@@ -21,7 +21,13 @@ Welcome to the Portkey Unity SDK! This software development kit (SDK) is designe
   - Phone
 - **Feature 3**: Google ReCaptcha when signing up.
 
-## Installation (TODO)
+## Installation
+
+### Requirements
+- Unity 2021.3.26f1 or later
+- Xcode 12.5 or later (for iOS builds)
+- Android Studio 4.2.2 or later (for Android builds)
+
 To start using the Portkey Unity SDK, follow these steps:
 
 1. Clone the repository or download the SDK package from the [releases](https://github.com/Portkey-Wallet/portkey-unity-sdk/releases) section.
@@ -31,7 +37,7 @@ To start using the Portkey Unity SDK, follow these steps:
 5. Select the extracted package file (e.g., `UnitySDK.unitypackage`) and click **Open**.
 6. Unity will import the SDK assets and libraries into your project.
 
-## Usage (TODO)
+## Usage
 To use the Unity SDK in your project, follow these steps:
 
 1. Open your Unity project.

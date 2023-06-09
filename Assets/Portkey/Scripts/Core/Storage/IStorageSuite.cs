@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 
-namespace Portkey.Storage
+namespace Portkey.Core
 {
-    public interface IStorageSuite
+    public interface IStorageSuite<T>
     {
-        Task<T> GetItem<T>(string key);
-        Task SetItem<T>(string key, T value);
-        Task RemoveItem(string key);
+        Task<T> GetItem(string key);
+        Task SetItem(string key, T value);
+        Task<T>  RemoveItem(string key);
     }
 }

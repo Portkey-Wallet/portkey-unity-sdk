@@ -27,6 +27,7 @@ Welcome to the Portkey Unity SDK! This software development kit (SDK) is designe
 - Unity 2021.3.26f1 or later
 - Xcode 12.5 or later (for iOS builds)
 - Android Studio 4.2.2 or later (for Android builds)
+- Unity Package: com.unity.nuget.newtonsoft-json@3.2 (Newtonsoft)
 
 To start using the Portkey Unity SDK, follow these steps:
 

@@ -8,6 +8,7 @@ using UnityEngine.Networking;
 
 namespace Portkey.GraphQL
 {
+    [CreateAssetMenu(fileName = "API Reference", menuName = "GraphQL/API Reference")]
     public class GraphQL : ScriptableObject, IGraphQLEditor, IGraphQL
     {
         [SerializeField]
@@ -23,13 +24,27 @@ namespace Portkey.GraphQL
         // auth token for posting if needed
         private string authToken;
         // stores schema of the introspection
-        private Introspection.SchemaClass schemaClass;
+        private Introspection.SchemaClass schemaClass = null;
         
 #if UNITY_EDITOR
         // check if introspection is loading
         private bool loading = false;
 #endif
 
+        //getter for schemaClass
+        public Introspection.SchemaClass GetSchemaClass()
+        {
+            return schemaClass;
+        }
+        
+#if UNITY_EDITOR
+        //getter for loading
+        public bool IsLoading()
+        {
+            return loading;
+        }
+#endif
+        
         public void SetAuthToken(string auth)
         {
             authToken = auth;
@@ -69,6 +84,7 @@ namespace Portkey.GraphQL
             loading = false;
         }
 
+#if UNITY_EDITOR
         public void Introspect()
         {
             loading = true;
@@ -77,7 +93,7 @@ namespace Portkey.GraphQL
             EditorApplication.update += HandleIntrospection;
         }
 
-        public void InitSchema()
+        public bool InitSchema()
         {
             if (schemaClass == null){
                 try{
@@ -85,18 +101,29 @@ namespace Portkey.GraphQL
                     //introspection = File.ReadAllText(Application.dataPath + $"{Path.DirectorySeparatorChar}{name}schema.txt");
                 }
                 catch{
-                    return;
+                    return false;
+                }
+
+                if (schemaClass == null)
+                {
+                    return false;
                 }
                 
                 schemaClass = JsonConvert.DeserializeObject<Introspection.SchemaClass>(introspection);
                 if (schemaClass.data.__schema.queryType != null)
                     queryEndpoint = schemaClass.data.__schema.queryType.name;
             }
+
+            return true;
         }
 
         public void CreateNewQuery()
         {
-            InitSchema();
+            if (!InitSchema())
+            {
+                Debug.Log("Schema not initialized!");
+                return;
+            }
             if (queries == null)
                 queries = new List<GraphQLQuery>();
             GraphQLQuery query = new GraphQLQuery{fields = new List<Field>(), queryOptions = new List<string>(), type = GraphQLQuery.Type.Query};
@@ -124,7 +151,7 @@ namespace Portkey.GraphQL
             return true;
         }
 
-        public void AddField(GraphQLQuery query, string typeName, Field parent)
+        public void AddField(GraphQLQuery query, string typeName, Field parent = null)
         {
             Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             List<Introspection.SchemaClass.Data.Schema.Type.Field> subFields = type.fields;
@@ -190,5 +217,7 @@ namespace Portkey.GraphQL
         {
             queries = new List<GraphQLQuery>();
         }
+#endif
+        
     }
 }

@@ -21,15 +21,23 @@ namespace Portkey.GraphQL
             this.schemaClass = schemaClass;
         }
         
-        public void GenerateDTOClass(string className, List<Introspection.SchemaClass.Data.Schema.Type.Field> fields)
+        public void GenerateDTOClass(string className)
         {
+            var fields = Fields(className);
+            
+            if(fields == null)
+            {
+                Debug.LogError($"Cannot find class {className} in schema!");
+                return;
+            }
+
             //generate class header
             StringBuilder genHeaderCode = new StringBuilder();
             bool listHeaderIncluded = false;
 
             StringBuilder genBodyCode = new StringBuilder();
-            
-            Dictionary< string, List<Introspection.SchemaClass.Data.Schema.Type.Field> > childClassList = new Dictionary<string, List<Introspection.SchemaClass.Data.Schema.Type.Field>>();
+
+            HashSet<string> childClassList = new HashSet<string>();
             
             for (int i = 0; i < fields.Count; i++){
                 Introspection.SchemaClass.Data.Schema.Type.Field field = fields[i];
@@ -39,7 +47,7 @@ namespace Portkey.GraphQL
                 {
                     case Introspection.SchemaClass.Data.Schema.Type.TypeKind.OBJECT:
                         genBodyCode.Append($"{fieldType} {field.name} {{get; set;}}\n");
-                        ExtractChildClass(childClassList, fieldType, field);
+                        ExtractChildClass(childClassList, fieldType);
                         break;
                     case Introspection.SchemaClass.Data.Schema.Type.TypeKind.SCALAR: ;
                         switch (field.type.name)
@@ -62,7 +70,7 @@ namespace Portkey.GraphQL
                     case Introspection.SchemaClass.Data.Schema.Type.TypeKind.LIST:
                         string childClassName = field.type.ofType.name;
                         genBodyCode.Append($"IList<{childClassName}> {field.name} {{get; set;}}\n");
-                        ExtractChildClass(childClassList, childClassName, field);
+                        ExtractChildClass(childClassList, childClassName);
                         
                         if(!listHeaderIncluded)
                         {
@@ -84,37 +92,48 @@ namespace Portkey.GraphQL
             Debug.Log(genHeaderCode.ToString());
             
             //generate child classes
+            GenerateChildClass(childClassList);
+        }
+
+        private void GenerateChildClass(HashSet<string> childClassList)
+        {
             foreach (var childClass in childClassList)
             {
                 for (int i = 0; i < schemaClass.data.__schema.types.Count(); ++i)
                 {
                     Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types[i];
 
-                    if (type.name != childClass.Key)
+                    if (type.name != childClass)
                     {
                         continue;
                     }
-                
-                    GenerateDTOClass(type.name, type.fields);
+
+                    GenerateDTOClass(type.name);
                 }
             }
         }
 
-        private static void ExtractChildClass(Dictionary<string, List<Introspection.SchemaClass.Data.Schema.Type.Field>> childClassList, string childClassName, Introspection.SchemaClass.Data.Schema.Type.Field field)
+        private List<Introspection.SchemaClass.Data.Schema.Type.Field> Fields(string className)
         {
-            //add child class to list to be generated later
-            if (childClassList.TryGetValue(childClassName,
-                    out List<Introspection.SchemaClass.Data.Schema.Type.Field> childList))
+            List<Introspection.SchemaClass.Data.Schema.Type.Field> fields = null;
+            for (int i = 0; i < schemaClass.data.__schema.types.Count(); ++i)
             {
-                childList.Add(field);
-            }
-            else
-            {
-                childClassList.Add(childClassName, new List<Introspection.SchemaClass.Data.Schema.Type.Field>());
-                childClassList[childClassName].Add(field);
+                Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types[i];
+
+                if (type.name != className)
+                {
+                    continue;
+                }
+
+                fields = type.fields;
             }
 
-            return;
+            return fields;
+        }
+
+        private static void ExtractChildClass(HashSet<string> childClassList, string childClassName)
+        {
+            childClassList.Add(childClassName);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Portkey.GraphQL
 #if UNITY_EDITOR
 
         public void Introspect();
-        public void InitSchema();
+        public bool InitSchema();
         public void CreateNewQuery();
         public void EditQuery(GraphQLQuery query);
         public bool CheckSubFields(string typeName);

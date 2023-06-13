@@ -1,0 +1,227 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
+
+namespace Portkey.GraphQL
+{
+    [Serializable]
+    public class GraphQLQuery
+    {
+        public string name;
+        public Type type;
+        public string query;
+        public string queryString;
+        public string returnType;
+        private string args;
+        public List<string> queryOptions;
+        public List<Field> fields;
+        public bool isComplete;
+
+        public enum Type
+        {
+            Query,
+            Mutation,
+            Subscription
+        }
+
+        public void SetArgs(object inputObject)
+        {
+            string json = JsonConvert.SerializeObject(inputObject, new Utils.EnumInputConverter());
+            args = Utils.JsonToArgument(json);
+            CompleteQuery();
+        }
+
+        public void SetArgs(string inputString)
+        {
+            args = inputString;
+            CompleteQuery();
+        }
+
+
+
+        public void CompleteQuery()
+        {
+            isComplete = true;
+            string data = null;
+            string parent = null;
+            Field previousField = null;
+            for (int i = 0; i < fields.Count; i++)
+            {
+                Field field = fields[i];
+                if (field.parentIndexes.Count == 0)
+                {
+                    if (parent == null)
+                    {
+                        data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
+                    }
+                    else
+                    {
+                        int count = previousField.parentIndexes.Count - field.parentIndexes.Count;
+                        while (count > 0)
+                        {
+                            data += $"\n{GenerateStringTabs(count + 1)}}}";
+                            count--;
+                        }
+
+                        data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
+                        parent = null;
+
+                    }
+
+                    previousField = field;
+                    continue;
+                }
+
+                if (fields[field.parentIndexes.Last()].name != parent)
+                {
+
+                    parent = fields[field.parentIndexes.Last()].name;
+
+                    if (fields[field.parentIndexes.Last()] == previousField)
+                    {
+
+                        data += $"{{\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
+                    }
+                    else
+                    {
+                        int count = previousField.parentIndexes.Count - field.parentIndexes.Count;
+                        while (count > 0)
+                        {
+                            data += $"\n{GenerateStringTabs(count + 1)}}}";
+                            count--;
+                        }
+
+                        data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
+                    }
+
+                    previousField = field;
+
+                }
+                else
+                {
+                    data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
+                    previousField = field;
+                }
+
+                if (i == fields.Count - 1)
+                {
+                    int count = previousField.parentIndexes.Count;
+                    while (count > 0)
+                    {
+                        data += $"\n{GenerateStringTabs(count + 1)}}}";
+                        count--;
+                    }
+                }
+
+            }
+
+            string arg = String.IsNullOrEmpty(args) ? "" : $"({args})";
+            string word;
+            switch (type)
+            {
+                case Type.Query:
+                    word = "query";
+                    break;
+                case Type.Mutation:
+                    word = "mutation";
+                    break;
+                case Type.Subscription:
+                    word = "subscription";
+                    break;
+                default:
+                    word = "query";
+                    break;
+            }
+
+            query = data == null
+                ? $"{word} {name}{{\n{GenerateStringTabs(1)}{queryString}{arg}\n}}"
+                : $"{word} {name}{{\n{GenerateStringTabs(1)}{queryString}{arg}{{{data}\n{GenerateStringTabs(1)}}}\n}}";
+        }
+
+        private string GenerateStringTabs(int number)
+        {
+            string result = "";
+            for (int i = 0; i < number; i++)
+            {
+                result += "    ";
+            }
+
+            return result;
+        }
+    }
+
+    [Serializable]
+    public class Field
+    {
+        public int index;
+
+        public int Index
+        {
+            get => index;
+            set
+            {
+                type = possibleFields[value].type;
+                name = possibleFields[value].name;
+                if (value != index)
+                    hasChanged = true;
+                index = value;
+
+            }
+        }
+
+        public string name;
+        public string type;
+        public List<int> parentIndexes;
+        public bool hasSubField;
+        public List<PossibleField> possibleFields;
+
+        public bool hasChanged;
+
+        public Field()
+        {
+            possibleFields = new List<PossibleField>();
+            parentIndexes = new List<int>();
+            index = 0;
+        }
+
+        public void CheckSubFields(Introspection.SchemaClass schemaClass)
+        {
+            Introspection.SchemaClass.Data.Schema.Type t =
+                schemaClass.data.__schema.types.Find((aType => aType.name == type));
+            if (t.fields == null || t.fields.Count == 0)
+            {
+                hasSubField = false;
+                return;
+            }
+
+            hasSubField = true;
+        }
+
+        [Serializable]
+        public class PossibleField
+        {
+            public string name;
+            public string type;
+
+            public static implicit operator PossibleField(Field field)
+            {
+                return new PossibleField { name = field.name, type = field.type };
+            }
+        }
+
+        public static explicit operator Field(Introspection.SchemaClass.Data.Schema.Type.Field schemaField)
+        {
+            Introspection.SchemaClass.Data.Schema.Type ofType = schemaField.type;
+            string typeName;
+            do
+            {
+                typeName = ofType.name;
+                ofType = ofType.ofType;
+            } while (ofType != null);
+
+            return new Field { name = schemaField.name, type = typeName };
+        }
+    }
+}

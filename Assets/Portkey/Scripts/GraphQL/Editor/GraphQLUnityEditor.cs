@@ -36,11 +36,6 @@ namespace Portkey.GraphQL.Editor
             graphRequest.objectReferenceValue = EditorGUILayout.ObjectField(graphRequest.objectReferenceValue, typeof(IHttp), true);
             if (GUI.changed) graphRequest.serializedObject.ApplyModifiedProperties();
             
-            if (!graph.InitSchema())
-            {
-                Debug.Log("Schema not initialized!");
-                return;
-            }
             if (GUILayout.Button("Reset")){
                 graph.DeleteAllQueries();
             }
@@ -53,6 +48,12 @@ namespace Portkey.GraphQL.Editor
             
             if (GUILayout.Button("Introspect")){
                 graph.Introspect();
+            }
+            
+            if (!graph.InitSchema())
+            {
+                Debug.Log("Schema not initialized!");
+                return;
             }
             
 #if UNITY_EDITOR

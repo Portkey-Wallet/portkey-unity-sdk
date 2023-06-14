@@ -90,7 +90,7 @@ namespace Portkey.GraphQL
             schemaFileName = $"{name}schema.txt";
             if(storage == null)
             {
-                storage = new PersistentLocalStorage(Application.dataPath);
+                storage = new PersistentLocalStorage(Application.dataPath + "/Portkey/Configs/GraphQL");
             }
         }
         
@@ -152,7 +152,7 @@ namespace Portkey.GraphQL
                     return false;
                 }
 
-                if (schemaClass == null)
+                if (schemaClass == null || introspection == null)
                 {
                     return false;
                 }

@@ -48,5 +48,40 @@ namespace Portkey.Test
             Task<int> value = storage.GetItem(KEY);
             Assert.AreEqual(INT_TO_CHECK, value.Result);
         }
+        
+        /// <summary>
+        /// Test that TestPersistentLocalStorage is able to store and retrieve data persistently.
+        /// </summary>
+        [Test]
+        public void TestPersistentLocalStorage()
+        {
+            const string FILENAME = "temp.txt";
+            
+            IStorageSuite<string> storage = new PersistentLocalStorage(Application.dataPath);
+            storage.SetItem(FILENAME, STRING_TO_CHECK);
+            Task<string> value = storage.GetItem(FILENAME);
+            Assert.AreEqual(STRING_TO_CHECK, value.Result);
+            
+            //clean up
+            storage.RemoveItem(FILENAME);
+        }
+        
+        /// <summary>
+        /// Test that TestPersistentLocalStorage is able to remove data.
+        /// </summary>
+        [Test]
+        public void TestPersistentLocalStorageRemove()
+        {
+            const string FILENAME = "temp.txt";
+            
+            IStorageSuite<string> storage = new PersistentLocalStorage(Application.dataPath);
+            storage.SetItem(FILENAME, STRING_TO_CHECK);
+
+            //clean up
+            storage.RemoveItem(FILENAME);
+            
+            Task<string> value = storage.GetItem(FILENAME);
+            Assert.AreEqual(null, value.Result);
+        }
     }
 }

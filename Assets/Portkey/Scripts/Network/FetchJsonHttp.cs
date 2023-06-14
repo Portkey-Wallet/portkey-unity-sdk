@@ -8,9 +8,10 @@ using UnityEngine.Networking;
 
 namespace Portkey.Network
 {
+    [CreateAssetMenu(fileName = "FetchJsonHttp", menuName = "Portkey/Network/FetchJsonHttp")]
     public class FetchJsonHttp : IHttp
     {
-        public IEnumerator Get<T>(string url, IHttp.successCallback<T> successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Get<T>(string url, IHttp.successCallback<T> successCallback, IHttp.errorCallback errorCallback)
         {
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
@@ -43,7 +44,7 @@ namespace Portkey.Network
             }
         }
 
-        public IEnumerator Post<T>(string url, string body, IHttp.successCallback<T> successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Post<T>(string url, string body, IHttp.successCallback<T> successCallback, IHttp.errorCallback errorCallback)
         {
             string jsonData = JsonConvert.SerializeObject(new{query = body});
             byte[] postData = Encoding.ASCII.GetBytes(jsonData);

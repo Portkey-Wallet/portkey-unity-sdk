@@ -1,34 +1,49 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
+using Portkey.Core;
+using Portkey.Network;
+using Portkey.Storage;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+#if UNITY_EDITOR
+using System.Threading.Tasks;
+#endif
 
 namespace Portkey.GraphQL
 {
-    [CreateAssetMenu(fileName = "API Reference", menuName = "GraphQL/API Reference")]
+    [CreateAssetMenu(fileName = "API Reference", menuName = "Portkey/GraphQL/API Reference")]
     public class GraphQL : ScriptableObject, IGraphQLEditor, IGraphQL
     {
         [SerializeField]
         private string url;
         [SerializeField]
         public List<GraphQLQuery> queries;
-
+        [SerializeField]
+        private IHttp request = null;
+        
         private string queryEndpoint;
-        //TODO: change http request to IHTTPClient
-        private UnityWebRequest request;
+        
         // stores introspection raw result
         private string introspection;
         // auth token for posting if needed
         private string authToken;
         // stores schema of the introspection
         private Introspection.SchemaClass schemaClass = null;
-        
+
 #if UNITY_EDITOR
+        private IStorageSuite<string> storage;
         // check if introspection is loading
         private bool loading = false;
+        // request for introspection. Only used on editor functions because
+        // Unity editor cannot run coroutines and async/await cannot be used on webgl
+        private UnityWebRequest editorRequest;
+        //schema file name
+        private string schemaFileName;
 #endif
 
         //getter for schemaClass
@@ -36,15 +51,7 @@ namespace Portkey.GraphQL
         {
             return schemaClass;
         }
-        
-#if UNITY_EDITOR
-        //getter for loading
-        public bool IsLoading()
-        {
-            return loading;
-        }
-#endif
-        
+
         public void SetAuthToken(string auth)
         {
             authToken = auth;
@@ -69,36 +76,77 @@ namespace Portkey.GraphQL
         {
             return queries.Find(aQuery => aQuery.name == queryName);
         }
-
+        
+        #region EditorOnly
+#if UNITY_EDITOR
+        //getter for loading
+        public bool IsLoading()
+        {
+            return loading;
+        }
+        
+        public void OnEnable()
+        {
+            schemaFileName = $"{name}schema.txt";
+            if(storage == null)
+            {
+                storage = new PersistentLocalStorage(Application.dataPath);
+            }
+        }
+        
         private void HandleIntrospection()
         {
-            if (!request.isDone)
+            if (!editorRequest.isDone)
                 return;
             EditorApplication.update -= HandleIntrospection;
-            introspection = request.downloadHandler.text;
-            //TODO: change to save to file on interface
-            //File.WriteAllText(Application.dataPath + $"{Path.DirectorySeparatorChar}{name}schema.txt",introspection);
+            introspection = editorRequest.downloadHandler.text;
+            storage.SetItem(schemaFileName, introspection);
             schemaClass = JsonConvert.DeserializeObject<Introspection.SchemaClass>(introspection);
             if (schemaClass.data.__schema.queryType != null)
                 queryEndpoint = schemaClass.data.__schema.queryType.name;
+            
+            editorRequest.uploadHandler.Dispose();
+            editorRequest.downloadHandler.Dispose();
+            editorRequest.Dispose();
+            
             loading = false;
         }
-
-#if UNITY_EDITOR
+        
         public void Introspect()
         {
             loading = true;
-            //TODO: change to http interface
-            //request = await HttpHandler.PostAsync(url, Introspection.schemaIntrospectionQuery, authToken);
+
+            string jsonData = JsonConvert.SerializeObject(new{query = Introspection.schemaIntrospectionQuery});
+            
+            byte[] postData = Encoding.ASCII.GetBytes(jsonData);
+            editorRequest = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
+            
+            editorRequest.uploadHandler = new UploadHandlerRaw(postData);
+            editorRequest.disposeUploadHandlerOnDispose = true;
+            editorRequest.downloadHandler = new DownloadHandlerBuffer();
+            editorRequest.disposeDownloadHandlerOnDispose = true;
+            
+            editorRequest.SetRequestHeader("Content-Type", "application/json");
+            if (!String.IsNullOrEmpty(authToken))
+                editorRequest.SetRequestHeader("Authorization", "Bearer " + authToken);
+
+            try
+            {
+                editorRequest.SendWebRequest();
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+
             EditorApplication.update += HandleIntrospection;
         }
 
         public bool InitSchema()
         {
-            if (schemaClass == null){
+            if (schemaClass == null || schemaClass.data == null){
                 try{
-                    //TODO: change to save to file on interface
-                    //introspection = File.ReadAllText(Application.dataPath + $"{Path.DirectorySeparatorChar}{name}schema.txt");
+                    introspection = storage.GetItem(schemaFileName).Result;
                 }
                 catch{
                     return false;
@@ -218,6 +266,6 @@ namespace Portkey.GraphQL
             queries = new List<GraphQLQuery>();
         }
 #endif
-        
+        #endregion
     }
 }

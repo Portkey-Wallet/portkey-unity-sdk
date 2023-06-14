@@ -2,6 +2,8 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
+using Portkey.Core;
+using Portkey.Storage;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,8 +12,18 @@ namespace Portkey.GraphQL.Editor
     [CustomEditor(typeof(GraphQL))]
     public class GraphQLUnityEditor : UnityEditor.Editor
     {
+        private const string GENERATED_CODE_FOLDER = "/Portkey/Scripts/__Generated__";
+        private IStorageSuite<string> _storage;
         private int index;
         private SerializedObject graphObject;
+
+        public void OnEnable()
+        {
+            if (_storage == null)
+            {
+                _storage = new PersistentLocalStorage(Application.dataPath + GENERATED_CODE_FOLDER);
+            }
+        }
 
         public override void OnInspectorGUI(){
             GraphQL graph = (GraphQL) target;
@@ -19,6 +31,11 @@ namespace Portkey.GraphQL.Editor
             GUIStyle style = new GUIStyle{fontSize = 15, alignment = TextAnchor.MiddleCenter};
             EditorGUILayout.LabelField(graph.name, style);
             EditorGUILayout.Space();
+            
+            UnityEditor.SerializedProperty graphRequest = graphObject.FindProperty("request");
+            graphRequest.objectReferenceValue = EditorGUILayout.ObjectField(graphRequest.objectReferenceValue, typeof(IHttp), true);
+            if (GUI.changed) graphRequest.serializedObject.ApplyModifiedProperties();
+            
             if (!graph.InitSchema())
             {
                 Debug.Log("Schema not initialized!");
@@ -32,6 +49,8 @@ namespace Portkey.GraphQL.Editor
             EditorGUILayout.Space();
             UnityEditor.SerializedProperty graphUrl = graphObject.FindProperty("url");
             graphUrl.stringValue = EditorGUILayout.TextField("Url", graphUrl.stringValue);
+            if (GUI.changed) graphUrl.serializedObject.ApplyModifiedProperties();
+            
             if (GUILayout.Button("Introspect")){
                 graph.Introspect();
             }
@@ -160,9 +179,8 @@ namespace Portkey.GraphQL.Editor
                     if (query.fields.Count > 0)
                     {
                         if (GUILayout.Button($"Generate {type}")) {
-                            //IGraphQLCodeGenerator codeGenerator = new GraphQLCSharpCodeGenerator();
-                            //codeGenerator.GenerateDTOClass(query.returnType, query.fields);
-                            //query.GenerateDTOClass();
+                            IGraphQLCodeGenerator codeGenerator = new GraphQLCSharpCodeGenerator(graph.GetSchemaClass(), _storage);
+                            codeGenerator.GenerateDTOClass(query.returnType);
                         }
                     }
 

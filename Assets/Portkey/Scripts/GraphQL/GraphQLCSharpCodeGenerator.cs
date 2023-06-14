@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Portkey.Core;
 using UnityEngine;
 
 namespace Portkey.GraphQL
@@ -8,11 +9,13 @@ namespace Portkey.GraphQL
     public class GraphQLCSharpCodeGenerator : IGraphQLCodeGenerator
     {
         private Introspection.SchemaClass schemaClass;
+        private IStorageSuite<string> _storage;
 
         //constructor
-        public GraphQLCSharpCodeGenerator(Introspection.SchemaClass schemaClass)
+        public GraphQLCSharpCodeGenerator(Introspection.SchemaClass schemaClass, IStorageSuite<string> storage)
         {
             this.schemaClass = schemaClass;
+            this._storage = storage;
         }
         
         //setter for schemaClass
@@ -46,7 +49,7 @@ namespace Portkey.GraphQL
                 switch (field.type.kind)
                 {
                     case Introspection.SchemaClass.Data.Schema.Type.TypeKind.OBJECT:
-                        genBodyCode.Append($"{fieldType} {field.name} {{get; set;}}\n");
+                        genBodyCode.Append($"\t\t{fieldType} {field.name} {{get; set;}}\n");
                         ExtractChildClass(childClassList, fieldType);
                         break;
                     case Introspection.SchemaClass.Data.Schema.Type.TypeKind.SCALAR: ;
@@ -65,11 +68,11 @@ namespace Portkey.GraphQL
                                 fieldType = "long";
                                 break;
                         }
-                        genBodyCode.Append($"{fieldType} {field.name} {{get; set;}}\n");
+                        genBodyCode.Append($"\t\t{fieldType} {field.name} {{get; set;}}\n");
                         break;
                     case Introspection.SchemaClass.Data.Schema.Type.TypeKind.LIST:
                         string childClassName = field.type.ofType.name;
-                        genBodyCode.Append($"IList<{childClassName}> {field.name} {{get; set;}}\n");
+                        genBodyCode.Append($"\t\tIList<{childClassName}> {field.name} {{get; set;}}\n");
                         ExtractChildClass(childClassList, childClassName);
                         
                         if(!listHeaderIncluded)
@@ -82,14 +85,19 @@ namespace Portkey.GraphQL
                 }
             }
             
-            genBodyCode.Append("}");
+            genBodyCode.Append("\t}\n");
             
+            //insert namespace
+            genHeaderCode.Append("namespace Portkey.GraphQL\n{\n");
             //insert class name
-            genHeaderCode.Append($"public class {className}\n{{\n");
+            genHeaderCode.Append($"\tpublic class {className}\n\t{{\n");
             //concatenate header and body
             genHeaderCode.Append(genBodyCode);
+            //close namespace
+            genHeaderCode.Append("}");
             
-            Debug.Log(genHeaderCode.ToString());
+            //Debug.Log(genHeaderCode.ToString());
+            _storage.SetItem(className + ".cs", genHeaderCode.ToString());
             
             //generate child classes
             GenerateChildClass(childClassList);

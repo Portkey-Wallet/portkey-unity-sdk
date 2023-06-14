@@ -9,9 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7eb5ecd35f8e648f0ae1232e27f0c96d, type: 3}
-  m_Name: PortKeyGraphQLConfig
+  m_Script: {fileID: 11500000, guid: cc0f57b7bfd3e4947be522b2bf08e5d3, type: 3}
+  m_Name: FetchJsonHttp
   m_EditorClassIdentifier: 
-  url: 
-  queries: []
-  request: {fileID: 11400000, guid: e645be7cb8d2e4a23abee15bbb39bdef, type: 2}

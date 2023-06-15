@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Portkey.GraphQL.Editor
 {
-    [CustomEditor(typeof(GraphQL))]
+    [CustomEditor(typeof(GraphQLConfig))]
     public class GraphQLUnityEditor : UnityEditor.Editor
     {
         private const string GENERATED_CODE_FOLDER = "/Portkey/Scripts/__Generated__";
@@ -26,7 +26,7 @@ namespace Portkey.GraphQL.Editor
         }
 
         public override void OnInspectorGUI(){
-            GraphQL graph = (GraphQL) target;
+            GraphQLConfig graph = (GraphQLConfig) target;
             graphObject = new UnityEditor.SerializedObject(graph);
             GUIStyle style = new GUIStyle{fontSize = 15, alignment = TextAnchor.MiddleCenter};
             EditorGUILayout.LabelField(graph.name, style);
@@ -82,7 +82,7 @@ namespace Portkey.GraphQL.Editor
             EditorUtility.SetDirty(graph);
         }
 
-        private void DisplayFields(GraphQL graph, List<GraphQLQuery> queryList, string type){
+        private void DisplayFields(GraphQLConfig graph, List<GraphQLQuery> queryList, string type){
             if (queryList != null){
                 if (queryList.Count > 0)
                     EditorGUILayout.LabelField(type);

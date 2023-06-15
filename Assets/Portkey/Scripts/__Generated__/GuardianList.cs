@@ -3,6 +3,6 @@ namespace Portkey.GraphQL
 {
 	public class GuardianList
 	{
-		IList<Guardian> guardians {get; set;}
+		public IList<Guardian> guardians {get; set;}
 	}
 }

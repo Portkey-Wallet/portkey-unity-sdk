@@ -3,6 +3,7 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderNFTBalancePageResultDto
 	{
-		IList<CAHolderNFTBalanceInfoDto> data {get; set;}
+		public long totalRecordCount {get; set;}
+		public IList<CAHolderNFTBalanceInfoDto> data {get; set;}
 	}
 }

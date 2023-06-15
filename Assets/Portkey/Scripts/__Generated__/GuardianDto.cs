@@ -2,10 +2,10 @@ namespace Portkey.GraphQL
 {
 	public class GuardianDto
 	{
-		int type {get; set;}
-		string verifierId {get; set;}
-		string identifierHash {get; set;}
-		string salt {get; set;}
-		bool isLoginGuardian {get; set;}
+		public int type {get; set;}
+		public string verifierId {get; set;}
+		public string identifierHash {get; set;}
+		public string salt {get; set;}
+		public bool isLoginGuardian {get; set;}
 	}
 }

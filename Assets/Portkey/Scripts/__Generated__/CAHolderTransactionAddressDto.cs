@@ -2,10 +2,10 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderTransactionAddressDto
 	{
-		string chainId {get; set;}
-		string caAddress {get; set;}
-		string address {get; set;}
-		string addressChainId {get; set;}
-		long transactionTime {get; set;}
+		public string chainId {get; set;}
+		public string caAddress {get; set;}
+		public string address {get; set;}
+		public string addressChainId {get; set;}
+		public long transactionTime {get; set;}
 	}
 }

@@ -3,12 +3,12 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderInfoDto
 	{
-		string id {get; set;}
-		string chainId {get; set;}
-		string caHash {get; set;}
-		string caAddress {get; set;}
-		IList<ManagerInfo> managerInfos {get; set;}
-		string originChainId {get; set;}
-		GuardianList guardianList {get; set;}
+		public string id {get; set;}
+		public string chainId {get; set;}
+		public string caHash {get; set;}
+		public string caAddress {get; set;}
+		public IList<ManagerInfo> managerInfos {get; set;}
+		public string originChainId {get; set;}
+		public GuardianList guardianList {get; set;}
 	}
 }

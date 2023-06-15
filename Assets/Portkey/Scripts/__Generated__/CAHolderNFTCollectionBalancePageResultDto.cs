@@ -3,6 +3,7 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderNFTCollectionBalancePageResultDto
 	{
-		IList<CAHolderNFTCollectionBalanceInfoDto> data {get; set;}
+		public long totalRecordCount {get; set;}
+		public IList<CAHolderNFTCollectionBalanceInfoDto> data {get; set;}
 	}
 }

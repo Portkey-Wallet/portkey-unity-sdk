@@ -2,9 +2,10 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderNFTBalanceInfoDto
 	{
-		string id {get; set;}
-		string chainId {get; set;}
-		string caAddress {get; set;}
-		NFTItemInfoDto nftInfo {get; set;}
+		public string id {get; set;}
+		public string chainId {get; set;}
+		public string caAddress {get; set;}
+		public long balance {get; set;}
+		public NFTItemInfoDto nftInfo {get; set;}
 	}
 }

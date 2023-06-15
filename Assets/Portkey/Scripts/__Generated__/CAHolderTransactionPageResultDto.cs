@@ -3,7 +3,7 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderTransactionPageResultDto
 	{
-		long totalRecordCount {get; set;}
-		IList<CAHolderTransactionDto> data {get; set;}
+		public long totalRecordCount {get; set;}
+		public IList<CAHolderTransactionDto> data {get; set;}
 	}
 }

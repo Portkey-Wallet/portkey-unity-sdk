@@ -3,7 +3,7 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderSearchTokenNFTPageResultDto
 	{
-		long totalRecordCount {get; set;}
-		IList<CAHolderSearchTokenNFTDto> data {get; set;}
+		public long totalRecordCount {get; set;}
+		public IList<CAHolderSearchTokenNFTDto> data {get; set;}
 	}
 }

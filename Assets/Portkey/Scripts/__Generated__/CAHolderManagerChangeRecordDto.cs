@@ -2,10 +2,11 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderManagerChangeRecordDto
 	{
-		string caAddress {get; set;}
-		string caHash {get; set;}
-		string manager {get; set;}
-		string changeType {get; set;}
-		string blockHash {get; set;}
+		public string caAddress {get; set;}
+		public string caHash {get; set;}
+		public string manager {get; set;}
+		public string changeType {get; set;}
+		public long blockHeight {get; set;}
+		public string blockHash {get; set;}
 	}
 }

@@ -48,7 +48,7 @@ namespace Portkey.GraphQL
                 Introspection.SchemaClass.Data.Schema.Type.Field field = fields[i];
 
                 string objectType = GetObjectTypeDeclaration(field.type, childClassList, ref listHeaderIncluded);
-                genBodyCode.Append($"\t\t{objectType} {field.name} {{get; set;}}\n");
+                genBodyCode.Append($"\t\tpublic {objectType} {field.name} {{get; set;}}\n");
             }
             
             if (listHeaderIncluded)

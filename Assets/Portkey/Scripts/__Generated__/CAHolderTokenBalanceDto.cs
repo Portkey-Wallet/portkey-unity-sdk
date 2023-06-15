@@ -3,10 +3,10 @@ namespace Portkey.GraphQL
 {
 	public class CAHolderTokenBalanceDto
 	{
-		string chainId {get; set;}
-		string caAddress {get; set;}
-		TokenInfoDto tokenInfo {get; set;}
-		long balance {get; set;}
-		IList<long> tokenIds {get; set;}
+		public string chainId {get; set;}
+		public string caAddress {get; set;}
+		public TokenInfoDto tokenInfo {get; set;}
+		public long balance {get; set;}
+		public IList<long> tokenIds {get; set;}
 	}
 }

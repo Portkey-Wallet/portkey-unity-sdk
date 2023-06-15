@@ -2,7 +2,7 @@ namespace Portkey.GraphQL
 {
 	public class TransactionFee
 	{
-		string symbol {get; set;}
-		long amount {get; set;}
+		public string symbol {get; set;}
+		public long amount {get; set;}
 	}
 }

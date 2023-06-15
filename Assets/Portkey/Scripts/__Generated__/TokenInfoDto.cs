@@ -2,19 +2,19 @@ namespace Portkey.GraphQL
 {
 	public class TokenInfoDto
 	{
-		string id {get; set;}
-		string chainId {get; set;}
-		string blockHash {get; set;}
-		long blockHeight {get; set;}
-		string previousBlockHash {get; set;}
-		string symbol {get; set;}
-		TokenType type {get; set;}
-		string tokenContractAddress {get; set;}
-		int decimals {get; set;}
-		long totalSupply {get; set;}
-		string tokenName {get; set;}
-		string issuer {get; set;}
-		bool isBurnable {get; set;}
-		int issueChainId {get; set;}
+		public string id {get; set;}
+		public string chainId {get; set;}
+		public string blockHash {get; set;}
+		public long blockHeight {get; set;}
+		public string previousBlockHash {get; set;}
+		public string symbol {get; set;}
+		public TokenType type {get; set;}
+		public string tokenContractAddress {get; set;}
+		public int decimals {get; set;}
+		public long totalSupply {get; set;}
+		public string tokenName {get; set;}
+		public string issuer {get; set;}
+		public bool isBurnable {get; set;}
+		public int issueChainId {get; set;}
 	}
 }

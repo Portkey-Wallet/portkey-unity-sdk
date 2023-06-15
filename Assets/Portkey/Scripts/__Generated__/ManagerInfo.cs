@@ -2,7 +2,7 @@ namespace Portkey.GraphQL
 {
 	public class ManagerInfo
 	{
-		string address {get; set;}
-		string extraData {get; set;}
+		public string address {get; set;}
+		public string extraData {get; set;}
 	}
 }

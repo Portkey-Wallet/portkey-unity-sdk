@@ -12,6 +12,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eb5ecd35f8e648f0ae1232e27f0c96d, type: 3}
   m_Name: PortkeyGraphQLConfig
   m_EditorClassIdentifier: 
-  url: 
-  queries: []
-  request: {fileID: 0}
+  url: https://dapp-portkey-test.portkey.finance/Portkey_DID/PortKeyIndexerCASchema/graphql
+  queries:
+  - name: GetHolderInfo
+    type: 0
+    query: 
+    queryString: caHolderInfo
+    returnType: CAHolderInfoDto
+    queryOptions:
+    - tokenInfo
+    - caHolderTransaction
+    - twoCaHolderTransaction
+    - caHolderTransactionInfo
+    - caHolderManagerInfo
+    - caHolderInfo
+    - loginGuardianInfo
+    - caHolderNFTCollectionBalanceInfo
+    - caHolderNFTBalanceInfo
+    - caHolderTokenBalanceInfo
+    - caHolderBingoInfo
+    - caHolderTransactionAddressInfo
+    - loginGuardianChangeRecordInfo
+    - caHolderManagerChangeRecordInfo
+    - caHolderSearchTokenNFT
+    - syncState
+    fields:
+    - index: 0
+      name: id
+      type: String
+      parentIndexes: 
+      hasSubField: 0
+      possibleFields:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      - name: guardianList
+        type: GuardianList
+      hasChanged: 0
+    isComplete: 0
+  request: {fileID: 11400000, guid: e645be7cb8d2e4a23abee15bbb39bdef, type: 2}

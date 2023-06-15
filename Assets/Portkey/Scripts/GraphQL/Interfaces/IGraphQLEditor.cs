@@ -13,6 +13,7 @@ namespace Portkey.GraphQL
         public void CreateNewQuery();
         public void EditQuery(GraphQLQuery query);
         public bool CheckSubFields(string typeName);
+        public void AddAllFields(GraphQLQuery query, string typeName, Field parent = null);
         public void AddField(GraphQLQuery query, string typeName, Field parent);
         public void GetQueryReturnType(GraphQLQuery query, string queryName);
         public void DeleteQuery(List<GraphQLQuery> query, int index);

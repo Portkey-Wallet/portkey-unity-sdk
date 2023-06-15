@@ -193,6 +193,64 @@ namespace Portkey.GraphQL
 
             return true;
         }
+        
+        public void AddAllFields(GraphQLQuery query, string typeName, Field parent = null)
+        {
+            Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
+            List<Introspection.SchemaClass.Data.Schema.Type.Field> subFields = type.fields;
+            int parentIndex = query.fields.FindIndex(aField => aField == parent);
+            List<int> parentIndexes = new List<int>();
+            if (parent != null){
+                parentIndexes = new List<int>(parent.parentIndexes){parentIndex};
+            }
+            Field fielder = new Field{parentIndexes = parentIndexes};
+            
+            foreach (Introspection.SchemaClass.Data.Schema.Type.Field field in subFields){
+                fielder.possibleFields.Add((Field)field);
+            }
+
+            for(int i = 0; i < fielder.possibleFields.Count; i++){
+                Field newField = new Field{parentIndexes = parentIndexes};
+            
+                foreach (Introspection.SchemaClass.Data.Schema.Type.Field field in subFields){
+                    newField.possibleFields.Add((Field)field);
+                }
+                
+                newField.Index = i;
+                
+                if (newField.parentIndexes.Count == 0)
+                {
+                    query.fields.Add(newField);
+                }
+                else{
+
+                    int index;
+                    index = query.fields.FindLastIndex(aField =>
+                        aField.parentIndexes.Count > newField.parentIndexes.Count &&
+                        aField.parentIndexes.Contains(newField.parentIndexes.Last()));
+
+                    if (index == -1){
+                        index = query.fields.FindLastIndex(aField =>
+                            aField.parentIndexes.Count > newField.parentIndexes.Count &&
+                            aField.parentIndexes.Last() == newField.parentIndexes.Last());
+                    }
+
+                    if (index == -1){
+                        index = newField.parentIndexes.Last();
+                    }
+
+                    index++;
+                    query.fields[parentIndex].hasChanged = false;
+                    query.fields.Insert(index, newField);
+                }
+                
+                newField.CheckSubFields(GetSchemaClass());
+                
+                if (newField.hasSubField){
+                    AddAllFields(query, newField.possibleFields[newField.Index].type, newField);
+                }
+            }
+        }
 
         public void AddField(GraphQLQuery query, string typeName, Field parent = null)
         {

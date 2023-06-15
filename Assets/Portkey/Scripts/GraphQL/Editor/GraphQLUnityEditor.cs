@@ -130,8 +130,12 @@ namespace Portkey.GraphQL.Editor
                             graph.GetQueryReturnType(query, options[index]);
                             graph.AddField(query, query.returnType);
                         }
+                        
+                        if (GUILayout.Button("Add All Fields")){
+                            graph.GetQueryReturnType(query, options[index]);
+                            graph.AddAllFields(query, query.returnType);
+                        }
                     }
-                    
 
                     foreach (Field field in query.fields){
                         GUI.color = new Color(0.8f,0.8f,0.8f);

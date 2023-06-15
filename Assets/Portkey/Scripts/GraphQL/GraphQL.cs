@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
 using Portkey.Core;
 using Portkey.Network;
 using Portkey.Storage;
+using Unity.Plastic.Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -146,7 +146,7 @@ namespace Portkey.GraphQL
         {
             if (schemaClass == null || schemaClass.data == null){
                 try{
-                    introspection = storage.GetItem(schemaFileName).Result;
+                    introspection = storage.GetItem(schemaFileName);
                 }
                 catch{
                     return false;

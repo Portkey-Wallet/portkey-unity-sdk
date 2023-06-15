@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using Portkey.Core;
 
 namespace Portkey.Storage
@@ -15,25 +13,24 @@ namespace Portkey.Storage
             this._path = path;
         }
         
-        public Task<string> GetItem(string filename)
+        public string GetItem(string filename)
         {
             string filePath = _path + $"{Path.DirectorySeparatorChar}{filename}";
             if (!File.Exists(filePath))
             {
-                return Task.FromResult<string>(null);
+                return null;
             }
-            return Task.FromResult(File.ReadAllText(filePath));
+            return File.ReadAllText(filePath);
         }
 
-        public Task SetItem(string filename, string value)
+        public void SetItem(string filename, string value)
         {
             File.WriteAllText(_path + $"{Path.DirectorySeparatorChar}{filename}",value);
-            return Task.FromResult(0);
         }
 
-        public Task<string> RemoveItem(string filename)
+        public string RemoveItem(string filename)
         {
-            Task<string> ret = GetItem(filename);
+            string ret = GetItem(filename);
             File.Delete(_path + $"{Path.DirectorySeparatorChar}{filename}");
             
             return ret;

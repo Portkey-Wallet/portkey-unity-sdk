@@ -1,11 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using Portkey.Core;
 using Portkey.Storage;
-using UnityEditor.VersionControl;
 
 namespace Portkey.Test
 {
@@ -58,8 +54,8 @@ namespace Portkey.Test
             
             IStorageSuite<string> storage = new PersistentLocalStorage(Application.dataPath);
             storage.SetItem(FILENAME, STRING_TO_CHECK);
-            Task<string> value = storage.GetItem(FILENAME);
-            Assert.AreEqual(STRING_TO_CHECK, value.Result);
+            string value = storage.GetItem(FILENAME);
+            Assert.AreEqual(STRING_TO_CHECK, value);
             
             //clean up
             storage.RemoveItem(FILENAME);
@@ -79,8 +75,8 @@ namespace Portkey.Test
             //clean up
             storage.RemoveItem(FILENAME);
             
-            Task<string> value = storage.GetItem(FILENAME);
-            Assert.AreEqual(null, value.Result);
+            string value = storage.GetItem(FILENAME);
+            Assert.AreEqual(null, value);
         }
     }
 }

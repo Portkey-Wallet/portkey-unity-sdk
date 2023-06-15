@@ -46,7 +46,8 @@ namespace Portkey.GraphQL.Editor
             graphUrl.stringValue = EditorGUILayout.TextField("Url", graphUrl.stringValue);
             if (GUI.changed) graphUrl.serializedObject.ApplyModifiedProperties();
             
-            if (GUILayout.Button("Introspect")){
+            if (GUILayout.Button("Introspect"))
+            {
                 graph.Introspect();
             }
             
@@ -57,7 +58,8 @@ namespace Portkey.GraphQL.Editor
             }
             
 #if UNITY_EDITOR
-            if (graph.IsLoading()){
+            if (graph.IsLoading())
+            {
                 EditorGUILayout.LabelField("API is being introspected. Please wait...");
             }
 #endif
@@ -67,8 +69,22 @@ namespace Portkey.GraphQL.Editor
             if (graph.GetSchemaClass() == null){
                 return;
             }
+            
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Create New Query")){
+            if (GUILayout.Button("Generate All Queries"))
+            {
+                IGraphQLCodeGenerator codeGenerator = new GraphQLCSharpCodeGenerator(graph.GetSchemaClass(), _storage);
+                foreach (var query in graph.queries)
+                {
+                    codeGenerator.GenerateDTOClass(query.returnType);
+                }
+            }
+
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Create New Query"))
+            {
                 graph.CreateNewQuery();
             }
 

@@ -11,7 +11,7 @@ namespace Portkey.Network
     [CreateAssetMenu(fileName = "FetchJsonHttp", menuName = "Portkey/Network/FetchJsonHttp")]
     public class FetchJsonHttp : IHttp
     {
-        public override IEnumerator Get<T>(string url, IHttp.successCallback<T> successCallback, IHttp.errorCallback errorCallback)
+        public IEnumerator Get(string url, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
@@ -27,24 +27,13 @@ namespace Portkey.Network
                     errorCallback(request.responseCode.ToString());
                     yield break;
                 }
-
-                T ret;
-                try
-                {
-                    ret = JsonConvert.DeserializeObject<T>(request.downloadHandler.text);
-                }
-                catch (Exception e)
-                {
-                    errorCallback(e.Message);
-                    throw;
-                }
-                successCallback(ret);
+                successCallback(request.downloadHandler.text);
 
                 request.Dispose();
             }
         }
 
-        public override IEnumerator Post<T>(string url, string body, IHttp.successCallback<T> successCallback, IHttp.errorCallback errorCallback)
+        public IEnumerator Post(string url, string body, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
             string jsonData = JsonConvert.SerializeObject(new{query = body});
             byte[] postData = Encoding.ASCII.GetBytes(jsonData);
@@ -76,18 +65,7 @@ namespace Portkey.Network
                     request.Dispose();
                     yield break;
                 }
-
-                T ret;
-                try
-                {
-                    ret = JsonConvert.DeserializeObject<T>(request.downloadHandler.text);
-                }
-                catch (Exception e)
-                {
-                    errorCallback(e.Message);
-                    throw;
-                }
-                successCallback(ret);
+                successCallback(request.downloadHandler.text);
 
                 request.uploadHandler.Dispose();
                 request.downloadHandler.Dispose();

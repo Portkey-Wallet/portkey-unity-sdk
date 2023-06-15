@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -31,8 +30,8 @@ namespace Portkey.Test
             
             IStorageSuite<string> storage = new NonPersistentStorage<string>();
             storage.SetItem(KEY, STRING_TO_CHECK);
-            Task<string> value = storage.GetItem(KEY);
-            Assert.AreEqual(STRING_TO_CHECK, value.Result);
+            string value = storage.GetItem(KEY);
+            Assert.AreEqual(STRING_TO_CHECK, value);
         }
         
         /// <summary>
@@ -45,8 +44,8 @@ namespace Portkey.Test
             
             IStorageSuite<int> storage = new NonPersistentStorageMock<int>("MyCuteLilStorage");
             storage.SetItem(KEY, INT_TO_CHECK);
-            Task<int> value = storage.GetItem(KEY);
-            Assert.AreEqual(INT_TO_CHECK, value.Result);
+            int value = storage.GetItem(KEY);
+            Assert.AreEqual(INT_TO_CHECK, value);
         }
     }
 }

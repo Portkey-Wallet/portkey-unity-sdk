@@ -1,13 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Portkey.Core;
 using Portkey.Network;
-using Portkey.Storage;
-using UnityEditor.VersionControl;
 
 namespace Portkey.Test
 {
@@ -15,30 +11,19 @@ namespace Portkey.Test
     /// HTTP test for testing if implemented class can do request to web.
     /// </summary>
     /// <remarks>
-    /// Check NonPersistentStorageMock.cs and NonPersistentStorage.cs for implementation details.
+    /// For testing simple http request for json data.
     /// </remarks>
     public class HttpTest
     {
         private const string URL = "https://my-json-server.typicode.com/typicode/demo/posts";
         private const string FAIL_URL = "https://google.com";
 
-        private IHttp request = new FetchJsonHttp();
-        public class JsonResponse
-        {
-            public string query;
-            public int id;
-        }
+        private IHttp _request = new FetchJsonHttp();
 
-        public class Comment
-        {
-            public string title;
-            public int id;
-        }
-
-        public void SuccessCallback<T>(T param)
+        public void SuccessCallback(string response)
         {
             Debug.Log("successCallback ");
-            Assert.NotNull(param);
+            Assert.NotNull(response);
         }
         
         public void ErrorCallback(string param)
@@ -60,7 +45,7 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpGet()
         {
             Debug.Log("Get to " + URL);
-            yield return request.Get< IList<Comment> >(URL, SuccessCallback, ErrorCallback);
+            yield return _request.Get(URL, SuccessCallback, ErrorCallback);
         }
         
         /// <summary>
@@ -70,7 +55,7 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpPost()
         {
             Debug.Log("Posting to " + URL);
-            yield return request.Post<JsonResponse>(URL, "", SuccessCallback, ErrorCallback);
+            yield return _request.Post(URL, "", SuccessCallback, ErrorCallback);
         }
         
         /// <summary>
@@ -80,17 +65,7 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpPostFailURL()
         {
             Debug.Log("Posting to " + FAIL_URL);
-            yield return request.Post<JsonResponse>(FAIL_URL, "", SuccessCallback, FailErrorCallback);
-        }
-        
-        /// <summary>
-        /// Test that TestFetchJsonHttpPostFailType is fails to retrieve json data due to type mismatch and returns into the error callback.
-        /// </summary>
-        [UnityTest]
-        public IEnumerator TestFetchJsonHttpPostFailType()
-        {
-            Debug.Log("Posting to " + URL);
-            yield return request.Post<IList<Comment>>(URL, "", SuccessCallback, FailErrorCallback);
+            yield return _request.Post(FAIL_URL, "", SuccessCallback, FailErrorCallback);
         }
     }
 }

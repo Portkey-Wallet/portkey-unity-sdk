@@ -1,6 +1,6 @@
 namespace Portkey.GraphQL
 {
-	public class Guardian
+	public class GuardianDto
 	{
 		int type {get; set;}
 		string verifierId {get; set;}

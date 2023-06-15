@@ -111,6 +111,9 @@ namespace Portkey.GraphQL
         
         public void Introspect()
         {
+            if(loading)
+                return;
+            
             loading = true;
 
             string jsonData = JsonConvert.SerializeObject(new{query = Introspection.schemaIntrospectionQuery});

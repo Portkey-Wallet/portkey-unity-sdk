@@ -26,6 +26,10 @@ namespace Portkey.GraphQL
         
         public void GenerateDTOClass(string className)
         {
+            //generate class header
+            StringBuilder genHeaderCode = new StringBuilder();
+            
+            //generate class body
             var fields = Fields(className);
             
             if(fields == null)
@@ -33,56 +37,23 @@ namespace Portkey.GraphQL
                 Debug.LogError($"Cannot find class {className} in schema!");
                 return;
             }
-
-            //generate class header
-            StringBuilder genHeaderCode = new StringBuilder();
+            
             bool listHeaderIncluded = false;
 
             StringBuilder genBodyCode = new StringBuilder();
 
-            HashSet<string> childClassList = new HashSet<string>();
+            Dictionary<Introspection.SchemaClass.Data.Schema.Type.TypeKind, HashSet<string>> childClassList = new Dictionary<Introspection.SchemaClass.Data.Schema.Type.TypeKind, HashSet<string>>();
             
             for (int i = 0; i < fields.Count; i++){
                 Introspection.SchemaClass.Data.Schema.Type.Field field = fields[i];
-                string fieldType = field.type.name;
-                    
-                switch (field.type.kind)
-                {
-                    case Introspection.SchemaClass.Data.Schema.Type.TypeKind.OBJECT:
-                        genBodyCode.Append($"\t\t{fieldType} {field.name} {{get; set;}}\n");
-                        ExtractChildClass(childClassList, fieldType);
-                        break;
-                    case Introspection.SchemaClass.Data.Schema.Type.TypeKind.SCALAR: ;
-                        switch (field.type.name)
-                        {
-                            case "String":
-                                fieldType = "string";
-                                break;
-                            case "Boolean":
-                                fieldType = "bool";
-                                break;
-                            case "Int":
-                                fieldType = "int";
-                                break;
-                            case "Long":
-                                fieldType = "long";
-                                break;
-                        }
-                        genBodyCode.Append($"\t\t{fieldType} {field.name} {{get; set;}}\n");
-                        break;
-                    case Introspection.SchemaClass.Data.Schema.Type.TypeKind.LIST:
-                        string childClassName = field.type.ofType.name;
-                        genBodyCode.Append($"\t\tIList<{childClassName}> {field.name} {{get; set;}}\n");
-                        ExtractChildClass(childClassList, childClassName);
-                        
-                        if(!listHeaderIncluded)
-                        {
-                            genHeaderCode.Append("using System.Collections.Generic;\n");
-                            listHeaderIncluded = true;
-                        }
-                        
-                        break;
-                }
+
+                string objectType = GetObjectTypeDeclaration(field.type, childClassList, ref listHeaderIncluded);
+                genBodyCode.Append($"\t\t{objectType} {field.name} {{get; set;}}\n");
+            }
+            
+            if (listHeaderIncluded)
+            {
+                genHeaderCode.Append("using System.Collections.Generic;\n");
             }
             
             genBodyCode.Append("\t}\n");
@@ -103,8 +74,130 @@ namespace Portkey.GraphQL
             GenerateChildClass(childClassList);
         }
 
-        private void GenerateChildClass(HashSet<string> childClassList)
+        private static string GetObjectTypeDeclaration(Introspection.SchemaClass.Data.Schema.Type type,
+            Dictionary<Introspection.SchemaClass.Data.Schema.Type.TypeKind, HashSet<string>> childClassList, ref bool listHeaderIncluded)
         {
+            string ret = "";
+            switch (type.kind)
+            {
+                case Introspection.SchemaClass.Data.Schema.Type.TypeKind.ENUM:
+                case Introspection.SchemaClass.Data.Schema.Type.TypeKind.OBJECT:
+                    ret = type.name;
+                    ExtractClass(childClassList, type.kind, type.name);
+                    break;
+                case Introspection.SchemaClass.Data.Schema.Type.TypeKind.SCALAR:
+                    string fieldType = GetFieldType(type.name);
+                    ret = fieldType;
+                    break;
+                case Introspection.SchemaClass.Data.Schema.Type.TypeKind.NON_NULL:
+                    ret = GetObjectTypeDeclaration(type.ofType, childClassList, ref listHeaderIncluded);
+                    break;
+                case Introspection.SchemaClass.Data.Schema.Type.TypeKind.LIST:
+                    ret = $"IList<{GetObjectTypeDeclaration(type.ofType, childClassList, ref listHeaderIncluded)}>";
+                    listHeaderIncluded = true;
+                    break;
+                default:
+                    Debug.LogError("Unhandled Type!");
+                    break;
+            }
+
+            return ret;
+        }
+
+        private static string GetFieldType(string fieldTypeName)
+        {
+            string fieldType = "";
+            switch (fieldTypeName)
+            {
+                case "String":
+                    fieldType = "string";
+                    break;
+                case "Boolean":
+                    fieldType = "bool";
+                    break;
+                case "Int":
+                    fieldType = "int";
+                    break;
+                case "Long":
+                    fieldType = "long";
+                    break;
+                default:
+                    Debug.LogError("Unrecognized Type!");
+                    break;
+            }
+
+            return fieldType;
+        }
+
+        private void GenerateEnum(string enumName)
+        {
+            List<Introspection.SchemaClass.Data.Schema.Type.EnumValue> enumValues = null;
+            for (int i = 0; i < schemaClass.data.__schema.types.Count(); ++i)
+            {
+                Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types[i];
+
+                if (type.name != enumName)
+                {
+                    continue;
+                }
+
+                enumValues = type.enumValues;
+            }
+
+            if (enumValues == null)
+            {
+                Debug.LogError("Cannot find enum " + enumName + " in schema!");
+                return;
+            }
+            
+            //generate class header
+            StringBuilder genHeaderCode = new StringBuilder();
+            
+            //generate class body
+            StringBuilder genBodyCode = new StringBuilder();
+
+            for (int i = 0; i < enumValues.Count; i++)
+            {
+                genBodyCode.Append($"\t\t{enumValues[i].name},\n");
+            }
+
+            genBodyCode.Append("\t}\n");
+            
+            //insert namespace
+            genHeaderCode.Append("namespace Portkey.GraphQL\n{\n");
+            //insert class name
+            genHeaderCode.Append($"\tpublic enum {enumName}\n\t{{\n");
+            //concatenate header and body
+            genHeaderCode.Append(genBodyCode);
+            //close namespace
+            genHeaderCode.Append("}");
+            
+            //Debug.Log(genHeaderCode.ToString());
+            _storage.SetItem(enumName + ".cs", genHeaderCode.ToString());
+        }
+
+        private void GenerateChildClass(Dictionary<Introspection.SchemaClass.Data.Schema.Type.TypeKind, HashSet<string>> childClassList)
+        {
+            //loop through childClassList
+            foreach (var pair in childClassList)
+            {
+                if(pair.Key == Introspection.SchemaClass.Data.Schema.Type.TypeKind.ENUM)
+                {
+                    foreach (var childClass in pair.Value)
+                    {
+                        GenerateEnum(childClass);
+                    }
+                }
+                else
+                {
+                    foreach (var childClass in pair.Value)
+                    {
+                        GenerateDTOClass(childClass);
+                    }
+                }
+            }
+            
+            /*
             foreach (var childClass in childClassList)
             {
                 for (int i = 0; i < schemaClass.data.__schema.types.Count(); ++i)
@@ -118,7 +211,7 @@ namespace Portkey.GraphQL
 
                     GenerateDTOClass(type.name);
                 }
-            }
+            }*/
         }
 
         private List<Introspection.SchemaClass.Data.Schema.Type.Field> Fields(string className)
@@ -139,9 +232,16 @@ namespace Portkey.GraphQL
             return fields;
         }
 
-        private static void ExtractChildClass(HashSet<string> childClassList, string childClassName)
+        private static void ExtractClass(Dictionary<Introspection.SchemaClass.Data.Schema.Type.TypeKind, HashSet<string>> childClassList, Introspection.SchemaClass.Data.Schema.Type.TypeKind type, string childClassName)
         {
-            childClassList.Add(childClassName);
+            if (childClassList.TryGetValue(type, out var value))
+            {
+                value.Add(childClassName);
+            }
+            else
+            {
+                childClassList.Add(type, new HashSet<string> {childClassName});
+            }
         }
     }
 }

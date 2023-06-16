@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   url: https://dapp-portkey-test.portkey.finance/Portkey_DID/PortKeyIndexerCASchema/graphql
   queries:
-  - name: CaHolderInfo
+  - name: GetCAHolderInfo
     type: 0
     query: 
     queryString: caHolderInfo
@@ -301,7 +301,7 @@ MonoBehaviour:
         type: Boolean
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderManagerChangeRecordInfo
+  - name: caHolderManagerChangeRecordInfo
     type: 0
     query: "query CaHolderManagerChangeRecordInfo{\n    caHolderManagerChangeRecordInfo{\n       
       caAddress\n        caHash\n        manager\n        changeType\n        blockHeight\n   
@@ -422,7 +422,7 @@ MonoBehaviour:
         type: String
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderManagerInfo
+  - name: caHolderManagerInfo
     type: 0
     query: 
     queryString: caHolderManagerInfo
@@ -582,7 +582,7 @@ MonoBehaviour:
         type: String
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderNftBalanceInfo
+  - name: caHolderNFTBalanceInfo
     type: 0
     query: "query CaHolderNftBalanceInfo{\n    caHolderNFTBalanceInfo{\n        totalRecordCount\n       
       data{\n            nftInfo{\n                collectionName\n               
@@ -1091,7 +1091,7 @@ MonoBehaviour:
         type: NFTItemInfoDto
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderNftCollectionBalanceInfo
+  - name: caHolderNFTCollectionBalanceInfo
     type: 0
     query: 
     queryString: caHolderNFTCollectionBalanceInfo
@@ -1492,7 +1492,7 @@ MonoBehaviour:
         type: NFTCollectionDto
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderSearchTokenNft
+  - name: caHolderSearchTokenNFT
     type: 0
     query: 
     queryString: caHolderSearchTokenNFT
@@ -2514,7 +2514,7 @@ MonoBehaviour:
         type: NFTItemInfoDto
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderTokenBalanceInfo
+  - name: caHolderTokenBalanceInfo
     type: 0
     query: 
     queryString: caHolderTokenBalanceInfo
@@ -3135,7 +3135,7 @@ MonoBehaviour:
         type: Long
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderTransaction
+  - name: caHolderTransaction
     type: 0
     query: 
     queryString: caHolderTransaction
@@ -4702,7 +4702,7 @@ MonoBehaviour:
         type: TransactionFee
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderTransactionAddressInfo
+  - name: caHolderTransactionAddressInfo
     type: 0
     query: 
     queryString: caHolderTransactionAddressInfo
@@ -4833,7 +4833,7 @@ MonoBehaviour:
         type: Long
       hasChanged: 0
     isComplete: 0
-  - name: CaHolderTransactionInfo
+  - name: caHolderTransactionInfo
     type: 0
     query: 
     queryString: caHolderTransactionInfo
@@ -6400,7 +6400,7 @@ MonoBehaviour:
         type: TransactionFee
       hasChanged: 0
     isComplete: 0
-  - name: LoginGuardianChangeRecordInfo
+  - name: loginGuardianChangeRecordInfo
     type: 0
     query: 
     queryString: loginGuardianChangeRecordInfo
@@ -6734,7 +6734,7 @@ MonoBehaviour:
         type: Boolean
       hasChanged: 0
     isComplete: 0
-  - name: LoginGuardianInfo
+  - name: loginGuardianInfo
     type: 0
     query: 
     queryString: loginGuardianInfo
@@ -6957,7 +6957,7 @@ MonoBehaviour:
         type: Boolean
       hasChanged: 0
     isComplete: 0
-  - name: SyncState
+  - name: syncState
     type: 0
     query: 
     queryString: syncState
@@ -6990,7 +6990,7 @@ MonoBehaviour:
         type: Long
       hasChanged: 0
     isComplete: 0
-  - name: TokenInfo
+  - name: tokenInfo
     type: 0
     query: 
     queryString: tokenInfo

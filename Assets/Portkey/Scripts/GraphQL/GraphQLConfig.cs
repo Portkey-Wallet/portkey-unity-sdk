@@ -4,15 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Portkey.Core;
-using Portkey.Network;
 using Portkey.Storage;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
-#if UNITY_EDITOR
-using System.Threading.Tasks;
-#endif
 
 namespace Portkey.GraphQL
 {
@@ -55,18 +52,42 @@ namespace Portkey.GraphQL
             throw new System.NotImplementedException();
         }
 
-        public IEnumerator Query<T>(string query, IHttp.successCallback<T> successCallback, IHttp.errorCallback errorCallback)
+        public IEnumerator Query<T>(string query, IGraphQL.successCallback<T> successCallback, IGraphQL.errorCallback errorCallback)
         {
-            return request.Post<T>(url, query, successCallback, errorCallback);
+            return request.Post(url, query, 
+                (response) =>
+                                {
+                                    JObject json = JObject.Parse(response);
+                                    string data = null;
+                                    if (json.TryGetValue("data", out var value))
+                                    {
+                                        //process data and wrapper
+                                        data = value.ToString();
+                                    }
+                                    else
+                                    {
+                                        errorCallback("No data in response. Incorrect response format.");
+                                        return;
+                                    }
+                                    //deserialize response
+                                    T deserializedObject = JsonConvert.DeserializeObject<T>(data);
+                                    //call success callback
+                                    successCallback(deserializedObject);
+                                }, 
+                    (error) =>
+                                {
+                                    //call error callback
+                                    errorCallback(error);
+                                });
         }
 
-        public IEnumerator Query<T>(GraphQLQuery query, IHttp.successCallback<T> successCallback, IHttp.errorCallback errorCallback)
+        public IEnumerator Query<T>(GraphQLQuery query, IGraphQL.successCallback<T> successCallback, IGraphQL.errorCallback errorCallback)
         {
             if (String.IsNullOrEmpty(query.query))
             {
                 query.CompleteQuery();
             }
-            return request.Post<T>(url, query.query, successCallback, errorCallback);
+            return Query<T>(query.query, successCallback, errorCallback);
         }
 
         public GraphQLQuery GetQueryByName(string queryName)
@@ -167,7 +188,7 @@ namespace Portkey.GraphQL
         {
             if (!InitSchema())
             {
-                Debug.Log("Schema not initialized!");
+                //Debug.Log("Schema not initialized!");
                 return;
             }
             if (queries == null)

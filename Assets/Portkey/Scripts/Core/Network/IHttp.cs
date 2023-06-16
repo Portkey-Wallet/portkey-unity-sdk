@@ -18,7 +18,7 @@ namespace Portkey.Core
         /// <param name="successCallback">Callback function when Get is successful.</param>
         /// <param name="errorCallback">Callback function when error occurs. msg contains error message.</param>
         /// <returns>The response from the request.</returns>
-        public IEnumerator Get(string url, successCallback successCallback, errorCallback errorCallback);
+        public abstract IEnumerator Get(string url, successCallback successCallback, errorCallback errorCallback);
 
         /// <summary>
         /// Make a POST request to the given url.
@@ -28,6 +28,6 @@ namespace Portkey.Core
         /// <param name="successCallback">Callback function when Get is successful.</param>
         /// <param name="errorCallback">Callback function when error occurs. msg contains error message.</param>
         /// <returns>The response from the request.</returns>
-        public IEnumerator Post(string url, string body, successCallback successCallback, errorCallback errorCallback);
+        public abstract IEnumerator Post(string url, string body, successCallback successCallback, errorCallback errorCallback);
     }
 }

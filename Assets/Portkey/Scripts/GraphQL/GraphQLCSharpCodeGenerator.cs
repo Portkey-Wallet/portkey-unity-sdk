@@ -8,20 +8,20 @@ namespace Portkey.GraphQL
 {
     public class GraphQLCSharpCodeGenerator : IGraphQLCodeGenerator
     {
-        private Introspection.SchemaClass schemaClass;
+        private Introspection.SchemaClass _schemaClass;
         private IStorageSuite<string> _storage;
 
         //constructor
         public GraphQLCSharpCodeGenerator(Introspection.SchemaClass schemaClass, IStorageSuite<string> storage)
         {
-            this.schemaClass = schemaClass;
+            this._schemaClass = schemaClass;
             this._storage = storage;
         }
         
         //setter for schemaClass
         public void SetSchemaClass(Introspection.SchemaClass schemaClass)
         {
-            this.schemaClass = schemaClass;
+            this._schemaClass = schemaClass;
         }
         
         public void GenerateDTOClass(string className)
@@ -132,9 +132,9 @@ namespace Portkey.GraphQL
         private void GenerateEnum(string enumName)
         {
             List<Introspection.SchemaClass.Data.Schema.Type.EnumValue> enumValues = null;
-            for (int i = 0; i < schemaClass.data.__schema.types.Count(); ++i)
+            for (int i = 0; i < _schemaClass.data.__schema.types.Count(); ++i)
             {
-                Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types[i];
+                Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types[i];
 
                 if (type.name != enumName)
                 {
@@ -217,9 +217,9 @@ namespace Portkey.GraphQL
         private List<Introspection.SchemaClass.Data.Schema.Type.Field> Fields(string className)
         {
             List<Introspection.SchemaClass.Data.Schema.Type.Field> fields = null;
-            for (int i = 0; i < schemaClass.data.__schema.types.Count(); ++i)
+            for (int i = 0; i < _schemaClass.data.__schema.types.Count(); ++i)
             {
-                Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types[i];
+                Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types[i];
 
                 if (type.name != className)
                 {

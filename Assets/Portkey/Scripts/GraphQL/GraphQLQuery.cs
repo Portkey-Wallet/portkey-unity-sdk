@@ -14,10 +14,11 @@ namespace Portkey.GraphQL
         public string query;
         public string queryString;
         public string returnType;
-        private string args;
         public List<string> queryOptions;
         public List<Field> fields;
         public bool isComplete;
+        
+        private string _args;
 
         public enum Type
         {
@@ -28,14 +29,14 @@ namespace Portkey.GraphQL
 
         public void SetArgs(object inputObject)
         {
-            string json = JsonConvert.SerializeObject(inputObject, new Utils.EnumInputConverter());
-            args = Utils.JsonToArgument(json);
+            string json = JsonConvert.SerializeObject(inputObject, new Utilities.EnumInputConverter());
+            _args = Utilities.JsonToArgument(json);
             CompleteQuery();
         }
 
         public void SetArgs(string inputString)
         {
-            args = inputString;
+            _args = inputString;
             CompleteQuery();
         }
 
@@ -117,7 +118,7 @@ namespace Portkey.GraphQL
 
             }
 
-            string arg = String.IsNullOrEmpty(args) ? "" : $"({args})";
+            string arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
             string word;
             switch (type)
             {

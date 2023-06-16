@@ -1,5 +1,4 @@
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using Portkey.Core;
@@ -9,13 +8,17 @@ using UnityEngine;
 
 namespace Portkey.GraphQL.Editor
 {
+    /// <summary>
+    /// GraphQLUnityEditor is a custom editor for GraphQLConfig.
+    /// It helps user add custom queries to GraphQLConfig.
+    /// </summary>
     [CustomEditor(typeof(GraphQLConfig))]
     public class GraphQLUnityEditor : UnityEditor.Editor
     {
         private const string GENERATED_CODE_FOLDER = "/Portkey/Scripts/__Generated__";
         private IStorageSuite<string> _storage;
-        private int index;
-        private SerializedObject graphObject;
+        private int _index;
+        private SerializedObject _graphObject;
 
         public void OnEnable()
         {
@@ -27,12 +30,12 @@ namespace Portkey.GraphQL.Editor
 
         public override void OnInspectorGUI(){
             GraphQLConfig graph = (GraphQLConfig) target;
-            graphObject = new UnityEditor.SerializedObject(graph);
+            _graphObject = new UnityEditor.SerializedObject(graph);
             GUIStyle style = new GUIStyle{fontSize = 15, alignment = TextAnchor.MiddleCenter};
             EditorGUILayout.LabelField(graph.name, style);
             EditorGUILayout.Space();
             
-            UnityEditor.SerializedProperty graphRequest = graphObject.FindProperty("request");
+            UnityEditor.SerializedProperty graphRequest = _graphObject.FindProperty("request");
             graphRequest.objectReferenceValue = EditorGUILayout.ObjectField(graphRequest.objectReferenceValue, typeof(IHttp), true);
             if (GUI.changed) graphRequest.serializedObject.ApplyModifiedProperties();
             
@@ -42,7 +45,7 @@ namespace Portkey.GraphQL.Editor
 
             EditorGUILayout.Space();
             EditorGUILayout.Space();
-            UnityEditor.SerializedProperty graphUrl = graphObject.FindProperty("url");
+            UnityEditor.SerializedProperty graphUrl = _graphObject.FindProperty("url");
             graphUrl.stringValue = EditorGUILayout.TextField("Url", graphUrl.stringValue);
             if (GUI.changed) graphUrl.serializedObject.ApplyModifiedProperties();
             
@@ -110,11 +113,11 @@ namespace Portkey.GraphQL.Editor
                     query.name = EditorGUILayout.TextField($"{type} Name", query.name);
                     string[] options = query.queryOptions.ToArray();
                     if (String.IsNullOrEmpty(query.returnType)){
-                        index = EditorGUILayout.Popup(type, index, options);
-                        query.queryString = options[index];
-                        EditorGUILayout.LabelField(options[index]);
+                        _index = EditorGUILayout.Popup(type, _index, options);
+                        query.queryString = options[_index];
+                        EditorGUILayout.LabelField(options[_index]);
                         if (GUILayout.Button($"Confirm {type}")){
-                            graph.GetQueryReturnType(query, options[index]);
+                            graph.GetQueryReturnType(query, options[_index]);
                         }
                         if (GUILayout.Button("Delete")){
                             graph.DeleteQuery(queryList, i);
@@ -143,12 +146,12 @@ namespace Portkey.GraphQL.Editor
                         $"Return Type: {query.returnType}");
                     if (graph.CheckSubFields(query.returnType)){
                         if (GUILayout.Button("Create Field")){
-                            graph.GetQueryReturnType(query, options[index]);
+                            graph.GetQueryReturnType(query, options[_index]);
                             graph.AddField(query, query.returnType);
                         }
                         
                         if (GUILayout.Button("Add All Fields")){
-                            graph.GetQueryReturnType(query, options[index]);
+                            graph.GetQueryReturnType(query, options[_index]);
                             graph.AddAllFields(query, query.returnType);
                         }
                     }

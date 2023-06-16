@@ -31,9 +31,9 @@ public class GraphQLTest
         return graphQL.Query<GraphQLCodeGen.Types.Query>(query.query, SuccessCallback, ErrorCallback);
     }
 
-    private void ErrorCallback(string msg)
+    private void ErrorCallback(string message)
     {
-        Assert.Fail($"Query by name <{QUERY_NAME_GETCAHOLDERINFO}> failed to be executed!\nError: {msg}");
+        Assert.Fail($"Query by name <{QUERY_NAME_GETCAHOLDERINFO}> failed to be executed!\nError: {message}");
     }
 
     private void SuccessCallback(GraphQLCodeGen.Types.Query param)
@@ -53,9 +53,9 @@ public class GraphQLTest
         return graphQL.Query<GraphQLCodeGen.Types.Query>(query.query, GraphQLPostNullReturnSuccessCallback, GraphQLPostNullReturnErrorCallback);
     }
     
-    private void GraphQLPostNullReturnErrorCallback(string msg)
+    private void GraphQLPostNullReturnErrorCallback(string message)
     {
-        Assert.Fail($"Query by name <{QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO}> should succeed with null!\nError: {msg}");
+        Assert.Fail($"Query by name <{QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO}> should succeed with null!\nError: {message}");
     }
 
     private void GraphQLPostNullReturnSuccessCallback(GraphQLCodeGen.Types.Query param)

@@ -3,6 +3,9 @@ using Portkey.Core;
 
 namespace Portkey.Storage
 {
+    /// <summary>
+    /// For persistent local storage on the device.
+    /// </summary>
     public class PersistentLocalStorage : IStorageSuite<string>
     {
         private string _path;

@@ -13,6 +13,10 @@ using UnityEngine.Networking;
 
 namespace Portkey.GraphQL
 {
+    /// <summary>
+    /// GraphQLConfig is a ScriptableObject that stores the GraphQL API reference.
+    /// It is the single point for user accessing GraphQL API in the form of a config file.
+    /// </summary>
     [CreateAssetMenu(fileName = "API Reference", menuName = "Portkey/GraphQL/API Reference")]
     public class GraphQLConfig : ScriptableObject, IGraphQLEditor, IGraphQL
     {
@@ -23,28 +27,27 @@ namespace Portkey.GraphQL
         [SerializeField]
         private IHttp request = null;
         
-        private string queryEndpoint;
+        private string _queryEndpoint;
         
         // stores introspection raw result
-        private string introspection;
+        private string _introspection;
         // stores schema of the introspection
-        private Introspection.SchemaClass schemaClass = null;
+        private Introspection.SchemaClass _schemaClass = null;
 
 #if UNITY_EDITOR
-        private IStorageSuite<string> storage;
+        private IStorageSuite<string> _storage;
         // check if introspection is loading
-        private bool loading = false;
+        private bool _loading = false;
         // request for introspection. Only used on editor functions because
         // Unity editor cannot run coroutines and async/await cannot be used on webgl
-        private UnityWebRequest editorRequest;
+        private UnityWebRequest _editorRequest;
         //schema file name
-        private string schemaFileName;
+        private string _schemaFileName;
 #endif
         
-        //getter for schemaClass
         public Introspection.SchemaClass GetSchemaClass()
         {
-            return schemaClass;
+            return _schemaClass;
         }
         
         public void GetHolderInfoByManager(string manager, string chainId)
@@ -100,58 +103,58 @@ namespace Portkey.GraphQL
         //getter for loading
         public bool IsLoading()
         {
-            return loading;
+            return _loading;
         }
         
         public void OnEnable()
         {
-            schemaFileName = $"{name}schema.txt";
-            if(storage == null)
+            _schemaFileName = $"{name}schema.txt";
+            if(_storage == null)
             {
-                storage = new PersistentLocalStorage(Application.dataPath + "/Portkey/Configs/GraphQL");
+                _storage = new PersistentLocalStorage(Application.dataPath + "/Portkey/Configs/GraphQL");
             }
         }
         
         private void HandleIntrospection()
         {
-            if (!editorRequest.isDone)
+            if (!_editorRequest.isDone)
                 return;
             EditorApplication.update -= HandleIntrospection;
-            introspection = editorRequest.downloadHandler.text;
-            storage.SetItem(schemaFileName, introspection);
-            schemaClass = JsonConvert.DeserializeObject<Introspection.SchemaClass>(introspection);
-            if (schemaClass.data.__schema.queryType != null)
-                queryEndpoint = schemaClass.data.__schema.queryType.name;
+            _introspection = _editorRequest.downloadHandler.text;
+            _storage.SetItem(_schemaFileName, _introspection);
+            _schemaClass = JsonConvert.DeserializeObject<Introspection.SchemaClass>(_introspection);
+            if (_schemaClass.data.__schema.queryType != null)
+                _queryEndpoint = _schemaClass.data.__schema.queryType.name;
             
-            editorRequest.uploadHandler.Dispose();
-            editorRequest.downloadHandler.Dispose();
-            editorRequest.Dispose();
+            _editorRequest.uploadHandler.Dispose();
+            _editorRequest.downloadHandler.Dispose();
+            _editorRequest.Dispose();
             
-            loading = false;
+            _loading = false;
         }
         
         public void Introspect()
         {
-            if(loading)
+            if(_loading)
                 return;
             
-            loading = true;
+            _loading = true;
 
             string jsonData = JsonConvert.SerializeObject(new{query = Introspection.schemaIntrospectionQuery});
             
             byte[] postData = Encoding.ASCII.GetBytes(jsonData);
-            editorRequest = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
+            _editorRequest = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
             
-            editorRequest.uploadHandler = new UploadHandlerRaw(postData);
-            editorRequest.disposeUploadHandlerOnDispose = true;
-            editorRequest.downloadHandler = new DownloadHandlerBuffer();
-            editorRequest.disposeDownloadHandlerOnDispose = true;
+            _editorRequest.uploadHandler = new UploadHandlerRaw(postData);
+            _editorRequest.disposeUploadHandlerOnDispose = true;
+            _editorRequest.downloadHandler = new DownloadHandlerBuffer();
+            _editorRequest.disposeDownloadHandlerOnDispose = true;
             
-            editorRequest.SetRequestHeader("Content-Type", "application/json");
+            _editorRequest.SetRequestHeader("Content-Type", "application/json");
 
             try
             {
-                editorRequest.SendWebRequest();
+                _editorRequest.SendWebRequest();
             }
             catch (Exception e)
             {
@@ -163,22 +166,22 @@ namespace Portkey.GraphQL
 
         public bool InitSchema()
         {
-            if (schemaClass == null || schemaClass.data == null){
+            if (_schemaClass == null || _schemaClass.data == null){
                 try{
-                    introspection = storage.GetItem(schemaFileName);
+                    _introspection = _storage.GetItem(_schemaFileName);
                 }
                 catch{
                     return false;
                 }
 
-                if (schemaClass == null || introspection == null)
+                if (_schemaClass == null || _introspection == null)
                 {
                     return false;
                 }
                 
-                schemaClass = JsonConvert.DeserializeObject<Introspection.SchemaClass>(introspection);
-                if (schemaClass.data.__schema.queryType != null)
-                    queryEndpoint = schemaClass.data.__schema.queryType.name;
+                _schemaClass = JsonConvert.DeserializeObject<Introspection.SchemaClass>(_introspection);
+                if (_schemaClass.data.__schema.queryType != null)
+                    _queryEndpoint = _schemaClass.data.__schema.queryType.name;
             }
 
             return true;
@@ -195,7 +198,7 @@ namespace Portkey.GraphQL
                 queries = new List<GraphQLQuery>();
             GraphQLQuery query = new GraphQLQuery{fields = new List<Field>(), queryOptions = new List<string>(), type = GraphQLQuery.Type.Query};
             
-            Introspection.SchemaClass.Data.Schema.Type queryType = schemaClass.data.__schema.types.Find((aType => aType.name == queryEndpoint));
+            Introspection.SchemaClass.Data.Schema.Type queryType = _schemaClass.data.__schema.types.Find((aType => aType.name == _queryEndpoint));
             for (int i = 0; i < queryType.fields.Count; i++){
                 query.queryOptions.Add(queryType.fields[i].name);
             }
@@ -210,7 +213,7 @@ namespace Portkey.GraphQL
 
         public bool CheckSubFields(string typeName)
         {
-            Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
+            Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             if (type?.fields == null || type.fields.Count == 0){
                 return false;
             }
@@ -220,7 +223,7 @@ namespace Portkey.GraphQL
         
         public void AddAllFields(GraphQLQuery query, string typeName, Field parent = null)
         {
-            Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
+            Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             List<Introspection.SchemaClass.Data.Schema.Type.Field> subFields = type.fields;
             int parentIndex = query.fields.FindIndex(aField => aField == parent);
             List<int> parentIndexes = new List<int>();
@@ -278,7 +281,7 @@ namespace Portkey.GraphQL
 
         public void AddField(GraphQLQuery query, string typeName, Field parent = null)
         {
-            Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
+            Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             List<Introspection.SchemaClass.Data.Schema.Type.Field> subFields = type.fields;
             int parentIndex = query.fields.FindIndex(aField => aField == parent);
             List<int> parentIndexes = new List<int>();
@@ -326,7 +329,7 @@ namespace Portkey.GraphQL
         public void GetQueryReturnType(GraphQLQuery query, string queryName)
         {
             Introspection.SchemaClass.Data.Schema.Type queryType =
-                schemaClass.data.__schema.types.Find((aType => aType.name == queryEndpoint));
+                _schemaClass.data.__schema.types.Find((aType => aType.name == _queryEndpoint));
             Introspection.SchemaClass.Data.Schema.Type.Field field =
                 queryType.fields.Find((aField => aField.name == queryName));
 

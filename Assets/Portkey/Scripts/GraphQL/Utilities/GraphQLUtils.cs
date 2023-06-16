@@ -5,8 +5,13 @@ using Newtonsoft.Json.Converters;
 
 namespace Portkey.GraphQL
 {
-    public static class Utils
+    /// <summary>
+    /// Utilities class for GraphQL to help with data conversion.
+    /// </summary>
+    public static class Utilities
     {
+        /// <summary>Function to convert a JSON string to a GraphQL argument string.</summary>
+        /// <param name="jsonInput">The JSON string to convert.</param>
         public static string JsonToArgument(string jsonInput)
         {
             char[] jsonChar = jsonInput.ToCharArray();
@@ -33,6 +38,7 @@ namespace Portkey.GraphQL
             return result;
         }
         
+        /// <summary>Enum converter for JSON serialization.</summary>
         public class EnumInputConverter : StringEnumConverter
         {
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer){

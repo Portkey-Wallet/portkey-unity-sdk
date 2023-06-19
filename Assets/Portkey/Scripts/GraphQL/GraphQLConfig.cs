@@ -49,11 +49,6 @@ namespace Portkey.GraphQL
         {
             return _schemaClass;
         }
-        
-        public void GetHolderInfoByManager(string manager, string chainId)
-        {
-            throw new System.NotImplementedException();
-        }
 
         public IEnumerator Query<T>(string query, IGraphQL.successCallback<T> successCallback, IGraphQL.errorCallback errorCallback)
         {

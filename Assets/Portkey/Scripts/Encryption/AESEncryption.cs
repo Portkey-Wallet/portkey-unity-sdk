@@ -8,18 +8,19 @@ namespace Portkey.Encryption
 {
     public class AESEncryption : IEncryption
     {
-        public override string Encrypt(string plainText, string password)
+        public string Encrypt(string plainText, string password)
         {
             GenerateKeyAndIVFromPassword(password, out var aesKey, out var aesIV);
                 
-            return EncryptStringToBytes_Aes(plainText, aesKey, aesIV).ToString();
+            byte[] encrypted = EncryptStringToBytes_Aes(plainText, aesKey, aesIV);
+            return Convert.ToBase64String(encrypted);
         }
 
-        public override string Decrypt(string cipherText, string password)
+        public string Decrypt(string cipherText, string password)
         {
             GenerateKeyAndIVFromPassword(password, out var aesKey, out var aesIV);
 
-            return DecryptStringFromBytes_Aes(Encoding.UTF8.GetBytes(cipherText), aesKey, aesIV);
+            return DecryptStringFromBytes_Aes(Convert.FromBase64String(cipherText), aesKey, aesIV);
         }
 
         private void GenerateKeyAndIVFromPassword(string password, out byte[] aesKey, out byte[] aesIV)

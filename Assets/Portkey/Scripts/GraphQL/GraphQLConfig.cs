@@ -57,6 +57,14 @@ namespace Portkey.GraphQL
                                 {
                                     JObject json = JObject.Parse(response);
                                     string data = null;
+                                    if (json.TryGetValue("errors", out var errorMessage))
+                                    {
+                                        //process data and wrapper
+                                        string error = errorMessage.ToString();
+                                        errorCallback(error);
+                                        return;
+                                    }
+                                    
                                     if (json.TryGetValue("data", out var value))
                                     {
                                         //process data and wrapper

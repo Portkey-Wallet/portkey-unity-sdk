@@ -1,0 +1,304 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7eb5ecd35f8e648f0ae1232e27f0c96d, type: 3}
+  m_Name: GraphQLConfigMock
+  m_EditorClassIdentifier: 
+  url: https://dapp-portkey-test.portkey.finance/Portkey_DID/PortKeyIndexerCASchema/graphql
+  queries:
+  - name: GetCAHolderInfo
+    type: 0
+    query: 
+    queryString: caHolderInfo
+    returnType: CAHolderInfoDto
+    queryOptions:
+    - tokenInfo
+    - caHolderTransaction
+    - twoCaHolderTransaction
+    - caHolderTransactionInfo
+    - caHolderManagerInfo
+    - caHolderInfo
+    - loginGuardianInfo
+    - caHolderNFTCollectionBalanceInfo
+    - caHolderNFTBalanceInfo
+    - caHolderTokenBalanceInfo
+    - caHolderBingoInfo
+    - caHolderTransactionAddressInfo
+    - loginGuardianChangeRecordInfo
+    - caHolderManagerChangeRecordInfo
+    - caHolderSearchTokenNFT
+    - syncState
+    fields:
+    - index: 0
+      name: id
+      type: String
+      parentIndexes: 
+      hasSubField: 0
+      possibleFields:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      - name: guardianList
+        type: GuardianList
+      hasChanged: 0
+    - index: 1
+      name: chainId
+      type: String
+      parentIndexes: 
+      hasSubField: 0
+      possibleFields:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      - name: guardianList
+        type: GuardianList
+      hasChanged: 0
+    - index: 2
+      name: caHash
+      type: String
+      parentIndexes: 
+      hasSubField: 0
+      possibleFields:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      - name: guardianList
+        type: GuardianList
+      hasChanged: 0
+    - index: 3
+      name: caAddress
+      type: String
+      parentIndexes: 
+      hasSubField: 0
+      possibleFields:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      - name: guardianList
+        type: GuardianList
+      hasChanged: 0
+    - index: 4
+      name: managerInfos
+      type: ManagerInfo
+      parentIndexes: 
+      hasSubField: 1
+      possibleFields:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      - name: guardianList
+        type: GuardianList
+      hasChanged: 0
+    - index: 1
+      name: extraData
+      type: String
+      parentIndexes: 04000000
+      hasSubField: 0
+      possibleFields:
+      - name: address
+        type: String
+      - name: extraData
+        type: String
+      hasChanged: 0
+    - index: 0
+      name: address
+      type: String
+      parentIndexes: 04000000
+      hasSubField: 0
+      possibleFields:
+      - name: address
+        type: String
+      - name: extraData
+        type: String
+      hasChanged: 0
+    - index: 5
+      name: originChainId
+      type: String
+      parentIndexes: 
+      hasSubField: 0
+      possibleFields:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      - name: guardianList
+        type: GuardianList
+      hasChanged: 0
+    - index: 6
+      name: guardianList
+      type: GuardianList
+      parentIndexes: 
+      hasSubField: 1
+      possibleFields:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      - name: guardianList
+        type: GuardianList
+      hasChanged: 0
+    - index: 0
+      name: guardians
+      type: Guardian
+      parentIndexes: 08000000
+      hasSubField: 1
+      possibleFields:
+      - name: guardians
+        type: Guardian
+      hasChanged: 0
+    - index: 4
+      name: isLoginGuardian
+      type: Boolean
+      parentIndexes: 0800000009000000
+      hasSubField: 0
+      possibleFields:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 3
+      name: salt
+      type: String
+      parentIndexes: 0800000009000000
+      hasSubField: 0
+      possibleFields:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 2
+      name: identifierHash
+      type: String
+      parentIndexes: 0800000009000000
+      hasSubField: 0
+      possibleFields:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 1
+      name: verifierId
+      type: String
+      parentIndexes: 0800000009000000
+      hasSubField: 0
+      possibleFields:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 0
+      name: type
+      type: Int
+      parentIndexes: 0800000009000000
+      hasSubField: 0
+      possibleFields:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    isComplete: 0
+  request: {fileID: 11400000, guid: 230f5a5775d97495790d5ae8cf72df0b, type: 2}

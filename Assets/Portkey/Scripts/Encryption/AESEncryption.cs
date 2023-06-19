@@ -6,6 +6,9 @@ using Portkey.Core;
 
 namespace Portkey.Encryption
 {
+    /// <summary>
+    /// Implementation of IEncryption using AES.
+    /// </summary>
     public class AESEncryption : IEncryption
     {
         public string Encrypt(string plainText, string password)
@@ -23,6 +26,12 @@ namespace Portkey.Encryption
             return DecryptStringFromBytes_Aes(Convert.FromBase64String(cipherText), aesKey, aesIV);
         }
 
+        /// <summary>
+        /// Generates AES key and IV from password.
+        /// </summary>
+        /// <param name="password">The password to encrypt with.</param>
+        /// <param name="aesKey">The output AES key.</param>
+        /// <param name="aesIV">The output AES IV.</param>
         private void GenerateKeyAndIVFromPassword(string password, out byte[] aesKey, out byte[] aesIV)
         {
             byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
@@ -30,6 +39,13 @@ namespace Portkey.Encryption
             aesIV = MD5.Create().ComputeHash(passwordBytes);
         }
 
+        /// <summary>
+        /// Encrypts a string with a key and IV.
+        /// </summary>
+        /// <param name="plainText">The string to encrypt.</param>
+        /// <param name="Key">The key to encrypt with.</param>
+        /// <param name="IV">The IV to encrypt with.</param>
+        /// <returns>Encrypted plainText in byte array.</returns>
         private byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
         {
             // Check arguments.
@@ -77,6 +93,13 @@ namespace Portkey.Encryption
             return encrypted;
         }
 
+        /// <summary>
+        /// Decrypts a string with a key and IV.
+        /// </summary>
+        /// <param name="cipherText">The byte array to decrypt.</param>
+        /// <param name="Key">The key to decrypt with.</param>
+        /// <param name="IV">The IV to decrypt with.</param>
+        /// <returns>Decrypted plainText in string.</returns>
         private string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
         {
             // Check arguments.

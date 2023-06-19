@@ -1,8 +1,21 @@
-namespace Portkey.Encryption
+using UnityEngine;
+
+namespace Portkey.Core
 {
-    public interface IEncryption
+    /// <summary>
+    /// An
+    /// </summary>
+    public abstract class IEncryption : ScriptableObject
     {
-        string Encrypt(string plainText, string password);
-        string Decrypt(string cipherText, string password);
+        /// <summary>
+        /// Make a GET request to the given url.
+        /// </summary>
+        /// <param name="url">The url to make the request to.</param>
+        /// <param name="successCallback">Callback function when Get is successful.</param>
+        /// <param name="errorCallback">Callback function when error occurs. msg contains error message.</param>
+        /// <returns>The response from the request.</returns>
+        public string abstract Encrypt(string plainText, string password);
+        public string abstract Decrypt(string cipherText, string password);
     }
 }
+

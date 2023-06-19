@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -9,15 +10,64 @@ using UnityEngine.TestTools;
 
 public class GraphQLTest
 {
+    public class GraphQLMonoTest : GraphQL, IMonoBehaviourTest
+    {
+        private bool runFinished = false;
+        public bool IsTestFinished
+        {
+            get { return runFinished; }
+        }
+
+        private void Awake()
+        {
+            InitializeGraphQLConfig();
+        }
+
+        private void Update()
+        {
+            runFinished = true;
+        }
+
+        public void InitializeGraphQLConfig()
+        {
+            this._graphQLConfig = GetPortkeyGraphQlConfig();
+        }
+
+        private static GraphQLConfig GetPortkeyGraphQlConfig()
+        {
+            string[] guids = AssetDatabase.FindAssets($"t:{nameof(GraphQLConfig)}");
+            if (guids.Length == 0)
+            {
+                Assert.Fail($"No {nameof(GraphQLConfig)} found!");
+            }
+            else if (guids.Length > 0)
+            {
+                Debug.LogWarning($"More than one {nameof(GraphQLConfig)} found, taking first one");
+            }
+
+            GraphQLConfig graphQL =
+                (GraphQLConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(GraphQLConfig));
+            return graphQL;
+        }
+    }
+    
     private const string QUERY_NAME_GETCAHOLDERINFO = "GetCAHolderInfo";
     private const string QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO = "caHolderManagerChangeRecordInfo";
 
-    private GraphQLConfig graphQL = GetPortkeyGraphQlConfig();
+    private MonoBehaviourTest<GraphQLMonoTest> _graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
+    
+    [UnityTest]
+    public IEnumerator GraphQLMonobehaviourWorks()
+    {
+        yield return _graphQlTest;
+    }
     
     [UnityTest]
     public IEnumerator GraphQLPostWorks()
     {
-        GraphQLQuery query = graphQL.GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
+        _graphQlTest.component.InitializeGraphQLConfig();
+        
+        GraphQLQuery query = ((IGraphQL)_graphQlTest.component).GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
         if (query == null)
         {
             Assert.Fail($"No Query by name <{QUERY_NAME_GETCAHOLDERINFO}> found!");
@@ -28,7 +78,7 @@ public class GraphQLTest
         dto.caHash = "f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b";
         query.SetArgs(new { dto = dto.GetInputObject()});
         
-        return graphQL.Query<GraphQLCodeGen.Types.Query>(query.query, SuccessCallback, ErrorCallback);
+        return ((IGraphQL)_graphQlTest.component).Query<GraphQLCodeGen.Types.Query>(query.query, SuccessCallback, ErrorCallback);
     }
 
     private void ErrorCallback(string message)
@@ -44,13 +94,15 @@ public class GraphQLTest
     [UnityTest]
     public IEnumerator GraphQLPostNullReturn()
     {
-        GraphQLQuery query = graphQL.GetQueryByName(QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO);
+        _graphQlTest.component.InitializeGraphQLConfig();
+        
+        GraphQLQuery query = ((IGraphQL)_graphQlTest.component).GetQueryByName(QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO);
         if (query == null)
         {
             Assert.Fail($"No Query by name <{QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO}> found!");
         };
         
-        return graphQL.Query<GraphQLCodeGen.Types.Query>(query.query, GraphQLPostNullReturnSuccessCallback, GraphQLPostNullReturnErrorCallback);
+        return ((IGraphQL)_graphQlTest.component).Query<GraphQLCodeGen.Types.Query>(query.query, GraphQLPostNullReturnSuccessCallback, GraphQLPostNullReturnErrorCallback);
     }
     
     private void GraphQLPostNullReturnErrorCallback(string message)
@@ -66,9 +118,11 @@ public class GraphQLTest
     [UnityTest]
     public IEnumerator GraphQLQueryNotFound()
     {
+        _graphQlTest.component.InitializeGraphQLConfig();
+        
         const string QUERY_NAME = "QueryMock";
         
-        GraphQLQuery query = graphQL.GetQueryByName(QUERY_NAME);
+        GraphQLQuery query = ((IGraphQL)_graphQlTest.component).GetQueryByName(QUERY_NAME);
         if (query == null)
         {
             Assert.Pass($"No Query by name <{QUERY_NAME}> found!");
@@ -76,22 +130,5 @@ public class GraphQLTest
 
         Assert.Fail($"Should not have found Query <{QUERY_NAME}>");
         yield break;
-    }
-
-    private static GraphQLConfig GetPortkeyGraphQlConfig()
-    {
-        string[] guids = AssetDatabase.FindAssets($"t:{nameof(GraphQLConfig)}");
-        if (guids.Length == 0)
-        {
-            Assert.Fail($"No {nameof(GraphQLConfig)} found!");
-        }
-        else if (guids.Length > 0)
-        {
-            Debug.LogWarning($"More than one {nameof(GraphQLConfig)} found, taking first one");
-        }
-
-        GraphQLConfig graphQL =
-            (GraphQLConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(GraphQLConfig));
-        return graphQL;
     }
 }

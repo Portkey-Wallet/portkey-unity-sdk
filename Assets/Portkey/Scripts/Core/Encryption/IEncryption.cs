@@ -3,19 +3,24 @@ using UnityEngine;
 namespace Portkey.Core
 {
     /// <summary>
-    /// An
+    /// An interface that handles encryption and decryption.
     /// </summary>
     public abstract class IEncryption : ScriptableObject
     {
         /// <summary>
-        /// Make a GET request to the given url.
+        /// Encrypts a string with a password.
         /// </summary>
-        /// <param name="url">The url to make the request to.</param>
-        /// <param name="successCallback">Callback function when Get is successful.</param>
-        /// <param name="errorCallback">Callback function when error occurs. msg contains error message.</param>
-        /// <returns>The response from the request.</returns>
-        public string abstract Encrypt(string plainText, string password);
-        public string abstract Decrypt(string cipherText, string password);
+        /// <param name="plainText">The string to encrypt.</param>
+        /// <param name="password">The password to encrypt with.</param>
+        /// <returns>Encrypted string.</returns>
+        public abstract string Encrypt(string plainText, string password);
+        /// <summary>
+        /// Decrypts a string with a password.
+        /// </summary>
+        /// <param name="cipherText">The string to decrypt.</param>
+        /// <param name="password">The password to decrypt with.</param>
+        /// <returns>Derypted string.</returns>
+        public abstract string Decrypt(string cipherText, string password);
     }
 }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using NUnit.Framework;
 using Portkey.Core;
 using Portkey.Encryption;
@@ -29,13 +30,13 @@ namespace Portkey.Test
         }
 
         /// <summary>
-        /// Test that AESEncryption is able to encrypt and decrypt data with weird password.
+        /// Test that AESEncryption is able to encrypt and decrypt data with non-utf8 password.
         /// </summary>
         [Test]
-        public void TestAESEncryptionEncryptAndDecryptWeirdPassword()
+        public void TestAESEncryptionEncryptAndDecryptNonUTF8Password()
         {
-            const string weirdPassword = "什么鬼";
-            //const string weirdPlainText = "什么鬼";
+            byte[] nonUtf8Bytes = {0xC0, 0xC1, 0xF5, 0xFF, 0xF6};
+            string weirdPassword = Convert.ToBase64String(nonUtf8Bytes);
 
             IEncryption aes = new AESEncryption();
             string cipherText = aes.Encrypt(PLAINTEXT, weirdPassword);
@@ -44,12 +45,13 @@ namespace Portkey.Test
         }
         
         /// <summary>
-        /// Test that AESEncryption is able to encrypt and decrypt data with weird plaintext.
+        /// Test that AESEncryption is able to encrypt and decrypt data with non-utf8 plaintext.
         /// </summary>
         [Test]
-        public void TestAESEncryptionEncryptAndDecryptWeirdPlaintext()
+        public void TestAESEncryptionEncryptAndDecryptNonUTF8Plaintext()
         {
-            const string weirdPlainText = "什么鬼";
+            byte[] nonUtf8Bytes = { 0xC0, 0xC1, 0xF5, 0xFF, 0xF6 };
+            string weirdPlainText = Convert.ToBase64String(nonUtf8Bytes);
 
             IEncryption aes = new AESEncryption();
             string cipherText = aes.Encrypt(weirdPlainText, PASSWORD);

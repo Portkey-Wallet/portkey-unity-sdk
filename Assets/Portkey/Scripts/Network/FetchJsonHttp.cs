@@ -12,34 +12,31 @@ namespace Portkey.Network
     {
         public IEnumerator Get(string url, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
-            using UnityWebRequest request = UnityWebRequest.Get(url);
+            using var request = UnityWebRequest.Get(url);
             yield return request.SendWebRequest();
 
             if (request.error != null)
             {
                 errorCallback(request.error);
-                request.Dispose();
                 yield break;
             }
-            else if (request.responseCode != 200)
+            
+            if (request.responseCode != 200)
             {
                 errorCallback(request.responseCode.ToString());
-                request.Dispose();
                 yield break;
             }
             successCallback(request.downloadHandler.text);
-
-            request.Dispose();
         }
 
         public IEnumerator Post(string url, string body, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
             string jsonData = JsonConvert.SerializeObject(new{query = body});
             byte[] postData = Encoding.ASCII.GetBytes(jsonData);
-            using UnityWebRequest request = new UnityWebRequest(url, 
-                                                                UnityWebRequest.kHttpVerbPOST,
-                                                                new DownloadHandlerBuffer(), 
-                                                                new UploadHandlerRaw(postData))
+            using var request = new UnityWebRequest(url, 
+                                                    UnityWebRequest.kHttpVerbPOST,
+                                                    new DownloadHandlerBuffer(), 
+                                                    new UploadHandlerRaw(postData))
             {
                 disposeUploadHandlerOnDispose = true,
                 disposeDownloadHandlerOnDispose = true
@@ -52,18 +49,15 @@ namespace Portkey.Network
             if (request.error != null)
             {
                 errorCallback(request.error);
-                request.Dispose();
                 yield break;
             }
-            else if (request.result != UnityWebRequest.Result.Success)
+            
+            if (request.result != UnityWebRequest.Result.Success)
             {
                 errorCallback(request.responseCode.ToString());
-                request.Dispose();
                 yield break;
             }
             successCallback(request.downloadHandler.text);
-
-            request.Dispose();
         }
         
         

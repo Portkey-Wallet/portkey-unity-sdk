@@ -12,64 +12,58 @@ namespace Portkey.Network
     {
         public IEnumerator Get(string url, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
-            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            using UnityWebRequest request = UnityWebRequest.Get(url);
+            yield return request.SendWebRequest();
+
+            if (request.error != null)
             {
-                yield return request.SendWebRequest();
-
-                if (request.error != null)
-                {
-                    errorCallback(request.error);
-                    yield break;
-                }
-                else if (request.responseCode != 200)
-                {
-                    errorCallback(request.responseCode.ToString());
-                    yield break;
-                }
-                successCallback(request.downloadHandler.text);
-
+                errorCallback(request.error);
                 request.Dispose();
+                yield break;
             }
+            else if (request.responseCode != 200)
+            {
+                errorCallback(request.responseCode.ToString());
+                request.Dispose();
+                yield break;
+            }
+            successCallback(request.downloadHandler.text);
+
+            request.Dispose();
         }
 
         public IEnumerator Post(string url, string body, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
             string jsonData = JsonConvert.SerializeObject(new{query = body});
             byte[] postData = Encoding.ASCII.GetBytes(jsonData);
-            using (UnityWebRequest request = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST))
+            using UnityWebRequest request = new UnityWebRequest(url, 
+                                                                UnityWebRequest.kHttpVerbPOST,
+                                                                new DownloadHandlerBuffer(), 
+                                                                new UploadHandlerRaw(postData))
             {
-                request.uploadHandler = new UploadHandlerRaw(postData);
-                request.disposeUploadHandlerOnDispose = true;
-                
-                request.downloadHandler = new DownloadHandlerBuffer();
-                request.disposeDownloadHandlerOnDispose = true;
-                
-                request.SetRequestHeader("Content-Type", "application/json");
+                disposeUploadHandlerOnDispose = true,
+                disposeDownloadHandlerOnDispose = true
+            };
+            
+            request.SetRequestHeader("Content-Type", "application/json");
 
-                yield return request.SendWebRequest();
+            yield return request.SendWebRequest();
 
-                if (request.error != null)
-                {
-                    errorCallback(request.error);
-                    request.uploadHandler.Dispose();
-                    request.downloadHandler.Dispose();
-                    request.Dispose();
-                    yield break;
-                }
-                else if (request.result != UnityWebRequest.Result.Success)
-                {
-                    errorCallback(request.responseCode.ToString());
-                    request.uploadHandler.Dispose();
-                    request.downloadHandler.Dispose();
-                    request.Dispose();
-                    yield break;
-                }
-                successCallback(request.downloadHandler.text);
-
-                request.uploadHandler.Dispose();
-                request.downloadHandler.Dispose();
+            if (request.error != null)
+            {
+                errorCallback(request.error);
                 request.Dispose();
+                yield break;
             }
+            else if (request.result != UnityWebRequest.Result.Success)
+            {
+                errorCallback(request.responseCode.ToString());
+                request.Dispose();
+                yield break;
+            }
+            successCallback(request.downloadHandler.text);
+
+            request.Dispose();
         }
         
         

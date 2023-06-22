@@ -3,14 +3,18 @@ using UnityEngine;
 
 namespace Portkey.Transport
 {
+    /// <summary>
+    /// Class that implements Android transport to support android deeplinks.
+    /// </summary>
     [CreateAssetMenu(fileName = "AndroidTransport", menuName = "Portkey/Transport/AndroidTransport")]
     public class AndroidTransport : Core.Transport
     {
+        /// <summary>
+        /// Android package name.
+        /// </summary>
         [SerializeField]
         private string packageName;
-        [SerializeField]
-        private string downloadLink;
-        
+
         protected override bool TrySend(string url)
         {
 #if UNITY_ANDROID
@@ -18,18 +22,7 @@ namespace Portkey.Transport
             var currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
             var packageManager = currentActivity.Call<AndroidJavaObject>("getPackageManager");
 
-            AndroidJavaObject packageInfo = null;
-            try
-            {
-                // check if package exists
-                packageInfo = packageManager.Call<AndroidJavaObject>("getPackageInfo", packageName, 0);
-                if (packageInfo == null)
-                {
-                    Debug.LogError($"Package {packageName} not found");
-                    return false;
-                }
-            }
-            catch (Exception e)
+            if (!IsPackageExist(packageManager, packageName))
             {
                 return false;
             }
@@ -38,9 +31,13 @@ namespace Portkey.Transport
             var uriData = uriClass.CallStatic<AndroidJavaObject>("parse", url);
 
             var i = packageManager.Call<AndroidJavaObject>("getLaunchIntentForPackage", packageName);
-
-            //i.Call<AndroidJavaObject>("setClassName", "com.portkey.did", "com.roblox.client.ActivityProtocolLaunch");
-            i.Call<AndroidJavaObject>("setAction", "android.content.Intent.ACTION_VIEW"); //android.intent.action.VIEW
+            if (i == null)
+            {
+                Debug.LogError($"Intent is null. Package name specified: {packageName}.");
+                return false;
+            }
+            
+            i.Call<AndroidJavaObject>("setAction", "android.intent.action.VIEW");
             i.Call<AndroidJavaObject>("setData", uriData);
 
             currentActivity.Call("startActivity", i);
@@ -50,7 +47,31 @@ namespace Portkey.Transport
 #endif
         }
 
-        protected override void OpenDownloadLink()
+        /// <summary>
+        /// Checks if the package exists.
+        /// </summary>
+        private static bool IsPackageExist(AndroidJavaObject packageManager, string packageName)
+        {
+            try
+            {
+                // check if package exists
+                var packageInfo = packageManager.Call<AndroidJavaObject>("getPackageInfo", packageName, 0);
+                if (packageInfo == null)
+                {
+                    Debug.LogError($"Package {packageName} not found");
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log($"Package {packageName} not found. Exception: {e.Message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        protected override void OpenDownloadLink(string downloadLink)
         {
 #if UNITY_ANDROID
             Application.OpenURL(downloadLink);

@@ -1,14 +1,15 @@
 using Portkey.Core;
 using Portkey.Transport;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class TestAndroidTransport : MonoBehaviour
 {
-    [SerializeField]
-    private ITransport _transport = null;
+    [SerializeReference]
+    private TransportConfig transportConfig;
 
     public void Send()
     {
-        _transport?.Send("portkey.did://test.portkey.finance/login?type=login&chainType=aelf");
+        transportConfig?.Send("portkey.did://test.portkey.finance/login?type=login&chainType=aelf");
     }
 }

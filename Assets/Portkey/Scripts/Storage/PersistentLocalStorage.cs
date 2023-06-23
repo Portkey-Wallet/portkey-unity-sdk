@@ -18,7 +18,7 @@ namespace Portkey.Storage
         
         public string GetItem(string filename)
         {
-            string filePath = _path + $"{Path.DirectorySeparatorChar}{filename}";
+            var filePath = _path + $"{Path.DirectorySeparatorChar}{filename}";
             if (!File.Exists(filePath))
             {
                 return null;
@@ -33,7 +33,7 @@ namespace Portkey.Storage
 
         public string RemoveItem(string filename)
         {
-            string ret = GetItem(filename);
+            var ret = GetItem(filename);
             File.Delete(_path + $"{Path.DirectorySeparatorChar}{filename}");
             
             return ret;

@@ -31,7 +31,7 @@ namespace Portkey.GraphQL.Editor
         public override void OnInspectorGUI(){
             GraphQLConfig graph = (GraphQLConfig) target;
             _graphObject = new UnityEditor.SerializedObject(graph);
-            GUIStyle style = new GUIStyle{fontSize = 15, alignment = TextAnchor.MiddleCenter};
+            var style = new GUIStyle{fontSize = 15, alignment = TextAnchor.MiddleCenter};
             EditorGUILayout.LabelField(graph.name, style);
             EditorGUILayout.Space();
             
@@ -45,7 +45,7 @@ namespace Portkey.GraphQL.Editor
 
             EditorGUILayout.Space();
             EditorGUILayout.Space();
-            UnityEditor.SerializedProperty graphUrl = _graphObject.FindProperty("url");
+            var graphUrl = _graphObject.FindProperty("url");
             graphUrl.stringValue = EditorGUILayout.TextField("Url", graphUrl.stringValue);
             if (GUI.changed) graphUrl.serializedObject.ApplyModifiedProperties();
             
@@ -109,9 +109,9 @@ namespace Portkey.GraphQL.Editor
                     EditorGUILayout.Space();
                     EditorGUILayout.Space();
                     EditorGUILayout.Space();
-                    GraphQLQuery query = queryList[i];
+                    var query = queryList[i];
                     query.name = EditorGUILayout.TextField($"{type} Name", query.name);
-                    string[] options = query.queryOptions.ToArray();
+                    var options = query.queryOptions.ToArray();
                     if (String.IsNullOrEmpty(query.returnType)){
                         _index = EditorGUILayout.Popup(type, _index, options);
                         query.queryString = options[_index];
@@ -158,9 +158,9 @@ namespace Portkey.GraphQL.Editor
 
                     foreach (Field field in query.fields){
                         GUI.color = new Color(0.8f,0.8f,0.8f);
-                        string[] fieldOptions = field.possibleFields.Select((aField => aField.name)).ToArray();
+                        var fieldOptions = field.possibleFields.Select((aField => aField.name)).ToArray();
                         EditorGUILayout.BeginHorizontal();
-                        GUIStyle fieldStyle = EditorStyles.popup;
+                        var fieldStyle = EditorStyles.popup;
                         fieldStyle.contentOffset = new Vector2(field.parentIndexes.Count * 20, 0);
                         field.Index = EditorGUILayout.Popup(field.Index, fieldOptions, fieldStyle);
                         GUI.color = Color.white;

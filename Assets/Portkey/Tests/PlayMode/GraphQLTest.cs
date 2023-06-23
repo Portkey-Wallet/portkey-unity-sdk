@@ -28,7 +28,7 @@ public class GraphQLTest
 
         protected static GraphQLConfig GetPortkeyGraphQlConfig(string searchFilter)
         {
-            string[] guids = AssetDatabase.FindAssets(searchFilter);
+            var guids = AssetDatabase.FindAssets(searchFilter);
             if (guids.Length == 0)
             {
                 Assert.Fail($"No {nameof(GraphQLConfig)} found!");
@@ -80,7 +80,7 @@ public class GraphQLTest
 
         public void Start()
         {
-            GraphQLQuery query = GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
+            var query = GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
             if (query == null)
             {
                 Assert.Fail($"No Query by name <{QUERY_NAME_GETCAHOLDERINFO}> found!");
@@ -128,10 +128,12 @@ public class GraphQLTest
         {
             Assert.Fail($"No Query by name <{QUERY_NAME_GETCAHOLDERINFO}> found!");
         }
-        GraphQLCodeGen.Types.GetCaHolderInfoDto dto = new GraphQLCodeGen.Types.GetCaHolderInfoDto();
-        dto.skipCount = 0;
-        dto.maxResultCount = 1;
-        dto.caHash = "f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b";
+        var dto = new GraphQLCodeGen.Types.GetCaHolderInfoDto
+        {
+            skipCount = 0,
+            maxResultCount = 1,
+            caHash = "f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b"
+        };
         query.SetArgs(new { dto = dto.GetInputObject()});
         
         return ((IGraphQL)graphQlTest.component).Query<GraphQLCodeGen.Types.Query>(query.query, SuccessCallback, ErrorCallback);
@@ -150,7 +152,7 @@ public class GraphQLTest
     [UnityTest]
     public IEnumerator GraphQLPostNullReturn()
     {
-        MonoBehaviourTest<GraphQLMonoTest> graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
+        var graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
         graphQlTest.component.InitializeGraphQLConfig();
         
         GraphQLQuery query = ((IGraphQL)graphQlTest.component).GetQueryByName(QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO);
@@ -175,18 +177,18 @@ public class GraphQLTest
     [UnityTest]
     public IEnumerator GraphQLQueryNotFound()
     {
-        MonoBehaviourTest<GraphQLMonoTest> graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
+        var graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
         graphQlTest.component.InitializeGraphQLConfig();
         
-        const string QUERY_NAME = "QueryMock";
+        const string queryName = "QueryMock";
         
-        GraphQLQuery query = ((IGraphQL)graphQlTest.component).GetQueryByName(QUERY_NAME);
+        GraphQLQuery query = ((IGraphQL)graphQlTest.component).GetQueryByName(queryName);
         if (query == null)
         {
-            Assert.Pass($"No Query by name <{QUERY_NAME}> found!");
+            Assert.Pass($"No Query by name <{queryName}> found!");
         }
 
-        Assert.Fail($"Should not have found Query <{QUERY_NAME}>");
+        Assert.Fail($"Should not have found Query <{queryName}>");
         yield break;
     }
 }

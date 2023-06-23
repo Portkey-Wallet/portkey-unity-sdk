@@ -17,21 +17,21 @@ namespace Portkey.GraphQL
             IGraphQL.successCallback<IList<CaHolderWithGuardian>> successCallback,
             IGraphQL.errorCallback errorCallback)
         {
-            GraphQLQuery query = _graphQLConfig.GetQueryByName(QUERY_CAHOLDERMANAGERINFO);
+            var query = _graphQLConfig.GetQueryByName(QUERY_CAHOLDERMANAGERINFO);
             if (query == null)
             {
                 errorCallback($"No Query by name <{QUERY_CAHOLDERMANAGERINFO}> found!");
                 yield break;
             }
 
-            Types.GetCaHolderManagerInfoDto dto = new Types.GetCaHolderManagerInfoDto();
+            var dto = new Types.GetCaHolderManagerInfoDto();
             dto.manager = manager;
             dto.chainId = chainId;
             query.SetArgs(new { dto = dto.GetInputObject() });
             yield return _graphQLConfig.Query<Types.Query>(query,
                 response =>
                 {
-                    List<CaHolderWithGuardian> ret = new List<CaHolderWithGuardian>();
+                    var ret = new List<CaHolderWithGuardian>();
 
                     if (response.caHolderManagerInfo == null || response.caHolderManagerInfo.Count == 0)
                     {
@@ -39,24 +39,28 @@ namespace Portkey.GraphQL
                         return;
                     }
 
-                    CaHolderWithGuardian holderWithGuardian = new CaHolderWithGuardian();
-                    holderWithGuardian.holderManagerInfo = response.caHolderManagerInfo[0];
-                    holderWithGuardian.loginGuardianInfo = null;
+                    var holderWithGuardian = new CaHolderWithGuardian
+                    {
+                        holderManagerInfo = response.caHolderManagerInfo[0],
+                        loginGuardianInfo = null
+                    };
                     ret.Add(holderWithGuardian);
 
                     //prepare query for loginGuardianInfo
-                    GraphQLQuery query = _graphQLConfig.GetQueryByName(QUERY_LOGINGUARDIANINFO);
+                    var query = _graphQLConfig.GetQueryByName(QUERY_LOGINGUARDIANINFO);
                     if (query == null)
                     {
                         errorCallback($"No Query by name <{QUERY_LOGINGUARDIANINFO}> found!");
                         return;
                     }
 
-                    Types.GetLoginGuardianInfoDto dto = new Types.GetLoginGuardianInfoDto();
-                    dto.caHash = response.caHolderManagerInfo[0].caHash;
-                    dto.chainId = chainId;
-                    dto.skipCount = 0;
-                    dto.maxResultCount = 100;
+                    var dto = new Types.GetLoginGuardianInfoDto
+                    {
+                        caHash = response.caHolderManagerInfo[0].caHash,
+                        chainId = chainId,
+                        skipCount = 0,
+                        maxResultCount = 100
+                    };
                     query.SetArgs(new { dto = dto.GetInputObject() });
                     StartCoroutine(_graphQLConfig.Query<Types.Query>(query,
                         responseToLogin =>

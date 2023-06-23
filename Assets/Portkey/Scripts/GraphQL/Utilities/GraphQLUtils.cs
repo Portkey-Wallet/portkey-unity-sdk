@@ -14,8 +14,8 @@ namespace Portkey.GraphQL
         /// <param name="jsonInput">The JSON string to convert.</param>
         public static string JsonToArgument(string jsonInput)
         {
-            char[] jsonChar = jsonInput.ToCharArray();
-            List<int> indexes = new List<int>();
+            var jsonChar = jsonInput.ToCharArray();
+            var indexes = new List<int>();
             jsonChar[0] = ' ';
             jsonChar[jsonChar.Length - 1] = ' ';
             for (int i = 0; i < jsonChar.Length; i++)
@@ -34,7 +34,7 @@ namespace Portkey.GraphQL
                 }
             }
 
-            string result = new string(jsonChar);
+            var result = new string(jsonChar);
             return result;
         }
         
@@ -47,7 +47,7 @@ namespace Portkey.GraphQL
                 }
                 else{
                     Enum @enum = (Enum) value;
-                    string enumText = @enum.ToString("G");
+                    var enumText = @enum.ToString("G");
                     writer.WriteRawValue(enumText);
                 }
             }

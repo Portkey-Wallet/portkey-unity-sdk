@@ -29,7 +29,7 @@ namespace Portkey.GraphQL
 
         public void SetArgs(object inputObject)
         {
-            string json = JsonConvert.SerializeObject(inputObject, new Utilities.EnumInputConverter());
+            var json = JsonConvert.SerializeObject(inputObject, new Utilities.EnumInputConverter());
             _args = Utilities.JsonToArgument(json);
             CompleteQuery();
         }
@@ -50,7 +50,7 @@ namespace Portkey.GraphQL
             Field previousField = null;
             for (int i = 0; i < fields.Count; i++)
             {
-                Field field = fields[i];
+                var field = fields[i];
                 if (field.parentIndexes.Count == 0)
                 {
                     if (parent == null)
@@ -118,7 +118,7 @@ namespace Portkey.GraphQL
 
             }
 
-            string arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
+            var arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
             string word;
             switch (type)
             {
@@ -189,8 +189,7 @@ namespace Portkey.GraphQL
 
         public void CheckSubFields(Introspection.SchemaClass schemaClass)
         {
-            Introspection.SchemaClass.Data.Schema.Type t =
-                schemaClass.data.__schema.types.Find((aType => aType.name == type));
+            var t = schemaClass.data.__schema.types.Find((aType => aType.name == type));
             if (t.fields == null || t.fields.Count == 0)
             {
                 hasSubField = false;
@@ -214,7 +213,7 @@ namespace Portkey.GraphQL
 
         public static explicit operator Field(Introspection.SchemaClass.Data.Schema.Type.Field schemaField)
         {
-            Introspection.SchemaClass.Data.Schema.Type ofType = schemaField.type;
+            var ofType = schemaField.type;
             string typeName;
             do
             {

@@ -27,7 +27,7 @@ namespace Portkey.GraphQL
         public void GenerateDTOClass(string className)
         {
             //generate class header
-            StringBuilder genHeaderCode = new StringBuilder();
+            var genHeaderCode = new StringBuilder();
             
             //generate class body
             var fields = Fields(className);
@@ -40,14 +40,14 @@ namespace Portkey.GraphQL
             
             bool listHeaderIncluded = false;
 
-            StringBuilder genBodyCode = new StringBuilder();
+            var genBodyCode = new StringBuilder();
 
-            Dictionary<Introspection.SchemaClass.Data.Schema.Type.TypeKind, HashSet<string>> childClassList = new Dictionary<Introspection.SchemaClass.Data.Schema.Type.TypeKind, HashSet<string>>();
+            var childClassList = new Dictionary<Introspection.SchemaClass.Data.Schema.Type.TypeKind, HashSet<string>>();
             
             for (int i = 0; i < fields.Count; i++){
-                Introspection.SchemaClass.Data.Schema.Type.Field field = fields[i];
+                var field = fields[i];
 
-                string objectType = GetObjectTypeDeclaration(field.type, childClassList, ref listHeaderIncluded);
+                var objectType = GetObjectTypeDeclaration(field.type, childClassList, ref listHeaderIncluded);
                 genBodyCode.Append($"\t\tpublic {objectType} {field.name} {{get; set;}}\n");
             }
             
@@ -134,7 +134,7 @@ namespace Portkey.GraphQL
             List<Introspection.SchemaClass.Data.Schema.Type.EnumValue> enumValues = null;
             for (int i = 0; i < _schemaClass.data.__schema.types.Count(); ++i)
             {
-                Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types[i];
+                var type = _schemaClass.data.__schema.types[i];
 
                 if (type.name != enumName)
                 {
@@ -151,10 +151,10 @@ namespace Portkey.GraphQL
             }
             
             //generate class header
-            StringBuilder genHeaderCode = new StringBuilder();
+            var genHeaderCode = new StringBuilder();
             
             //generate class body
-            StringBuilder genBodyCode = new StringBuilder();
+            var genBodyCode = new StringBuilder();
 
             for (int i = 0; i < enumValues.Count; i++)
             {
@@ -196,22 +196,6 @@ namespace Portkey.GraphQL
                     }
                 }
             }
-            
-            /*
-            foreach (var childClass in childClassList)
-            {
-                for (int i = 0; i < schemaClass.data.__schema.types.Count(); ++i)
-                {
-                    Introspection.SchemaClass.Data.Schema.Type type = schemaClass.data.__schema.types[i];
-
-                    if (type.name != childClass)
-                    {
-                        continue;
-                    }
-
-                    GenerateDTOClass(type.name);
-                }
-            }*/
         }
 
         private List<Introspection.SchemaClass.Data.Schema.Type.Field> Fields(string className)
@@ -219,7 +203,7 @@ namespace Portkey.GraphQL
             List<Introspection.SchemaClass.Data.Schema.Type.Field> fields = null;
             for (int i = 0; i < _schemaClass.data.__schema.types.Count(); ++i)
             {
-                Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types[i];
+                var type = _schemaClass.data.__schema.types[i];
 
                 if (type.name != className)
                 {

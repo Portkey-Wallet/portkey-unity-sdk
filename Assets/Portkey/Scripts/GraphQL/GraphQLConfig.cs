@@ -145,7 +145,7 @@ namespace Portkey.GraphQL
 
             string jsonData = JsonConvert.SerializeObject(new{query = Introspection.schemaIntrospectionQuery});
             
-            byte[] postData = Encoding.ASCII.GetBytes(jsonData);
+            var postData = Encoding.ASCII.GetBytes(jsonData);
             _editorRequest = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
             
             _editorRequest.uploadHandler = new UploadHandlerRaw(postData);
@@ -194,14 +194,12 @@ namespace Portkey.GraphQL
         {
             if (!InitSchema())
             {
-                //Debug.Log("Schema not initialized!");
                 return;
             }
-            if (queries == null)
-                queries = new List<GraphQLQuery>();
-            GraphQLQuery query = new GraphQLQuery{fields = new List<Field>(), queryOptions = new List<string>(), type = GraphQLQuery.Type.Query};
+            queries ??= new List<GraphQLQuery>();
+            var query = new GraphQLQuery{fields = new List<Field>(), queryOptions = new List<string>(), type = GraphQLQuery.Type.Query};
             
-            Introspection.SchemaClass.Data.Schema.Type queryType = _schemaClass.data.__schema.types.Find((aType => aType.name == _queryEndpoint));
+            var queryType = _schemaClass.data.__schema.types.Find((aType => aType.name == _queryEndpoint));
             for (int i = 0; i < queryType.fields.Count; i++){
                 query.queryOptions.Add(queryType.fields[i].name);
             }
@@ -216,7 +214,7 @@ namespace Portkey.GraphQL
 
         public bool CheckSubFields(string typeName)
         {
-            Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
+            var type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             if (type?.fields == null || type.fields.Count == 0){
                 return false;
             }
@@ -233,16 +231,16 @@ namespace Portkey.GraphQL
             if (parent != null){
                 parentIndexes = new List<int>(parent.parentIndexes){parentIndex};
             }
-            Field fielder = new Field{parentIndexes = parentIndexes};
+            var fielder = new Field{parentIndexes = parentIndexes};
             
             foreach (Introspection.SchemaClass.Data.Schema.Type.Field field in subFields){
                 fielder.possibleFields.Add((Field)field);
             }
 
             for(int i = 0; i < fielder.possibleFields.Count; i++){
-                Field newField = new Field{parentIndexes = parentIndexes};
+                var newField = new Field{parentIndexes = parentIndexes};
             
-                foreach (Introspection.SchemaClass.Data.Schema.Type.Field field in subFields){
+                foreach (var field in subFields){
                     newField.possibleFields.Add((Field)field);
                 }
                 
@@ -253,9 +251,7 @@ namespace Portkey.GraphQL
                     query.fields.Add(newField);
                 }
                 else{
-
-                    int index;
-                    index = query.fields.FindLastIndex(aField =>
+                    var index = query.fields.FindLastIndex(aField =>
                         aField.parentIndexes.Count > newField.parentIndexes.Count &&
                         aField.parentIndexes.Contains(newField.parentIndexes.Last()));
 
@@ -284,14 +280,14 @@ namespace Portkey.GraphQL
 
         public void AddField(GraphQLQuery query, string typeName, Field parent = null)
         {
-            Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
-            List<Introspection.SchemaClass.Data.Schema.Type.Field> subFields = type.fields;
-            int parentIndex = query.fields.FindIndex(aField => aField == parent);
-            List<int> parentIndexes = new List<int>();
+            var type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
+            var subFields = type.fields;
+            var parentIndex = query.fields.FindIndex(aField => aField == parent);
+            var parentIndexes = new List<int>();
             if (parent != null){
                 parentIndexes = new List<int>(parent.parentIndexes){parentIndex};
             }
-            Field fielder = new Field{parentIndexes = parentIndexes};
+            var fielder = new Field{parentIndexes = parentIndexes};
             
             foreach (Introspection.SchemaClass.Data.Schema.Type.Field field in subFields){
                 fielder.possibleFields.Add((Field)field);
@@ -301,9 +297,7 @@ namespace Portkey.GraphQL
                 query.fields.Add(fielder);
             }
             else{
-
-                int index;
-                index = query.fields.FindLastIndex(aField =>
+                var index = query.fields.FindLastIndex(aField =>
                     aField.parentIndexes.Count > fielder.parentIndexes.Count &&
                     aField.parentIndexes.Contains(fielder.parentIndexes.Last()));
 
@@ -325,16 +319,14 @@ namespace Portkey.GraphQL
         
         private string GetFieldType(Introspection.SchemaClass.Data.Schema.Type.Field field)
         {
-            Field newField = (Field)field;
+            var newField = (Field)field;
             return newField.type;
         }
 
         public void GetQueryReturnType(GraphQLQuery query, string queryName)
         {
-            Introspection.SchemaClass.Data.Schema.Type queryType =
-                _schemaClass.data.__schema.types.Find((aType => aType.name == _queryEndpoint));
-            Introspection.SchemaClass.Data.Schema.Type.Field field =
-                queryType.fields.Find((aField => aField.name == queryName));
+            var queryType = _schemaClass.data.__schema.types.Find((aType => aType.name == _queryEndpoint));
+            var field = queryType.fields.Find((aField => aField.name == queryName));
 
             query.returnType = GetFieldType(field);
         }

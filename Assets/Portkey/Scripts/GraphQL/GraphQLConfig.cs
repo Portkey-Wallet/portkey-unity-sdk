@@ -55,12 +55,12 @@ namespace Portkey.GraphQL
             return request.Post(url, query, 
                 (response) =>
                                 {
-                                    JObject json = JObject.Parse(response);
+                                    var json = JObject.Parse(response);
                                     string data = null;
                                     if (json.TryGetValue("errors", out var errorMessage))
                                     {
                                         //process data and wrapper
-                                        string error = errorMessage.ToString();
+                                        var error = errorMessage.ToString();
                                         errorCallback(error);
                                         return;
                                     }
@@ -76,7 +76,7 @@ namespace Portkey.GraphQL
                                         return;
                                     }
                                     //deserialize response
-                                    T deserializedObject = JsonConvert.DeserializeObject<T>(data);
+                                    var deserializedObject = JsonConvert.DeserializeObject<T>(data);
                                     //call success callback
                                     successCallback(deserializedObject);
                                 }, 

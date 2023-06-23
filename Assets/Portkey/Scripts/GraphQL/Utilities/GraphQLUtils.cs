@@ -10,7 +10,22 @@ namespace Portkey.GraphQL
     /// </summary>
     public static class Utilities
     {
-        /// <summary>Function to convert a JSON string to a GraphQL argument string.</summary>
+        /// <summary>
+        /// Function to convert a JSON string to a GraphQL argument string.
+        /// It transforms json format into GraphQL argument format when querying.
+        /// 
+        /// For example:
+        /// JSON:
+        /// {
+        ///    "dto": {
+        ///        "caHash": "f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b",
+        ///        "skipCount": 0,
+        ///        "maxResultCount": 1
+        ///    }
+        /// }
+        /// After transforming:
+        /// dto :{ caHash :"f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b", skipCount :0, maxResultCount :1}
+        /// </summary>
         /// <param name="jsonInput">The JSON string to convert.</param>
         public static string JsonToArgument(string jsonInput)
         {

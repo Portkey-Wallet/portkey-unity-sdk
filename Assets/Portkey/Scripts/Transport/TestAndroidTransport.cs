@@ -10,6 +10,9 @@ public class TestAndroidTransport : MonoBehaviour
 
     public void Send()
     {
-        transportConfig?.Send("portkey.did://test.portkey.finance/login?type=login&chainType=aelf");
+        if (transportConfig != null)
+        {
+            transportConfig.Send("portkey.did://test.portkey.finance/login?type=login&chainType=aelf");
+        }
     }
 }

@@ -11,19 +11,18 @@ namespace Portkey.Encryption
     /// </summary>
     public class AESEncryption : IEncryption
     {
-        public string Encrypt(string plainText, string password)
+        public byte[] Encrypt(string plainText, string password)
         {
             GenerateKeyAndIVFromPassword(password, out var aesKey, out var aesIV);
-                
-            var encrypted = EncryptStringToBytes_Aes(plainText, aesKey, aesIV);
-            return Convert.ToBase64String(encrypted);
+            
+            return EncryptStringToBytes(plainText, aesKey, aesIV);
         }
 
-        public string Decrypt(string cipherText, string password)
+        public string Decrypt(byte[] cipherText, string password)
         {
             GenerateKeyAndIVFromPassword(password, out var aesKey, out var aesIV);
 
-            return DecryptStringFromBytes_Aes(Convert.FromBase64String(cipherText), aesKey, aesIV);
+            return DecryptStringFromBytes(cipherText, aesKey, aesIV);
         }
 
         /// <summary>
@@ -46,7 +45,7 @@ namespace Portkey.Encryption
         /// <param name="Key">The key to encrypt with.</param>
         /// <param name="IV">The IV to encrypt with.</param>
         /// <returns>Encrypted plainText in byte array.</returns>
-        private byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
+        private byte[] EncryptStringToBytes(string plainText, byte[] Key, byte[] IV)
         {
             // Check arguments.
             if (plainText == null || plainText.Length <= 0)
@@ -62,8 +61,6 @@ namespace Portkey.Encryption
                 throw new ArgumentNullException("IV");
             }
 
-            byte[] encrypted;
-
             // Create an Aes object
             // with the specified key and IV.
             using var aesAlg = Aes.Create();
@@ -74,18 +71,14 @@ namespace Portkey.Encryption
             var encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
 
             // Create the streams used for encryption.
-            using (var msEncrypt = new MemoryStream())
+            using var msEncrypt = new MemoryStream();
+            using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
+            using (var swEncrypt = new StreamWriter(csEncrypt))
             {
-                using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                {
-                    using (var swEncrypt = new StreamWriter(csEncrypt))
-                    {
-                        //Write all data to the stream.
-                        swEncrypt.Write(plainText);
-                    }
-                    encrypted = msEncrypt.ToArray();
-                }
+                //Write all data to the stream.
+                swEncrypt.Write(plainText);
             }
+            var encrypted = msEncrypt.ToArray();
 
             // Return the encrypted bytes from the memory stream.
             return encrypted;
@@ -98,7 +91,7 @@ namespace Portkey.Encryption
         /// <param name="Key">The key to decrypt with.</param>
         /// <param name="IV">The IV to decrypt with.</param>
         /// <returns>Decrypted plainText in string.</returns>
-        private string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
+        private string DecryptStringFromBytes(byte[] cipherText, byte[] Key, byte[] IV)
         {
             // Check arguments.
             if (cipherText == null || cipherText.Length <= 0)
@@ -116,7 +109,7 @@ namespace Portkey.Encryption
 
             // Declare the string used to hold
             // the decrypted text.
-            string plaintext = null;
+            string plainText = null;
 
             // Create an Aes object
             // with the specified key and IV.
@@ -128,21 +121,14 @@ namespace Portkey.Encryption
             var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
             // Create the streams used for decryption.
-            using (var msDecrypt = new MemoryStream(cipherText))
-            {
-                using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                {
-                    using (var srDecrypt = new StreamReader(csDecrypt))
-                    {
+            using var msDecrypt = new MemoryStream(cipherText);
+            using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+            using var srDecrypt = new StreamReader(csDecrypt);
+            // Read the decrypted bytes from the decrypting stream
+            // and place them in a string.
+            plainText = srDecrypt.ReadToEnd();
 
-                        // Read the decrypted bytes from the decrypting stream
-                        // and place them in a string.
-                        plaintext = srDecrypt.ReadToEnd();
-                    }
-                }
-            }
-
-            return plaintext;
+            return plainText;
         }
     }
 }

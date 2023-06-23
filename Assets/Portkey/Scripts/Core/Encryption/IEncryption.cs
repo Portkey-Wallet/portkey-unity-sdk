@@ -10,15 +10,15 @@ namespace Portkey.Core
         /// </summary>
         /// <param name="plainText">The string to encrypt.</param>
         /// <param name="password">The password to encrypt with.</param>
-        /// <returns>Encrypted string.</returns>
-        public string Encrypt(string plainText, string password);
+        /// <returns>Encrypted byte array.</returns>
+        public byte[] Encrypt(string plainText, string password);
         /// <summary>
         /// Decrypts a string with a password.
         /// </summary>
-        /// <param name="cipherText">The string to decrypt.</param>
+        /// <param name="cipherText">The byte array to decrypt.</param>
         /// <param name="password">The password to decrypt with.</param>
         /// <returns>Derypted string.</returns>
-        public string Decrypt(string cipherText, string password);
+        public string Decrypt(byte[] cipherText, string password);
     }
 }
 

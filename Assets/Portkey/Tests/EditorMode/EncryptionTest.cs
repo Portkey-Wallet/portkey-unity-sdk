@@ -24,8 +24,8 @@ namespace Portkey.Test
         public void TestAESEncryptionEncryptAndDecryptPass()
         {
             IEncryption aes = new AESEncryption();
-            string cipherText = aes.Encrypt(PLAINTEXT, PASSWORD);
-            string plainText = aes.Decrypt(cipherText, PASSWORD);
+            var cipherText = aes.Encrypt(PLAINTEXT, PASSWORD);
+            var plainText = aes.Decrypt(cipherText, PASSWORD);
             Assert.AreEqual(PLAINTEXT, plainText);
         }
 
@@ -36,11 +36,11 @@ namespace Portkey.Test
         public void TestAESEncryptionEncryptAndDecryptNonUTF8Password()
         {
             byte[] nonUtf8Bytes = {0xC0, 0xC1, 0xF5, 0xFF, 0xF6};
-            string weirdPassword = Convert.ToBase64String(nonUtf8Bytes);
+            var weirdPassword = Convert.ToBase64String(nonUtf8Bytes);
 
             IEncryption aes = new AESEncryption();
-            string cipherText = aes.Encrypt(PLAINTEXT, weirdPassword);
-            string plainText = aes.Decrypt(cipherText, weirdPassword);
+            var cipherText = aes.Encrypt(PLAINTEXT, weirdPassword);
+            var plainText = aes.Decrypt(cipherText, weirdPassword);
             Assert.AreEqual(PLAINTEXT, plainText);
         }
         
@@ -51,11 +51,11 @@ namespace Portkey.Test
         public void TestAESEncryptionEncryptAndDecryptNonUTF8Plaintext()
         {
             byte[] nonUtf8Bytes = { 0xC0, 0xC1, 0xF5, 0xFF, 0xF6 };
-            string weirdPlainText = Convert.ToBase64String(nonUtf8Bytes);
+            var weirdPlainText = Convert.ToBase64String(nonUtf8Bytes);
 
             IEncryption aes = new AESEncryption();
-            string cipherText = aes.Encrypt(weirdPlainText, PASSWORD);
-            string plainText = aes.Decrypt(cipherText, PASSWORD);
+            var cipherText = aes.Encrypt(weirdPlainText, PASSWORD);
+            var plainText = aes.Decrypt(cipherText, PASSWORD);
             Assert.AreEqual(weirdPlainText, plainText);
         }
         
@@ -65,10 +65,11 @@ namespace Portkey.Test
         [Test]
         public void TestAESEncryptionDecryptNonWorkableCipher()
         {
+            var randomText = Convert.FromBase64String("random string");
             IEncryption aes = new AESEncryption();
             try
             {
-                string plainText = aes.Decrypt("random string", PASSWORD);
+                var plainText = aes.Decrypt(randomText, PASSWORD);
             }
             catch (Exception e)
             {
@@ -84,10 +85,10 @@ namespace Portkey.Test
         public void TestAESEncryptionDecryptIncorrectPassword()
         {
             IEncryption aes = new AESEncryption();
-            string cipherText = aes.Encrypt(PLAINTEXT, PASSWORD);
+            var cipherText = aes.Encrypt(PLAINTEXT, PASSWORD);
             try
             {
-                string plainText = aes.Decrypt(cipherText, "incorrect password");
+                var plainText = aes.Decrypt(cipherText, "incorrect password");
             }
             catch (Exception e)
             {
@@ -105,7 +106,7 @@ namespace Portkey.Test
             IEncryption aes = new AESEncryption();
             try
             {
-                string cipherText = aes.Encrypt(null, PASSWORD);
+                var cipherText = aes.Encrypt(null, PASSWORD);
             }
             catch (ArgumentNullException e)
             {
@@ -121,10 +122,10 @@ namespace Portkey.Test
         public void TestAESEncryptionDecryptInvalidInput()
         {
             IEncryption aes = new AESEncryption();
-            string cipherText = aes.Encrypt(PLAINTEXT, PASSWORD);
+            var cipherText = aes.Encrypt(PLAINTEXT, PASSWORD);
             try
             {
-                string plainText = aes.Decrypt(cipherText, null);
+                var plainText = aes.Decrypt(cipherText, null);
             }
             catch (ArgumentNullException e)
             {

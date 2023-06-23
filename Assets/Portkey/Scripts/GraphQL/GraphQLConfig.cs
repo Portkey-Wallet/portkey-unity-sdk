@@ -37,7 +37,7 @@ namespace Portkey.GraphQL
 #if UNITY_EDITOR
         private IStorageSuite<string> _storage;
         // check if introspection is loading
-        private bool _loading = false;
+        public bool IsLoading { get; private set; } = false;
         // request for introspection. Only used on editor functions because
         // Unity editor cannot run coroutines and async/await cannot be used on webgl
         private UnityWebRequest _editorRequest;
@@ -103,12 +103,6 @@ namespace Portkey.GraphQL
         
         #region EditorOnly
 #if UNITY_EDITOR
-        //getter for loading
-        public bool IsLoading()
-        {
-            return _loading;
-        }
-        
         public void OnEnable()
         {
             _schemaFileName = $"{name}schema.txt";
@@ -133,15 +127,15 @@ namespace Portkey.GraphQL
             _editorRequest.downloadHandler.Dispose();
             _editorRequest.Dispose();
             
-            _loading = false;
+            IsLoading = false;
         }
         
         public void Introspect()
         {
-            if(_loading)
+            if(IsLoading)
                 return;
             
-            _loading = true;
+            IsLoading = true;
 
             string jsonData = JsonConvert.SerializeObject(new{query = Introspection.schemaIntrospectionQuery});
             

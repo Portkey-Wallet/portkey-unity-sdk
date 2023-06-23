@@ -61,7 +61,7 @@ namespace Portkey.GraphQL.Editor
             }
             
 #if UNITY_EDITOR
-            if (graph.IsLoading())
+            if (graph.IsLoading)
             {
                 EditorGUILayout.LabelField("API is being introspected. Please wait...");
             }

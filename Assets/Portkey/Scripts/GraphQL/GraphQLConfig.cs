@@ -106,10 +106,7 @@ namespace Portkey.GraphQL
         public void OnEnable()
         {
             _schemaFileName = $"{name}schema.txt";
-            if(_storage == null)
-            {
-                _storage = new PersistentLocalStorage(Application.dataPath + "/Portkey/Configs/GraphQL");
-            }
+            _storage ??= new PersistentLocalStorage(Application.dataPath + "/Portkey/Configs/GraphQL");
         }
         
         private void HandleIntrospection()
@@ -219,9 +216,9 @@ namespace Portkey.GraphQL
         public void AddAllFields(GraphQLQuery query, string typeName, Field parent = null)
         {
             Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
-            List<Introspection.SchemaClass.Data.Schema.Type.Field> subFields = type.fields;
+            var subFields = type.fields;
             int parentIndex = query.fields.FindIndex(aField => aField == parent);
-            List<int> parentIndexes = new List<int>();
+            var parentIndexes = new List<int>();
             if (parent != null){
                 parentIndexes = new List<int>(parent.parentIndexes){parentIndex};
             }

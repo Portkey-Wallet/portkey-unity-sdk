@@ -38,7 +38,7 @@ namespace Portkey.Test
             Assert.Pass(param);
         }
         
-#if UNITY_EDITOR
+#if TEST_FETCHJSONHTTP
         /// <summary>
         /// Test that TestFetchJsonHttpGet is able to get and retrieve json data.
         /// Only tested locally. Build machines to skip this test with server side dependency.

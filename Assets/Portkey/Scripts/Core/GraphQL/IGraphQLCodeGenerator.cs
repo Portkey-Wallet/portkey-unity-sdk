@@ -1,4 +1,4 @@
-namespace Portkey.GraphQL
+namespace Portkey.Core
 {
     /// <summary>
     /// An interface to generate GraphQL DTO classes.

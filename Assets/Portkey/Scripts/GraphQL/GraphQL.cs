@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Portkey.Core;
 using Portkey.GraphQL;
 using UnityEngine;
 using Types = GraphQLCodeGen.Types;

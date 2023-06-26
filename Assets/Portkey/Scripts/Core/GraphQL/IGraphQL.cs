@@ -1,8 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
-using Portkey.Core;
+using Portkey.GraphQL;
 
-namespace Portkey.GraphQL
+namespace Portkey.Core
 {
     /// <summary>
     /// An interface to GraphQL calls.

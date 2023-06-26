@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using Portkey.GraphQL;
 
-namespace Portkey.GraphQL
+namespace Portkey.Core
 {
     /// <summary>
     /// An interface to GraphQL editor.

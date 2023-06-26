@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using GraphQLCodeGen;
 
-namespace Portkey.GraphQL
+namespace Portkey.Core
 {
     /// <summary>Concatenated class for holder info with guardian.</summary>
     public class CaHolderWithGuardian
@@ -18,7 +18,7 @@ namespace Portkey.GraphQL
         /// <param name="manager">The manager to get the holder info of.</param>
         /// <param name="chainId">The chain id related to the info to get from.</param>
         /// <param name="successCallback">Callback function when post of query is successful.</param>
-        /// <param name="errorCallback">Callback function when error occurs.</
+        /// <param name="errorCallback">Callback function when error occurs.</param>
         public IEnumerator GetHolderInfoByManager(string manager, string chainId, IGraphQL.successCallback<IList<CaHolderWithGuardian>> successCallback, IGraphQL.errorCallback errorCallback);
     }
 }

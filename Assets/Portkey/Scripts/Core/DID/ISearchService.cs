@@ -58,6 +58,13 @@ namespace Portkey.Core
         public long interval;
         public long reCount;
         public long maxCount;
+        
+        public static readonly QueryOptions DefaultQueryOptions = new QueryOptions
+        {
+            interval = 500,
+            reCount = 0,
+            maxCount = 20
+        };
     }
     
     [Serializable]
@@ -72,9 +79,6 @@ namespace Portkey.Core
 
     public interface ISearchService
     {
-        delegate void SuccessCallback<T>(T result);
-        delegate void ErrorCallback(string error);
-        
         public IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetChainsInfo(SuccessCallback<ChainInfo[]> successCallback, ErrorCallback errorCallback);

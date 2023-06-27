@@ -45,7 +45,7 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpGet()
         {
             Debug.Log("Get to " + URL);
-            yield return _request.Get(URL, SuccessCallback, ErrorCallback);
+            yield return _request.Get(URL, "", SuccessCallback, ErrorCallback);
         }
         
         /// <summary>

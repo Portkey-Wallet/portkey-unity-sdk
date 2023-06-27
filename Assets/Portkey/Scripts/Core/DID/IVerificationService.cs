@@ -92,9 +92,6 @@ namespace Portkey.Core
     /// </summary>
     public interface IVerificationService
     {
-        delegate void SuccessCallback<T>(T result);
-        delegate void ErrorCallback(string error);
-        
         public IEnumerator GetVerificationCode(SendVerificationCodeRequestParams requestParams, SuccessCallback<SendVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator VerifyVerificationCode(VerifyVerificationCodeParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator sendAppleUserExtraInfo(SendAppleUserExtraInfoParams requestParams, SuccessCallback<SendAppleUserExtraInfoResult> successCallback, ErrorCallback errorCallback);

@@ -144,9 +144,6 @@ namespace Portkey.Core
     /// </summary>
     public interface IPortkeySocialService : IVerificationService, ISearchService
     {
-        delegate void SuccessCallback<T>(T result);
-        delegate void ErrorCallback(string error);
-        
         public IEnumerator Register(RegisterParams requestParams, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator Recovery(RecoveryParams requestParams, SuccessCallback<RecoveryResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetHolderInfo(GetHolderInfoParams requestParams, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback);

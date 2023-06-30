@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Text;
 using Portkey.Core;
-using Unity.Plastic.Newtonsoft.Json;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 

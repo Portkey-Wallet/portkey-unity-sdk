@@ -1,4 +1,4 @@
-namespace Portkey.DID
+namespace Portkey.Core
 {
     public class Crypto
     {
@@ -23,5 +23,16 @@ namespace Portkey.DID
         public KdfParameters KdfParams { get; private set; }
         public string Mac { get; private set; }
         public string MnemonicEncrypted { get; private set; }
+        
+        public Crypto(string cipher, string ciphertext, CipherParameters cipherParams, string kdf, KdfParameters kdfParams, string mac, string mnemonicEncrypted)
+        {
+            Cipher = cipher;
+            Ciphertext = ciphertext;
+            CipherParams = cipherParams;
+            Kdf = kdf;
+            KdfParams = kdfParams;
+            Mac = mac;
+            MnemonicEncrypted = mnemonicEncrypted;
+        }
     }
 }

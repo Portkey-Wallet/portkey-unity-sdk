@@ -2,21 +2,29 @@ using Portkey.Core;
 
 namespace Portkey.DID
 {
-    public class WalletAccount : IAccountMethods
+    /// <summary>
+    /// EOA Wallet Account.
+    /// TODO: implement this when AElf C# SDK is ready.
+    /// </summary>
+    public class WalletAccount : AccountBase
     {
-        public Signature SignTransaction(string transaction)
+        public override Signature SignTransaction(string transaction)
         {
             throw new System.NotImplementedException();
         }
 
-        public byte[] Sign(string data)
+        public override byte[] Sign(string data)
         {
             throw new System.NotImplementedException();
         }
 
-        public KeyStore Encrypt(string password, string options = null)
+        public override KeyStore Encrypt(string password, string options = null)
         {
             throw new System.NotImplementedException();
+        }
+
+        public WalletAccount(BlockchainWallet wallet) : base(wallet)
+        {
         }
     }
 }

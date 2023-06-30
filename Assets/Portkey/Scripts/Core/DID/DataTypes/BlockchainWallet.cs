@@ -1,6 +1,6 @@
 using System;
 
-namespace Portkey.DID
+namespace Portkey.Core
 {
     public class BlockchainWallet
     {

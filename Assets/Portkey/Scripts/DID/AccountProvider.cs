@@ -2,20 +2,20 @@ using Portkey.Core;
 
 namespace Portkey.DID
 {
-    public class AccountProvider : IAccountProvider<WalletAccount>
+    public class AccountProvider : IAccountProvider<AccountBase>
     {
-        public WalletAccount GetAccountFromPrivateKey(string privateKey)
+        public AccountBase GetAccountFromPrivateKey(string privateKey)
         {
             
             throw new System.NotImplementedException();
         }
 
-        public WalletAccount CreateAccount()
+        public AccountBase CreateAccount()
         {
             throw new System.NotImplementedException();
         }
 
-        public WalletAccount Decrypt(string keyStore, string password)
+        public AccountBase Decrypt(string keyStore, string password)
         {
             throw new System.NotImplementedException();
         }

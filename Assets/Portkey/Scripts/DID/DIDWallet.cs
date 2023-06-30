@@ -5,6 +5,8 @@ namespace Portkey.DID
 
     public class DIDWallet<T> : IDIDWallet where T : AccountBase
     {
+        private IPortkeySocialService _socialService;
+        private T _managementAccount;
         public void Create()
         {
             throw new System.NotImplementedException();

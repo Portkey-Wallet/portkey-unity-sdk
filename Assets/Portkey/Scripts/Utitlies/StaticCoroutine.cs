@@ -7,6 +7,7 @@ namespace Portkey.Utilities
     /// A static helper class for running coroutines.
     /// This allows classes that are not MonoBehaviours to run coroutines,
     /// thereby allowing abstract class to be inherited without it being a MonoBehaviour.
+    /// Example usage: Rest API call classes that do not have side effects and only provides a service.
     /// </summary>
     public static class StaticCoroutine
     {

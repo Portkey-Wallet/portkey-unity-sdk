@@ -144,13 +144,39 @@ namespace Portkey.Core
     /// </summary>
     public interface IPortkeySocialService : IVerificationService, ISearchService
     {
+        /// <summary>
+        /// Coroutine to register a new account.
+        /// </summary>
+        /// <param name="requestParams">Parameters for registration.</param>
         public IEnumerator Register(RegisterParams requestParams, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Coroutine to recover an existing account.
+        /// </summary>
+        /// <param name="requestParams">Parameters for recovery.</param>
         public IEnumerator Recovery(RecoveryParams requestParams, SuccessCallback<RecoveryResult> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Get holder info by guardian info, chainId and caHash.
+        /// </summary>
         public IEnumerator GetHolderInfo(GetHolderInfoParams requestParams, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Get holder info by account manager.
+        /// </summary>
         public IEnumerator GetHolderInfoByManager(GetCAHolderByManagerParams requestParams, SuccessCallback<GetCAHolderByManagerResult> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Get registration info.
+        /// </summary>
         public IEnumerator GetRegisterInfo(GetRegisterInfoParams requestParams, SuccessCallback<RegisterInfo> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Check google recaptcha result.
+        /// </summary>
         public IEnumerator CheckGoogleRecaptcha(CheckGoogleRecaptchaParams requestParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Get phone country code.
+        /// </summary>
         public IEnumerator GetPhoneCountryCode(SuccessCallback<ICountryItem[]> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Get phone country code with local.
+        /// </summary>
         public IEnumerator GetPhoneCountryCodeWithLocal(SuccessCallback<IPhoneCountryCodeResult> successCallback, ErrorCallback errorCallback);
     }
 }

@@ -7,6 +7,7 @@ namespace Portkey.DID
     {
         private IPortkeySocialService _socialService;
         private T _managementAccount;
+
         public void Create()
         {
             throw new System.NotImplementedException();
@@ -37,32 +38,32 @@ namespace Portkey.DID
             throw new System.NotImplementedException();
         }
 
-        public string GetLoginStatus(string chainId, string sessionId)
+        public RecoverStatusResult GetLoginStatus(string chainId, string sessionId)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Register(string param)
+        public RegisterResult Register(RegisterParams param)
         {
             throw new System.NotImplementedException();
         }
 
-        public string GetRegisterStatus(string chainId, string sessionId)
+        public RegisterStatusResult GetRegisterStatus(string chainId, string sessionId)
         {
             throw new System.NotImplementedException();
         }
 
-        public string GetHolderInfo(string param)
+        public GetCAHolderByManagerResult GetHolderInfo(GetHolderInfoParams param)
         {
             throw new System.NotImplementedException();
         }
 
-        public string GetVerifierServers(string chainId)
+        public VerifierItem[] GetVerifierServers(string chainId)
         {
             throw new System.NotImplementedException();
         }
 
-        public string GetCAHolderInfo(string chainId)
+        public CAHolderInfo GetCAHolderInfo(string chainId)
         {
             throw new System.NotImplementedException();
         }

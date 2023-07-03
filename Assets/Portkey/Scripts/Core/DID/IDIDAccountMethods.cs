@@ -4,9 +4,47 @@ namespace Portkey.Core
     
     public class LoginResult
     {
-        //public RecoverStatusResult Status { get; private set; }
+        public RecoverStatusResult Status { get; private set; }
         public string SessionId { get; private set; }
-        //public Error Error { get; private set; }
+        public Error Error { get; private set; }
+        
+        LoginResult(RecoverStatusResult status, string sessionId)
+        {
+            Status = status;
+            SessionId = sessionId;
+        }
+    }
+    
+    public class Error
+    {
+        public string Name { get; private set; }
+        public string Message { get; private set; }
+        public string Stack { get; private set; }
+        
+        public Error(string code, string message, string stack)
+        {
+            Name = code;
+            Message = message;
+            Stack = stack;
+        }
+    }
+    
+    public class VerifierItem
+    {
+        public string Id { get; private set; }
+        public string Name { get; private set; }
+        public string ImageUrl { get; private set; }
+        public string[] EndPoints { get; private set; }
+        public string[] VerifierAddresses { get; private set; }
+        
+        public VerifierItem(string id, string name, string imageUrl, string[] endPoints, string[] verifierAddresses)
+        {
+            Id = id;
+            Name = name;
+            ImageUrl = imageUrl;
+            EndPoints = endPoints;
+            VerifierAddresses = verifierAddresses;
+        }
     }
     
     public interface IDIDAccountMethods
@@ -14,17 +52,11 @@ namespace Portkey.Core
         public bool Login(ScanLoginParam param);
         public LoginResult Login(AccountLoginParams param);
         public bool Logout(EditManagerParams param);
-        //TODO: return RecoverStatusResult
-        public string GetLoginStatus(string chainId, string sessionId);
-        //TODO: return RegisterResult and take in RegisterParams
-        public string Register(string param);
-        //TODO: return RegisterStatusResult
-        string GetRegisterStatus(string chainId, string sessionId);
-        //TODO: return GetCAHolderByManagerResult and take in GetHolderInfoParams
-        public string GetHolderInfo(string param);
-        //TODO: return VerifierItem[]
-        string GetVerifierServers(string chainId);
-        //TODO: return CAHolderInfo
-        string GetCAHolderInfo(string chainId);
+        public RecoverStatusResult GetLoginStatus(string chainId, string sessionId);
+        public RegisterResult Register(RegisterParams param);
+        RegisterStatusResult GetRegisterStatus(string chainId, string sessionId);
+        public GetCAHolderByManagerResult GetHolderInfo(GetHolderInfoParams param);
+        VerifierItem[] GetVerifierServers(string chainId);
+        CAHolderInfo GetCAHolderInfo(string chainId);
     }
 }

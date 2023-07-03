@@ -6,7 +6,6 @@ namespace Portkey.Core
     {
         public RecoverStatusResult Status { get; private set; }
         public string SessionId { get; private set; }
-        public Error Error { get; private set; }
         
         LoginResult(RecoverStatusResult status, string sessionId)
         {
@@ -14,21 +13,7 @@ namespace Portkey.Core
             SessionId = sessionId;
         }
     }
-    
-    public class Error
-    {
-        public string Name { get; private set; }
-        public string Message { get; private set; }
-        public string Stack { get; private set; }
-        
-        public Error(string code, string message, string stack)
-        {
-            Name = code;
-            Message = message;
-            Stack = stack;
-        }
-    }
-    
+
     public class VerifierItem
     {
         public string Id { get; private set; }
@@ -49,6 +34,11 @@ namespace Portkey.Core
     
     public interface IDIDAccountMethods
     {
+        /// <summary>
+        /// For logging in with scan.
+        /// </summary>
+        /// <param name="param">Provides chain ID, caHash and manager info.</param>
+        /// <returns>True if able to login, false otherwise.</returns>
         public bool Login(ScanLoginParam param);
         public LoginResult Login(AccountLoginParams param);
         public bool Logout(EditManagerParams param);

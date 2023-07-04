@@ -7,6 +7,9 @@ using Types = GraphQLCodeGen.Types;
 
 namespace Portkey.GraphQL
 {
+    /// <summary>
+    /// GraphQL is the main class to interact with GraphQL.
+    /// </summary>
     public class GraphQL : MonoBehaviour, IDIDGraphQL, IGraphQL
     {
         [SerializeField] protected IGraphQL _graphQLConfig;

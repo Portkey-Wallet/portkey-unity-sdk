@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Newtonsoft.Json;
-using Debug = UnityEngine.Debug;
 
 namespace Portkey.GraphQL
 {
@@ -37,7 +35,7 @@ namespace Portkey.GraphQL
             }
             catch (ArgumentException e)
             {
-                Debug.LogException(e);
+                Core.Debugger.LogException(e);
                 throw;
             }
             CompleteQuery();

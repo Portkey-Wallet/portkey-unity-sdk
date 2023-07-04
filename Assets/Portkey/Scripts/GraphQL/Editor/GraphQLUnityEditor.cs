@@ -74,18 +74,6 @@ namespace Portkey.GraphQL.Editor
             }
             
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Generate All Queries"))
-            {
-                IGraphQLCodeGenerator codeGenerator = new GraphQLCSharpCodeGenerator(graph.GetSchemaClass(), _storage);
-                foreach (var query in graph.queries)
-                {
-                    codeGenerator.GenerateDTOClass(query.returnType);
-                }
-            }
-
-            EditorGUILayout.EndHorizontal();
-            
-            EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Create New Query"))
             {
                 graph.CreateNewQuery();
@@ -197,14 +185,6 @@ namespace Portkey.GraphQL.Editor
                     if (query.fields.Count > 0){
                         if (GUILayout.Button($"Preview {type}")){
                             query.CompleteQuery();
-                        }
-                    }
-                    
-                    if (query.fields.Count > 0)
-                    {
-                        if (GUILayout.Button($"Generate {type}")) {
-                            IGraphQLCodeGenerator codeGenerator = new GraphQLCSharpCodeGenerator(graph.GetSchemaClass(), _storage);
-                            codeGenerator.GenerateDTOClass(query.returnType);
                         }
                     }
 

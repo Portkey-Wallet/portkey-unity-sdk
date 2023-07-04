@@ -213,101 +213,115 @@ namespace Portkey.GraphQL
             return true;
         }
         
+        /// <summary>
+        /// A recursive way to add all fields of a query as an option field in Unity Editor.
+        /// </summary>
         public void AddAllFields(GraphQLQuery query, string typeName, Field parent = null)
         {
-            Introspection.SchemaClass.Data.Schema.Type type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
+            var type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             var subFields = type.fields;
-            int parentIndex = query.fields.FindIndex(aField => aField == parent);
+            var parentIndex = query.fields.FindIndex(aField => aField == parent);
             var parentIndexes = new List<int>();
-            if (parent != null){
+            // setup parent indexes for the new field
+            if (parent != null)
+            {
                 parentIndexes = new List<int>(parent.parentIndexes){parentIndex};
             }
-            var fielder = new Field{parentIndexes = parentIndexes};
-            
-            foreach (Introspection.SchemaClass.Data.Schema.Type.Field field in subFields){
-                fielder.possibleFields.Add((Field)field);
-            }
 
-            for(int i = 0; i < fielder.possibleFields.Count; i++){
-                var newField = new Field{parentIndexes = parentIndexes};
-            
-                foreach (var field in subFields){
-                    newField.possibleFields.Add((Field)field);
-                }
-                
-                newField.Index = i;
-                
-                if (newField.parentIndexes.Count == 0)
+            // Loop through and initialize all sub fields for this field and add them as options
+            for(var i = 0; i < subFields.Count; i++)
+            {
+                // start initializing child field
+                var childField = new Field{parentIndexes = parentIndexes};
+                foreach (var field in subFields)
                 {
-                    query.fields.Add(newField);
+                    // add sibling field options to the field
+                    childField.possibleFields.Add((Field)field);
                 }
-                else{
-                    var index = query.fields.FindLastIndex(aField =>
-                        aField.parentIndexes.Count > newField.parentIndexes.Count &&
-                        aField.parentIndexes.Contains(newField.parentIndexes.Last()));
-
-                    if (index == -1){
-                        index = query.fields.FindLastIndex(aField =>
-                            aField.parentIndexes.Count > newField.parentIndexes.Count &&
-                            aField.parentIndexes.Last() == newField.parentIndexes.Last());
-                    }
-
-                    if (index == -1){
-                        index = newField.parentIndexes.Last();
-                    }
-
-                    index++;
+                childField.Index = i;
+                
+                // add the child field to the query at the end if it does not have a parent field
+                if (childField.parentIndexes.Count == 0)
+                {
+                    query.fields.Add(childField);
+                }
+                else
+                {
+                    var indexToInsertField = GetInsertIndex(query, childField);
+                    // fields UI are laid out in order of index
+                    query.fields.Insert(indexToInsertField, childField);
+                    
                     query.fields[parentIndex].hasChanged = false;
-                    query.fields.Insert(index, newField);
                 }
                 
-                newField.CheckSubFields(GetSchemaClass());
+                childField.CheckSubFields(GetSchemaClass());
                 
-                if (newField.hasSubField){
-                    AddAllFields(query, newField.possibleFields[newField.Index].type, newField);
+                // recursively initialize all sub fields of this field as options
+                if (childField.hasSubField)
+                {
+                    AddAllFields(query, childField.possibleFields[childField.Index].type, childField);
                 }
             }
         }
 
+        /// <summary>
+        /// Function to add field option for a query in Unity Editor.
+        /// </summary>
+        /// <param name="query">Corresponding GraphQLQuery object to add field option for.</param>
+        /// <param name="typeName">Name of the class in schema.</param>
+        /// <param name="parent">The parent of the field.</param>
         public void AddField(GraphQLQuery query, string typeName, Field parent = null)
         {
             var type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             var subFields = type.fields;
             var parentIndex = query.fields.FindIndex(aField => aField == parent);
             var parentIndexes = new List<int>();
+            // setup parent indexes for the new field
             if (parent != null){
                 parentIndexes = new List<int>(parent.parentIndexes){parentIndex};
             }
-            var fielder = new Field{parentIndexes = parentIndexes};
+            var childField = new Field{parentIndexes = parentIndexes};
             
-            foreach (Introspection.SchemaClass.Data.Schema.Type.Field field in subFields){
-                fielder.possibleFields.Add((Field)field);
+            // add all possible field options for the new field based on its siblings
+            foreach (var field in subFields){
+                childField.possibleFields.Add((Field)field);
             }
 
-            if (fielder.parentIndexes.Count == 0){
-                query.fields.Add(fielder);
+            // add the child field to the query at the end if it does not have a parent field
+            if (childField.parentIndexes.Count == 0)
+            {
+                query.fields.Add(childField);
             }
-            else{
-                var index = query.fields.FindLastIndex(aField =>
-                    aField.parentIndexes.Count > fielder.parentIndexes.Count &&
-                    aField.parentIndexes.Contains(fielder.parentIndexes.Last()));
-
-                if (index == -1){
-                    index = query.fields.FindLastIndex(aField =>
-                        aField.parentIndexes.Count > fielder.parentIndexes.Count &&
-                        aField.parentIndexes.Last() == fielder.parentIndexes.Last());
-                }
-
-                if (index == -1){
-                    index = fielder.parentIndexes.Last();
-                }
-
-                index++;
+            else
+            {
+                var indexToInsertField = GetInsertIndex(query, childField);
+                // fields UI are laid out in order of index
+                query.fields.Insert(indexToInsertField, childField);
+                
                 query.fields[parentIndex].hasChanged = false;
-                query.fields.Insert(index, fielder);
             }
         }
-        
+
+        private static int GetInsertIndex(GraphQLQuery query, Field field)
+        {
+            // We find the last index where there is more parent than this child field
+            // and that it contains the immediate parent of this child field.
+            // Mainly used to beautify the order of UI output so that all classes are grouped together
+            var indexToInsertField = query.fields.FindLastIndex(aField =>
+                aField.parentIndexes.Count > field.parentIndexes.Count &&
+                aField.parentIndexes.Contains(field.parentIndexes.Last()));
+
+            if (indexToInsertField == -1)
+            {
+                // insert directly after the parent field
+                indexToInsertField = field.parentIndexes.Last();
+            }
+
+            indexToInsertField++;
+
+            return indexToInsertField;
+        }
+
         private string GetFieldType(Introspection.SchemaClass.Data.Schema.Type.Field field)
         {
             var newField = (Field)field;

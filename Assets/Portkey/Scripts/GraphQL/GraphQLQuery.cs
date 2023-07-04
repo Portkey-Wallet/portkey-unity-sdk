@@ -40,7 +40,11 @@ namespace Portkey.GraphQL
         }
 
 
-
+        /// <summary>
+        /// Construct a graphQL syntax query string from the field list, arguments and query name.
+        /// Each field has parentIndexes which is a list of indexes of the fields that are its parents.
+        /// The last element in parentIndexes is the immediate parent of the field, moving up as the index decreases.
+        /// </summary>
         public void CompleteQuery()
         {
             isComplete = true;
@@ -50,42 +54,46 @@ namespace Portkey.GraphQL
             for (int i = 0; i < fields.Count; i++)
             {
                 var field = fields[i];
+                // If the current field has no parent
                 if (field.parentIndexes.Count == 0)
                 {
-                    if (parent == null)
+                    // if there was a parent on the previous field but not on this one, we need to close brackets for the previous field
+                    if (parent != null)
                     {
-                        data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-                    }
-                    else
-                    {
+                        // find out how many closing bracket to output based on the amount of parents the previous field had
                         int count = previousField.parentIndexes.Count - field.parentIndexes.Count;
                         while (count > 0)
                         {
                             data += $"\n{GenerateStringTabs(count + 1)}}}";
                             count--;
                         }
-
-                        data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
+                        
                         parent = null;
-
                     }
+                    
+                    //output the current field with indentation
+                    data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
 
                     previousField = field;
                     continue;
                 }
 
+                // for handling fields with parents
+                // if the current field has an immediate parent that is different from the previous field's parent
                 if (fields[field.parentIndexes.Last()].name != parent)
                 {
-
                     parent = fields[field.parentIndexes.Last()].name;
 
+                    // if the field's immediate parent is the previous field
                     if (fields[field.parentIndexes.Last()] == previousField)
                     {
-
+                        // output the current field with corresponding indentation
                         data += $"{{\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
                     }
+                    // else we have to close the brackets for the previous field and output the current field with corresponding indentation
                     else
                     {
+                        // find out how many closing bracket to output based on the amount of parents the previous field had
                         int count = previousField.parentIndexes.Count - field.parentIndexes.Count;
                         while (count > 0)
                         {
@@ -101,10 +109,12 @@ namespace Portkey.GraphQL
                 }
                 else
                 {
+                    // since this field is under the same parent, we simply output with the corresponding indentation
                     data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
                     previousField = field;
                 }
 
+                // if this is the last field, we need to close all the brackets
                 if (i == fields.Count - 1)
                 {
                     int count = previousField.parentIndexes.Count;
@@ -117,6 +127,7 @@ namespace Portkey.GraphQL
 
             }
 
+            // check what kind of query it is and construct the query string accordingly
             var arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
             string word;
             switch (type)
@@ -186,6 +197,10 @@ namespace Portkey.GraphQL
             index = 0;
         }
 
+        /// <summary>
+        /// Check and set if the field has subfields. For Editor UI purposes to introduce a button to create sub field.
+        /// </summary>
+        /// <param name="schemaClass">Schema of the field to check against.</param>
         public void CheckSubFields(Introspection.SchemaClass schemaClass)
         {
             var t = schemaClass.data.__schema.types.Find((aType => aType.name == type));

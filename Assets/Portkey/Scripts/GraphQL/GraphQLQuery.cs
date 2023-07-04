@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Newtonsoft.Json;
+using Debug = UnityEngine.Debug;
 
 namespace Portkey.GraphQL
 {
@@ -29,7 +31,15 @@ namespace Portkey.GraphQL
         public void SetArgs(object inputObject)
         {
             var json = JsonConvert.SerializeObject(inputObject, new Utilities.EnumInputConverter());
-            _args = Utilities.JsonToArgument(json);
+            try
+            {
+                _args = Utilities.JsonToArgument(json);
+            }
+            catch (ArgumentException e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
             CompleteQuery();
         }
 

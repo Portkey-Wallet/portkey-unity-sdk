@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -136,6 +137,68 @@ public class GraphQLTest
         query.SetArgs(new { dto = dto.GetInputObject()});
         
         return ((IGraphQL)graphQlTest.component).Query<GraphQLCodeGen.Types.Query>(query.query, SuccessCallback, ErrorCallback);
+    }
+
+    [Test]
+    public void JsonToArgumentTest()
+    {
+        const string JSON_INPUT = "{\"skipCount\":0,\"maxResultCount\":1,\"caHash\":\"f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b\"}";
+        const string JSON_EXPECTED_OUTPUT = "  skipCount :0, maxResultCount :1, caHash :\"f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b\" ";
+        try
+        {
+            var output = Utilities.JsonToArgument(JSON_INPUT);
+            Assert.AreEqual(JSON_EXPECTED_OUTPUT, output);
+        }
+        catch (Exception e)
+        {
+            Assert.Fail("Should not fail. Message: " + e.Message);
+        }
+    }
+
+    [Test]
+    public void JsonToArgumentOnlyOneOpeningBracketTest()
+    {
+        const string JSON_INPUT = "{\"skipCount\":0,\"maxResultCount\":1,\"caHash\":\"f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b\"";
+        try
+        {
+            var output = Utilities.JsonToArgument(JSON_INPUT);
+            Assert.Fail("Argument should not be valid. Output: " + output);
+        }
+        catch (Exception e)
+        {
+            Assert.Pass("Should fail. Message: " + e.Message);
+        }
+    }
+    
+    [Test]
+    public void JsonToArgumentNoOpeningBracketTest()
+    {
+        const string JSON_INPUT = "\"skipCount\":0,\"maxResultCount\":1,\"caHash\":\"f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b\"";
+        try
+        {
+            var output = Utilities.JsonToArgument(JSON_INPUT);
+            Assert.Fail("Argument should not be valid. Output: " + output);
+        }
+        catch (Exception e)
+        {
+            Assert.Pass("Should fail. Message: " + e.Message);
+        }
+    }
+    
+    [Test]
+    public void JsonToArgumentArrayTest()
+    {
+        const string JSON_INPUT = "{\"userId\": 1,\"id\": 1,\"title\": \"delectus aut autem\",\"completed\": false,\"myList\": [{\"value\": 1,\"id\": \"WUGFPBGP\"},{\"value\": 3,\"id\": \"QFPNVASU\"}]}";
+        const string JSON_EXPECTED_OUTPUT = "  userId : 1, id : 1, title : \"delectus aut autem\", completed : false, myList : [{ value : 1, id : \"WUGFPBGP\"},{ value : 3, id : \"QFPNVASU\"}] ";
+        try
+        {
+            var output = Utilities.JsonToArgument(JSON_INPUT);
+            Assert.AreEqual(JSON_EXPECTED_OUTPUT, output);
+        }
+        catch (Exception e)
+        {
+            Assert.Fail("Should not fail. Message: " + e.Message);
+        }
     }
 
     private void ErrorCallback(string message)

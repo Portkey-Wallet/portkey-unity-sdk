@@ -32,71 +32,42 @@ namespace Portkey.GraphQL
         /// <param name="jsonInput">The JSON string to convert.</param>
         public static string JsonToArgument(string jsonInput)
         {
-            var json = JObject.Parse(jsonInput);
-            return JsonToArgument(json);
+            var jsonCharList = jsonInput.ToList();
             
-            var jsonChar = jsonInput.ToCharArray();
-            var indexes = new List<int>();
-            jsonChar[0] = ' ';
-            jsonChar[jsonChar.Length - 1] = ' ';
-            for (int i = 0; i < jsonChar.Length; i++)
+            // remove starting parenthesis if any
+            if(jsonCharList[0] == '{' && jsonCharList[^1] == '}')
             {
-                if (jsonChar[i] == '\"')
-                {
-                    if (indexes.Count == 2)
-                        indexes = new List<int>();
-                    indexes.Add(i);
-                }
-
-                if (jsonChar[i] == ':')
-                {
-                    jsonChar[indexes[0]] = ' ';
-                    jsonChar[indexes[1]] = ' ';
-                }
-            }
-
-            var result = new string(jsonChar);
-            return result;
-        }
-
-        private static string JsonToArgument(JToken json)
-        {
-            string ret = "";
-
-            if (json is JObject jObject)
-            {
-                foreach (var pair in jObject)
-                {
-                    var isValue = pair.Value is JValue;
-                    
-                    ret += pair.Key + " :";
-                    if (!isValue)
-                    {
-                        ret += "{ ";
-                    }
-                    ret += JsonToArgument(pair.Value);
-                    if (!isValue)
-                    {
-                        ret += " }";
-                    }
-                    ret += ",";
-                }
-            }
-            else if (json is JArray array)
-            {
-                foreach (var item in array)
-                {
-                    JsonToArgument(item);
-                }
+                jsonCharList[0] = ' ';
+                jsonCharList[^1] = ' ';
             }
             else
             {
-                ret += json.ToString();
+                throw new ArgumentException("Invalid JSON input. JSON input must be an object.");
             }
-            
-            return ret;
+
+            var startQuote = jsonCharList.Count;
+            // loop until there are no more quotes found encapsulating keys
+            while (startQuote > 0)
+            {
+                // find the separator between key and value from the back of the char array
+                var separator = jsonCharList.LastIndexOf(':', startQuote - 1);
+                if(separator == -1)
+                    break;
+                // find the quotes around the key
+                var endQuote = jsonCharList.LastIndexOf('"', separator - 1);
+                if(endQuote == -1)
+                    break;
+                startQuote = jsonCharList.LastIndexOf('"', endQuote - 1);
+                if(startQuote == -1)
+                    break;
+                // remove quotes from key
+                jsonCharList[startQuote] = ' ';
+                jsonCharList[endQuote] = ' ';
+            }
+
+            return new string(jsonCharList.ToArray());
         }
-        
+
         /// <summary>Enum converter for JSON serialization.</summary>
         public class EnumInputConverter : StringEnumConverter
         {

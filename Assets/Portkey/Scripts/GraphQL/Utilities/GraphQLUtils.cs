@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 namespace Portkey.GraphQL
 {
@@ -29,6 +32,9 @@ namespace Portkey.GraphQL
         /// <param name="jsonInput">The JSON string to convert.</param>
         public static string JsonToArgument(string jsonInput)
         {
+            var json = JObject.Parse(jsonInput);
+            return JsonToArgument(json);
+            
             var jsonChar = jsonInput.ToCharArray();
             var indexes = new List<int>();
             jsonChar[0] = ' ';
@@ -51,6 +57,44 @@ namespace Portkey.GraphQL
 
             var result = new string(jsonChar);
             return result;
+        }
+
+        private static string JsonToArgument(JToken json)
+        {
+            string ret = "";
+
+            if (json is JObject jObject)
+            {
+                foreach (var pair in jObject)
+                {
+                    var isValue = pair.Value is JValue;
+                    
+                    ret += pair.Key + " :";
+                    if (!isValue)
+                    {
+                        ret += "{ ";
+                    }
+                    ret += JsonToArgument(pair.Value);
+                    if (!isValue)
+                    {
+                        ret += " }";
+                    }
+                    ret += ",";
+                }
+            }
+            else if (json is JArray array)
+            {
+                foreach (var item in array)
+                {
+                    JsonToArgument(item);
+                }
+            }
+            else
+            {
+                ret += json.ToString();
+            }
+            
+            return ret;
         }
         
         /// <summary>Enum converter for JSON serialization.</summary>

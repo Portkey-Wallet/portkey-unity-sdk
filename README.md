@@ -38,6 +38,19 @@ To start using the Portkey Unity SDK, follow these steps:
 5. Select the extracted package file (e.g., `UnitySDK.unitypackage`) and click **Open**.
 6. Unity will import the SDK assets and libraries into your project.
 
+### Tools
+- GraphQL C# Code Generator (For generating data structs of GraphQL's query responses)
+    - Go to your Terminal
+    - cd to Tools/ directory.
+    - Execute the following commands in your Terminal
+        ```
+        npm i graphql
+        npm i -D typescript @graphql-codegen/cli
+        npm i @graphql-codegen/c-sharp
+        npm run codegen
+        ```
+    - The generated C# code will appear in Assets/Portkey/Scripts/__Generated__/GraphQLCodeGen.cs
+
 ## Usage
 To use the Unity SDK in your project, follow these steps:
 

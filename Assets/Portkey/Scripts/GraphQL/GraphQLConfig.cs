@@ -217,18 +217,13 @@ namespace Portkey.GraphQL
             var type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             var subFields = type.fields;
             var parentIndex = query.fields.FindIndex(aField => aField == parent);
-            var parentIndexes = new List<int>();
-            // setup parent indexes for the new field
-            if (parent != null)
-            {
-                parentIndexes = new List<int>(parent.parentIndexes){parentIndex};
-            }
+            var ancestors = (parent == null) ? 0 : parent.ancestors + 1;
 
             // Loop through and initialize all sub fields for this field and add them as options
             for(var i = 0; i < subFields.Count; i++)
             {
                 // start initializing child field
-                var childField = new Field{parentIndexes = parentIndexes};
+                var childField = new Field{ancestors = ancestors};
                 foreach (var field in subFields)
                 {
                     // add sibling field options to the field
@@ -236,19 +231,8 @@ namespace Portkey.GraphQL
                 }
                 childField.Index = i;
                 
-                // add the child field to the query at the end if it does not have a parent field
-                if (childField.parentIndexes.Count == 0)
-                {
-                    query.fields.Add(childField);
-                }
-                else
-                {
-                    var indexToInsertField = GetInsertIndex(query, childField);
-                    // fields UI are laid out in order of index
-                    query.fields.Insert(indexToInsertField, childField);
-                    
-                    query.fields[parentIndex].hasChanged = false;
-                }
+                // add the child field to the query at the start of its parent
+                query.fields.Insert(parentIndex+1, childField);
                 
                 childField.CheckSubFields(GetSchemaClass());
                 
@@ -270,48 +254,20 @@ namespace Portkey.GraphQL
         {
             var type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             var subFields = type.fields;
-
-            var childField = parent?.CreateChild()??new Field();
+            var parentIndex = query.fields.FindIndex(aField => aField == parent);
+            var ancestors = (parent == null) ? 0 : parent.ancestors + 1;
+            var childField = new Field{ancestors = ancestors};
             
             // add all possible field options for the new field based on its siblings
             foreach (var field in subFields){
                 childField.possibleFields.Add((Field)field);
             }
+            
+            childField.Index = 0;
+            childField.CheckSubFields(GetSchemaClass());
 
-            // add the child field to the query at the end if it does not have a parent field
-            if (childField.IsTopLevel)
-            {
-                query.fields.Add(childField);
-            }
-            else
-            {
-                var indexToInsertField = GetInsertIndex(query, childField);
-                // fields UI are laid out in order of index
-                query.fields.Insert(indexToInsertField, childField);
-                
-                parent.hasChanged = false;
-            }
-        }
-
-        private static int GetInsertIndex(GraphQLQuery query, Field fieldToBeInserted)
-        {
-            // We find the last index where there is more parent than this child field
-            // and that it contains the immediate parent of this child field.
-            // Mainly used to beautify the order of UI output so that all classes are grouped together
-            var indexToInsertField = query.fields.FindLastIndex(otherField => 
-                otherField.ancestors.Count > fieldToBeInserted.ancestors.Count &&
-                otherField.ancestors.Contains(fieldToBeInserted.ancestors.Last())
-            );
-
-            if (indexToInsertField == -1)
-            {
-                // insert directly after the parent field
-                indexToInsertField = query.fields.IndexOf(fieldToBeInserted.ancestors.Last());
-            }
-
-            indexToInsertField++;
-
-            return indexToInsertField;
+            // add the child field to the query at the start of its parent
+            query.fields.Insert(parentIndex+1, childField);
         }
 
         private string GetFieldType(Introspection.SchemaClass.Data.Schema.Type.Field field)

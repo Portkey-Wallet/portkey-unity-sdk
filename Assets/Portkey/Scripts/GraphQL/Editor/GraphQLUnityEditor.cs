@@ -89,7 +89,8 @@ namespace Portkey.GraphQL.Editor
             EditorUtility.SetDirty(graph);
         }
 
-        private void DisplayFields(GraphQLConfig graph, List<GraphQLQuery> queryList, string type){
+        private void DisplayFields(GraphQLConfig graph, List<GraphQLQuery> queryList, string type)
+        {
             if (queryList != null){
                 if (queryList.Count > 0)
                     EditorGUILayout.LabelField(type);
@@ -136,11 +137,13 @@ namespace Portkey.GraphQL.Editor
                         if (GUILayout.Button("Create Field")){
                             graph.GetQueryReturnType(query, options[_index]);
                             graph.AddField(query, query.returnType);
+                            return;
                         }
                         
                         if (GUILayout.Button("Add All Fields")){
                             graph.GetQueryReturnType(query, options[_index]);
                             graph.AddAllFields(query, query.returnType);
+                            return;
                         }
                     }
 
@@ -149,8 +152,12 @@ namespace Portkey.GraphQL.Editor
                         var fieldOptions = field.possibleFields.Select((aField => aField.name)).ToArray();
                         EditorGUILayout.BeginHorizontal();
                         var fieldStyle = EditorStyles.popup;
-                        fieldStyle.contentOffset = new Vector2(field.parentIndexes.Count * 20, 0);
-                        field.Index = EditorGUILayout.Popup(field.Index, fieldOptions, fieldStyle);
+                        fieldStyle.contentOffset = new Vector2(field.ancestors * 20, 0);
+                        var newIndex = EditorGUILayout.Popup(field.Index, fieldOptions, fieldStyle);
+                        if (newIndex != field.Index){
+                            RemoveChildFields(field, query);
+                            field.Index = newIndex;
+                        }
                         GUI.color = Color.white;
                         field.CheckSubFields(graph.GetSchemaClass());
                         if (field.hasSubField){
@@ -161,23 +168,22 @@ namespace Portkey.GraphQL.Editor
                         }
 
                         if (GUILayout.Button("x", GUILayout.MaxWidth(20))){
-                            int parentIndex = query.fields.FindIndex(aField => aField == field);
-                            query.fields.RemoveAll(afield => afield.parentIndexes.Contains(parentIndex));
+                            
+                            RemoveChildFields(field, query);
+                            
                             query.fields.Remove(field);
+                            field.hasChanged = false;
+
+                            break;
+                        }
+
+                        if (field.hasChanged)
+                        {
                             field.hasChanged = false;
                             break;
                         }
 
                         EditorGUILayout.EndHorizontal();
-
-                        if (field.hasChanged){
-                            int parentIndex = query.fields.FindIndex(aField => aField == field);
-                            query.fields.RemoveAll(afield => afield.parentIndexes.Contains(parentIndex));
-                            field.hasChanged = false;
-                            break;
-                        }
-
-                        
                     }
                     EditorGUILayout.Space();
                     EditorGUILayout.Space();
@@ -197,6 +203,28 @@ namespace Portkey.GraphQL.Editor
                 EditorGUILayout.Space();
             }
             
+        }
+
+        private static void RemoveChildFields(Field field, GraphQLQuery query)
+        {
+            if (field.hasSubField)
+            {
+                int startIndex = query.fields.FindIndex(aField => aField == field) + 1;
+                var ancestors = field.ancestors + 1;
+
+                int indexToRemove = -1;
+                // find the last field under the same ancestor
+                for (var m = startIndex; m < query.fields.Count; ++m)
+                {
+                    if (query.fields[m].ancestors < ancestors)
+                    {
+                        indexToRemove = m;
+                        break;
+                    }
+                }
+
+                query.fields.RemoveRange(startIndex, indexToRemove - startIndex);
+            }
         }
     }
 }

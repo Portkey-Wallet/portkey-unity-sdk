@@ -58,89 +58,33 @@ namespace Portkey.GraphQL
         {
             isComplete = true;
             string data = null;
-            string parent = null;
             Field previousField = null;
-            ///
-            ///  {
-            ///     a,
-            /// }
-            /// 
-            ///     b
-            /// 
-            foreach (var (i, field) in fields.Select((item, i)=> (i, item)))
+            for (int i = 0; i < fields.Count; i++)
             {
-                
-                // If the current field has no parent
-                if (field.parentIndexes.Count == 0)
+                var field = fields[i];
+
+                // if there was a parent on the previous field, check if we need to close brackets
+                if (previousField != null && previousField.ancestors > 0)
                 {
-                    // if there was a parent on the previous field but not on this one, we need to close brackets for the previous field
-                    if (parent != null)
-                    {
-                        // find out how many closing bracket to output based on the amount of parents the previous field had
-                        int count = previousField.parentIndexes.Count - field.parentIndexes.Count;
-                        while (count > 0)
-                        {
-                            data += $"\n{GenerateStringTabs(count + 1)}}}";
-                            count--;
-                        }
-                        
-                        parent = null;
-                    }
-                    
-                    //output the current field with indentation
-                    data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-
-                    previousField = field;
-                    continue;
-                }
-
-                // for handling fields with parents
-                // if the current field has an immediate parent that is different from the previous field's parent
-                if (fields[field.parentIndexes.Last()].name != parent)
-                {
-                    parent = fields[field.parentIndexes.Last()].name;
-
-                    // if the field's immediate parent is the previous field
-                    if (fields[field.parentIndexes.Last()] == previousField)
-                    {
-                        // output the current field with corresponding indentation
-                        data += $"{{\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-                    }
-                    // else we have to close the brackets for the previous field and output the current field with corresponding indentation
-                    else
-                    {
-                        // find out how many closing bracket to output based on the amount of parents the previous field had
-                        int count = previousField.parentIndexes.Count - field.parentIndexes.Count;
-                        while (count > 0)
-                        {
-                            data += $"\n{GenerateStringTabs(count + 1)}}}";
-                            count--;
-                        }
-
-                        data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-                    }
-
-                    previousField = field;
-
-                }
-                else
-                {
-                    // since this field is under the same parent, we simply output with the corresponding indentation
-                    data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-                    previousField = field;
-                }
-
-                // if this is the last field, we need to close all the brackets
-                if (i == fields.Count - 1)
-                {
-                    int count = previousField.parentIndexes.Count;
+                    // find out how many closing bracket to output based on the amount of ancestors the previous field had
+                    var count = previousField.ancestors - field.ancestors;
                     while (count > 0)
                     {
                         data += $"\n{GenerateStringTabs(count + 1)}}}";
                         count--;
                     }
                 }
+                
+                //output the current field with indentation
+                data += $"\n{GenerateStringTabs(field.ancestors + 2)}{field.name}";
+                if(field.hasSubField)
+                {
+                    data += "{";
+                }
+
+                previousField = field;
             }
+
             // check what kind of query it is and construct the query string accordingly
             var arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
             string word;
@@ -198,9 +142,7 @@ namespace Portkey.GraphQL
 
         public string name;
         public string type;
-        public List<int> parentIndexes;
-        public List<Field> ancestors;
-        public bool IsTopLevel => ancestors == null || ancestors.Count == 0;
+        public int ancestors;
         public bool hasSubField;
         public List<PossibleField> possibleFields;
 
@@ -209,16 +151,8 @@ namespace Portkey.GraphQL
         public Field()
         {
             possibleFields = new List<PossibleField>();
-            parentIndexes = new List<int>();
+            ancestors = 0;
             index = 0;
-        }
-
-        public Field CreateChild()
-        {
-            return new Field()
-            {
-                ancestors = new []{ancestors, new List<Field>{ this }}.SelectMany(item=>item).ToList()
-            };
         }
 
         /// <summary>

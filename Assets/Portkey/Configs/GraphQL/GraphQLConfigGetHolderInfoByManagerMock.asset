@@ -42,7 +42,7 @@ MonoBehaviour:
       type: GuardianDto
       ancestors: 0
       hasSubField: 1
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -61,7 +61,7 @@ MonoBehaviour:
       type: Boolean
       ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -78,7 +78,7 @@ MonoBehaviour:
       type: String
       ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -95,7 +95,7 @@ MonoBehaviour:
       type: String
       ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -112,7 +112,7 @@ MonoBehaviour:
       type: String
       ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -129,7 +129,7 @@ MonoBehaviour:
       type: Int
       ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -146,7 +146,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -165,7 +165,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -184,7 +184,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -203,7 +203,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -222,7 +222,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -265,7 +265,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -284,7 +284,7 @@ MonoBehaviour:
       type: ManagerInfo
       ancestors: 0
       hasSubField: 1
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -303,7 +303,7 @@ MonoBehaviour:
       type: String
       ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: address
         type: String
       - name: extraData
@@ -314,7 +314,7 @@ MonoBehaviour:
       type: String
       ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: address
         type: String
       - name: extraData
@@ -325,7 +325,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -344,7 +344,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -363,7 +363,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -382,7 +382,7 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId

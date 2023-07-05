@@ -149,7 +149,7 @@ namespace Portkey.GraphQL.Editor
 
                     foreach (Field field in query.fields){
                         GUI.color = new Color(0.8f,0.8f,0.8f);
-                        var fieldOptions = field.possibleFields.Select((aField => aField.name)).ToArray();
+                        var fieldOptions = field.fieldOptions.Select((aField => aField.name)).ToArray();
                         EditorGUILayout.BeginHorizontal();
                         var fieldStyle = EditorStyles.popup;
                         fieldStyle.contentOffset = new Vector2(field.ancestors * 20, 0);
@@ -162,7 +162,7 @@ namespace Portkey.GraphQL.Editor
                         field.CheckSubFields(graph.GetSchemaClass());
                         if (field.hasSubField){
                             if (GUILayout.Button("Create Sub Field")){
-                                graph.AddField(query, field.possibleFields[field.Index].type, field);
+                                graph.AddField(query, field.fieldOptions[field.Index].type, field);
                                 break;
                             }
                         }
@@ -190,7 +190,7 @@ namespace Portkey.GraphQL.Editor
 
                     if (query.fields.Count > 0){
                         if (GUILayout.Button($"Preview {type}")){
-                            query.CompleteQuery();
+                            query.BuildQueryString();
                         }
                     }
 

@@ -39,13 +39,13 @@ namespace Portkey.GraphQL
                 Core.Debugger.LogException(e);
                 throw;
             }
-            CompleteQuery();
+            BuildQueryString();
         }
 
         public void SetArgs(string inputString)
         {
             _args = inputString;
-            CompleteQuery();
+            BuildQueryString();
         }
 
 
@@ -54,15 +54,13 @@ namespace Portkey.GraphQL
         /// Each field has parentIndexes which is a list of indexes of the fields that are its parents.
         /// The last element in parentIndexes is the immediate parent of the field, moving up as the index decreases.
         /// </summary>
-        public void CompleteQuery()
+        public void BuildQueryString()
         {
             isComplete = true;
             string data = null;
             Field previousField = null;
-            for (int i = 0; i < fields.Count; i++)
+            foreach (var field in fields)
             {
-                var field = fields[i];
-
                 // if there was a parent on the previous field, check if we need to close brackets
                 if (previousField != null && previousField.ancestors > 0)
                 {
@@ -87,22 +85,13 @@ namespace Portkey.GraphQL
 
             // check what kind of query it is and construct the query string accordingly
             var arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
-            string word;
-            switch (type)
+            string word = type switch
             {
-                case Type.Query:
-                    word = "query";
-                    break;
-                case Type.Mutation:
-                    word = "mutation";
-                    break;
-                case Type.Subscription:
-                    word = "subscription";
-                    break;
-                default:
-                    word = "query";
-                    break;
-            }
+                Type.Query => "query",
+                Type.Mutation => "mutation",
+                Type.Subscription => "subscription",
+                _ => "query"
+            };
 
             query = data == null
                 ? $"{word} {name}{{\n{GenerateStringTabs(1)}{queryString}{arg}\n}}"
@@ -131,8 +120,8 @@ namespace Portkey.GraphQL
             get => index;
             set
             {
-                type = possibleFields[value].type;
-                name = possibleFields[value].name;
+                type = fieldOptions[value].type;
+                name = fieldOptions[value].name;
                 if (value != index)
                     hasChanged = true;
                 index = value;
@@ -144,13 +133,13 @@ namespace Portkey.GraphQL
         public string type;
         public int ancestors;
         public bool hasSubField;
-        public List<PossibleField> possibleFields;
+        public List<FieldOption> fieldOptions;
 
         public bool hasChanged;
 
         public Field()
         {
-            possibleFields = new List<PossibleField>();
+            fieldOptions = new List<FieldOption>();
             ancestors = 0;
             index = 0;
         }
@@ -172,14 +161,14 @@ namespace Portkey.GraphQL
         }
 
         [Serializable]
-        public class PossibleField
+        public class FieldOption
         {
             public string name;
             public string type;
 
-            public static implicit operator PossibleField(Field field)
+            public static implicit operator FieldOption(Field field)
             {
-                return new PossibleField { name = field.name, type = field.type };
+                return new FieldOption { name = field.name, type = field.type };
             }
         }
 

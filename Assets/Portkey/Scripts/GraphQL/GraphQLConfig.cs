@@ -91,7 +91,7 @@ namespace Portkey.GraphQL
         {
             if (String.IsNullOrEmpty(query.query))
             {
-                query.CompleteQuery();
+                query.BuildQueryString();
             }
             return Query<T>(query.query, successCallback, errorCallback);
         }
@@ -227,7 +227,7 @@ namespace Portkey.GraphQL
                 foreach (var field in subFields)
                 {
                     // add sibling field options to the field
-                    childField.possibleFields.Add((Field)field);
+                    childField.fieldOptions.Add((Field)field);
                 }
                 childField.Index = i;
                 
@@ -239,7 +239,7 @@ namespace Portkey.GraphQL
                 // recursively initialize all sub fields of this field as options
                 if (childField.hasSubField)
                 {
-                    AddAllFields(query, childField.possibleFields[childField.Index].type, childField);
+                    AddAllFields(query, childField.fieldOptions[childField.Index].type, childField);
                 }
             }
         }
@@ -260,7 +260,7 @@ namespace Portkey.GraphQL
             
             // add all possible field options for the new field based on its siblings
             foreach (var field in subFields){
-                childField.possibleFields.Add((Field)field);
+                childField.fieldOptions.Add((Field)field);
             }
             
             childField.Index = 0;

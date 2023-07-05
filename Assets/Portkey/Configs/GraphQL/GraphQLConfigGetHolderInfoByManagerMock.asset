@@ -41,6 +41,7 @@ MonoBehaviour:
       name: id
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -60,6 +61,7 @@ MonoBehaviour:
       name: chainId
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -79,6 +81,7 @@ MonoBehaviour:
       name: caHash
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -98,6 +101,7 @@ MonoBehaviour:
       name: caAddress
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -117,6 +121,7 @@ MonoBehaviour:
       name: managerInfos
       type: ManagerInfo
       parentIndexes: 
+      ancestors: []
       hasSubField: 1
       possibleFields:
       - name: id
@@ -136,6 +141,7 @@ MonoBehaviour:
       name: extraData
       type: String
       parentIndexes: 04000000
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: address
@@ -147,6 +153,7 @@ MonoBehaviour:
       name: address
       type: String
       parentIndexes: 04000000
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: address
@@ -158,6 +165,7 @@ MonoBehaviour:
       name: originChainId
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -201,6 +209,7 @@ MonoBehaviour:
       name: id
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -220,6 +229,7 @@ MonoBehaviour:
       name: chainId
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -239,6 +249,7 @@ MonoBehaviour:
       name: caHash
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -258,6 +269,7 @@ MonoBehaviour:
       name: caAddress
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -277,6 +289,7 @@ MonoBehaviour:
       name: manager
       type: String
       parentIndexes: 
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: id
@@ -296,6 +309,7 @@ MonoBehaviour:
       name: loginGuardian
       type: GuardianDto
       parentIndexes: 
+      ancestors: []
       hasSubField: 1
       possibleFields:
       - name: id
@@ -315,6 +329,7 @@ MonoBehaviour:
       name: isLoginGuardian
       type: Boolean
       parentIndexes: 05000000
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: type
@@ -332,6 +347,7 @@ MonoBehaviour:
       name: salt
       type: String
       parentIndexes: 05000000
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: type
@@ -349,6 +365,7 @@ MonoBehaviour:
       name: identifierHash
       type: String
       parentIndexes: 05000000
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: type
@@ -366,6 +383,7 @@ MonoBehaviour:
       name: verifierId
       type: String
       parentIndexes: 05000000
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: type
@@ -383,6 +401,7 @@ MonoBehaviour:
       name: type
       type: Int
       parentIndexes: 05000000
+      ancestors: []
       hasSubField: 0
       possibleFields:
       - name: type

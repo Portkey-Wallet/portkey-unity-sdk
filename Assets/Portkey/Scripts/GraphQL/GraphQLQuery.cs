@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-using UnityEngine.Serialization;
 
 namespace Portkey.GraphQL
 {
@@ -60,16 +59,9 @@ namespace Portkey.GraphQL
             string data = null;
             string parent = null;
             Field previousField = null;
-            ///
-            ///  {
-            ///     a,
-            /// }
-            /// 
-            ///     b
-            /// 
-            foreach (var (i, field) in fields.Select((item, i)=> (i, item)))
+            for (int i = 0; i < fields.Count; i++)
             {
-                
+                var field = fields[i];
                 // If the current field has no parent
                 if (field.parentIndexes.Count == 0)
                 {
@@ -140,7 +132,9 @@ namespace Portkey.GraphQL
                         count--;
                     }
                 }
+
             }
+
             // check what kind of query it is and construct the query string accordingly
             var arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
             string word;
@@ -199,8 +193,6 @@ namespace Portkey.GraphQL
         public string name;
         public string type;
         public List<int> parentIndexes;
-        public List<Field> ancestors;
-        public bool IsTopLevel => ancestors == null || ancestors.Count == 0;
         public bool hasSubField;
         public List<PossibleField> possibleFields;
 
@@ -211,14 +203,6 @@ namespace Portkey.GraphQL
             possibleFields = new List<PossibleField>();
             parentIndexes = new List<int>();
             index = 0;
-        }
-
-        public Field CreateChild()
-        {
-            return new Field()
-            {
-                ancestors = new []{ancestors, new List<Field>{ this }}.SelectMany(item=>item).ToList()
-            };
         }
 
         /// <summary>

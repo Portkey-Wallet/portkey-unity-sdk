@@ -206,7 +206,11 @@ namespace Portkey.GraphQL
         public bool CheckSubFields(string typeName)
         {
             var type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
-            return type?.fields != null && type.fields.Count != 0;
+            if (type?.fields == null || type.fields.Count == 0){
+                return false;
+            }
+
+            return true;
         }
         
         /// <summary>
@@ -270,8 +274,13 @@ namespace Portkey.GraphQL
         {
             var type = _schemaClass.data.__schema.types.Find((aType => aType.name == typeName));
             var subFields = type.fields;
-
-            var childField = parent?.CreateChild()??new Field();
+            var parentIndex = query.fields.FindIndex(aField => aField == parent);
+            var parentIndexes = new List<int>();
+            // setup parent indexes for the new field
+            if (parent != null){
+                parentIndexes = new List<int>(parent.parentIndexes){parentIndex};
+            }
+            var childField = new Field{parentIndexes = parentIndexes};
             
             // add all possible field options for the new field based on its siblings
             foreach (var field in subFields){
@@ -279,7 +288,7 @@ namespace Portkey.GraphQL
             }
 
             // add the child field to the query at the end if it does not have a parent field
-            if (childField.IsTopLevel)
+            if (childField.parentIndexes.Count == 0)
             {
                 query.fields.Add(childField);
             }
@@ -289,24 +298,23 @@ namespace Portkey.GraphQL
                 // fields UI are laid out in order of index
                 query.fields.Insert(indexToInsertField, childField);
                 
-                parent.hasChanged = false;
+                query.fields[parentIndex].hasChanged = false;
             }
         }
 
-        private static int GetInsertIndex(GraphQLQuery query, Field fieldToBeInserted)
+        private static int GetInsertIndex(GraphQLQuery query, Field field)
         {
             // We find the last index where there is more parent than this child field
             // and that it contains the immediate parent of this child field.
             // Mainly used to beautify the order of UI output so that all classes are grouped together
-            var indexToInsertField = query.fields.FindLastIndex(otherField => 
-                otherField.ancestors.Count > fieldToBeInserted.ancestors.Count &&
-                otherField.ancestors.Contains(fieldToBeInserted.ancestors.Last())
-            );
+            var indexToInsertField = query.fields.FindLastIndex(aField =>
+                aField.parentIndexes.Count > field.parentIndexes.Count &&
+                aField.parentIndexes.Contains(field.parentIndexes.Last()));
 
             if (indexToInsertField == -1)
             {
                 // insert directly after the parent field
-                indexToInsertField = query.fields.IndexOf(fieldToBeInserted.ancestors.Last());
+                indexToInsertField = field.parentIndexes.Last();
             }
 
             indexToInsertField++;

@@ -223,6 +223,12 @@ namespace Portkey.GraphQL.Editor
                     }
                 }
 
+                //there is no found child in this object
+                if (indexToRemove == -1)
+                {
+                    return;
+                }
+
                 query.fields.RemoveRange(startIndex, indexToRemove - startIndex);
             }
         }

@@ -183,7 +183,7 @@ $@"{operationType.ToKeyword()} {name} {{
         public static string Indented(this string expression, int indent)
         {
             var sb = new StringBuilder();
-            sb.Insert(0, " ", indent * IndentSize);
+            sb.Append(' ', indent * IndentSize);
             sb.Append(expression);
             return sb.ToString();
         }

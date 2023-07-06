@@ -10,7 +10,6 @@ using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client.Configuration;
 using Portkey.Core;
-using Secp256k1Net;
 
 namespace Portkey.Contract
 {

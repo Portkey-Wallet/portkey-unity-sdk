@@ -85,7 +85,7 @@ namespace Portkey.GraphQL
 
             // check what kind of query it is and construct the query string accordingly
             var arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
-            string word = type switch
+            var word = type switch
             {
                 Type.Query => "query",
                 Type.Mutation => "mutation",

@@ -120,7 +120,7 @@ public class GraphQLTest
     [UnityTest]
     public IEnumerator GraphQLPostWorks()
     {
-        MonoBehaviourTest<GraphQLMonoTest> graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
+        var graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
         graphQlTest.component.InitializeGraphQLConfig();
         
         GraphQLQuery query = ((IGraphQL)graphQlTest.component).GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
@@ -251,6 +251,95 @@ public class GraphQLTest
         }
 
         Assert.Fail($"Should not have found Query <{queryName}>");
+        yield break;
+    }
+    
+    [UnityTest]
+    public IEnumerator BuildQueryStringTest()
+    {
+        const string EXPECTED_RESULT = 
+@"query GetCAHolderInfo{
+    caHolderInfo{
+        guardianList{
+            guardians{
+                isLoginGuardian
+                salt
+                identifierHash
+                verifierId
+                type
+            }
+        }
+        originChainId
+        managerInfos{
+            extraData
+            address
+        }
+        caAddress
+        caHash
+        chainId
+        id
+    }
+}";
+            
+        var graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
+        graphQlTest.component.InitializeGraphQLConfig();
+        
+        const string QUERY_NAME_GETCAHOLDERINFO = "GetCAHolderInfo";
+        
+        var query = ((IGraphQL)graphQlTest.component).GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
+
+        query.BuildQueryString();
+        
+        
+        Assert.AreEqual(EXPECTED_RESULT, query.query);
+        yield break;
+    }
+    
+    [UnityTest]
+    public IEnumerator BuildQueryStringWithArgTest()
+    {
+        const string EXPECTED_RESULT = 
+@"query GetCAHolderInfo{
+    caHolderInfo(  dto :{ caHash :""caHash_mock"", maxResultCount :1, skipCount :0} ){
+        guardianList{
+            guardians{
+                isLoginGuardian
+                salt
+                identifierHash
+                verifierId
+                type
+            }
+        }
+        originChainId
+        managerInfos{
+            extraData
+            address
+        }
+        caAddress
+        caHash
+        chainId
+        id
+    }
+}";
+            
+        var graphQlTest = new MonoBehaviourTest<GraphQLMonoTest>();
+        graphQlTest.component.InitializeGraphQLConfig();
+        
+        var query = ((IGraphQL)graphQlTest.component).GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
+        if (query == null)
+        {
+            Assert.Fail($"No Query by name <{QUERY_NAME_GETCAHOLDERINFO}> found!");
+        }
+        var dto = new GraphQLCodeGen.Types.GetCaHolderInfoDto
+        {
+            skipCount = 0,
+            maxResultCount = 1,
+            caHash = "caHash_mock"
+        };
+        query.SetArgs(new { dto = dto.GetInputObject()});
+        
+        Assert.AreEqual(EXPECTED_RESULT, query.query);
+
         yield break;
     }
 }

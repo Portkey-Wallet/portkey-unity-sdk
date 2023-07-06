@@ -1,12 +1,16 @@
 using System;
 using System.Collections;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AElf;
 using AElf.Client;
 using AElf.Client.Dto;
+using AElf.Cryptography;
 using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client.Configuration;
 using Portkey.Core;
+using Secp256k1Net;
 
 namespace Portkey.Contract
 {
@@ -43,7 +47,14 @@ namespace Portkey.Contract
                 //var ownAddress = client.GetAddressFromPrivateKey(privateKey);
                 var ownAddress = "TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T";
                 //var ownAddress = "045ab0516fda4eeb504ad8d7ce8a2a24e5af6004afa9ff3ee26f2c697e334be48c31597e1905711a6aa749fc475787000b5d6260bcf0d457f23c60aa60bb6c8602";
-
+                
+                /*
+                var secp256K1 = new Secp256k1();
+                var privateKeyNonHex = ByteArrayHelper.HexStringToByteArray(privateKey);
+                byte[] numArray = new byte[65];
+                byte[] message = new byte[32];
+                secp256K1.SignRecoverable((Span<byte>) numArray, (Span<byte>) message, (Span<byte>) privateKeyNonHex);
+*/
                 var transaction =
                     await client.GenerateTransactionAsync(ownAddress, contractAddress,
                         methodName, param);
@@ -65,6 +76,7 @@ namespace Portkey.Contract
                 {
                     //_logger.LogError(e, methodName + " error: {param}", param);
                 }*/
+                Debugger.LogException(e);
 
                 return new T();
             }

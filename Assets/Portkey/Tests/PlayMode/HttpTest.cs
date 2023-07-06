@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Net.Http;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -24,6 +25,12 @@ namespace Portkey.Test
         {
             Debug.Log("successCallback ");
             Assert.NotNull(response);
+        }
+        
+        public void SuccessFailCallback(string response)
+        {
+            Debug.Log("successCallback ");
+            Assert.Fail(response);
         }
         
         public void ErrorCallback(string param)
@@ -65,7 +72,7 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpPostFailURL()
         {
             Debug.Log("Posting to " + FAIL_URL);
-            yield return _request.Post(FAIL_URL, "", SuccessCallback, FailErrorCallback);
+            yield return _request.Post(FAIL_URL, "", SuccessFailCallback, FailErrorCallback);
         }
     }
 }

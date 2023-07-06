@@ -258,10 +258,10 @@ public class GraphQLTest
     public IEnumerator BuildQueryStringTest()
     {
         const string EXPECTED_RESULT = 
-@"query GetCAHolderInfo{
-    caHolderInfo{
-        guardianList{
-            guardians{
+@"query GetCAHolderInfo {
+    caHolderInfo {
+        guardianList {
+            guardians {
                 isLoginGuardian
                 salt
                 identifierHash
@@ -270,7 +270,7 @@ public class GraphQLTest
             }
         }
         originChainId
-        managerInfos{
+        managerInfos {
             extraData
             address
         }
@@ -299,10 +299,10 @@ public class GraphQLTest
     public IEnumerator BuildQueryStringWithArgTest()
     {
         const string EXPECTED_RESULT = 
-@"query GetCAHolderInfo{
-    caHolderInfo(  dto :{ caHash :""caHash_mock"", maxResultCount :1, skipCount :0} ){
-        guardianList{
-            guardians{
+@"query GetCAHolderInfo {
+    caHolderInfo(  dto :{ caHash :""caHash_mock"", maxResultCount :1, skipCount :0} ) {
+        guardianList {
+            guardians {
                 isLoginGuardian
                 salt
                 identifierHash
@@ -311,7 +311,7 @@ public class GraphQLTest
             }
         }
         originChainId
-        managerInfos{
+        managerInfos {
             extraData
             address
         }

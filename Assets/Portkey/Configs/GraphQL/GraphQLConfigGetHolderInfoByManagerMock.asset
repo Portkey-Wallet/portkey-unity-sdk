@@ -42,199 +42,77 @@ MonoBehaviour:
       type: GuardianDto
       ancestors: 0
       hasSubField: 1
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
+      fieldOptions: []
       hasChanged: 0
     - index: 4
       name: isLoginGuardian
       type: Boolean
       ancestors: 1
       hasSubField: 0
-      fieldOptions:
-      - name: type
-        type: Int
-      - name: verifierId
-        type: String
-      - name: identifierHash
-        type: String
-      - name: salt
-        type: String
-      - name: isLoginGuardian
-        type: Boolean
+      fieldOptions: []
       hasChanged: 0
     - index: 3
       name: salt
       type: String
       ancestors: 1
       hasSubField: 0
-      fieldOptions:
-      - name: type
-        type: Int
-      - name: verifierId
-        type: String
-      - name: identifierHash
-        type: String
-      - name: salt
-        type: String
-      - name: isLoginGuardian
-        type: Boolean
+      fieldOptions: []
       hasChanged: 0
     - index: 2
       name: identifierHash
       type: String
       ancestors: 1
       hasSubField: 0
-      fieldOptions:
-      - name: type
-        type: Int
-      - name: verifierId
-        type: String
-      - name: identifierHash
-        type: String
-      - name: salt
-        type: String
-      - name: isLoginGuardian
-        type: Boolean
+      fieldOptions: []
       hasChanged: 0
     - index: 1
       name: verifierId
       type: String
       ancestors: 1
       hasSubField: 0
-      fieldOptions:
-      - name: type
-        type: Int
-      - name: verifierId
-        type: String
-      - name: identifierHash
-        type: String
-      - name: salt
-        type: String
-      - name: isLoginGuardian
-        type: Boolean
+      fieldOptions: []
       hasChanged: 0
     - index: 0
       name: type
       type: Int
       ancestors: 1
       hasSubField: 0
-      fieldOptions:
-      - name: type
-        type: Int
-      - name: verifierId
-        type: String
-      - name: identifierHash
-        type: String
-      - name: salt
-        type: String
-      - name: isLoginGuardian
-        type: Boolean
+      fieldOptions: []
       hasChanged: 0
     - index: 4
       name: manager
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
+      fieldOptions: []
       hasChanged: 0
     - index: 3
       name: caAddress
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
+      fieldOptions: []
       hasChanged: 0
     - index: 2
       name: caHash
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
+      fieldOptions: []
       hasChanged: 0
     - index: 1
       name: chainId
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
+      fieldOptions: []
       hasChanged: 0
     - index: 0
       name: id
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
+      fieldOptions: []
       hasChanged: 0
     isComplete: 0
   - name: caHolderManagerInfo
@@ -265,136 +143,56 @@ MonoBehaviour:
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
+      fieldOptions: []
       hasChanged: 0
     - index: 4
       name: managerInfos
       type: ManagerInfo
       ancestors: 0
       hasSubField: 1
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
+      fieldOptions: []
       hasChanged: 0
     - index: 1
       name: extraData
       type: String
       ancestors: 1
       hasSubField: 0
-      fieldOptions:
-      - name: address
-        type: String
-      - name: extraData
-        type: String
+      fieldOptions: []
       hasChanged: 0
     - index: 0
       name: address
       type: String
       ancestors: 1
       hasSubField: 0
-      fieldOptions:
-      - name: address
-        type: String
-      - name: extraData
-        type: String
+      fieldOptions: []
       hasChanged: 0
     - index: 3
       name: caAddress
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
+      fieldOptions: []
       hasChanged: 0
     - index: 2
       name: caHash
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
+      fieldOptions: []
       hasChanged: 0
     - index: 1
       name: chainId
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
+      fieldOptions: []
       hasChanged: 0
     - index: 0
       name: id
       type: String
       ancestors: 0
       hasSubField: 0
-      fieldOptions:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
+      fieldOptions: []
       hasChanged: 0
     isComplete: 0
   request: {fileID: 11400000, guid: d6ad6dc445c9d458abbff60d4e8338a8, type: 2}

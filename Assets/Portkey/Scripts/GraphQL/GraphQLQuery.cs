@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
-using UnityEngine.Serialization;
 
 namespace Portkey.GraphQL
 {
@@ -10,7 +9,7 @@ namespace Portkey.GraphQL
     public class GraphQLQuery
     {
         public string name;
-        public Type type;
+        public OperationType operationType = OperationType.Query;
         public string query;
         public string queryString;
         public string returnType;
@@ -20,7 +19,7 @@ namespace Portkey.GraphQL
         
         private string _args;
 
-        public enum Type
+        public enum OperationType
         {
             Query,
             Mutation,
@@ -57,7 +56,7 @@ namespace Portkey.GraphQL
         public void BuildQueryString()
         {
             isComplete = true;
-            string data = null;
+            var fieldSelectionBuilder = new StringBuilder();
             Field previousField = null;
             foreach (var field in fields)
             {
@@ -68,45 +67,37 @@ namespace Portkey.GraphQL
                     var count = previousField.ancestors - field.ancestors;
                     while (count > 0)
                     {
-                        data += $"\n{GenerateStringTabs(count + 1)}}}";
+                        fieldSelectionBuilder.AppendLine("}".Indented(count + 1));
                         count--;
                     }
                 }
                 
                 //output the current field with indentation
-                data += $"\n{GenerateStringTabs(field.ancestors + 2)}{field.name}";
                 if(field.hasSubField)
                 {
-                    data += "{";
+                    fieldSelectionBuilder.Append(field.name.Indented(field.ancestors + 2));
+                    fieldSelectionBuilder.AppendLine(" {");
+                }
+                else
+                {
+                    fieldSelectionBuilder.AppendLine(field.name.Indented(field.ancestors + 2));
                 }
 
                 previousField = field;
             }
 
-            // check what kind of query it is and construct the query string accordingly
-            var arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
-            var word = type switch
+            if (fieldSelectionBuilder.Length > 0)
             {
-                Type.Query => "query",
-                Type.Mutation => "mutation",
-                Type.Subscription => "subscription",
-                _ => "query"
-            };
-
-            query = data == null
-                ? $"{word} {name}{{\n{GenerateStringTabs(1)}{queryString}{arg}\n}}"
-                : $"{word} {name}{{\n{GenerateStringTabs(1)}{queryString}{arg}{{{data}\n{GenerateStringTabs(1)}}}\n}}";
-        }
-
-        private string GenerateStringTabs(int number)
-        {
-            string result = "";
-            for (int i = 0; i < number; i++)
-            {
-                result += "    ";
+                fieldSelectionBuilder.Insert(0, "{\n");
+                fieldSelectionBuilder.Append("}".Indented(1));
             }
-
-            return result;
+            
+            // check what kind of query it is and construct the query string accordingly
+            var arg = string.IsNullOrEmpty(_args) ? "" : $"({_args})";
+            query =
+$@"{operationType.ToKeyword()} {name} {{
+    {queryString}{arg} {fieldSelectionBuilder}
+}}";
         }
     }
 
@@ -185,4 +176,30 @@ namespace Portkey.GraphQL
             return new Field { name = schemaField.name, type = typeName };
         }
     }
+
+    internal static class StringExtension
+    {
+        private const int IndentSize = 4;
+        public static string Indented(this string expression, int indent)
+        {
+            var sb = new StringBuilder();
+            sb.Insert(0, " ", indent * IndentSize);
+            sb.Append(expression);
+            return sb.ToString();
+        }
+    }
+    internal static class OperationTypeExtension
+    {
+        public static string ToKeyword(this GraphQLQuery.OperationType operationType)
+        {
+            return operationType switch
+            {
+                GraphQLQuery.OperationType.Query => "query",
+                GraphQLQuery.OperationType.Mutation => "mutation",
+                GraphQLQuery.OperationType.Subscription => "subscription",
+                _ => "query"
+            };
+        }
+    }
+
 }

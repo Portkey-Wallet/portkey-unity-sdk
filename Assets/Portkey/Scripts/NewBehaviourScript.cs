@@ -18,12 +18,13 @@ public class NewBehaviourScript : MonoBehaviour
 
     private async void Request()
     {
-        IContract contract = new AElfContractBasic();
+        /*
+        IContract contract = new ContractBasic();
 
         var result = await contract.CallTransactionAsync<GetVerifierServersOutput>("", 
             "GetVerifierServers", new Empty());
         
-        Debugger.Log(result.VerifierServers[0]);
+        Debugger.Log(result.VerifierServers[0]);*/
     }
 
     // Update is called once per frame

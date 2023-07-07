@@ -26,10 +26,12 @@ namespace Portkey.Core
 
     public interface IContract
     {
+        string ContractAddress { get; }
+        /*
         IEnumerator CallViewMethod(string methodName, object[] paramOptions, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback);
         IEnumerator CallSendMethod(string methodName, object[] paramOptions, SendOptions sendOptions, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback);
         IEnumerator EncodeTx(string methodName, object[] paramOptions, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback);
-
-        Task<T> CallTransactionAsync<T>(string chainId, string methodName, IMessage param) where T : IMessage<T>, new();
+        */
+        Task<T> CallTransactionAsync<T>(string methodName, IMessage param) where T : IMessage<T>, new();
     }
 }

@@ -1,15 +1,34 @@
+using System.Threading.Tasks;
 using AElf.Client;
+using AElf.Client.Dto;
+using AElf.Types;
+using Google.Protobuf;
 using Portkey.Core;
 
 namespace Portkey.Chain
 {
     public class AElfChain : IChain
     {
-        public AElfClient Client { get; protected set; }
+        private AElfClient _aelfClient;
 
         public AElfChain(string rpcUrl)
         {
-            Client = new AElfClient(rpcUrl);
+            _aelfClient = new AElfClient(rpcUrl);
+        }
+
+        public async Task<Transaction> GenerateTransactionAsync(string from, string to, string methodName, IMessage input)
+        {
+            return await _aelfClient.GenerateTransactionAsync(from, to, methodName, input);
+        }
+
+        public Transaction SignTransaction(string privateKeyHex, Transaction transaction)
+        {
+            return _aelfClient.SignTransaction(privateKeyHex, transaction);
+        }
+
+        public async Task<string> ExecuteTransactionAsync(ExecuteTransactionDto input)
+        {
+            return await _aelfClient.ExecuteTransactionAsync(input);
         }
     }
 }

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff6e57f4326f74baf85a3434bd0e2b4f, type: 3}
   m_Name: PortkeyTestConfig
   m_EditorClassIdentifier: 
-  apiBaseUrl: https://localtest-applesign.portkey.finance
-  chainInfos:
-  - chainId: did-i-test-aelf-main-BP-01
+  _apiBaseUrl: 
+  _chainInfos:
+  - chainId: TestMain
     rpcUrl: http://192.168.66.61:8000
-    contracts:
-    - contractName: CAContract
+    contractInfos:
+    - contractId: CAContract
       contractAddress: 2imqjpkCwnvYzfnr61Lp2XQVN2JU17LPkA9AZzmRZzV5LRRWmR

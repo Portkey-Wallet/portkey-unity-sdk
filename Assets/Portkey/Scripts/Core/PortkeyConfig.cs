@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Portkey.Core
 {
@@ -7,24 +10,58 @@ namespace Portkey.Core
     /// Portkey configuration object. Contains only config data.
     /// </summary>
     [CreateAssetMenu(fileName = "PortkeyConfig", menuName = "Portkey/PortkeyConfig", order = 1)]
-    public class PortkeyConfig : ScriptableObject
+    public class PortkeyConfig : ScriptableObject, ISerializationCallbackReceiver
     {
         [Serializable]
-        public class ChainInfo
+        public class ChainInfo : ISerializationCallbackReceiver
         {
-            public string chainId;
-            public string rpcUrl;
-            public ContractInfo[] contracts;
+            [SerializeField]
+            private string chainId;
+            [SerializeField]
+            private string rpcUrl;
+            [SerializeField]
+            private ContractInfo[] contractInfos;
+
+            public string ChainId => chainId;
+            public string RpcUrl => rpcUrl;
+            public Dictionary<string, ContractInfo> ContractInfos { get; private set; }
+            public void OnBeforeSerialize()
+            {
+            }
+
+            public void OnAfterDeserialize()
+            {
+                ContractInfos = contractInfos?.ToDictionary(contractInfo => contractInfo.ContractId, contractInfo => contractInfo);
+            }
         }
         
         [Serializable]
         public class ContractInfo
         {
-            public string contractName;
-            public string contractAddress;
-        }
+            [SerializeField]
+            private string contractId;
+            [SerializeField]
+            private string contractAddress;
             
-        public string apiBaseUrl;
-        public ChainInfo[] chainInfos;
+            public string ContractId => contractId;
+            public string ContractAddress => contractAddress;
+        }
+
+        [SerializeField]
+        private string _apiBaseUrl;
+        [SerializeField]
+        private ChainInfo[] _chainInfos;
+        
+        public Dictionary<string, ChainInfo> ChainInfos { get; private set; }
+        public string ApiBaseUrl => _apiBaseUrl;
+
+        public void OnBeforeSerialize()
+        {
+        }
+
+        public void OnAfterDeserialize()
+        {
+            ChainInfos = _chainInfos?.ToDictionary(chainInfo => chainInfo.ChainId, chainInfo => chainInfo);
+        }
     }
 }

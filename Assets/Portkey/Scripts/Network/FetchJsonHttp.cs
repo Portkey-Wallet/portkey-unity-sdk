@@ -43,7 +43,7 @@ namespace Portkey.Network
             successCallback(request.downloadHandler.text);
         }
 
-        public override IEnumerator Post(string url, string jsonData, string body, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Post(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
             jsonData??=string.Empty;
             

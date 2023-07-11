@@ -10,15 +10,15 @@ namespace Portkey.Network
     {
         [SerializeField] private string caHolderManagerInfoResponse;
         [SerializeField] private string loginGuardianInfoResponse;
-        public override IEnumerator Get(string url, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Get(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
             errorCallback("Should not be called!");
             yield break;
         }
 
-        public override IEnumerator Post(string url, string body, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Post(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
-            if (body.Contains("caHolderManagerInfo"))
+            if (jsonData.Contains("caHolderManagerInfo"))
             {
                 successCallback(caHolderManagerInfoResponse);
             }

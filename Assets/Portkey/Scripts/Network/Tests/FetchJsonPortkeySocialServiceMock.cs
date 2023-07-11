@@ -10,7 +10,7 @@ namespace Portkey.Network
         private int _registerStatusCallTimes = 0;
         private int _recoverStatusCallTimes = 0;
         
-        public IEnumerator Get(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Get(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
             var subUrl = url.Replace("https://test.mock", "");
             switch (subUrl)
@@ -76,7 +76,7 @@ namespace Portkey.Network
             }
         }
 
-        public IEnumerator Post(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Post(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
             var subUrl = url.Replace("https://test.mock", "");
             switch (subUrl)

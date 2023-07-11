@@ -18,11 +18,15 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       # TODO for running unity unit test on push. Currently we do not have license to run this.
       # Refer: https://game.ci/docs/github/test-runner/
-      #- name: Unity - Test runner
-      #  uses: game-ci/unity-test-runner@v2.1.1
-      #  env:
-      #    UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-      #  with:
-      #    projectPath: path/to/your/project
-      #    githubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache Library
+        uses: actions/cache@v2
+        with:
+            path: Library
+            key: Library
+      - name: Unity - Test runner
+        uses: game-ci/unity-test-runner@v2.1.1
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 

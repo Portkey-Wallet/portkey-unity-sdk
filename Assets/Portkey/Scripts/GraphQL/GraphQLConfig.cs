@@ -51,7 +51,8 @@ namespace Portkey.GraphQL
 
         public IEnumerator Query<T>(string query, IGraphQL.successCallback<T> successCallback, IGraphQL.errorCallback errorCallback)
         {
-            return request.Post(url, query, 
+            var jsonData = JsonConvert.SerializeObject(new{query});
+            return request.Post(url, jsonData, 
                 (response) =>
                                 {
                                     var json = JObject.Parse(response);

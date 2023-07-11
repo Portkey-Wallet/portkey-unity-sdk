@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using AElf;
 using AElf.Client.Dto;
 using AElf.Client.Extensions;
 using AElf.Types;
@@ -11,6 +10,7 @@ using Portkey.Contract;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
+using UnityEngine.TestTools;
 using Transaction = AElf.Types.Transaction;
 
 namespace Portkey.Test
@@ -91,9 +91,12 @@ namespace Portkey.Test
         [Test]
         public void ContractGetVerifierServersExceptionTest()
         {
+            const string EXCEPION_MESSAGE = "Failed to execute tx.";
+            LogAssert.ignoreFailingMessages = true;
+            
             var config = PortkeyUtilities.GetConfig<PortkeyConfig>("PortkeyTestConfig");
             var testMainChain = config.ChainInfos["TestMain"];
-            IChain aelfChainMock = new AElfChainMock((() => throw new Exception("Failed to execute tx.")));
+            IChain aelfChainMock = new AElfChainMock((() => throw new Exception(EXCEPION_MESSAGE)));
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
             var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_wallet, "GetVerifierServers", new Empty()));

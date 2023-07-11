@@ -4,6 +4,7 @@ using AElf;
 using AElf.Client.Dto;
 using Google.Protobuf;
 using Portkey.Core;
+using UnityEngine;
 
 namespace Portkey.Contract
 {

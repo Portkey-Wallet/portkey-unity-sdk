@@ -4,34 +4,21 @@ using Google.Protobuf;
 
 namespace Portkey.Core
 {
-    public class SendOptions
-    {
-        public string From { get; private set; }
-        public string GasPrice { get; private set; }
-        public int Gas { get; private set; }
-        public int Value { get; private set; }
-        public int Nonce { get; private set; }
-        public string OnMethod { get; private set; }
-        
-        public SendOptions(string onMethod, string from = null, string gasPrice = null, int gas = -1, int value = -1, int nonce = -1)
-        {
-            From = from;
-            GasPrice = gasPrice;
-            Gas = gas;
-            Value = value;
-            Nonce = nonce;
-            OnMethod = onMethod;
-        }
-    }
-
+    /// <summary>
+    /// Contract interface for interacting with a smart contract.
+    /// </summary>
     public interface IContract
     {
         string ContractAddress { get; }
-        /*
-        IEnumerator CallViewMethod(string methodName, object[] paramOptions, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback);
-        IEnumerator CallSendMethod(string methodName, object[] paramOptions, SendOptions sendOptions, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback);
-        IEnumerator EncodeTx(string methodName, object[] paramOptions, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback);
-        */
-        Task<T> CallTransactionAsync<T>(string methodName, IMessage param) where T : IMessage<T>, new();
+        
+        /// <summary>
+        /// CallTransactionAsync is a generic method that can be used to call a contract method and execute the transaction.
+        /// </summary>
+        /// <param name="wallet">EOA Wallet to sign the transaction with.</param>
+        /// <param name="methodName">Name of the method to call from the contract.</param>
+        /// <param name="param">Parameters for calling the method from the contract.</param>
+        /// <typeparam name="T">Protobuf IMessage inherited classes corresponding to the called contract method.</typeparam>
+        /// <returns>Results in the form of IMessage.</returns>
+        Task<T> CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param) where T : IMessage<T>, new();
     }
 }

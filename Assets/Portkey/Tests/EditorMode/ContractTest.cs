@@ -15,6 +15,10 @@ using Transaction = AElf.Types.Transaction;
 
 namespace Portkey.Test
 {
+    /// <summary>
+    /// AElfChainMock is a mock of AElfChain, which is used to test the ContractBasic class.
+    /// It basically mocks the method of AElfClient.
+    /// </summary>
     public class AElfChainMock : IChain
     { 
         public delegate void BodyMock();
@@ -35,9 +39,7 @@ namespace Portkey.Test
                 From = from.ToAddress(),
                 To = Address.FromBase58(to),
                 MethodName = methodName,
-                Params = input.ToByteString(),
-                RefBlockNumber = 100000,
-                RefBlockPrefix = ByteString.CopyFrom("1234".GetBytes(), 0, 4)
+                Params = input.ToByteString()
             };
 
             GenerateTransactionAsyncBodyMock();
@@ -58,8 +60,18 @@ namespace Portkey.Test
         }
     }
 
+    /// <summary>
+    /// ContractTest is a class to test ContractBasic functionalities.
+    /// </summary>
     public class ContractTest
     {
+        private readonly BlockchainWallet _wallet = new BlockchainWallet("TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T",
+                                                                        "83829798ac92d428ed13b29fe60ace1a7a10e7a347bdc9f23a85615339068f1c",
+                                                                        "mock");
+        
+        /// <summary>
+        /// Create a test to get verifier servers from contract.
+        /// </summary>
         [Test]
         public void ContractGetVerifierServersTest()
         {
@@ -68,11 +80,14 @@ namespace Portkey.Test
             IChain aelfChainMock = new AElfChainMock();
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>("GetVerifierServers", new Empty()));
+            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_wallet, "GetVerifierServers", new Empty()));
         
             Assert.AreEqual("594ebf395cdba58b0e725d71eb3c1a17d57662b0667a92f770f341d4e794b76b", result.VerifierServers[0].Id.ToHex());
         }
         
+        /// <summary>
+        /// Create a test to make sure the handling of errors for contract basic is working.
+        /// </summary>
         [Test]
         public void ContractGetVerifierServersExceptionTest()
         {
@@ -81,9 +96,9 @@ namespace Portkey.Test
             IChain aelfChainMock = new AElfChainMock((() => throw new Exception("Failed to execute tx.")));
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>("GetVerifierServers", new Empty()));
+            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_wallet, "GetVerifierServers", new Empty()));
         
-            Assert.AreEqual(new GetVerifierServersOutput(), result);
+            Assert.AreEqual(0, result.VerifierServers.Count);
         }
     }
 }

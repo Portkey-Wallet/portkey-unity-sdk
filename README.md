@@ -44,9 +44,7 @@ To start using the Portkey Unity SDK, follow these steps:
     - cd to Tools/ directory.
     - Execute the following commands in your Terminal
         ```
-        npm i graphql
-        npm i -D typescript @graphql-codegen/cli
-        npm i @graphql-codegen/c-sharp
+        npm install
         npm run codegen
         ```
     - The generated C# code will appear in Assets/Portkey/Scripts/__Generated__/GraphQLCodeGen.cs

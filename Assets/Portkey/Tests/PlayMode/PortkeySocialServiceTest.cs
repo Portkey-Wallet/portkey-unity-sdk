@@ -95,7 +95,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator GetRegisterStatusTest()
         {
-            bool done = false;
+            var done = false;
             
             var options = new QueryOptions
             {
@@ -119,7 +119,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator GetRegisterStatusBadParameterTest()
         {
-            bool done = false;
+            var done = false;
             
             var options = new QueryOptions
             {
@@ -143,7 +143,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator GetRecoverStatusTest()
         {
-            bool done = false;
+            var done = false;
             
             var options = new QueryOptions
             {
@@ -167,7 +167,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator GetRecoverStatusBadParameterTest()
         {
-            bool done = false;
+            var done = false;
             
             var options = new QueryOptions
             {
@@ -191,7 +191,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator VerifyVerificationCodeTest()
         {
-            bool done = false;
+            var done = false;
 
             var requestParams = new VerifyVerificationCodeParams()
             {

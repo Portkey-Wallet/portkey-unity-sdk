@@ -107,47 +107,47 @@ namespace Portkey.DID
                 yield break;
             }
             
-            yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
+            SuccessCallback<ArrayWrapper<RegisterStatusResult>> wrappedSuccessCallback = (ArrayWrapper<RegisterStatusResult> response) =>
             {
-                StartCoroutine(GetRegisterStatus(id, queryOptions, ret, (ArrayWrapper<RegisterStatusResult> response) =>
+                if (response.items == null || response.items.Length == 0)
                 {
-                    if (response.items == null || response.items.Length == 0)
-                    {
-                        errorCallback("response.items is null");
-                        return;
-                    }
-                    successCallback(response.items[0]);
-                }, errorCallback));
-            }, errorCallback);
-        }
-        
-        private IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<ArrayWrapper<RegisterStatusResult>> successCallback, ErrorCallback errorCallback)
-        {
-            if(queryOptions.reCount > queryOptions.maxCount)
-            {
-                errorCallback("timeout");
-                yield break;
-            }
+                    errorCallback("response.items is null");
+                    return;
+                }
+                successCallback(response.items[0]);
+            };
             
             yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
             {
-                StartCoroutine(GetRegisterStatus(id, queryOptions, ret, successCallback, errorCallback));
+                StartCoroutine(IsRepollNeeded(ret));
             }, errorCallback);
-        }
-
-        private IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, ArrayWrapper<RegisterStatusResult> requestParam,
-            SuccessCallback<ArrayWrapper<RegisterStatusResult>> successCallback, ErrorCallback errorCallback)
-        {
-            if(requestParam == null || requestParam.items == null || 
-               requestParam.items.Length == 0 || requestParam.items[0].registerStatus == "pending")
+            
+            IEnumerator Repoll()
             {
-                yield return new WaitForSeconds(queryOptions.interval);
-                ++queryOptions.reCount;
-                yield return StartCoroutine(GetRegisterStatus(id, queryOptions, successCallback, errorCallback));
+                if(queryOptions.reCount > queryOptions.maxCount)
+                {
+                    errorCallback("timeout");
+                    yield break;
+                }
+            
+                yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
+                {
+                    StartCoroutine(IsRepollNeeded(ret));
+                }, errorCallback);
             }
-            else
+            
+            IEnumerator IsRepollNeeded(ArrayWrapper<RegisterStatusResult> requestParam)
             {
-                successCallback(requestParam);
+                if(requestParam?.items == null || requestParam.items.Length == 0 || requestParam.items[0].registerStatus == "pending")
+                {
+                    yield return new WaitForSeconds(queryOptions.interval);
+                    ++queryOptions.reCount;
+                    yield return StartCoroutine(Repoll());
+                }
+                else
+                {
+                    wrappedSuccessCallback(requestParam);
+                }
             }
         }
 
@@ -158,47 +158,49 @@ namespace Portkey.DID
                 errorCallback("timeout");
                 yield break;
             }
-            yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
+            
+            SuccessCallback<ArrayWrapper<RecoverStatusResult>> wrappedSuccessCallback = (ArrayWrapper<RecoverStatusResult> response) =>
             {
-                StartCoroutine(GetRecoverStatus(id, queryOptions, ret, (ArrayWrapper<RecoverStatusResult> response) =>
+                if (response.items == null || response.items.Length == 0)
                 {
-                    if (response.items == null || response.items.Length == 0)
-                    {
-                        errorCallback("response.items is null");
-                        return;
-                    }
-                    successCallback(response.items[0]);
-                }, errorCallback));
-            }, errorCallback);
-        }
-        
-        private IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, SuccessCallback<ArrayWrapper<RecoverStatusResult>> successCallback, ErrorCallback errorCallback)
-        {
-            if(queryOptions.reCount > queryOptions.maxCount)
-            {
-                errorCallback("timeout");
-                yield break;
-            }
+                    errorCallback("response.items is null");
+                    return;
+                }
+
+                successCallback(response.items[0]);
+            };
             
             yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
             {
-                StartCoroutine(GetRecoverStatus(id, queryOptions, ret, successCallback, errorCallback));
+                StartCoroutine(IsRepollNeeded(ret));
             }, errorCallback);
-        }
-        
-        private IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, ArrayWrapper<RecoverStatusResult> requestParam,
-            SuccessCallback<ArrayWrapper<RecoverStatusResult>> successCallback, ErrorCallback errorCallback)
-        {
-            if(requestParam == null || requestParam.items == null || 
-               requestParam.items.Length == 0 || requestParam.items[0].recoveryStatus == "pending")
+            
+            IEnumerator Repoll()
             {
-                yield return new WaitForSeconds(queryOptions.interval);
-                ++queryOptions.reCount;
-                yield return StartCoroutine(GetRecoverStatus(id, queryOptions, successCallback, errorCallback));
+                if(queryOptions.reCount > queryOptions.maxCount)
+                {
+                    errorCallback("timeout");
+                    yield break;
+                }
+            
+                yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
+                {
+                    StartCoroutine(IsRepollNeeded(ret));
+                }, errorCallback);
             }
-            else
+            
+            IEnumerator IsRepollNeeded(ArrayWrapper<RecoverStatusResult> requestParam)
             {
-                successCallback(requestParam);
+                if(requestParam?.items == null || requestParam.items.Length == 0 || requestParam.items[0].recoveryStatus == "pending")
+                {
+                    yield return new WaitForSeconds(queryOptions.interval);
+                    ++queryOptions.reCount;
+                    yield return StartCoroutine(Repoll());
+                }
+                else
+                {
+                    wrappedSuccessCallback(requestParam);
+                }
             }
         }
 

@@ -7,6 +7,9 @@ using Portkey.Core;
 
 namespace Portkey.Chain
 {
+    /// <summary>
+    /// AElfChain is a wrapper around AElfClient to implement chain related methods.
+    /// </summary>
     public class AElfChain : IChain
     {
         private AElfClient _aelfClient;

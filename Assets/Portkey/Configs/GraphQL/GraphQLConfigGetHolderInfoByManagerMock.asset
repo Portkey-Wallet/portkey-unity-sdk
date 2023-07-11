@@ -15,7 +15,7 @@ MonoBehaviour:
   url: https://dapp-portkey-test.portkey.finance/Portkey_DID/PortKeyIndexerCASchema/graphql
   queries:
   - name: loginGuardianInfo
-    type: 0
+    operationType: 0
     query: 
     queryString: loginGuardianInfo
     returnType: LoginGuardianDto
@@ -238,7 +238,7 @@ MonoBehaviour:
       hasChanged: 0
     isComplete: 0
   - name: caHolderManagerInfo
-    type: 0
+    operationType: 0
     query: 
     queryString: caHolderManagerInfo
     returnType: CAHolderManagerDto

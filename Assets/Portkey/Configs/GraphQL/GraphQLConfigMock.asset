@@ -15,7 +15,7 @@ MonoBehaviour:
   url: https://dapp-portkey-test.portkey.finance/Portkey_DID/PortKeyIndexerCASchema/graphql
   queries:
   - name: GetCAHolderInfo
-    type: 0
+    operationType: 0
     query: 
     queryString: caHolderInfo
     returnType: CAHolderInfoDto

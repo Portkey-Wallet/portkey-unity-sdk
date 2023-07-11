@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Portkey.Core;
 using Portkey.Storage;
@@ -188,7 +187,7 @@ namespace Portkey.GraphQL
                 return;
             }
             queries ??= new List<GraphQLQuery>();
-            var query = new GraphQLQuery{fields = new List<Field>(), queryOptions = new List<string>(), type = GraphQLQuery.Type.Query};
+            var query = new GraphQLQuery{fields = new List<Field>(), queryOptions = new List<string>(), operationType = GraphQLQuery.OperationType.Query};
             
             var queryType = _schemaClass.data.__schema.types.Find((aType => aType.name == _queryEndpoint));
             for (int i = 0; i < queryType.fields.Count; i++){

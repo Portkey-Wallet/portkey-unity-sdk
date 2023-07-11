@@ -8,7 +8,7 @@ namespace Portkey.Core
         public string PrivateKey { get; private set; }
         public string Mnemonic { get; private set; }
         
-        public BlockchainWallet(string bip44Path, string address, string privateKey, Object keyPair, BlockchainWallet childWallet, string mnemonic)
+        public BlockchainWallet(string address, string privateKey, string mnemonic)
         {
             Address = address;
             PrivateKey = privateKey;

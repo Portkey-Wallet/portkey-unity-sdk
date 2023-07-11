@@ -14,168 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   url: https://dapp-portkey-test.portkey.finance/Portkey_DID/PortKeyIndexerCASchema/graphql
   queries:
-  - name: caHolderManagerInfo
-    type: 0
-    query: 
-    queryString: caHolderManagerInfo
-    returnType: CAHolderManagerDto
-    queryOptions:
-    - tokenInfo
-    - caHolderTransaction
-    - twoCaHolderTransaction
-    - caHolderTransactionInfo
-    - caHolderManagerInfo
-    - caHolderInfo
-    - loginGuardianInfo
-    - caHolderNFTCollectionBalanceInfo
-    - caHolderNFTBalanceInfo
-    - caHolderTokenBalanceInfo
-    - caHolderBingoInfo
-    - caHolderTransactionAddressInfo
-    - loginGuardianChangeRecordInfo
-    - caHolderManagerChangeRecordInfo
-    - caHolderSearchTokenNFT
-    - syncState
-    fields:
-    - index: 0
-      name: id
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
-      hasChanged: 0
-    - index: 1
-      name: chainId
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
-      hasChanged: 0
-    - index: 2
-      name: caHash
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
-      hasChanged: 0
-    - index: 3
-      name: caAddress
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
-      hasChanged: 0
-    - index: 4
-      name: managerInfos
-      type: ManagerInfo
-      parentIndexes: 
-      hasSubField: 1
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
-      hasChanged: 0
-    - index: 1
-      name: extraData
-      type: String
-      parentIndexes: 04000000
-      hasSubField: 0
-      possibleFields:
-      - name: address
-        type: String
-      - name: extraData
-        type: String
-      hasChanged: 0
-    - index: 0
-      name: address
-      type: String
-      parentIndexes: 04000000
-      hasSubField: 0
-      possibleFields:
-      - name: address
-        type: String
-      - name: extraData
-        type: String
-      hasChanged: 0
-    - index: 5
-      name: originChainId
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: managerInfos
-        type: ManagerInfo
-      - name: originChainId
-        type: String
-      hasChanged: 0
-    isComplete: 0
   - name: loginGuardianInfo
-    type: 0
+    operationType: 0
     query: 
     queryString: loginGuardianInfo
     returnType: LoginGuardianDto
@@ -197,107 +37,12 @@ MonoBehaviour:
     - caHolderSearchTokenNFT
     - syncState
     fields:
-    - index: 0
-      name: id
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
-      hasChanged: 0
-    - index: 1
-      name: chainId
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
-      hasChanged: 0
-    - index: 2
-      name: caHash
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
-      hasChanged: 0
-    - index: 3
-      name: caAddress
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
-      hasChanged: 0
-    - index: 4
-      name: manager
-      type: String
-      parentIndexes: 
-      hasSubField: 0
-      possibleFields:
-      - name: id
-        type: String
-      - name: chainId
-        type: String
-      - name: caHash
-        type: String
-      - name: caAddress
-        type: String
-      - name: manager
-        type: String
-      - name: loginGuardian
-        type: GuardianDto
-      hasChanged: 0
     - index: 5
       name: loginGuardian
       type: GuardianDto
-      parentIndexes: 
+      ancestors: 0
       hasSubField: 1
-      possibleFields:
+      fieldOptions:
       - name: id
         type: String
       - name: chainId
@@ -314,9 +59,9 @@ MonoBehaviour:
     - index: 4
       name: isLoginGuardian
       type: Boolean
-      parentIndexes: 05000000
+      ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -331,9 +76,9 @@ MonoBehaviour:
     - index: 3
       name: salt
       type: String
-      parentIndexes: 05000000
+      ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -348,9 +93,9 @@ MonoBehaviour:
     - index: 2
       name: identifierHash
       type: String
-      parentIndexes: 05000000
+      ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -365,9 +110,9 @@ MonoBehaviour:
     - index: 1
       name: verifierId
       type: String
-      parentIndexes: 05000000
+      ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -382,9 +127,9 @@ MonoBehaviour:
     - index: 0
       name: type
       type: Int
-      parentIndexes: 05000000
+      ancestors: 1
       hasSubField: 0
-      possibleFields:
+      fieldOptions:
       - name: type
         type: Int
       - name: verifierId
@@ -395,6 +140,261 @@ MonoBehaviour:
         type: String
       - name: isLoginGuardian
         type: Boolean
+      hasChanged: 0
+    - index: 4
+      name: manager
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 3
+      name: caAddress
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 2
+      name: caHash
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 1
+      name: chainId
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 0
+      name: id
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    isComplete: 0
+  - name: caHolderManagerInfo
+    operationType: 0
+    query: 
+    queryString: caHolderManagerInfo
+    returnType: CAHolderManagerDto
+    queryOptions:
+    - tokenInfo
+    - caHolderTransaction
+    - twoCaHolderTransaction
+    - caHolderTransactionInfo
+    - caHolderManagerInfo
+    - caHolderInfo
+    - loginGuardianInfo
+    - caHolderNFTCollectionBalanceInfo
+    - caHolderNFTBalanceInfo
+    - caHolderTokenBalanceInfo
+    - caHolderBingoInfo
+    - caHolderTransactionAddressInfo
+    - loginGuardianChangeRecordInfo
+    - caHolderManagerChangeRecordInfo
+    - caHolderSearchTokenNFT
+    - syncState
+    fields:
+    - index: 5
+      name: originChainId
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 4
+      name: managerInfos
+      type: ManagerInfo
+      ancestors: 0
+      hasSubField: 1
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 1
+      name: extraData
+      type: String
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: address
+        type: String
+      - name: extraData
+        type: String
+      hasChanged: 0
+    - index: 0
+      name: address
+      type: String
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: address
+        type: String
+      - name: extraData
+        type: String
+      hasChanged: 0
+    - index: 3
+      name: caAddress
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 2
+      name: caHash
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 1
+      name: chainId
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 0
+      name: id
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
       hasChanged: 0
     isComplete: 0
   request: {fileID: 11400000, guid: d6ad6dc445c9d458abbff60d4e8338a8, type: 2}

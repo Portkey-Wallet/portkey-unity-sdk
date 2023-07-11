@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace Portkey.GraphQL
@@ -9,7 +9,7 @@ namespace Portkey.GraphQL
     public class GraphQLQuery
     {
         public string name;
-        public Type type;
+        public OperationType operationType = OperationType.Query;
         public string query;
         public string queryString;
         public string returnType;
@@ -19,7 +19,7 @@ namespace Portkey.GraphQL
         
         private string _args;
 
-        public enum Type
+        public enum OperationType
         {
             Query,
             Mutation,
@@ -38,13 +38,13 @@ namespace Portkey.GraphQL
                 Core.Debugger.LogException(e);
                 throw;
             }
-            CompleteQuery();
+            BuildQueryString();
         }
 
         public void SetArgs(string inputString)
         {
             _args = inputString;
-            CompleteQuery();
+            BuildQueryString();
         }
 
 
@@ -53,121 +53,51 @@ namespace Portkey.GraphQL
         /// Each field has parentIndexes which is a list of indexes of the fields that are its parents.
         /// The last element in parentIndexes is the immediate parent of the field, moving up as the index decreases.
         /// </summary>
-        public void CompleteQuery()
+        public void BuildQueryString()
         {
             isComplete = true;
-            string data = null;
-            string parent = null;
+            var fieldSelectionBuilder = new StringBuilder();
             Field previousField = null;
-            for (int i = 0; i < fields.Count; i++)
+            foreach (var field in fields)
             {
-                var field = fields[i];
-                // If the current field has no parent
-                if (field.parentIndexes.Count == 0)
+                // if there was a parent on the previous field, check if we need to close brackets
+                if (previousField != null && previousField.ancestors > 0)
                 {
-                    // if there was a parent on the previous field but not on this one, we need to close brackets for the previous field
-                    if (parent != null)
-                    {
-                        // find out how many closing bracket to output based on the amount of parents the previous field had
-                        int count = previousField.parentIndexes.Count - field.parentIndexes.Count;
-                        while (count > 0)
-                        {
-                            data += $"\n{GenerateStringTabs(count + 1)}}}";
-                            count--;
-                        }
-                        
-                        parent = null;
-                    }
-                    
-                    //output the current field with indentation
-                    data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-
-                    previousField = field;
-                    continue;
-                }
-
-                // for handling fields with parents
-                // if the current field has an immediate parent that is different from the previous field's parent
-                if (fields[field.parentIndexes.Last()].name != parent)
-                {
-                    parent = fields[field.parentIndexes.Last()].name;
-
-                    // if the field's immediate parent is the previous field
-                    if (fields[field.parentIndexes.Last()] == previousField)
-                    {
-                        // output the current field with corresponding indentation
-                        data += $"{{\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-                    }
-                    // else we have to close the brackets for the previous field and output the current field with corresponding indentation
-                    else
-                    {
-                        // find out how many closing bracket to output based on the amount of parents the previous field had
-                        int count = previousField.parentIndexes.Count - field.parentIndexes.Count;
-                        while (count > 0)
-                        {
-                            data += $"\n{GenerateStringTabs(count + 1)}}}";
-                            count--;
-                        }
-
-                        data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-                    }
-
-                    previousField = field;
-
-                }
-                else
-                {
-                    // since this field is under the same parent, we simply output with the corresponding indentation
-                    data += $"\n{GenerateStringTabs(field.parentIndexes.Count + 2)}{field.name}";
-                    previousField = field;
-                }
-
-                // if this is the last field, we need to close all the brackets
-                if (i == fields.Count - 1)
-                {
-                    int count = previousField.parentIndexes.Count;
+                    // find out how many closing bracket to output based on the amount of ancestors the previous field had
+                    var count = previousField.ancestors - field.ancestors;
                     while (count > 0)
                     {
-                        data += $"\n{GenerateStringTabs(count + 1)}}}";
+                        fieldSelectionBuilder.AppendLine("}".Indented(count + 1));
                         count--;
                     }
                 }
+                
+                //output the current field with indentation
+                if(field.hasSubField)
+                {
+                    fieldSelectionBuilder.Append(field.name.Indented(field.ancestors + 2));
+                    fieldSelectionBuilder.AppendLine(" {");
+                }
+                else
+                {
+                    fieldSelectionBuilder.AppendLine(field.name.Indented(field.ancestors + 2));
+                }
 
+                previousField = field;
             }
 
+            if (fieldSelectionBuilder.Length > 0)
+            {
+                fieldSelectionBuilder.Insert(0, "{\n");
+                fieldSelectionBuilder.Append("}".Indented(1));
+            }
+            
             // check what kind of query it is and construct the query string accordingly
-            var arg = String.IsNullOrEmpty(_args) ? "" : $"({_args})";
-            string word;
-            switch (type)
-            {
-                case Type.Query:
-                    word = "query";
-                    break;
-                case Type.Mutation:
-                    word = "mutation";
-                    break;
-                case Type.Subscription:
-                    word = "subscription";
-                    break;
-                default:
-                    word = "query";
-                    break;
-            }
-
-            query = data == null
-                ? $"{word} {name}{{\n{GenerateStringTabs(1)}{queryString}{arg}\n}}"
-                : $"{word} {name}{{\n{GenerateStringTabs(1)}{queryString}{arg}{{{data}\n{GenerateStringTabs(1)}}}\n}}";
-        }
-
-        private string GenerateStringTabs(int number)
-        {
-            string result = "";
-            for (int i = 0; i < number; i++)
-            {
-                result += "    ";
-            }
-
-            return result;
+            var arg = string.IsNullOrEmpty(_args) ? "" : $"({_args})";
+            query =
+$@"{operationType.ToKeyword()} {name} {{
+    {queryString}{arg} {fieldSelectionBuilder}
+}}";
         }
     }
 
@@ -181,8 +111,8 @@ namespace Portkey.GraphQL
             get => index;
             set
             {
-                type = possibleFields[value].type;
-                name = possibleFields[value].name;
+                type = fieldOptions[value].type;
+                name = fieldOptions[value].name;
                 if (value != index)
                     hasChanged = true;
                 index = value;
@@ -192,16 +122,16 @@ namespace Portkey.GraphQL
 
         public string name;
         public string type;
-        public List<int> parentIndexes;
+        public int ancestors;
         public bool hasSubField;
-        public List<PossibleField> possibleFields;
+        public List<FieldOption> fieldOptions;
 
         public bool hasChanged;
 
         public Field()
         {
-            possibleFields = new List<PossibleField>();
-            parentIndexes = new List<int>();
+            fieldOptions = new List<FieldOption>();
+            ancestors = 0;
             index = 0;
         }
 
@@ -222,14 +152,14 @@ namespace Portkey.GraphQL
         }
 
         [Serializable]
-        public class PossibleField
+        public class FieldOption
         {
             public string name;
             public string type;
 
-            public static implicit operator PossibleField(Field field)
+            public static implicit operator FieldOption(Field field)
             {
-                return new PossibleField { name = field.name, type = field.type };
+                return new FieldOption { name = field.name, type = field.type };
             }
         }
 
@@ -246,4 +176,30 @@ namespace Portkey.GraphQL
             return new Field { name = schemaField.name, type = typeName };
         }
     }
+
+    internal static class StringExtension
+    {
+        private const int IndentSize = 4;
+        public static string Indented(this string expression, int indent)
+        {
+            var sb = new StringBuilder();
+            sb.Append(' ', indent * IndentSize);
+            sb.Append(expression);
+            return sb.ToString();
+        }
+    }
+    internal static class OperationTypeExtension
+    {
+        public static string ToKeyword(this GraphQLQuery.OperationType operationType)
+        {
+            return operationType switch
+            {
+                GraphQLQuery.OperationType.Query => "query",
+                GraphQLQuery.OperationType.Mutation => "mutation",
+                GraphQLQuery.OperationType.Subscription => "subscription",
+                _ => "query"
+            };
+        }
+    }
+
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Portkey.Core
 {
@@ -24,6 +23,10 @@ namespace Portkey.Core
 
             public string ChainId => chainId;
             public string RpcUrl => rpcUrl;
+            
+            /// <summary>
+            /// A getter for the contract infos for contracts that are deployed on this chain.
+            /// </summary>
             public Dictionary<string, ContractInfo> ContractInfos { get; private set; }
             public void OnBeforeSerialize()
             {
@@ -31,6 +34,7 @@ namespace Portkey.Core
 
             public void OnAfterDeserialize()
             {
+                // create a runtime dictionary to access the contract infos by contract id since dictionaries are not serializable
                 ContractInfos = contractInfos?.ToDictionary(contractInfo => contractInfo.ContractId, contractInfo => contractInfo);
             }
         }
@@ -48,12 +52,15 @@ namespace Portkey.Core
         }
 
         [SerializeField]
-        private string _apiBaseUrl;
+        private string apiBaseUrl;
         [SerializeField]
-        private ChainInfo[] _chainInfos;
+        private ChainInfo[] chainInfos;
         
+        /// <summary>
+        /// A getter for the chain infos.
+        /// </summary>
         public Dictionary<string, ChainInfo> ChainInfos { get; private set; }
-        public string ApiBaseUrl => _apiBaseUrl;
+        public string ApiBaseUrl => apiBaseUrl;
 
         public void OnBeforeSerialize()
         {
@@ -61,7 +68,8 @@ namespace Portkey.Core
 
         public void OnAfterDeserialize()
         {
-            ChainInfos = _chainInfos?.ToDictionary(chainInfo => chainInfo.ChainId, chainInfo => chainInfo);
+            // create a runtime dictionary to access the chain infos by chain id since dictionaries are not serializable
+            ChainInfos = chainInfos?.ToDictionary(chainInfo => chainInfo.ChainId, chainInfo => chainInfo);
         }
     }
 }

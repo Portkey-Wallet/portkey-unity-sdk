@@ -75,7 +75,7 @@ namespace Portkey.Test
         [Test]
         public void ContractGetVerifierServersTest()
         {
-            var config = PortkeyUtilities.GetConfig<PortkeyConfig>("PortkeyTestConfig");
+            var config = UnityHelper.GetConfig<PortkeyConfig>("PortkeyTestConfig");
             var testMainChain = config.ChainInfos["TestMain"];
             IChain aelfChainMock = new AElfChainMock();
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);
@@ -94,7 +94,7 @@ namespace Portkey.Test
             const string EXCEPION_MESSAGE = "Failed to execute tx.";
             LogAssert.ignoreFailingMessages = true;
             
-            var config = PortkeyUtilities.GetConfig<PortkeyConfig>("PortkeyTestConfig");
+            var config = UnityHelper.GetConfig<PortkeyConfig>("PortkeyTestConfig");
             var testMainChain = config.ChainInfos["TestMain"];
             IChain aelfChainMock = new AElfChainMock((() => throw new Exception(EXCEPION_MESSAGE)));
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);

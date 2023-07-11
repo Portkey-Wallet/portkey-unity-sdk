@@ -37,9 +37,11 @@ namespace Portkey.Test
             Debug.Log("FailErrorCallback: " + param);
             Assert.Pass(param);
         }
-
+        
+#if TEST_FETCHJSONHTTP
         /// <summary>
         /// Test that TestFetchJsonHttpGet is able to get and retrieve json data.
+        /// Only tested locally. Build machines to skip this test with server side dependency.
         /// </summary>
         [UnityTest]
         public IEnumerator TestFetchJsonHttpGet()
@@ -50,6 +52,7 @@ namespace Portkey.Test
         
         /// <summary>
         /// Test that TestFetchJsonHttpPost is able to post and retrieve json data.
+        /// Only tested locally. Build machines to skip this test with server side dependency.
         /// </summary>
         [UnityTest]
         public IEnumerator TestFetchJsonHttpPost()
@@ -57,6 +60,7 @@ namespace Portkey.Test
             Debug.Log("Posting to " + URL);
             yield return _request.Post(URL, "", SuccessCallback, ErrorCallback);
         }
+#endif
         
         /// <summary>
         /// Test that TestFetchJsonHttpPostFailURL is fails to retrieve json data and returns into the error callback.

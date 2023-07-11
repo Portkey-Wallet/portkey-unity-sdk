@@ -1,0 +1,21 @@
+{
+  "name": "csharp-code-gen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "codegen": "graphql-codegen --config codegen.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@graphql-codegen/cli": "4.0.1",
+    "@graphql-codegen/typescript": "4.0.1"
+  },
+  "dependencies": {
+    "@graphql-codegen/c-sharp": "^4.3.1",
+    "graphql": "^16.7.1"
+  }
+}

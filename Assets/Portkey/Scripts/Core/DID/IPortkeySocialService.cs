@@ -121,7 +121,7 @@ namespace Portkey.Core
     [Serializable]
     public class RegisterInfo
     {
-        string originChainId;
+        public string originChainId;
     }
 
     [Serializable]

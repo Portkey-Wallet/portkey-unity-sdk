@@ -1,12 +1,10 @@
-using System;
-using Portkey.DID;
+using AElf.Types;
 
 namespace Portkey.Core
 {
     public interface IAccountMethods
     {
-        public Signature SignTransaction(string transaction);
+        public Transaction SignTransaction(Transaction transaction);
         public byte[] Sign(string data);
-        public KeyStore Encrypt(string password, string options = null);
     }
 }

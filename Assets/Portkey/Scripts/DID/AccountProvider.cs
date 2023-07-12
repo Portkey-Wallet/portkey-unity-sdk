@@ -1,3 +1,4 @@
+using AElf.Client;
 using Portkey.Core;
 
 namespace Portkey.DID
@@ -11,11 +12,6 @@ namespace Portkey.DID
         }
 
         public AccountBase CreateAccount()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public AccountBase Decrypt(string keyStore, string password)
         {
             throw new System.NotImplementedException();
         }

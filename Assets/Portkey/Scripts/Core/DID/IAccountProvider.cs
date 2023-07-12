@@ -4,6 +4,5 @@ namespace Portkey.Core
     {
         public T GetAccountFromPrivateKey(string privateKey);
         public T CreateAccount();
-        public T Decrypt(string keyStore, string password);
     }
 }

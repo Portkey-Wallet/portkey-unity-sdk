@@ -1,3 +1,5 @@
+using AElf.Types;
+
 namespace Portkey.Core
 {
     public abstract class AccountBase : IAccountMethods
@@ -13,10 +15,8 @@ namespace Portkey.Core
             PrivateKey = wallet.PrivateKey;
         }
         
-        public abstract Signature SignTransaction(string transaction);
+        public abstract Transaction SignTransaction(Transaction transaction);
 
         public abstract byte[] Sign(string data);
-
-        public abstract KeyStore Encrypt(string password, string options = null);
     }
 }

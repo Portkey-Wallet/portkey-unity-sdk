@@ -1,3 +1,7 @@
+using AElf;
+using AElf.Client;
+using AElf.Cryptography;
+using AElf.Types;
 using Portkey.Core;
 
 namespace Portkey.DID
@@ -8,19 +12,17 @@ namespace Portkey.DID
     /// </summary>
     public class WalletAccount : AccountBase
     {
-        public override Signature SignTransaction(string transaction)
+        public override Transaction SignTransaction(Transaction transaction)
         {
-            throw new System.NotImplementedException();
+            var client = new AElfClient("http://localhost:1235");
+            return client.SignTransaction(PrivateKey, transaction);
         }
 
         public override byte[] Sign(string data)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public override KeyStore Encrypt(string password, string options = null)
-        {
-            throw new System.NotImplementedException();
+            var byteData = data.GetBytes();
+            var client = new AElfClient("http://localhost:1235");
+            return CryptoHelper.SignWithPrivateKey(ByteArrayHelper.HexStringToByteArray(PrivateKey), byteData);
         }
 
         public WalletAccount(BlockchainWallet wallet) : base(wallet)

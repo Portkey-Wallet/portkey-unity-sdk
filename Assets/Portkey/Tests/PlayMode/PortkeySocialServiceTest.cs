@@ -16,38 +16,23 @@ namespace Portkey.Test
     /// </summary>
     public class PortkeySocialServiceTest
     {
-        public class PortkeySocialServiceMonoTest : PortkeySocialService, IMonoBehaviourTest
-        {
-            private const string PORTKEY_CONFIG_NAME = "PortkeyMockConfig";
-            public bool IsTestFinished
-            {
-                get { return false; }
-            }
-
-            private void Start()
-            {
-                this.config = GetPortkeyConfig(PORTKEY_CONFIG_NAME);
-                this._http = new FetchJsonPortkeySocialServiceMock();
-            }
+        private const string PORTKEY_CONFIG_NAME = "PortkeyMockConfig";
+        private IPortkeySocialService _portkeySocialService = new PortkeySocialService(GetPortkeyConfig(PORTKEY_CONFIG_NAME), new FetchJsonPortkeySocialServiceMock(), null);
             
-            protected static PortkeyConfig GetPortkeyConfig(string name)
+        private static PortkeyConfig GetPortkeyConfig(string name)
+        {
+            var guids = AssetDatabase.FindAssets($"t:{nameof(PortkeyConfig)} {name}");
+            if (guids.Length == 0)
             {
-                var guids = AssetDatabase.FindAssets($"t:{nameof(PortkeyConfig)} {name}");
-                if (guids.Length == 0)
-                {
-                    Assert.Fail($"No {nameof(PortkeyConfig)} found!");
-                }
-                else if (guids.Length > 0)
-                {
-                    Debug.LogWarning($"More than one {nameof(PortkeyConfig)} found, taking first one");
-                }
-
-                return (PortkeyConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(PortkeyConfig));
+                Assert.Fail($"No {nameof(PortkeyConfig)} found!");
             }
+            else if (guids.Length > 0)
+            {
+                Debug.LogWarning($"More than one {nameof(PortkeyConfig)} found, taking first one");
+            }
+
+            return (PortkeyConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(PortkeyConfig));
         }
-
-
-        private MonoBehaviourTest<PortkeySocialServiceMonoTest> _portkeySocialService = new MonoBehaviourTest<PortkeySocialServiceMonoTest>();
         
         private void ErrorCallback(string param)
         {
@@ -83,7 +68,8 @@ namespace Portkey.Test
                     requestId = "requestId_mock"
                 }
             };
-            return _portkeySocialService.component.Register(registerParam, (result) =>
+            
+            return _portkeySocialService.Register(registerParam, (result) =>
             {
                 Assert.AreNotEqual("", result.sessionId);
             }, ErrorCallback);
@@ -103,7 +89,8 @@ namespace Portkey.Test
                 reCount = 0,
                 maxCount = 20
             };
-            yield return _portkeySocialService.component.GetRegisterStatus("id_mock", options, (result) =>
+            
+            yield return _portkeySocialService.GetRegisterStatus("id_mock", options, (result) =>
             {
                 done = true;
                 Assert.AreEqual(true, (result.registerStatus == "pass" && result.registerMessage != ""));
@@ -127,7 +114,8 @@ namespace Portkey.Test
                 reCount = 1,
                 maxCount = 0
             };
-            yield return _portkeySocialService.component.GetRegisterStatus("id_mock", options, (result) =>
+            
+            yield return _portkeySocialService.GetRegisterStatus("id_mock", options, (result) =>
             {
                 done = true;
                 Assert.Fail("Should not be here.");
@@ -151,7 +139,7 @@ namespace Portkey.Test
                 reCount = 0,
                 maxCount = 20
             };
-            yield return _portkeySocialService.component.GetRecoverStatus("id_mock", options, (result) =>
+            yield return _portkeySocialService.GetRecoverStatus("id_mock", options, (result) =>
             {
                 done = true;
                 Assert.AreEqual(true, (result.recoveryStatus == "pass" && result.recoveryMessage != ""));
@@ -175,7 +163,7 @@ namespace Portkey.Test
                 reCount = 1,
                 maxCount = 0
             };
-            yield return _portkeySocialService.component.GetRecoverStatus("id_mock", options, (result) =>
+            yield return _portkeySocialService.GetRecoverStatus("id_mock", options, (result) =>
             {
                 done = true;
                 Assert.Fail("Should not be here.");
@@ -201,7 +189,7 @@ namespace Portkey.Test
                 guardianIdentifier = "guardianIdentifier_mock",
                 chainId = "AELF"
             };
-            yield return _portkeySocialService.component.VerifyVerificationCode(requestParams, (result) =>
+            yield return _portkeySocialService.VerifyVerificationCode(requestParams, (result) =>
             {
                 done = true;
                 Assert.AreEqual(true, (result.signature == "signature_mock" && result.verificationDoc == "verificationDoc_mock"));

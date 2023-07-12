@@ -1,5 +1,6 @@
 using System.Collections;
 using Portkey.Core;
+using Portkey.Utilities;
 using Unity.Plastic.Newtonsoft.Json;
 using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -9,19 +10,23 @@ namespace Portkey.DID
     /// <summary>
     /// Portkey Social Service class. Contains methods for making requests to the Portkey Social API.
     /// </summary>
-    public class PortkeySocialService : MonoBehaviour, IPortkeySocialService
+    public class PortkeySocialService : IPortkeySocialService
     {
-        [SerializeField]
-        protected PortkeyConfig config;
-        [SerializeField]
-        protected IHttp _http;
-        [SerializeField]
+        private PortkeyConfig _config;
+        private IHttp _http;
         private GraphQL.GraphQL _graphQl;
+        
+        public PortkeySocialService(PortkeyConfig config, IHttp http, GraphQL.GraphQL graphQl)
+        {
+            this._config = config;
+            this._http = http;
+            _graphQl = graphQl;
+        }
 
         private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
             var jsonData = JsonConvert.SerializeObject(requestParams);
-            var fullUrl = config.apiBaseUrl + url;
+            var fullUrl = _config.apiBaseUrl + url;
             return _http.Post(fullUrl, jsonData, JsonToObject<T2>(successCallback, errorCallback),
                 (error) =>
                 {
@@ -32,7 +37,7 @@ namespace Portkey.DID
         private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
             var jsonData = JsonConvert.SerializeObject(requestParams);
-            var fullUrl = config.apiBaseUrl + url;
+            var fullUrl = _config.apiBaseUrl + url;
             return _http.Get(fullUrl, jsonData, JsonToObject<T2>(successCallback, errorCallback),
                 (error) =>
                 {
@@ -42,7 +47,7 @@ namespace Portkey.DID
         
         private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
-            var fullUrl = config.apiBaseUrl + url;
+            var fullUrl = _config.apiBaseUrl + url;
             return _http.Get(fullUrl, "", JsonToObject<T>(successCallback, errorCallback),
                 (error) =>
                 {
@@ -109,7 +114,7 @@ namespace Portkey.DID
             
                 yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
                 {
-                    StartCoroutine(IsRepollNeeded(ret));
+                    StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
                 }, errorCallback);
             }
             
@@ -119,7 +124,7 @@ namespace Portkey.DID
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
                     ++queryOptions.reCount;
-                    yield return StartCoroutine(Poll());
+                    yield return StaticCoroutine.StartCoroutine(Poll());
                 }
                 else
                 {
@@ -142,7 +147,7 @@ namespace Portkey.DID
             
                 yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
                 {
-                    StartCoroutine(IsRepollNeeded(ret));
+                    StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
                 }, errorCallback);
             }
             
@@ -152,7 +157,7 @@ namespace Portkey.DID
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
                     ++queryOptions.reCount;
-                    yield return StartCoroutine(Poll());
+                    yield return StaticCoroutine.StartCoroutine(Poll());
                 }
                 else
                 {

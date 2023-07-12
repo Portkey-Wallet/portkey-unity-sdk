@@ -19,6 +19,6 @@ namespace Portkey.Core
         /// <param name="chainId">The chain id related to the info to get from.</param>
         /// <param name="successCallback">Callback function when post of query is successful.</param>
         /// <param name="errorCallback">Callback function when error occurs.</param>
-        public IEnumerator GetHolderInfoByManager(string manager, string chainId, IGraphQL.successCallback<IList<CaHolderWithGuardian>> successCallback, IGraphQL.errorCallback errorCallback);
+        public IEnumerator GetHolderInfoByManager(string manager, string chainId, SuccessCallback<IList<CaHolderWithGuardian>> successCallback, ErrorCallback errorCallback);
     }
 }

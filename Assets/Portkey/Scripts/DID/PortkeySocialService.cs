@@ -1,10 +1,8 @@
-using System;
 using System.Collections;
 using Portkey.Core;
 using Unity.Plastic.Newtonsoft.Json;
 using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Portkey.DID
 {
@@ -17,8 +15,8 @@ namespace Portkey.DID
         protected PortkeyConfig config;
         [SerializeField]
         protected IHttp _http;
-        //[SerializeField]
-        //private readonly GraphQL _graphQL;
+        [SerializeField]
+        private GraphQL.GraphQL _graphQl;
 
         private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
@@ -67,9 +65,7 @@ namespace Portkey.DID
                 }
                 else
                 {
-                    //throw new Exception("Unknown type");
                     errorCallback("Unsupported type detected!");
-                    return;
                 }
             };
         }
@@ -190,10 +186,16 @@ namespace Portkey.DID
             return Get("/api/app/account/guardianIdentifiers", requestParams, successCallback, errorCallback);
         }
 
-        //TODO: implement once graphQL is merged
         public IEnumerator GetHolderInfoByManager(GetCAHolderByManagerParams requestParams, SuccessCallback<GetCAHolderByManagerResult> successCallback, ErrorCallback errorCallback)
         {
-            throw new System.NotImplementedException();
+            return _graphQl.GetHolderInfoByManager(requestParams.manager, requestParams.chainId, (ret) =>
+            {
+                var result = new GetCAHolderByManagerResult
+                {
+                    caHolders = ret
+                };
+                successCallback(result);
+            }, errorCallback);
         }
 
         public IEnumerator GetRegisterInfo(GetRegisterInfoParams requestParams, SuccessCallback<RegisterInfo> successCallback, ErrorCallback errorCallback)

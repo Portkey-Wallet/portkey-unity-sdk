@@ -49,7 +49,7 @@ namespace Portkey.GraphQL
             return _schemaClass;
         }
 
-        public IEnumerator Query<T>(string query, IGraphQL.successCallback<T> successCallback, IGraphQL.errorCallback errorCallback)
+        public IEnumerator Query<T>(string query, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
             var jsonData = JsonConvert.SerializeObject(new{query});
             return request.Post(url, jsonData, 
@@ -87,7 +87,7 @@ namespace Portkey.GraphQL
                                 });
         }
 
-        public IEnumerator Query<T>(GraphQLQuery query, IGraphQL.successCallback<T> successCallback, IGraphQL.errorCallback errorCallback)
+        public IEnumerator Query<T>(GraphQLQuery query, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
             if (String.IsNullOrEmpty(query.query))
             {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Portkey.Core
 {
@@ -67,7 +68,7 @@ namespace Portkey.Core
     [Serializable]
     public class GetCAHolderByManagerResult
     {
-        //CaHolderWithGuardian[] caHolders;
+        public IList<CaHolderWithGuardian> caHolders;
     }
 
     [Serializable]

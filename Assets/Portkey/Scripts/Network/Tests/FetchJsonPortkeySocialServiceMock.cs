@@ -73,6 +73,53 @@ namespace Portkey.Network
                             break;
                     }
                     yield break;
+                case "/api/app/search/chainsinfoindex":
+                    successCallback(JsonUtility.ToJson(new ChainInfo[]
+                    {
+                        new ChainInfo()
+                        {
+                            caContractAddress = "caContractAddress_mock",
+                            chainId = "chainId_mock",
+                            chainName = "chainName_mock",
+                            endPoint = "endPoint_mock",
+                            explorerUrl = "explorerUrl_mock",
+                            id = "id_mock",
+                            lastModifyTime = "lastModifyTime_mock"
+                        }
+                    }));
+                    yield break;
+                case "/api/app/search/caholderindex":
+                    successCallback(JsonUtility.ToJson(new CAHolderInfo
+                    {
+                        userId = "userId_mock",
+                        caAddress = "caAddress_mock",
+                        caHash = "caHash_mock",
+                        id = "id_mock",
+                        nickName = "nickName_mock"
+                    }));
+                    yield break;
+                case "/api/app/account/guardianIdentifiers":
+                    successCallback(JsonUtility.ToJson(new IHolderInfo
+                    {
+                        caAddress = "caAddress_mock",
+                        caHash = "caHash_mock"
+                    }));
+                    yield break;
+                case "/api/app/account/registerInfo":
+                    successCallback(JsonUtility.ToJson(new RegisterInfo
+                    {
+                        originChainId = "originChainId_mock"
+                    }));
+                    yield break;
+                case "/api/app/phone/info":
+                    successCallback(JsonUtility.ToJson(new ICountryItem[]
+                    {
+                        new ICountryItem
+                        {
+                            code = "code_mock"
+                        }
+                    }));
+                    yield break;
             }
         }
 
@@ -87,12 +134,35 @@ namespace Portkey.Network
                         sessionId = "sessionId_mock"
                     }));
                     yield break;
+                case "/api/app/account/recovery/request":
+                    successCallback(JsonUtility.ToJson(new RecoveryResult
+                    {
+                        sessionId = "sessionId_mock"
+                    }));
+                    yield break;
                 case "/api/app/account/verifyCode":
+                case "/api/app/account/verifyGoogleToken":
+                case "/api/app/account/verifyAppleToken":
                     successCallback(JsonUtility.ToJson(new VerifyVerificationCodeResult
                     {
                         verificationDoc = "verificationDoc_mock",
                         signature = "signature_mock"
                     }));
+                    yield break;
+                case "/api/app/account/sendVerificationRequest":
+                    successCallback(JsonUtility.ToJson(new SendVerificationCodeResult
+                    {
+                        verifierSessionId = "verifierSessionId_mock"
+                    }));
+                    yield break;
+                case "/api/app/account/appleUserExtraInfo":
+                    successCallback(JsonUtility.ToJson(new SendAppleUserExtraInfoResult
+                    {
+                        userId = "userId_mock"
+                    }));
+                    yield break;
+                case "/api/app/account/isGoogleRecaptchaOpen":
+                    successCallback(JsonUtility.ToJson(true));
                     yield break;
             }
         }

@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Portkey.Network
 {
+    /// <summary>
+    /// Class used to mock for PortkeySocialServiceTest
+    /// </summary>
     public class FetchJsonPortkeySocialServiceMock : IHttp
     {
         private int _registerStatusCallTimes = 0;

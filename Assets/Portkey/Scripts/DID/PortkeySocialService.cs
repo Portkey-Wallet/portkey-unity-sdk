@@ -101,28 +101,9 @@ namespace Portkey.DID
 
         public IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
-            if(queryOptions.reCount > queryOptions.maxCount)
-            {
-                errorCallback("timeout");
-                yield break;
-            }
-            
-            SuccessCallback<ArrayWrapper<RegisterStatusResult>> wrappedSuccessCallback = (ArrayWrapper<RegisterStatusResult> response) =>
-            {
-                if (response.items == null || response.items.Length == 0)
-                {
-                    errorCallback("response.items is null");
-                    return;
-                }
-                successCallback(response.items[0]);
-            };
-            
-            yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
-            {
-                StartCoroutine(IsRepollNeeded(ret));
-            }, errorCallback);
-            
-            IEnumerator Repoll()
+            yield return Poll();
+
+            IEnumerator Poll()
             {
                 if(queryOptions.reCount > queryOptions.maxCount)
                 {
@@ -142,40 +123,20 @@ namespace Portkey.DID
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
                     ++queryOptions.reCount;
-                    yield return StartCoroutine(Repoll());
+                    yield return StartCoroutine(Poll());
                 }
                 else
                 {
-                    wrappedSuccessCallback(requestParam);
+                    successCallback(requestParam.items[0]);
                 }
             }
         }
 
         public IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
-            if(queryOptions.reCount > queryOptions.maxCount)
-            {
-                errorCallback("timeout");
-                yield break;
-            }
+            yield return Poll();
             
-            SuccessCallback<ArrayWrapper<RecoverStatusResult>> wrappedSuccessCallback = (ArrayWrapper<RecoverStatusResult> response) =>
-            {
-                if (response.items == null || response.items.Length == 0)
-                {
-                    errorCallback("response.items is null");
-                    return;
-                }
-
-                successCallback(response.items[0]);
-            };
-            
-            yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
-            {
-                StartCoroutine(IsRepollNeeded(ret));
-            }, errorCallback);
-            
-            IEnumerator Repoll()
+            IEnumerator Poll()
             {
                 if(queryOptions.reCount > queryOptions.maxCount)
                 {
@@ -195,11 +156,11 @@ namespace Portkey.DID
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
                     ++queryOptions.reCount;
-                    yield return StartCoroutine(Repoll());
+                    yield return StartCoroutine(Poll());
                 }
                 else
                 {
-                    wrappedSuccessCallback(requestParam);
+                    successCallback(requestParam.items[0]);
                 }
             }
         }

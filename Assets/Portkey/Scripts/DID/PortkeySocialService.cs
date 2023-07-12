@@ -61,16 +61,22 @@ namespace Portkey.DID
             {
                 var json = JToken.Parse(response);
 
-                if (json is JObject)
+                switch (json)
                 {
-                    //deserialize response
-                    var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
-                    //call success callback
-                    successCallback(deserializedObject);
-                }
-                else
-                {
-                    errorCallback("Unsupported type detected!");
+                    case JObject:
+                    {
+                        //deserialize response
+                        var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
+                        //call success callback
+                        successCallback(deserializedObject);
+                        break;
+                    }
+                    case JValue:
+                        successCallback(json.Value<T>());
+                        break;
+                    default:
+                        errorCallback("Unsupported type detected!");
+                        break;
                 }
             };
         }
@@ -85,17 +91,17 @@ namespace Portkey.DID
             return Post("/api/app/account/verifyCode", requestParams, successCallback, errorCallback);
         }
 
-        public IEnumerator sendAppleUserExtraInfo(SendAppleUserExtraInfoParams requestParams, SuccessCallback<SendAppleUserExtraInfoResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator SendAppleUserExtraInfo(SendAppleUserExtraInfoParams requestParams, SuccessCallback<SendAppleUserExtraInfoResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/userExtraInfo/appleUserExtraInfo", requestParams, successCallback, errorCallback);
         }
 
-        public IEnumerator verifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/account/verifyGoogleToken", requestParams, successCallback, errorCallback);
         }
 
-        public IEnumerator verifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/account/verifyAppleToken", requestParams, successCallback, errorCallback);
         }

@@ -112,13 +112,26 @@ namespace Portkey.Network
                     }));
                     yield break;
                 case "/api/app/phone/info":
-                    successCallback(JsonUtility.ToJson(new ICountryItem[]
-                    {
-                        new ICountryItem
-                        {
-                            code = "code_mock"
-                        }
-                    }));
+                    var phoneInfo = @"{
+                                    ""locateData"": {
+                                            ""country"": ""Singapore"",
+                                            ""code"": ""65"",
+                                            ""iso"": ""SG""
+                                    },
+                                    ""data"": [
+                                    {
+                                        ""country"": ""China"",
+                                        ""code"": ""86"",
+                                        ""iso"": ""CN""
+                                    },
+                                    {
+                                        ""country"": ""Denmark"",
+                                        ""code"": ""45"",
+                                        ""iso"": ""DK""
+                                    },
+                                    ]
+                                }";
+                    successCallback(phoneInfo);
                     yield break;
             }
         }
@@ -162,7 +175,7 @@ namespace Portkey.Network
                     }));
                     yield break;
                 case "/api/app/account/isGoogleRecaptchaOpen":
-                    successCallback(JsonUtility.ToJson(true));
+                    successCallback("true");
                     yield break;
             }
         }

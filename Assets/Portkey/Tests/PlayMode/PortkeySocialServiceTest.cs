@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Net;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -193,6 +191,153 @@ namespace Portkey.Test
             {
                 done = true;
                 Assert.AreEqual(true, (result.signature == "signature_mock" && result.verificationDoc == "verificationDoc_mock"));
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator RecoveryTest()
+        {
+            var done = false;
+
+            var requestParams = new RecoveryParams()
+            {
+                chainId = "AELF",
+                loginGuardianIdentifier = "loginGuardianIdentifier_mock",
+            };
+            yield return _portkeySocialService.Recovery(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual(true, result.sessionId == "sessionId_mock");
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator CheckGoogleRecaptchaTest()
+        {
+            var done = false;
+
+            var requestParams = new CheckGoogleRecaptchaParams()
+            {
+                operationType = RecaptchaType.register
+            };
+            yield return _portkeySocialService.CheckGoogleRecaptcha(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual(true, result);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator GetRegisterInfoTest()
+        {
+            var done = false;
+
+            var requestParams = new GetRegisterInfoParams()
+            {
+                caHash = "caHash_mock",
+                loginGuardianIdentifier = "loginGuardianIdentifier_mock"
+            };
+            yield return _portkeySocialService.GetRegisterInfo(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual("originChainId_mock", result.originChainId);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator GetPhoneCountryCodeWithLocalTest()
+        {
+            var done = false;
+
+            yield return _portkeySocialService.GetPhoneCountryCodeWithLocal((result) =>
+            {
+                done = true;
+                Assert.AreEqual("65", result.locateData.code);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator GetHolderInfoTest()
+        {
+            var done = false;
+
+            var requestParams = new GetHolderInfoParams()
+            {
+                caHash = "caHash_mock"
+            };
+            yield return _portkeySocialService.GetHolderInfo(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual("caAddress_mock", result.caAddress);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator VerifyAppleTokenTest()
+        {
+            var done = false;
+
+            var requestParams = new VerifyAppleTokenParams()
+            {
+                chainId = "AELF"
+            };
+            yield return _portkeySocialService.VerifyAppleToken(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual("verificationDoc_mock", result.verificationDoc);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator VerifyGoogleTokenTest()
+        {
+            var done = false;
+
+            var requestParams = new VerifyGoogleTokenParams()
+            {
+                chainId = "AELF"
+            };
+            yield return _portkeySocialService.VerifyGoogleToken(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual("verificationDoc_mock", result.verificationDoc);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        
+        [UnityTest]
+        public IEnumerator GetCAHolderInfoTest()
+        {
+            var done = false;
+
+            yield return _portkeySocialService.GetCAHolderInfo("authorization_mock","caHash_mock", (result) =>
+            {
+                done = true;
+                Assert.AreEqual("userId_mock", result.userId);
             }, ErrorCallback);
 
             while (!done)

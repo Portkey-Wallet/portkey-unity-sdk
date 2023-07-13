@@ -23,7 +23,7 @@ namespace Portkey.DID
         private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
             var jsonData = JsonConvert.SerializeObject(requestParams);
-            var fullUrl = config.apiBaseUrl + url;
+            var fullUrl = config.ApiBaseUrl + url;
             return _http.Post(fullUrl, jsonData, JsonToObject<T2>(successCallback, errorCallback),
                 (error) =>
                 {
@@ -34,7 +34,7 @@ namespace Portkey.DID
         private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
             var jsonData = JsonConvert.SerializeObject(requestParams);
-            var fullUrl = config.apiBaseUrl + url;
+            var fullUrl = config.ApiBaseUrl + url;
             return _http.Get(fullUrl, jsonData, JsonToObject<T2>(successCallback, errorCallback),
                 (error) =>
                 {
@@ -44,7 +44,7 @@ namespace Portkey.DID
         
         private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
-            var fullUrl = config.apiBaseUrl + url;
+            var fullUrl = config.ApiBaseUrl + url;
             return _http.Get(fullUrl, "", JsonToObject<T>(successCallback, errorCallback),
                 (error) =>
                 {

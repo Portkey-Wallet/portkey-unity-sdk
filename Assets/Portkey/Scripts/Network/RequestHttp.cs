@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json;
 using Portkey.Core;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -9,16 +8,9 @@ using UnityEngine.Networking;
 
 namespace Portkey.Network
 {
-    [CreateAssetMenu(fileName = "FetchJsonHttp", menuName = "Portkey/Network/FetchJsonHttp")]
-    public class FetchJsonHttp : IHttp
+    [CreateAssetMenu(fileName = "RequestHttp", menuName = "Portkey/Network/RequestHttp")]
+    public class RequestHttp : IHttp
     {
-        /*
-        public IEnumerator Post<T>(string url, T body, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
-        {
-            var jsonData = JsonConvert.SerializeObject(body);
-            return Post(url, jsonData, successCallback, errorCallback);
-        }*/
-
         public override IEnumerator Get(JsonRequestData data, successCallback successCallback, ErrorCallback errorCallback)
         {
             data.JsonData??=string.Empty;

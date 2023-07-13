@@ -1,32 +1,29 @@
-using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using Portkey.Core;
-using Newtonsoft.Json;
-using UnityEditor;
-using UnityEngine;
+using Newtonsoft.Json.Linq;
 using UnityEngine.Networking;
 
 namespace Portkey.Network
 {
-    [CreateAssetMenu(fileName = "FetchJsonHttp", menuName = "Portkey/Network/FetchJsonHttp")]
-    public class FetchJsonHttp : IHttp
+    public class FetchFormHttp : IHttp
     {
-        public override IEnumerator Get(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public IEnumerator Get(string url, string parameters, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
-            jsonData??=string.Empty;
+            parameters??=string.Empty;
             
-            byte[] postData = Encoding.ASCII.GetBytes(jsonData);
+            byte[] data = Encoding.ASCII.GetBytes(parameters);
             using var request = new UnityWebRequest(url, 
                                                     UnityWebRequest.kHttpVerbGET,
                                                     new DownloadHandlerBuffer(), 
-                                                    new UploadHandlerRaw(postData))
+                                                    new UploadHandlerRaw(data))
             {
                 disposeUploadHandlerOnDispose = true,
                 disposeDownloadHandlerOnDispose = true
             };
             
-            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             
             yield return request.SendWebRequest();
 
@@ -43,22 +40,13 @@ namespace Portkey.Network
             }
             successCallback(request.downloadHandler.text);
         }
-
-        public override IEnumerator Post(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        
+        private IEnumerator Post(string url, JObject body, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
-            jsonData??=string.Empty;
-            
-            byte[] postData = Encoding.ASCII.GetBytes(jsonData);
-            using var request = new UnityWebRequest(url, 
-                                                    UnityWebRequest.kHttpVerbPOST,
-                                                    new DownloadHandlerBuffer(), 
-                                                    new UploadHandlerRaw(postData))
-            {
-                disposeUploadHandlerOnDispose = true,
-                disposeDownloadHandlerOnDispose = true
-            };
-            
-            request.SetRequestHeader("Content-Type", "application/json");
+            var formFields = ConvertToDictionary(body);
+            var request = UnityWebRequest.Post(url, formFields);
+
+            request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
             yield return request.SendWebRequest();
 
@@ -67,19 +55,35 @@ namespace Portkey.Network
                 errorCallback(request.error);
                 yield break;
             }
-            
+
             if (request.result != UnityWebRequest.Result.Success)
             {
                 errorCallback(request.responseCode.ToString());
                 yield break;
             }
+
             successCallback(request.downloadHandler.text);
+        }
+
+        public IEnumerator Post(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        {
+            return Post(url, JObject.Parse(jsonData), successCallback, errorCallback);
         }
 
         public IEnumerator Post<T>(string url, T body, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
         {
-            var jsonData = JsonConvert.SerializeObject(body);
-            return Post(url, jsonData, successCallback, errorCallback);
+            return Post(url, JObject.FromObject(body), successCallback, errorCallback);
+        }
+
+        private static Dictionary<string, string> ConvertToDictionary(JObject jsonObject)
+        {
+            var result = new Dictionary<string, string>();
+            foreach (var property in jsonObject.Properties())
+            {
+                result[property.Name] = property.Value.ToString();
+            }
+
+            return result;
         }
     }
 }

@@ -9,5 +9,7 @@ namespace Portkey.Core
     public class PortkeyConfig : ScriptableObject
     {
         public string apiBaseUrl;
+        
+        public string ApiBaseUrl => apiBaseUrl;
     }
 }

@@ -61,7 +61,7 @@ namespace Portkey.DID
                 JsonData = JsonConvert.SerializeObject(requestParams),
             };
             
-            return Get(url, jsonRequestData, successCallback, errorCallback);
+            return Get(jsonRequestData, successCallback, errorCallback);
         }
         
         private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, ErrorCallback errorCallback)

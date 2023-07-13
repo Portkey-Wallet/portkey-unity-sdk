@@ -8,16 +8,22 @@ namespace Portkey.Network
     public class FetchJsonHttpMock : IHttp
     {
         [SerializeField] private string response;
-        public override IEnumerator Get(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+
+        public override IEnumerator Get(JsonRequestData data, successCallback successCallback, ErrorCallback errorCallback)
         {
             successCallback(response);
             yield break;
         }
 
-        public override IEnumerator Post(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Post(JsonRequestData data, successCallback successCallback, ErrorCallback errorCallback)
         {
             successCallback(response);
             yield break;
+        }
+
+        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, successCallback successCallback, ErrorCallback errorCallback)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

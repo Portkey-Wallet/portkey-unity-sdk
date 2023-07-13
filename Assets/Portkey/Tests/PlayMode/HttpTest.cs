@@ -18,7 +18,7 @@ namespace Portkey.Test
         private const string URL = "https://my-json-server.typicode.com/typicode/demo/posts";
         private const string FAIL_URL = "https://google.com";
 
-        private IHttp _request = new FetchJsonHttp();
+        private IHttp _request = new RequestHttp();
 
         public void SuccessCallback(string response)
         {

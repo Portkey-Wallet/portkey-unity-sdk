@@ -3,15 +3,14 @@ using Portkey.Core;
 
 namespace Portkey.DID
 {
-    public class AccountProvider : IAccountProvider<AccountBase>
+    public class AccountProvider : IAccountProvider<WalletAccount>
     {
-        public AccountBase GetAccountFromPrivateKey(string privateKey)
+        public WalletAccount GetAccountFromPrivateKey(string privateKey)
         {
-            
             throw new System.NotImplementedException();
         }
 
-        public AccountBase CreateAccount()
+        public WalletAccount CreateAccount()
         {
             throw new System.NotImplementedException();
         }

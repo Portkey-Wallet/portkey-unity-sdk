@@ -4,13 +4,9 @@ namespace Portkey.Core
 {
     public class JsonRequestData : IRequestData
     {
-        public string Url;
-        public Dictionary<string, string> Headers;
-        public string JsonData;
-
-        public string GetContentType()
-        {
-            return "application/json";
-        }
+        public string Url = null;
+        public Dictionary<string, string> Headers = new Dictionary<string, string>();
+        public string JsonData = null;
+        public string ContentType => "application/json";
     }
 }

@@ -17,7 +17,13 @@ namespace Portkey.DID
 
         public IEnumerator GetConnectToken(RequestTokenConfig config, SuccessCallback<ConnectToken> successCallback, ErrorCallback errorCallback)
         {
-            yield return _http.Post(_apiUrl, config, (response) =>
+            var fieldForm = new FieldFormRequestData<RequestTokenConfig>
+            {
+                Url = _apiUrl,
+                FieldFormsObject = config
+            };
+            
+            yield return _http.PostFieldForm(fieldForm, (response) =>
             {
                 var token = JsonConvert.DeserializeObject<ConnectToken>(response);
                 if (token == null)

@@ -19,7 +19,7 @@ namespace Portkey.Test
         [Test]
         public void SignTest()
         {
-            var wallet = new WalletAccount(new BlockchainWallet("", "", ""))
+            var wallet = new WalletAccount(new BlockchainWallet("", "", "", ""))
             {
                 PrivateKeyNow = PRIVATE_KEY
             };

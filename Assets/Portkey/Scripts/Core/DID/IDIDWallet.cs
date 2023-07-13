@@ -8,11 +8,11 @@ namespace Portkey.Core
         /// For adding a manager account to the DID.
         /// </summary>
         /// <param name="editManagerParams">Parameters for adding manager account.</param>
-        public IEnumerator AddManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback);
+        public IEnumerator AddManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// For removing a manager account to the DID.
         /// </summary>
         /// <param name="editManagerParams">Parameters for removing manager account.</param>
-        public IEnumerator RemoveManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback);
+        public IEnumerator RemoveManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
     }
 }

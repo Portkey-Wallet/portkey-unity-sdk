@@ -115,6 +115,11 @@ namespace Portkey.DID
             throw new System.NotImplementedException();
         }
 
+        public CAHolderInfo GetCAHolderInfo(string chainId)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
         {
             if(_connectService == null)

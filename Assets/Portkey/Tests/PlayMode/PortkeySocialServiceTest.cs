@@ -18,7 +18,7 @@ namespace Portkey.Test
     {
         public class PortkeySocialServiceMonoTest : PortkeySocialService, IMonoBehaviourTest
         {
-            private const string PORTKEY_CONFIG_NAME = "PortkeyMockConfig";
+            private const string PORTKEY_CONFIG_NAME = "PortkeyTestConfig";
             public bool IsTestFinished
             {
                 get { return false; }

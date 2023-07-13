@@ -3,6 +3,9 @@ using Portkey.Core;
 
 namespace Portkey.Storage
 {
+    /// <summary>
+    /// Default non-persistent storage.
+    /// </summary>
     public class NonPersistentStorage<T> : IStorageSuite<T>
     {
         private Dictionary<string, T> _localStorage = new Dictionary<string, T>();

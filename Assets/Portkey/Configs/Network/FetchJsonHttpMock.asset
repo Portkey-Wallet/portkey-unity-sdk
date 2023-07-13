@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e6fec830c05142989e9c169e3f2c333, type: 3}
+  m_Name: FetchJsonHttpMock
+  m_EditorClassIdentifier: 
+  response: '{   "data": {     "caHolderInfo": [       {         "id": "tDVW-27Ea4jqxkjSnDuwU4nuitrbX2hzqqA2Gt28W9DJveVTnaTXhWA",        
+    "chainId": "tDVW",         "caHash": "f78e0f6e5619863fe9bafc50be3641072be27cf449760d2f63aaa180a723bc9b",        
+    "caAddress": "27Ea4jqxkjSnDuwU4nuitrbX2hzqqA2Gt28W9DJveVTnaTXhWA",         "managerInfos":
+    [           {             "extraData": "{\"transactionTime\":1684842811952,\"deviceInfo\":\"Mpnv9UqDaO9NykdxS0w+XuIcTyKIZNx+lhhmkecHsLVLOdfrgW36Sft2KCcF4+JW\",\"version\":\"2.0.0\"}",            
+    "address": "GTAGRhfMXC25oY811YaL1m1j6Q2TihNwyyco1V8gG9ENTfD29"           }        
+    ],         "originChainId": "tDVW",         "guardianList": {           "guardians":
+    [             {               "isLoginGuardian": true,               "salt":
+    "775b8dac6d9748e697b747dfad90e72c",               "identifierHash": "f29355a74ec3f0599bc27bd603273c66c7ff5ceb8d0b6c6019752c200e46670b",              
+    "verifierId": "8b32a14d28d7093b14e40d09eb0065b68a7d0c0462bc19ac88c519beb39884f3",              
+    "type": 2             }           ]         }       }     ]   } }'

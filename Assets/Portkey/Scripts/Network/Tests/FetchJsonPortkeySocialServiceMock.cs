@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using Portkey.Core;
 using UnityEngine;
 
@@ -10,9 +9,9 @@ namespace Portkey.Network
         private int _registerStatusCallTimes = 0;
         private int _recoverStatusCallTimes = 0;
         
-        public IEnumerator Get(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Get(JsonRequestData data, IHttp.successCallback successCallback, ErrorCallback errorCallback)
         {
-            var subUrl = url.Replace("https://test.mock", "");
+            var subUrl = data.Url.Replace("https://test.mock", "");
             switch (subUrl)
             {
                 case "/api/app/search/accountregisterindex":
@@ -76,9 +75,9 @@ namespace Portkey.Network
             }
         }
 
-        public IEnumerator Post(string url, string jsonData, IHttp.successCallback successCallback, IHttp.errorCallback errorCallback)
+        public override IEnumerator Post(JsonRequestData data, IHttp.successCallback successCallback, ErrorCallback errorCallback)
         {
-            var subUrl = url.Replace("https://test.mock", "");
+            var subUrl = data.Url.Replace("https://test.mock", "");
             switch (subUrl)
             {
                 case "/api/app/account/register/request":
@@ -95,6 +94,11 @@ namespace Portkey.Network
                     }));
                     yield break;
             }
+        }
+
+        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, successCallback successCallback, ErrorCallback errorCallback)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

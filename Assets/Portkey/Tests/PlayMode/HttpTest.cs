@@ -53,7 +53,14 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpGet()
         {
             Debug.Log("Get to " + URL);
-            yield return _request.Get(URL, "", SuccessCallback, ErrorCallback);
+            
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = URL,
+                JsonData = ""
+            };
+            
+            yield return _request.Get(jsonRequestData, SuccessCallback, ErrorCallback);
         }
         
         /// <summary>
@@ -64,7 +71,14 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpPost()
         {
             Debug.Log("Posting to " + URL);
-            yield return _request.Post(URL, "", SuccessCallback, ErrorCallback);
+            
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = URL,
+                JsonData = ""
+            };
+            
+            yield return _request.Post(jsonRequestData, SuccessCallback, ErrorCallback);
         }
 #endif
         

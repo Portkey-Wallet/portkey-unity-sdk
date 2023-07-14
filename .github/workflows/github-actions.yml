@@ -24,9 +24,9 @@ jobs:
             path: Library
             key: Library
       - name: Restore NuGet packages
-        run: dotnet new tool-manifest
-        run: dotnet tool install NuGetForUnity.Cli
-        run: dotnet nugetforunity restore .
+      - run: dotnet new tool-manifest
+      - run: dotnet tool install NuGetForUnity.Cli
+      - run: dotnet nugetforunity restore .
       - name: Unity - Test runner
         uses: game-ci/unity-test-runner@v2.1.1
         env:

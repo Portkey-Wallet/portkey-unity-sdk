@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Scripts"
+        "Scripts",
+        "TestUtilities"
     ],
     "includePlatforms": [
         "Editor"
@@ -13,7 +14,10 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "Google.Protobuf.dll",
+        "AElf.Client.dll",
+        "AElf.Types.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

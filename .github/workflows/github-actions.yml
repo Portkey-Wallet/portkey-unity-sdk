@@ -16,6 +16,10 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: dotnet new tool-manifest
+      - run: dotnet tool install NuGetForUnity.Cli
+      - run: dotnet nugetforunity restore .
+      # - run: rm Assets/Packages/Microsoft.NETCore.Portable.Compatibility.1.0.1/lib/netstandard1.0/System.ServiceModel.dll
       # TODO for running unity unit test on push. Currently we do not have license to run this.
       # Refer: https://game.ci/docs/github/test-runner/
       - name: Cache Library

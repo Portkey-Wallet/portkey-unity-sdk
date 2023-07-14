@@ -23,6 +23,8 @@ jobs:
         with:
             path: Library
             key: Library
+      - name: Restore NuGet
+        run: unity-editor -batchmode -ignoreCompilerErrors -projectPath /Assets/NuGet/Editor -executeMethod NugetForUnity.NugetHelper.Restore
       - name: Unity - Test runner
         uses: game-ci/unity-test-runner@v2.1.1
         env:

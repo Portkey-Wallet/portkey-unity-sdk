@@ -26,6 +26,12 @@ namespace Portkey.Test
             Assert.NotNull(response);
         }
         
+        public void SuccessFailCallback(string response)
+        {
+            Debug.Log("successCallback ");
+            Assert.Fail(response);
+        }
+        
         public void ErrorCallback(string param)
         {
             Debug.Log("errorCallback");
@@ -69,7 +75,14 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpPostFailURL()
         {
             Debug.Log("Posting to " + FAIL_URL);
-            yield return _request.Post(FAIL_URL, "", SuccessCallback, FailErrorCallback);
+            
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = FAIL_URL,
+                JsonData = ""
+            };
+            
+            yield return _request.Post(jsonRequestData, SuccessFailCallback, FailErrorCallback);
         }
     }
 }

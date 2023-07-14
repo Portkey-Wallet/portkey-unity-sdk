@@ -12,22 +12,26 @@ namespace Portkey.DID
     /// </summary>
     public class PortkeySocialService : IPortkeySocialService
     {
-        private PortkeyConfig _config;
+        private PortkeyConfig config;
         private IHttp _http;
         private GraphQL.GraphQL _graphQl;
         
         public PortkeySocialService(PortkeyConfig config, IHttp http, GraphQL.GraphQL graphQl)
         {
-            this._config = config;
+            this.config = config;
             this._http = http;
             _graphQl = graphQl;
         }
 
         private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
-            var jsonData = JsonConvert.SerializeObject(requestParams);
-            var fullUrl = _config.apiBaseUrl + url;
-            return _http.Post(fullUrl, jsonData, JsonToObject<T2>(successCallback, errorCallback),
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = config.ApiBaseUrl + url,
+                JsonData = JsonConvert.SerializeObject(requestParams),
+            };
+            
+            return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback),
                 (error) =>
                 {
                     errorCallback(error);
@@ -36,9 +40,13 @@ namespace Portkey.DID
         
         private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
-            var jsonData = JsonConvert.SerializeObject(requestParams);
-            var fullUrl = _config.apiBaseUrl + url;
-            return _http.Get(fullUrl, jsonData, JsonToObject<T2>(successCallback, errorCallback),
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = config.ApiBaseUrl + url,
+                JsonData = JsonConvert.SerializeObject(requestParams),
+            };
+            
+            return _http.Get(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback),
                 (error) =>
                 {
                     errorCallback(error);
@@ -47,8 +55,12 @@ namespace Portkey.DID
         
         private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
-            var fullUrl = _config.apiBaseUrl + url;
-            return _http.Get(fullUrl, "", JsonToObject<T>(successCallback, errorCallback),
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = config.ApiBaseUrl + url,
+            };
+            
+            return _http.Get(jsonRequestData, JsonToObject<T>(successCallback, errorCallback),
                 (error) =>
                 {
                     errorCallback(error);

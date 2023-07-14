@@ -1,4 +1,4 @@
 public interface IRequestData
 {
-    string GetContentType();
+    string ContentType { get; }
 }

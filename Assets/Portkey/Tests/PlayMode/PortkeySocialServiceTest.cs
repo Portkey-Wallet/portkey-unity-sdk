@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Net;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -16,38 +14,23 @@ namespace Portkey.Test
     /// </summary>
     public class PortkeySocialServiceTest
     {
-        public class PortkeySocialServiceMonoTest : PortkeySocialService, IMonoBehaviourTest
-        {
-            private const string PORTKEY_CONFIG_NAME = "PortkeyTestConfig";
-            public bool IsTestFinished
-            {
-                get { return false; }
-            }
-
-            private void Start()
-            {
-                this.config = GetPortkeyConfig(PORTKEY_CONFIG_NAME);
-                this._http = new FetchJsonPortkeySocialServiceMock();
-            }
+        private const string PORTKEY_CONFIG_NAME = "PortkeyMockConfig";
+        private IPortkeySocialService _portkeySocialService = new PortkeySocialService(GetPortkeyConfig(PORTKEY_CONFIG_NAME), new FetchJsonPortkeySocialServiceMock(), null);
             
-            protected static PortkeyConfig GetPortkeyConfig(string name)
+        private static PortkeyConfig GetPortkeyConfig(string name)
+        {
+            var guids = AssetDatabase.FindAssets($"t:{nameof(PortkeyConfig)} {name}");
+            if (guids.Length == 0)
             {
-                var guids = AssetDatabase.FindAssets($"t:{nameof(PortkeyConfig)} {name}");
-                if (guids.Length == 0)
-                {
-                    Assert.Fail($"No {nameof(PortkeyConfig)} found!");
-                }
-                else if (guids.Length > 0)
-                {
-                    Debug.LogWarning($"More than one {nameof(PortkeyConfig)} found, taking first one");
-                }
-
-                return (PortkeyConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(PortkeyConfig));
+                Assert.Fail($"No {nameof(PortkeyConfig)} found!");
             }
+            else if (guids.Length > 0)
+            {
+                Debug.LogWarning($"More than one {nameof(PortkeyConfig)} found, taking first one");
+            }
+
+            return (PortkeyConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(PortkeyConfig));
         }
-
-
-        private MonoBehaviourTest<PortkeySocialServiceMonoTest> _portkeySocialService = new MonoBehaviourTest<PortkeySocialServiceMonoTest>();
         
         private void ErrorCallback(string param)
         {
@@ -83,7 +66,8 @@ namespace Portkey.Test
                     requestId = "requestId_mock"
                 }
             };
-            return _portkeySocialService.component.Register(registerParam, (result) =>
+            
+            return _portkeySocialService.Register(registerParam, (result) =>
             {
                 Assert.AreNotEqual("", result.sessionId);
             }, ErrorCallback);
@@ -95,7 +79,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator GetRegisterStatusTest()
         {
-            bool done = false;
+            var done = false;
             
             var options = new QueryOptions
             {
@@ -103,7 +87,8 @@ namespace Portkey.Test
                 reCount = 0,
                 maxCount = 20
             };
-            yield return _portkeySocialService.component.GetRegisterStatus("id_mock", options, (result) =>
+            
+            yield return _portkeySocialService.GetRegisterStatus("id_mock", options, (result) =>
             {
                 done = true;
                 Assert.AreEqual(true, (result.registerStatus == "pass" && result.registerMessage != ""));
@@ -119,7 +104,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator GetRegisterStatusBadParameterTest()
         {
-            bool done = false;
+            var done = false;
             
             var options = new QueryOptions
             {
@@ -127,7 +112,8 @@ namespace Portkey.Test
                 reCount = 1,
                 maxCount = 0
             };
-            yield return _portkeySocialService.component.GetRegisterStatus("id_mock", options, (result) =>
+            
+            yield return _portkeySocialService.GetRegisterStatus("id_mock", options, (result) =>
             {
                 done = true;
                 Assert.Fail("Should not be here.");
@@ -143,7 +129,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator GetRecoverStatusTest()
         {
-            bool done = false;
+            var done = false;
             
             var options = new QueryOptions
             {
@@ -151,7 +137,7 @@ namespace Portkey.Test
                 reCount = 0,
                 maxCount = 20
             };
-            yield return _portkeySocialService.component.GetRecoverStatus("id_mock", options, (result) =>
+            yield return _portkeySocialService.GetRecoverStatus("id_mock", options, (result) =>
             {
                 done = true;
                 Assert.AreEqual(true, (result.recoveryStatus == "pass" && result.recoveryMessage != ""));
@@ -167,7 +153,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator GetRecoverStatusBadParameterTest()
         {
-            bool done = false;
+            var done = false;
             
             var options = new QueryOptions
             {
@@ -175,7 +161,7 @@ namespace Portkey.Test
                 reCount = 1,
                 maxCount = 0
             };
-            yield return _portkeySocialService.component.GetRecoverStatus("id_mock", options, (result) =>
+            yield return _portkeySocialService.GetRecoverStatus("id_mock", options, (result) =>
             {
                 done = true;
                 Assert.Fail("Should not be here.");
@@ -191,7 +177,7 @@ namespace Portkey.Test
         [UnityTest]
         public IEnumerator VerifyVerificationCodeTest()
         {
-            bool done = false;
+            var done = false;
 
             var requestParams = new VerifyVerificationCodeParams()
             {
@@ -201,10 +187,157 @@ namespace Portkey.Test
                 guardianIdentifier = "guardianIdentifier_mock",
                 chainId = "AELF"
             };
-            yield return _portkeySocialService.component.VerifyVerificationCode(requestParams, (result) =>
+            yield return _portkeySocialService.VerifyVerificationCode(requestParams, (result) =>
             {
                 done = true;
                 Assert.AreEqual(true, (result.signature == "signature_mock" && result.verificationDoc == "verificationDoc_mock"));
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator RecoveryTest()
+        {
+            var done = false;
+
+            var requestParams = new RecoveryParams()
+            {
+                chainId = "AELF",
+                loginGuardianIdentifier = "loginGuardianIdentifier_mock",
+            };
+            yield return _portkeySocialService.Recovery(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual(true, result.sessionId == "sessionId_mock");
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator CheckGoogleRecaptchaTest()
+        {
+            var done = false;
+
+            var requestParams = new CheckGoogleRecaptchaParams()
+            {
+                operationType = RecaptchaType.register
+            };
+            yield return _portkeySocialService.CheckGoogleRecaptcha(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual(true, result);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator GetRegisterInfoTest()
+        {
+            var done = false;
+
+            var requestParams = new GetRegisterInfoParams()
+            {
+                caHash = "caHash_mock",
+                loginGuardianIdentifier = "loginGuardianIdentifier_mock"
+            };
+            yield return _portkeySocialService.GetRegisterInfo(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual("originChainId_mock", result.originChainId);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator GetPhoneCountryCodeWithLocalTest()
+        {
+            var done = false;
+
+            yield return _portkeySocialService.GetPhoneCountryCodeWithLocal((result) =>
+            {
+                done = true;
+                Assert.AreEqual("65", result.locateData.code);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator GetHolderInfoTest()
+        {
+            var done = false;
+
+            var requestParams = new GetHolderInfoParams()
+            {
+                caHash = "caHash_mock"
+            };
+            yield return _portkeySocialService.GetHolderInfo(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual("caAddress_mock", result.caAddress);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator VerifyAppleTokenTest()
+        {
+            var done = false;
+
+            var requestParams = new VerifyAppleTokenParams()
+            {
+                chainId = "AELF"
+            };
+            yield return _portkeySocialService.VerifyAppleToken(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual("verificationDoc_mock", result.verificationDoc);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator VerifyGoogleTokenTest()
+        {
+            var done = false;
+
+            var requestParams = new VerifyGoogleTokenParams()
+            {
+                chainId = "AELF"
+            };
+            yield return _portkeySocialService.VerifyGoogleToken(requestParams, (result) =>
+            {
+                done = true;
+                Assert.AreEqual("verificationDoc_mock", result.verificationDoc);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        
+        [UnityTest]
+        public IEnumerator GetCAHolderInfoTest()
+        {
+            var done = false;
+
+            yield return _portkeySocialService.GetCAHolderInfo("authorization_mock","caHash_mock", (result) =>
+            {
+                done = true;
+                Assert.AreEqual("userId_mock", result.userId);
             }, ErrorCallback);
 
             while (!done)

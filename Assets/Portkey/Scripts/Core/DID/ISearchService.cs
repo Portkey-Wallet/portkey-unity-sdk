@@ -77,6 +77,9 @@ namespace Portkey.Core
         public string nickName;
     }
 
+    /// <summary>
+    /// Service for searching register status, recover status as well as chain and holder info.
+    /// </summary>
     public interface ISearchService
     {
         public IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback);

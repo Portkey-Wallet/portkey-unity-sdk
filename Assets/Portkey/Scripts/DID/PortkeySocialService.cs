@@ -1,25 +1,28 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Portkey.Core;
+using Portkey.Utilities;
 using Unity.Plastic.Newtonsoft.Json;
 using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Portkey.DID
 {
     /// <summary>
     /// Portkey Social Service class. Contains methods for making requests to the Portkey Social API.
     /// </summary>
-    public class PortkeySocialService : MonoBehaviour, IPortkeySocialService
+    public class PortkeySocialService : IPortkeySocialService
     {
-        [SerializeField]
-        protected PortkeyConfig config;
-        [SerializeField]
-        protected IHttp _http;
-        //[SerializeField]
-        //private readonly GraphQL _graphQL;
+        private PortkeyConfig config;
+        private IHttp _http;
+        private GraphQL.GraphQL _graphQl;
+        
+        public PortkeySocialService(PortkeyConfig config, IHttp http, GraphQL.GraphQL graphQl)
+        {
+            this.config = config;
+            this._http = http;
+            _graphQl = graphQl;
+        }
 
         private string GetFullApiUrl(string url)
         {
@@ -58,7 +61,7 @@ namespace Portkey.DID
                 JsonData = JsonConvert.SerializeObject(requestParams),
             };
             
-            return Get(url, jsonRequestData, successCallback, errorCallback);
+            return Get(jsonRequestData, successCallback, errorCallback);
         }
         
         private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
@@ -77,18 +80,22 @@ namespace Portkey.DID
             {
                 var json = JToken.Parse(response);
 
-                if (json is JObject)
+                switch (json)
                 {
-                    //deserialize response
-                    var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
-                    //call success callback
-                    successCallback(deserializedObject);
-                }
-                else
-                {
-                    //throw new Exception("Unknown type");
-                    errorCallback("Unsupported type detected!");
-                    return;
+                    case JObject:
+                    {
+                        //deserialize response
+                        var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
+                        //call success callback
+                        successCallback(deserializedObject);
+                        break;
+                    }
+                    case JValue:
+                        successCallback(json.Value<T>());
+                        break;
+                    default:
+                        errorCallback("Unsupported type detected!");
+                        break;
                 }
             };
         }
@@ -103,121 +110,84 @@ namespace Portkey.DID
             return Post("/api/app/account/verifyCode", requestParams, successCallback, errorCallback);
         }
 
-        public IEnumerator sendAppleUserExtraInfo(SendAppleUserExtraInfoParams requestParams, SuccessCallback<SendAppleUserExtraInfoResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator SendAppleUserExtraInfo(SendAppleUserExtraInfoParams requestParams, SuccessCallback<SendAppleUserExtraInfoResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/userExtraInfo/appleUserExtraInfo", requestParams, successCallback, errorCallback);
         }
 
-        public IEnumerator verifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/account/verifyGoogleToken", requestParams, successCallback, errorCallback);
         }
 
-        public IEnumerator verifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/account/verifyAppleToken", requestParams, successCallback, errorCallback);
         }
 
         public IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
-            if(queryOptions.reCount > queryOptions.maxCount)
-            {
-                errorCallback("timeout");
-                yield break;
-            }
-            
-            yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
-            {
-                StartCoroutine(GetRegisterStatus(id, queryOptions, ret, (ArrayWrapper<RegisterStatusResult> response) =>
-                {
-                    if (response.items == null || response.items.Length == 0)
-                    {
-                        errorCallback("response.items is null");
-                        return;
-                    }
-                    successCallback(response.items[0]);
-                }, errorCallback));
-            }, errorCallback);
-        }
-        
-        private IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<ArrayWrapper<RegisterStatusResult>> successCallback, ErrorCallback errorCallback)
-        {
-            if(queryOptions.reCount > queryOptions.maxCount)
-            {
-                errorCallback("timeout");
-                yield break;
-            }
-            
-            yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
-            {
-                StartCoroutine(GetRegisterStatus(id, queryOptions, ret, successCallback, errorCallback));
-            }, errorCallback);
-        }
+            yield return Poll();
 
-        private IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, ArrayWrapper<RegisterStatusResult> requestParam,
-            SuccessCallback<ArrayWrapper<RegisterStatusResult>> successCallback, ErrorCallback errorCallback)
-        {
-            if(requestParam == null || requestParam.items == null || 
-               requestParam.items.Length == 0 || requestParam.items[0].registerStatus == "pending")
+            IEnumerator Poll()
             {
-                yield return new WaitForSeconds(queryOptions.interval);
-                ++queryOptions.reCount;
-                yield return StartCoroutine(GetRegisterStatus(id, queryOptions, successCallback, errorCallback));
+                if(queryOptions.reCount > queryOptions.maxCount)
+                {
+                    errorCallback("timeout");
+                    yield break;
+                }
+            
+                yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
+                {
+                    StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
+                }, errorCallback);
             }
-            else
+            
+            IEnumerator IsRepollNeeded(ArrayWrapper<RegisterStatusResult> requestParam)
             {
-                successCallback(requestParam);
+                if(requestParam?.items == null || requestParam.items.Length == 0 || requestParam.items[0].registerStatus == "pending")
+                {
+                    yield return new WaitForSeconds(queryOptions.interval);
+                    ++queryOptions.reCount;
+                    yield return StaticCoroutine.StartCoroutine(Poll());
+                }
+                else
+                {
+                    successCallback(requestParam.items[0]);
+                }
             }
         }
 
         public IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
-            if(queryOptions.reCount > queryOptions.maxCount)
+            yield return Poll();
+            
+            IEnumerator Poll()
             {
-                errorCallback("timeout");
-                yield break;
-            }
-            yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
-            {
-                StartCoroutine(GetRecoverStatus(id, queryOptions, ret, (ArrayWrapper<RecoverStatusResult> response) =>
+                if(queryOptions.reCount > queryOptions.maxCount)
                 {
-                    if (response.items == null || response.items.Length == 0)
-                    {
-                        errorCallback("response.items is null");
-                        return;
-                    }
-                    successCallback(response.items[0]);
-                }, errorCallback));
-            }, errorCallback);
-        }
-        
-        private IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, SuccessCallback<ArrayWrapper<RecoverStatusResult>> successCallback, ErrorCallback errorCallback)
-        {
-            if(queryOptions.reCount > queryOptions.maxCount)
-            {
-                errorCallback("timeout");
-                yield break;
+                    errorCallback("timeout");
+                    yield break;
+                }
+            
+                yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
+                {
+                    StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
+                }, errorCallback);
             }
             
-            yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
+            IEnumerator IsRepollNeeded(ArrayWrapper<RecoverStatusResult> requestParam)
             {
-                StartCoroutine(GetRecoverStatus(id, queryOptions, ret, successCallback, errorCallback));
-            }, errorCallback);
-        }
-        
-        private IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, ArrayWrapper<RecoverStatusResult> requestParam,
-            SuccessCallback<ArrayWrapper<RecoverStatusResult>> successCallback, ErrorCallback errorCallback)
-        {
-            if(requestParam == null || requestParam.items == null || 
-               requestParam.items.Length == 0 || requestParam.items[0].recoveryStatus == "pending")
-            {
-                yield return new WaitForSeconds(queryOptions.interval);
-                ++queryOptions.reCount;
-                yield return StartCoroutine(GetRecoverStatus(id, queryOptions, successCallback, errorCallback));
-            }
-            else
-            {
-                successCallback(requestParam);
+                if(requestParam?.items == null || requestParam.items.Length == 0 || requestParam.items[0].recoveryStatus == "pending")
+                {
+                    yield return new WaitForSeconds(queryOptions.interval);
+                    ++queryOptions.reCount;
+                    yield return StaticCoroutine.StartCoroutine(Poll());
+                }
+                else
+                {
+                    successCallback(requestParam.items[0]);
+                }
             }
         }
 
@@ -253,10 +223,16 @@ namespace Portkey.DID
             return Get("/api/app/account/guardianIdentifiers", requestParams, successCallback, errorCallback);
         }
 
-        //TODO: implement once graphQL is merged
         public IEnumerator GetHolderInfoByManager(GetCAHolderByManagerParams requestParams, SuccessCallback<GetCAHolderByManagerResult> successCallback, ErrorCallback errorCallback)
         {
-            throw new System.NotImplementedException();
+            return _graphQl.GetHolderInfoByManager(requestParams.manager, requestParams.chainId, (ret) =>
+            {
+                var result = new GetCAHolderByManagerResult
+                {
+                    caHolders = ret
+                };
+                successCallback(result);
+            }, errorCallback);
         }
 
         public IEnumerator GetRegisterInfo(GetRegisterInfoParams requestParams, SuccessCallback<RegisterInfo> successCallback, ErrorCallback errorCallback)

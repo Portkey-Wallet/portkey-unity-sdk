@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Portkey.Core;
 using Unity.Plastic.Newtonsoft.Json;
 using Unity.Plastic.Newtonsoft.Json.Linq;
@@ -20,11 +21,16 @@ namespace Portkey.DID
         //[SerializeField]
         //private readonly GraphQL _graphQL;
 
+        private string GetFullApiUrl(string url)
+        {
+            return config.ApiBaseUrl + url;
+        }
+        
         private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
             var jsonRequestData = new JsonRequestData
             {
-                Url = config.ApiBaseUrl + url,
+                Url = GetFullApiUrl(url),
                 JsonData = JsonConvert.SerializeObject(requestParams),
             };
             
@@ -35,33 +41,34 @@ namespace Portkey.DID
                 });
         }
         
-        private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
+        private IEnumerator Get<T>(JsonRequestData jsonRequestData, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
-            var jsonRequestData = new JsonRequestData
-            {
-                Url = config.ApiBaseUrl + url,
-                JsonData = JsonConvert.SerializeObject(requestParams),
-            };
-            
-            return _http.Get(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback),
+            return _http.Get(jsonRequestData, JsonToObject<T>(successCallback, errorCallback),
                 (error) =>
                 {
                     errorCallback(error);
                 });
         }
         
+        private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
+        {
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = GetFullApiUrl(url),
+                JsonData = JsonConvert.SerializeObject(requestParams),
+            };
+            
+            return Get(url, jsonRequestData, successCallback, errorCallback);
+        }
+        
         private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
             var jsonRequestData = new JsonRequestData
             {
-                Url = config.ApiBaseUrl + url,
+                Url = GetFullApiUrl(url),
             };
             
-            return _http.Get(jsonRequestData, JsonToObject<T>(successCallback, errorCallback),
-                (error) =>
-                {
-                    errorCallback(error);
-                });
+            return Get(jsonRequestData, successCallback, errorCallback);
         }
         
         private static IHttp.successCallback JsonToObject<T>(SuccessCallback<T> successCallback, ErrorCallback errorCallback)
@@ -221,7 +228,14 @@ namespace Portkey.DID
 
         public IEnumerator GetCAHolderInfo(string authorization, string caHash, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
         {
-            return Get("/api/app/search/caholderindex", new { filter = $"caHash:{caHash}" }, successCallback, errorCallback);
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = GetFullApiUrl("/api/app/search/caholderindex"),
+                JsonData = JsonConvert.SerializeObject(new { filter = $"caHash:{caHash}" }),
+                Headers = new Dictionary<string, string> { { "Authorization", authorization } }
+            };
+            
+            return Get(jsonRequestData, successCallback, errorCallback);
         }
 
         public IEnumerator Register(RegisterParams requestParams, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)

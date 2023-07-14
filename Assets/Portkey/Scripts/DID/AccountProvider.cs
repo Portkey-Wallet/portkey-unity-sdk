@@ -1,5 +1,7 @@
 using AElf.Client;
 using Portkey.Core;
+using Wallet;
+using Wallet = Wallet.Wallet;
 
 namespace Portkey.DID
 {
@@ -12,6 +14,8 @@ namespace Portkey.DID
 
         public WalletAccount CreateAccount()
         {
+            var wallet = new global::Wallet.Wallet();
+            var accountInfo = wallet.CreateWallet(128, Language.English, null);
             throw new System.NotImplementedException();
         }
     }

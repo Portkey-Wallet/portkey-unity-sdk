@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Secp256k1.Net</id>
+    <version>1.2.0</version>
+    <authors>Matthew Little</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <readme>README.md</readme>
+    <projectUrl>https://github.com/zone117x/Secp256k1.Net</projectUrl>
+    <description>.NET wrapper for native secp256k1 library</description>
+    <tags>Secp256k1 libsecp256k1 ECDSA ethereum bitcoin</tags>
+    <repository type="git" url="https://github.com/zone117x/Secp256k1.Net.git" commit="332630c5087c877ae90e6077f0434d7788170684" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="System.Memory" version="4.5.5" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

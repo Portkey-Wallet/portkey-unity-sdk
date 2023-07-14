@@ -29,6 +29,13 @@ Welcome to the Portkey Unity SDK! This software development kit (SDK) is designe
 - Android Studio 4.2.2 or later (for Android builds)
 - Unity Package: com.unity.nuget.newtonsoft-json@3.2 (Newtonsoft)
 
+### Dependencies
+- Google Protobuf 3.19.4
+    - If you require to generate C# classes from .proto, please use the installation below:
+        ```
+        brew install protobuf@21
+        ```
+
 To start using the Portkey Unity SDK, follow these steps:
 
 1. Clone the repository or download the SDK package from the [releases](https://github.com/Portkey-Wallet/portkey-unity-sdk/releases) section.

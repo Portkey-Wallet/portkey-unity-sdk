@@ -14,7 +14,7 @@ namespace Portkey.Test
     /// </summary>
     public class PortkeySocialServiceTest
     {
-        private const string PORTKEY_CONFIG_NAME = "PortkeyMockConfig";
+        private const string PORTKEY_CONFIG_NAME = "PortkeyTestConfig";
         private IPortkeySocialService _portkeySocialService = new PortkeySocialService(GetPortkeyConfig(PORTKEY_CONFIG_NAME), new FetchJsonPortkeySocialServiceMock(), null);
             
         private static PortkeyConfig GetPortkeyConfig(string name)

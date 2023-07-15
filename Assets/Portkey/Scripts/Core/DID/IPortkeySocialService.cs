@@ -36,7 +36,7 @@ namespace Portkey.Core
     }
 
     [Serializable]
-    public class RegisterResult
+    public class SessionIdResult
     {
         public string sessionId;
     }
@@ -94,16 +94,28 @@ namespace Portkey.Core
     {
         public string caAddress;
         public string caHash;
-        public Guardian[] guardianList;
+        public GuardianList guardianList;
         public Manager[] managerInfos;
+    }
+
+    [Serializable]
+    public class GuardianList
+    {
+        public Guardian[] guardians;
+    }
+    
+    [Serializable]
+    public class GetHolderInfoByManagerParams : GetHolderInfoParams
+    {
+        public string manager = null;
     }
     
     [Serializable]
     public class GetHolderInfoParams
     {
         public string chainId;
-        public string caHash;
-        public string guardianIdentifier;
+        public string caHash = null;
+        public string guardianIdentifier = null;
     }
 
     [Serializable]
@@ -149,7 +161,7 @@ namespace Portkey.Core
         /// Coroutine to register a new account.
         /// </summary>
         /// <param name="requestParams">Parameters for registration.</param>
-        public IEnumerator Register(RegisterParams requestParams, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator Register(RegisterParams requestParams, SuccessCallback<SessionIdResult> successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// Coroutine to recover an existing account.
         /// </summary>

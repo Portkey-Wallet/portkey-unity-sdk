@@ -125,7 +125,7 @@ namespace Portkey.DID
             return Post("/api/app/account/verifyAppleToken", requestParams, successCallback, errorCallback);
         }
 
-        public IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GetRegisterStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
             yield return Poll();
 
@@ -137,7 +137,7 @@ namespace Portkey.DID
                     yield break;
                 }
             
-                yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
+                yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{sessionId}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
                 {
                     StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
                 }, errorCallback);
@@ -158,7 +158,7 @@ namespace Portkey.DID
             }
         }
 
-        public IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GetRecoverStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
             yield return Poll();
             
@@ -170,7 +170,7 @@ namespace Portkey.DID
                     yield break;
                 }
             
-                yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
+                yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{sessionId}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
                 {
                     StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
                 }, errorCallback);
@@ -208,7 +208,7 @@ namespace Portkey.DID
             return Get(jsonRequestData, successCallback, errorCallback);
         }
 
-        public IEnumerator Register(RegisterParams requestParams, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator Register(RegisterParams requestParams, SuccessCallback<SessionIdResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/account/register/request", requestParams, successCallback, errorCallback);
         }

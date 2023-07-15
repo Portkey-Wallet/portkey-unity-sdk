@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using AElf;
 using AElf.Kernel;
 using Portkey.Core;
+using Portkey.Utilities;
 
 namespace Portkey.DID
 {
@@ -47,7 +49,7 @@ namespace Portkey.DID
             }), errorCallback);
         }
         
-        public void InitializeAccount()
+        public void InitializeManagementAccount()
         {
             if (_managementAccount != null)
             {
@@ -69,7 +71,7 @@ namespace Portkey.DID
 
         public bool Login(EditManagerParams param)
         {
-            InitializeAccount();
+            InitializeManagementAccount();
 
             if (_accountInfo.LoginAccount == null)
             {
@@ -95,19 +97,149 @@ namespace Portkey.DID
             throw new System.NotImplementedException();
         }
 
-        public RegisterResult Register(RegisterParams param)
+        public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
         {
-            throw new System.NotImplementedException();
+            if(_accountInfo.LoginAccount != null)
+            {
+                errorCallback("Account already logged in.");
+                yield break;
+            }
+            
+            InitializeManagementAccount();
+            param.manager = _managementAccount.Address;
+            
+            yield return _socialService.Register(param, (result) =>
+            {
+                StaticCoroutine.StartCoroutine(_socialService.GetRegisterStatus(result.sessionId, QueryOptions.DefaultQueryOptions,
+                    (status) =>
+                    {
+                        if (status.IsStatusPass())
+                        {
+                            UpdateAccountInfo(param.loginGuardianIdentifier);
+                            UpdateCAInfo(param.chainId, status.caHash, status.caAddress);
+                        }
+                        else
+                        {
+                            errorCallback($"Register failed: {status.registerMessage}");
+                        }
+
+                        successCallback(new RegisterResult(status, result.sessionId));
+                    }, errorCallback));
+            }, errorCallback);
         }
 
-        public RegisterStatusResult GetRegisterStatus(string chainId, string sessionId)
+        public IEnumerator GetRegisterStatus(string chainId, string sessionId, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
-            throw new System.NotImplementedException();
+            return _socialService.GetRegisterStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
+                {
+                    if(status == null)
+                    {
+                        errorCallback("Failed to get register status.");
+                        return;
+                    }
+                    if(IsFirstTimeRegisterPassed(chainId, status))
+                    {
+                        var holderInfoParams = new GetHolderInfoParams
+                        {
+                            chainId = chainId,
+                            caHash = status.caHash
+                        };
+                        StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
+                        {
+                            var isCurrentAccountAManager = info.managerInfos.Any(manager => manager.address == _managementAccount.Address);
+                            if (isCurrentAccountAManager)
+                            {
+                                UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
+                                UpdateCAInfo(chainId, status.caHash, status.caAddress);
+                            }
+
+                            successCallback(status);
+                        }, errorCallback));
+                    }
+                    else
+                    {
+                        successCallback(status);
+                    }
+                },
+                errorCallback);
         }
 
-        public GetCAHolderByManagerResult GetHolderInfo(GetHolderInfoParams param)
+        private void UpdateAccountInfo(string guardianIdentifier)
         {
-            throw new System.NotImplementedException();
+            _accountInfo = new AccountInfo
+            {
+                LoginAccount = guardianIdentifier
+            };
+        }
+        
+        private void UpdateCAInfo(string chainId, string caHash, string caAddress)
+        {
+            _caInfoMap[chainId] = new CAInfo
+            {
+                caHash = caHash,
+                caAddress = caAddress
+            };
+        }
+
+        private bool IsFirstTimeRegisterPassed(string chainId, RegisterStatusResult response)
+        {
+            return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_caInfoMap.ContainsKey(chainId);
+        }
+
+        public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
+        {
+            return _socialService.GetHolderInfo(param, (holderInfo) =>
+            {
+                if (IsLoginAccountTheRequestedGuardian(param, holderInfo))
+                {
+                    UpdateCAInfo(param.chainId, holderInfo.caHash, holderInfo.caAddress);
+                }
+
+                successCallback(holderInfo);
+            }, errorCallback);
+        }
+
+        public IEnumerator GetHolderInfo(GetHolderInfoByManagerParams param, SuccessCallback<CaHolderWithGuardian> successCallback, ErrorCallback errorCallback)
+        {
+            var manager = param.manager;
+            
+            // If manager is not specified, use the management account.
+            if(manager == null && _managementAccount != null)
+            {
+                manager = _managementAccount.Address;
+            }
+            if (manager == null)
+            {
+                errorCallback("No manager account!");
+                yield break;
+            }
+
+            var caHolderInfoByManagerParams = new GetCAHolderByManagerParams
+            {
+                chainId = param.chainId,
+                manager = manager
+            };
+            yield return _socialService.GetHolderInfoByManager(caHolderInfoByManagerParams, (result) =>
+            {
+                var info = result.caHolders[0];
+                if (info != null && manager == _managementAccount?.Address &&
+                    info.holderManagerInfo.caAddress != null && info.holderManagerInfo.caHash != null)
+                {
+                    UpdateCAInfo(param.chainId, info.holderManagerInfo.caHash, info.holderManagerInfo.caAddress);
+                    var loginAccount = info.loginGuardianInfo[0]?.loginGuardian?.identifierHash;
+                    if (_accountInfo.LoginAccount == null && loginAccount != null)
+                    {
+                        UpdateAccountInfo(loginAccount);
+                    }
+                }
+
+                successCallback(info);
+            }, errorCallback);
+        }
+
+        private bool IsLoginAccountTheRequestedGuardian(GetHolderInfoParams param, IHolderInfo holderInfo)
+        {
+            return holderInfo != null && param.guardianIdentifier == _accountInfo?.LoginAccount;
         }
 
         public VerifierItem[] GetVerifierServers(string chainId)

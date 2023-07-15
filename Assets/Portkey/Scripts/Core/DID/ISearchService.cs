@@ -17,6 +17,11 @@ namespace Portkey.Core
         /// </summary>
         public string registerStatus;
         public string registerMessage;
+        
+        public bool IsStatusPass()
+        {
+            return registerStatus == "pass";
+        }
     }
     
     [Serializable]
@@ -82,8 +87,8 @@ namespace Portkey.Core
     /// </summary>
     public interface ISearchService
     {
-        public IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback);
-        public IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator GetRegisterStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator GetRecoverStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetChainsInfo(SuccessCallback<ChainInfo[]> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetCAHolderInfo(string authorization, string caHash, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
     }

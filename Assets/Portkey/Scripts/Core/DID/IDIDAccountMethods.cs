@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace Portkey.Core
 {
     using ScanLoginParam = EditManagerParams;
@@ -7,7 +9,19 @@ namespace Portkey.Core
         public RecoverStatusResult Status { get; private set; }
         public string SessionId { get; private set; }
         
-        LoginResult(RecoverStatusResult status, string sessionId)
+        public LoginResult(RecoverStatusResult status, string sessionId)
+        {
+            Status = status;
+            SessionId = sessionId;
+        }
+    }
+
+    public class RegisterResult
+    {
+        public RegisterStatusResult Status { get; private set; }
+        public string SessionId { get; private set; }
+
+        public RegisterResult(RegisterStatusResult status, string sessionId)
         {
             Status = status;
             SessionId = sessionId;
@@ -43,10 +57,11 @@ namespace Portkey.Core
         public LoginResult Login(AccountLoginParams param);
         public bool Logout(EditManagerParams param);
         public RecoverStatusResult GetLoginStatus(string chainId, string sessionId);
-        public RegisterResult Register(RegisterParams param);
-        RegisterStatusResult GetRegisterStatus(string chainId, string sessionId);
-        public GetCAHolderByManagerResult GetHolderInfo(GetHolderInfoParams param);
+        IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback);
+        IEnumerator GetRegisterStatus(string chainId, string sessionId, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback);
+        public IEnumerator GetHolderInfo(GetHolderInfoByManagerParams param, SuccessCallback<CaHolderWithGuardian> successCallback, ErrorCallback errorCallback);
         VerifierItem[] GetVerifierServers(string chainId);
-        CAHolderInfo GetCAHolderInfo(string chainId);
+        public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
     }
 }

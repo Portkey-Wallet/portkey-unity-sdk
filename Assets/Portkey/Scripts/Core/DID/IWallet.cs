@@ -8,7 +8,7 @@ namespace Portkey.Core
         /// <summary>
         /// Initializes the Wallet with a new Account if it does not have one.
         /// </summary>
-        public void InitializeAccount();
+        public void InitializeManagementAccount();
         
         /// <summary>
         /// For saving the Wallet.

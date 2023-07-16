@@ -24,7 +24,7 @@ namespace Portkey.Contract
         public ContractBasic(IChain chain, string contractAddress)
         {
             _chain = chain;
-            ContractAddress = contractAddress;
+            ContractAddress = contractAddress ?? throw new ArgumentException("Contract address cannot be null.");
         }
         
         public async Task<T> CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param) where T : IMessage<T>, new()

@@ -141,12 +141,12 @@ namespace Portkey.DID
             
             yield return _socialService.Register(param, (result) =>
             {
-                StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId,
+                StaticCoroutine.StartCoroutine(_socialService.GetRegisterStatus(result.sessionId, QueryOptions.DefaultQueryOptions,
                     (status) =>
                     {
                         if (status.IsStatusPass())
                         {
-                            //UpdateAccountInfo(param.loginGuardianIdentifier);
+                            UpdateAccountInfo(param.loginGuardianIdentifier);
                             UpdateCAInfo(param.chainId, status.caHash, status.caAddress);
                         }
                         else

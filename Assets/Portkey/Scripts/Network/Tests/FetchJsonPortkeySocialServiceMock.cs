@@ -137,10 +137,9 @@ namespace Portkey.Network
                     }");
                     yield break;
                 case "/api/app/account/recovery/request":
-                    successCallback(JsonUtility.ToJson(new RecoveryResult
-                    {
-                        sessionId = "sessionId_mock"
-                    }));
+                    successCallback(@"{
+                    ""sessionId"": ""string""
+                    }");
                     yield break;
                 case "/api/app/account/verifyCode":
                 case "/api/app/account/verifyGoogleToken":

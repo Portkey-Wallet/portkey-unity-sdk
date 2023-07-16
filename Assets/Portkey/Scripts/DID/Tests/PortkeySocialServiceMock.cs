@@ -73,7 +73,7 @@ namespace Portkey.Test
             yield break;
         }
 
-        public IEnumerator Recovery(RecoveryParams requestParams, SuccessCallback<RecoveryResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator Recovery(RecoveryParams requestParams, SuccessCallback<SessionIdResult> successCallback, ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();
         }

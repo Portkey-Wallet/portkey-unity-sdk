@@ -53,12 +53,6 @@ namespace Portkey.Core
     }
 
     [Serializable]
-    public class RecoveryResult
-    {
-        public string sessionId;
-    }
-
-    [Serializable]
     public class GetCAHolderByManagerParams
     {
         public string manager;
@@ -166,7 +160,7 @@ namespace Portkey.Core
         /// Coroutine to recover an existing account.
         /// </summary>
         /// <param name="requestParams">Parameters for recovery.</param>
-        public IEnumerator Recovery(RecoveryParams requestParams, SuccessCallback<RecoveryResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator Recovery(RecoveryParams requestParams, SuccessCallback<SessionIdResult> successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// Get holder info by guardian info, chainId and caHash.
         /// </summary>

@@ -84,9 +84,9 @@ namespace Portkey.DID
         {
             InitializeManagementAccount();
 
-            if (!_accountInfo.IsLoggedIn())
+            if (_accountInfo.IsLoggedIn())
             {
-                throw new Exception("Account not logged in.");
+                throw new Exception("Account already logged in.");
             }
 
             var recoveryParam = new RecoveryParams
@@ -167,7 +167,7 @@ namespace Portkey.DID
 
         public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
         {
-            if(_accountInfo.LoginAccount != null)
+            if(_accountInfo.IsLoggedIn())
             {
                 errorCallback("Account already logged in.");
                 yield break;

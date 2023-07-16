@@ -213,7 +213,7 @@ namespace Portkey.DID
             return Post("/api/app/account/register/request", requestParams, successCallback, errorCallback);
         }
 
-        public IEnumerator Recovery(RecoveryParams requestParams, SuccessCallback<RecoveryResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator Recovery(RecoveryParams requestParams, SuccessCallback<SessionIdResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/account/recovery/request", requestParams, successCallback, errorCallback);
         }

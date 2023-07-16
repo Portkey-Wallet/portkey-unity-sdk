@@ -1,13 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Google.Protobuf;
 using Moq;
 using NUnit.Framework;
+using Portkey.Contract;
+using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.DID;
 using Portkey.Network;
 using Portkey.Storage;
 using Portkey.Utilities;
 using UnityEngine.TestTools;
+using Guardian = Portkey.Core.Guardian;
+using GuardianList = Portkey.Core.GuardianList;
 
 namespace Portkey.Test
 {
@@ -27,6 +33,29 @@ namespace Portkey.Test
                         "mnemonic_mock",
                         "publicKey_mock")));
             return accountProviderMock;
+        }
+        
+        private static Mock<IContractProvider> GetContractProviderMock<T>() where T : IMessage<T>, new()
+        {
+            // mock contract
+            var contractMock = new Mock<IContract>();
+            contractMock.Setup(contract => contract.CallTransactionAsync<T>(It.IsAny<BlockchainWallet>(),
+                    It.IsAny<string>(), It.IsAny<IMessage>()))
+                .Returns((BlockchainWallet wallet, string methodName, IMessage param) =>
+                {
+                    return new Task<T>(() => new T());
+                });
+            
+            // mock provider
+            var contractProviderMock = new Mock<IContractProvider>();
+            contractProviderMock.Setup(provider => provider.GetContract(It.IsAny<string>(),
+                    It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()))
+                .Returns((string chainId, SuccessCallback<IContract> successCallback, ErrorCallback errorCallback) =>
+                {
+                    successCallback(contractMock.Object);
+                    return new List<string>().GetEnumerator();
+                });
+            return contractProviderMock;
         }
         
         private static Mock<IPortkeySocialService> GetSocialServiceMock()
@@ -95,8 +124,9 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
+            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
 
-            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService);
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             
             return didWallet.GetRegisterStatus("AELF_mock", "sessionId_mock", (response) =>
             {
@@ -113,8 +143,9 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
+            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
 
-            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService);
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             var registerParam = new RegisterParams
             {
                 type = AccountType.Google,
@@ -141,12 +172,14 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
+            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
 
-            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService);
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             var registerParam = new RegisterParams
             {
                 type = AccountType.Google,
-                chainId = "AELF_mock"
+                chainId = "AELF_mock",
+                loginGuardianIdentifier = "loginGuardianIdentifier_mock"
             };
             
             return didWallet.Register(registerParam, (result) =>
@@ -159,6 +192,88 @@ namespace Portkey.Test
                     accountProviderMock.Verify(provider => provider.CreateAccount(), Times.AtMostOnce());
                     socialServiceMock.Verify(service => service.Register(It.IsAny<RegisterParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
                     socialServiceMock.Verify(service => service.GetRegisterStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RegisterStatusResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                    socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                    
+                    Assert.AreEqual(error, "Account already logged in.");
+                }));
+            }, error =>
+            {
+                Assert.Fail(error);
+            });
+        }
+        
+        [UnityTest]
+        public IEnumerator GetLoginStatusTest()
+        {
+            var accountProviderMock = GetAccountProviderMock();
+            var socialServiceMock = GetSocialServiceMock();
+            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
+            
+            return didWallet.GetLoginStatus("AELF_mock", "sessionId_mock", (response) =>
+            {
+                Assert.AreEqual(response.caAddress, "caAddress_mock");
+                Assert.AreEqual(response.caHash, "caHash_mock");
+            }, error =>
+            {
+                Assert.Fail(error);
+            });
+        }
+        
+        [UnityTest]
+        public IEnumerator LoginTest()
+        {
+            var accountProviderMock = GetAccountProviderMock();
+            var socialServiceMock = GetSocialServiceMock();
+            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
+            var accountLoginParams = new AccountLoginParams("loginGuardianIdentifier_mock",
+                                            new GuardiansApproved[] { new GuardiansApproved() },
+                                                    "extraData_mock",
+                                                        "chainId_mock",
+                                                                new Context());
+            
+            return didWallet.Login(accountLoginParams, (result) =>
+            {
+                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.AtMostOnce());
+                socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                Assert.AreEqual(result.Status.caAddress, "caAddress_mock");
+                Assert.AreEqual(result.Status.caHash, "caHash_mock");
+                Assert.AreEqual(result.SessionId, "sessionId_mock");
+            }, error =>
+            {
+                Assert.Fail(error);
+            });
+        }
+        
+        [UnityTest]
+        public IEnumerator LoginTwiceTest()
+        {
+            var accountProviderMock = GetAccountProviderMock();
+            var socialServiceMock = GetSocialServiceMock();
+            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
+            var accountLoginParams = new AccountLoginParams("loginGuardianIdentifier_mock",
+                                                    new GuardiansApproved[] { new GuardiansApproved() },
+                                                            "extraData_mock",
+                                                            "chainId_mock",
+                                                            new Context());
+            
+            return didWallet.Login(accountLoginParams, (result) =>
+            {
+                StaticCoroutine.StartCoroutine(didWallet.Login(accountLoginParams, (result) =>
+                {
+                    Assert.Fail("Should not be here");
+                }, error =>
+                {
+                    accountProviderMock.Verify(provider => provider.CreateAccount(), Times.AtMostOnce());
+                    socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                    socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
                     socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
                     
                     Assert.AreEqual(error, "Account already logged in.");

@@ -1,3 +1,5 @@
+using Portkey.Contracts.CA;
+
 namespace Portkey.Core
 {
     public class EditManagerParams

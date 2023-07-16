@@ -100,30 +100,31 @@ namespace Portkey.DID
             };
             return _socialService.Recovery(recoveryParam, (result) =>
             {
-                StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId,
+                StaticCoroutine.StartCoroutine(_socialService.GetRecoverStatus(result.sessionId, QueryOptions.DefaultQueryOptions,
                     (status) =>
                     {
                         if (status.IsStatusPass())
                         {
-                            UpdateAccountInfo(param.loginGuardianIdentifier);
-                            UpdateCAInfo(param.chainId, status.caHash, status.caAddress);
+                            UpdateAccountInfo(param.LoginGuardianIdentifier);
+                            UpdateCAInfo(param.ChainId, status.caHash, status.caAddress);
                         }
                         else
                         {
-                            errorCallback($"Register failed: {status.registerMessage}");
+                            errorCallback($"Register failed: {status.recoveryMessage}");
+                            return;
                         }
 
-                        successCallback(new RecoveryResult(status, result.sessionId));
+                        successCallback(new LoginResult(status, result.sessionId));
                     }, errorCallback));
             }, errorCallback);
         }
 
-        public bool Logout(EditManagerParams param)
+        public RecoverStatusResult GetLoginStatus(string chainId, string sessionId)
         {
             throw new System.NotImplementedException();
         }
-
-        public RecoverStatusResult GetLoginStatus(string chainId, string sessionId)
+        
+        public bool Logout(EditManagerParams param)
         {
             throw new System.NotImplementedException();
         }
@@ -152,6 +153,7 @@ namespace Portkey.DID
                         else
                         {
                             errorCallback($"Register failed: {status.registerMessage}");
+                            return;
                         }
 
                         successCallback(new RegisterResult(status, result.sessionId));

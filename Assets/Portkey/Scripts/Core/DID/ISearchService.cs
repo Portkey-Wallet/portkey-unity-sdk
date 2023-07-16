@@ -32,6 +32,11 @@ namespace Portkey.Core
         /// </summary>
         public string recoveryStatus;
         public string recoveryMessage;
+        
+        public bool IsStatusPass()
+        {
+            return recoveryStatus == "pass";
+        }
     }
     
     [Serializable]

@@ -30,20 +30,11 @@ namespace Portkey.Core
 
     public class VerifierItem
     {
-        public string Id { get; private set; }
-        public string Name { get; private set; }
-        public string ImageUrl { get; private set; }
-        public string[] EndPoints { get; private set; }
-        public string[] VerifierAddresses { get; private set; }
-        
-        public VerifierItem(string id, string name, string imageUrl, string[] endPoints, string[] verifierAddresses)
-        {
-            Id = id;
-            Name = name;
-            ImageUrl = imageUrl;
-            EndPoints = endPoints;
-            VerifierAddresses = verifierAddresses;
-        }
+        public string id;
+        public string name;
+        public string imageUrl;
+        public string[] endPoints;
+        public string[] verifierAddresses;
     }
     
     public interface IDIDAccountMethods
@@ -61,7 +52,7 @@ namespace Portkey.Core
         IEnumerator GetRegisterStatus(string chainId, string sessionId, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback);
         IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback);
         IEnumerator GetHolderInfo(GetHolderInfoByManagerParams param, SuccessCallback<CaHolderWithGuardian> successCallback, ErrorCallback errorCallback);
-        VerifierItem[] GetVerifierServers(string chainId);
+        IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback);
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
     }
 }

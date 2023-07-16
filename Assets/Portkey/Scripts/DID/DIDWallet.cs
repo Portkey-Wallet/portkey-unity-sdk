@@ -2,11 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using AElf;
-using AElf.Kernel;
 using AElf.Types;
 using Google.Protobuf;
-using Google.Protobuf.Reflection;
+using Google.Protobuf.WellKnownTypes;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
@@ -342,14 +340,42 @@ namespace Portkey.DID
             return holderInfo != null && param.guardianIdentifier == _accountInfo?.LoginAccount;
         }
 
-        public VerifierItem[] GetVerifierServers(string chainId)
+        public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
         {
-            throw new System.NotImplementedException();
+            InitializeManagementAccount();
+            yield return _contractProvider.GetContract(chainId, async (contract) =>
+            {
+                var result = await contract.CallTransactionAsync<GetVerifierServersOutput>(_managementAccount.Wallet, "GetVerifierServers", new Empty());
+
+                var verifierItems = ConvertToVerifierItems(result);
+                successCallback(verifierItems);
+            }, errorCallback);
         }
 
-        public CAHolderInfo GetCAHolderInfo(string chainId)
+        private static VerifierItem[] ConvertToVerifierItems(GetVerifierServersOutput result)
         {
-            throw new NotImplementedException();
+            var verifierItems = new VerifierItem[result.VerifierServers.Count];
+            for (var i = 0; i < result.VerifierServers.Count; i++)
+            {
+                var verifierServer = result.VerifierServers[i];
+                var addresses = new string[verifierServer.VerifierAddresses.Count];
+                for (var j = 0; j < verifierServer.VerifierAddresses.Count; j++)
+                {
+                    addresses[j] = verifierServer.VerifierAddresses[j].ToString();
+                }
+
+                var item = new VerifierItem
+                {
+                    id = verifierServer.Id.ToHex(),
+                    name = verifierServer.Name,
+                    imageUrl = verifierServer.ImageUrl,
+                    endPoints = verifierServer.EndPoints.ToArray(),
+                    verifierAddresses = addresses
+                };
+                verifierItems[i] = item;
+            }
+
+            return verifierItems;
         }
 
         public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)

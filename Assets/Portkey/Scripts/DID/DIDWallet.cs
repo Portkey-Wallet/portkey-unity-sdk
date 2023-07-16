@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using AElf;
 using AElf.Kernel;
+using AElf.Types;
+using Google.Protobuf;
+using Google.Protobuf.Reflection;
+using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
 
 namespace Portkey.DID
 {
-
     public class DIDWallet<T> : IDIDWallet where T : AccountBase
     {
         protected class AccountInfo
@@ -28,35 +31,20 @@ namespace Portkey.DID
         private IStorageSuite<string> _storageSuite;
         private IAccountProvider<T> _accountProvider;
         private IConnectService _connectService;
-        
+        private IContractProvider _contractProvider;
+
         private AccountInfo _accountInfo = new AccountInfo();
-        private Dictionary<string, ChainInfo> _chainsInfoMap = new Dictionary<string, ChainInfo>();
         private Dictionary<string, CAInfo> _caInfoMap = new Dictionary<string, CAInfo>();
 
-        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IAccountProvider<T> accountProvider, IConnectService connectService)
+        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IAccountProvider<T> accountProvider, IConnectService connectService, IContractProvider contractProvider)
         {
             _socialService = socialService;
             _storageSuite = storageSuite;
             _accountProvider = accountProvider;
             _connectService = connectService;
+            _contractProvider = contractProvider;
         }
-        
-        private IEnumerator GetChainsInfo(SuccessCallback<Dictionary<string, ChainInfo>> successCallback, ErrorCallback errorCallback)
-        {
-            yield return _socialService.GetChainsInfo((result =>
-            {
-                result ??= new ArrayWrapper<ChainInfo>
-                {
-                    items = new ChainInfo[] { }
-                };
-                foreach (var chainInfo in result.items)
-                {
-                    _chainsInfoMap[chainInfo.chainId] = chainInfo;
-                }
-                successCallback(_chainsInfoMap);
-            }), errorCallback);
-        }
-        
+
         public void InitializeManagementAccount()
         {
             if (_managementAccount != null)
@@ -86,24 +74,48 @@ namespace Portkey.DID
                 throw new Exception("Account not logged in.");
             }
 
-            return AddManager(param, response =>
+            return AddManager(param, result =>
             {
-                successCallback(response);
+                successCallback(result);
             }, errorCallback);
-
-            /*
-             *
-    if (!this.accountInfo.loginAccount) throw new Error('account not logged in');
-      const _params = params as ScanLoginParams;
-      const req = await this.addManager(_params);
-      if (req?.error) throw req.error;
-      return true;
-             */
         }
 
         public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
         {
-            throw new NotImplementedException();
+            InitializeManagementAccount();
+
+            if (!_accountInfo.IsLoggedIn())
+            {
+                throw new Exception("Account not logged in.");
+            }
+
+            var recoveryParam = new RecoveryParams
+            {
+                chainId = param.ChainId,
+                loginGuardianIdentifier = param.LoginGuardianIdentifier,
+                manager = _managementAccount.Address,
+                guardiansApproved = param.GuardiansApprovedList,
+                extraData = param.ExtraData,
+                context = param.Context
+            };
+            return _socialService.Recovery(recoveryParam, (result) =>
+            {
+                StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId,
+                    (status) =>
+                    {
+                        if (status.IsStatusPass())
+                        {
+                            UpdateAccountInfo(param.loginGuardianIdentifier);
+                            UpdateCAInfo(param.chainId, status.caHash, status.caAddress);
+                        }
+                        else
+                        {
+                            errorCallback($"Register failed: {status.registerMessage}");
+                        }
+
+                        successCallback(new RecoveryResult(status, result.sessionId));
+                    }, errorCallback));
+            }, errorCallback);
         }
 
         public bool Logout(EditManagerParams param)
@@ -335,8 +347,18 @@ namespace Portkey.DID
                 throw new Exception("Manager Account does not exist.");
             }
             
-            //TODO
-            yield return null;
+            yield return _contractProvider.GetContract(editManagerParams.ChainId, async (contract) =>
+            {
+                var addManagerInfoInput = new AddManagerInfoInput
+                {
+                    ManagerInfo = editManagerParams.ManagerInfo,
+                    CaHash = Hash.LoadFromHex(editManagerParams.CaHash)
+                };
+                
+                var result = await contract.CallTransactionAsync<AddManagerInfoInput>(_managementAccount.Wallet, "AddManagerInfo", addManagerInfoInput);
+                // TODO: we need a new proto for the output from calling AddManagerInfo, then we return the result
+                successCallback(true);
+            }, errorCallback);
         }
 
         public IEnumerator RemoveManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback,

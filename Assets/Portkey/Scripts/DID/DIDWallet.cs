@@ -76,6 +76,7 @@ namespace Portkey.DID
 
             return AddManager(param, result =>
             {
+                // TODO: result.error error handling
                 successCallback(result);
             }, errorCallback);
         }
@@ -160,9 +161,39 @@ namespace Portkey.DID
             return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_caInfoMap.ContainsKey(chainId);
         }
         
-        public bool Logout(EditManagerParams param)
+        public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {
-            throw new System.NotImplementedException();
+            if (_managementAccount == null)
+            {
+                errorCallback("ManagerAccount does not exist!");
+                yield break;
+            }
+            if(param.caHash == null && _caInfoMap.TryGetValue(param.chainId, out var caInfo))
+            {
+                param.caHash = caInfo.caHash;
+            }
+            if(param.caHash == null)
+            {
+                errorCallback("CAHash does not exist!");
+                yield break;
+            }
+            if (param.managerInfo == null)
+            {
+                var address = new Address
+                {
+                    Value = ByteString.CopyFromUtf8(_managementAccount.Address)
+                };
+                param.managerInfo = new ManagerInfo
+                {
+                    Address = address,
+                    ExtraData = "extraData"
+                };
+            }
+            yield return RemoveManager(param, result =>
+            {
+                // TODO: result.error error handling
+                successCallback(true);
+            }, errorCallback);
         }
 
         public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
@@ -385,12 +416,12 @@ namespace Portkey.DID
                 throw new Exception("Manager Account does not exist.");
             }
             
-            yield return _contractProvider.GetContract(editManagerParams.ChainId, async (contract) =>
+            yield return _contractProvider.GetContract(editManagerParams.chainId, async (contract) =>
             {
                 var addManagerInfoInput = new AddManagerInfoInput
                 {
-                    ManagerInfo = editManagerParams.ManagerInfo,
-                    CaHash = Hash.LoadFromHex(editManagerParams.CaHash)
+                    ManagerInfo = editManagerParams.managerInfo,
+                    CaHash = Hash.LoadFromHex(editManagerParams.caHash)
                 };
                 
                 var result = await contract.CallTransactionAsync<AddManagerInfoInput>(_managementAccount.Wallet, "AddManagerInfo", addManagerInfoInput);

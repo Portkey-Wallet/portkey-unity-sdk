@@ -119,9 +119,45 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        public RecoverStatusResult GetLoginStatus(string chainId, string sessionId)
+        public IEnumerator GetLoginStatus(string chainId, string sessionId, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
-            throw new System.NotImplementedException();
+            return _socialService.GetRecoverStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
+                {
+                    if(status == null)
+                    {
+                        errorCallback("Failed to get register status.");
+                        return;
+                    }
+                    if(IsFirstTimeRecoverPassed(chainId, status))
+                    {
+                        var holderInfoParams = new GetHolderInfoParams
+                        {
+                            chainId = chainId,
+                            caHash = status.caHash
+                        };
+                        StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
+                        {
+                            var isCurrentAccountAManager = info.managerInfos.Any(manager => manager.address == _managementAccount.Address);
+                            if (isCurrentAccountAManager)
+                            {
+                                UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
+                                UpdateCAInfo(chainId, status.caHash, status.caAddress);
+                            }
+
+                            successCallback(status);
+                        }, errorCallback));
+                    }
+                    else
+                    {
+                        successCallback(status);
+                    }
+                },
+                errorCallback);
+        }
+        
+        private bool IsFirstTimeRecoverPassed(string chainId, RecoverStatusResult response)
+        {
+            return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_caInfoMap.ContainsKey(chainId);
         }
         
         public bool Logout(EditManagerParams param)

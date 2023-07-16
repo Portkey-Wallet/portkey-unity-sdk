@@ -5,7 +5,7 @@ using Portkey.Core;
 
 namespace Portkey.Contract
 {
-    public class CAContractProvider : IContractProvider<ContractBasic>
+    public class CAContractProvider : IContractProvider
     {
         private Dictionary<string, IContract> _contracts = new Dictionary<string, IContract>();
         private IPortkeySocialService _service;

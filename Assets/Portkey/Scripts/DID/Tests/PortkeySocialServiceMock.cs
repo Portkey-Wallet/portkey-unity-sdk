@@ -53,7 +53,7 @@ namespace Portkey.Test
             throw new System.NotImplementedException();
         }
 
-        public IEnumerator GetChainsInfo(SuccessCallback<ChainInfo[]> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GetChainsInfo(SuccessCallback<ArrayWrapper<ChainInfo>> successCallback, ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();
         }

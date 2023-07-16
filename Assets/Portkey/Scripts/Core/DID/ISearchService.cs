@@ -89,7 +89,7 @@ namespace Portkey.Core
     {
         public IEnumerator GetRegisterStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetRecoverStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback);
-        public IEnumerator GetChainsInfo(SuccessCallback<ChainInfo[]> successCallback, ErrorCallback errorCallback);
+        public IEnumerator GetChainsInfo(SuccessCallback<ArrayWrapper<ChainInfo>> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetCAHolderInfo(string authorization, string caHash, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
     }
 }

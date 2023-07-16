@@ -191,7 +191,7 @@ namespace Portkey.DID
             }
         }
 
-        public IEnumerator GetChainsInfo(SuccessCallback<ChainInfo[]> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GetChainsInfo(SuccessCallback<ArrayWrapper<ChainInfo>> successCallback, ErrorCallback errorCallback)
         {
             return Get("/api/app/search/chainsinfoindex", successCallback, errorCallback);
         }

@@ -343,5 +343,20 @@ namespace Portkey.Test
             while (!done)
                 yield return null;
         }
+        
+        [UnityTest]
+        public IEnumerator GetChainsInfoTest()
+        {
+            var done = false;
+
+            yield return _portkeySocialService.GetChainsInfo( (result) =>
+            {
+                done = true;
+                Assert.NotZero(result.items.Length);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
     }
 }

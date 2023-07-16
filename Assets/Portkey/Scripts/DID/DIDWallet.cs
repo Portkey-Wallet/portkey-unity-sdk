@@ -16,6 +16,11 @@ namespace Portkey.DID
         {
             public string LoginAccount { get; set; } = null;
             public string Nickname { get; set; } = null;
+            
+            public bool IsLoggedIn()
+            {
+                return LoginAccount != null;
+            }
         }
         
         private IPortkeySocialService _socialService;
@@ -40,8 +45,11 @@ namespace Portkey.DID
         {
             yield return _socialService.GetChainsInfo((result =>
             {
-                result ??= new ChainInfo[] { };
-                foreach (var chainInfo in result)
+                result ??= new ArrayWrapper<ChainInfo>
+                {
+                    items = new ChainInfo[] { }
+                };
+                foreach (var chainInfo in result.items)
                 {
                     _chainsInfoMap[chainInfo.chainId] = chainInfo;
                 }
@@ -69,22 +77,33 @@ namespace Portkey.DID
             throw new System.NotImplementedException();
         }
 
-        public bool Login(EditManagerParams param)
+        public IEnumerator Login(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {
             InitializeManagementAccount();
 
-            if (_accountInfo.LoginAccount == null)
+            if (!_accountInfo.IsLoggedIn())
             {
                 throw new Exception("Account not logged in.");
             }
 
-            //TODO
-            return false;
+            return AddManager(param, response =>
+            {
+                successCallback(response);
+            }, errorCallback);
+
+            /*
+             *
+    if (!this.accountInfo.loginAccount) throw new Error('account not logged in');
+      const _params = params as ScanLoginParams;
+      const req = await this.addManager(_params);
+      if (req?.error) throw req.error;
+      return true;
+             */
         }
 
-        public LoginResult Login(AccountLoginParams param)
+        public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool Logout(EditManagerParams param)
@@ -227,7 +246,7 @@ namespace Portkey.DID
                 {
                     UpdateCAInfo(param.chainId, info.holderManagerInfo.caHash, info.holderManagerInfo.caAddress);
                     var loginAccount = info.loginGuardianInfo[0]?.loginGuardian?.identifierHash;
-                    if (_accountInfo.LoginAccount == null && loginAccount != null)
+                    if (!_accountInfo.IsLoggedIn() && loginAccount != null)
                     {
                         UpdateAccountInfo(loginAccount);
                     }
@@ -308,7 +327,7 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        public IEnumerator AddManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback,
+        public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
             if (_managementAccount == null)

@@ -13,6 +13,6 @@ namespace Portkey.Core
         /// For removing a manager account to the DID.
         /// </summary>
         /// <param name="editManagerParams">Parameters for removing manager account.</param>
-        public IEnumerator RemoveManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
+        public IEnumerator RemoveManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
     }
 }

@@ -425,15 +425,51 @@ namespace Portkey.DID
                 };
                 
                 var result = await contract.CallTransactionAsync<AddManagerInfoInput>(_managementAccount.Wallet, "AddManagerInfo", addManagerInfoInput);
+                
                 // TODO: we need a new proto for the output from calling AddManagerInfo, then we return the result
+                // TODO: output errorCallback if there is an error
                 successCallback(true);
             }, errorCallback);
         }
 
-        public IEnumerator RemoveManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback,
+        public IEnumerator RemoveManager(EditManagerParams param, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
-            throw new NotImplementedException();
+            if(_managementAccount == null)
+            {
+                errorCallback("Management Account does not exist.");
+                yield break;
+            }
+
+            yield return _contractProvider.GetContract(param.chainId, async (contract) =>
+            {
+                var removeManagerInfoInput = new RemoveManagerInfoInput
+                {
+                    CaHash = Hash.LoadFromHex(param.caHash)
+                };
+                var result = await contract.CallTransactionAsync<RemoveManagerInfoInput>(_managementAccount.Wallet, "RemoveManagerInfo", removeManagerInfoInput);
+                
+                // TODO: we need a new proto for the output from calling RemoveManagerInfo, then we return the result
+                // TODO: output errorCallback if there is an error
+                
+                if (IsCurrentAccount(param))
+                {
+                    ClearDIDWallet();
+                }
+                
+                successCallback(true);
+            }, errorCallback);
+        }
+
+        private bool IsCurrentAccount(EditManagerParams param)
+        {
+            return param.managerInfo?.Address.ToString() == _managementAccount.Address && _caInfoMap[param.chainId].caHash == param.caHash;
+        }
+
+        private void ClearDIDWallet()
+        {
+            _caInfoMap.Clear();
+            _accountInfo = new AccountInfo();
         }
     }
 }

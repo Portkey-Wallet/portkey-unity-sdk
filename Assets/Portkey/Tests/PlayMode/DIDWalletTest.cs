@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Moq;
 using NUnit.Framework;
+using Portkey.Chain;
 using Portkey.Contract;
 using Portkey.Contracts.CA;
 using Portkey.Core;
@@ -19,25 +21,25 @@ namespace Portkey.Test
 {
     public class DIDWalletTest
     {
-        private IPortkeySocialService socialService = new PortkeySocialServiceMock();
         private IStorageSuite<string> storageSuite = new NonPersistentStorageMock<string>("");
         private IConnectService connectService = new ConnectService<RequestHttp>("", new RequestHttp());
+        
+        private static readonly BlockchainWallet Wallet = 
+            new BlockchainWallet("TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T",
+                                "83829798ac92d428ed13b29fe60ace1a7a10e7a347bdc9f23a85615339068f1c",
+                                "mock",
+                                "045ab0516fda4eeb504ad8d7ce8a2a24e5af6004afa9ff3ee26f2c697e334be48c31597e1905711a6aa749fc475787000b5d6260bcf0d457f23c60aa60bb6c8602");
         
         private static Mock<IAccountProvider<WalletAccount>> GetAccountProviderMock()
         {
             var accountProviderMock = new Mock<IAccountProvider<WalletAccount>>();
             accountProviderMock.Setup(provider => provider.CreateAccount())
-                .Returns(new WalletAccount(
-                    new BlockchainWallet("address_mock", 
-                        "privateKey_mock", 
-                        "mnemonic_mock",
-                        "publicKey_mock")));
+                .Returns(new WalletAccount(Wallet));
             return accountProviderMock;
         }
-        
-        private static Mock<IContractProvider> GetContractProviderMock<T>() where T : IMessage<T>, new()
+
+        private static Mock<IContract> GetContractMock<T>() where T : IMessage<T>, new()
         {
-            // mock contract
             var contractMock = new Mock<IContract>();
             contractMock.Setup(contract => contract.CallTransactionAsync<T>(It.IsAny<BlockchainWallet>(),
                     It.IsAny<string>(), It.IsAny<IMessage>()))
@@ -45,8 +47,11 @@ namespace Portkey.Test
                 {
                     return new Task<T>(() => new T());
                 });
-            
-            // mock provider
+            return contractMock;
+        }
+
+        private static Mock<IContractProvider> GetContractProviderMock(IMock<IContract> contractMock)
+        {
             var contractProviderMock = new Mock<IContractProvider>();
             contractProviderMock.Setup(provider => provider.GetContract(It.IsAny<string>(),
                     It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()))
@@ -109,7 +114,7 @@ namespace Portkey.Test
                         {
                             new Manager
                             {
-                                address = "address_mock",
+                                address = Wallet.Address,
                             }
                         }
                     });
@@ -124,7 +129,8 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
-            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+            var contractMock = GetContractMock<AddManagerInfoInput>();
+            var contractProviderMock = GetContractProviderMock(contractMock);
 
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             
@@ -143,7 +149,8 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
-            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+            var contractMock = GetContractMock<AddManagerInfoInput>();
+            var contractProviderMock = GetContractProviderMock(contractMock);
 
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             var registerParam = new RegisterParams
@@ -154,10 +161,9 @@ namespace Portkey.Test
             
             return didWallet.Register(registerParam, (result) =>
             {
-                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.AtMostOnce());
-                socialServiceMock.Verify(service => service.Register(It.IsAny<RegisterParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                socialServiceMock.Verify(service => service.GetRegisterStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RegisterStatusResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                socialServiceMock.Verify(service => service.Register(It.IsAny<RegisterParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                socialServiceMock.Verify(service => service.GetRegisterStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RegisterStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 Assert.AreEqual(result.Status.caAddress, "caAddress_mock");
                 Assert.AreEqual(result.Status.caHash, "caHash_mock");
                 Assert.AreEqual(result.SessionId, "sessionId_mock");
@@ -172,7 +178,8 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
-            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+            var contractMock = GetContractMock<AddManagerInfoInput>();
+            var contractProviderMock = GetContractProviderMock(contractMock);
 
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             var registerParam = new RegisterParams
@@ -189,11 +196,10 @@ namespace Portkey.Test
                     Assert.Fail("Should not be here");
                 }, error =>
                 {
-                    accountProviderMock.Verify(provider => provider.CreateAccount(), Times.AtMostOnce());
-                    socialServiceMock.Verify(service => service.Register(It.IsAny<RegisterParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                    socialServiceMock.Verify(service => service.GetRegisterStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RegisterStatusResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                    socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                    
+                    accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                    socialServiceMock.Verify(service => service.Register(It.IsAny<RegisterParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                    socialServiceMock.Verify(service => service.GetRegisterStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RegisterStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
+
                     Assert.AreEqual(error, "Account already logged in.");
                 }));
             }, error =>
@@ -207,7 +213,8 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
-            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+            var contractMock = GetContractMock<AddManagerInfoInput>();
+            var contractProviderMock = GetContractProviderMock(contractMock);
 
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             
@@ -226,7 +233,8 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
-            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+            var contractMock = GetContractMock<AddManagerInfoInput>();
+            var contractProviderMock = GetContractProviderMock(contractMock);
 
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             var accountLoginParams = new AccountLoginParams("loginGuardianIdentifier_mock",
@@ -237,10 +245,10 @@ namespace Portkey.Test
             
             return didWallet.Login(accountLoginParams, (result) =>
             {
-                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.AtMostOnce());
-                socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 Assert.AreEqual(result.Status.caAddress, "caAddress_mock");
                 Assert.AreEqual(result.Status.caHash, "caHash_mock");
                 Assert.AreEqual(result.SessionId, "sessionId_mock");
@@ -255,7 +263,8 @@ namespace Portkey.Test
         {
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
-            var contractProviderMock = GetContractProviderMock<AddManagerInfoInput>();
+            var contractMock = GetContractMock<AddManagerInfoInput>();
+            var contractProviderMock = GetContractProviderMock(contractMock);
 
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
             var accountLoginParams = new AccountLoginParams("loginGuardianIdentifier_mock",
@@ -271,13 +280,65 @@ namespace Portkey.Test
                     Assert.Fail("Should not be here");
                 }, error =>
                 {
-                    accountProviderMock.Verify(provider => provider.CreateAccount(), Times.AtMostOnce());
-                    socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                    socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
-                    socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.AtMostOnce());
+                    accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                    socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                    socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                    socialServiceMock.Verify(service => service.GetHolderInfo(It.IsAny<GetHolderInfoParams>(), It.IsAny<SuccessCallback<IHolderInfo>>(), It.IsAny<ErrorCallback>()), Times.Once());
                     
                     Assert.AreEqual(error, "Account already logged in.");
                 }));
+            }, error =>
+            {
+                Assert.Fail(error);
+            });
+        }
+        
+        [UnityTest]
+        public IEnumerator GetVerifierServersLiveTest()
+        {
+            var accountProviderMock = GetAccountProviderMock();
+            var socialServiceMock = GetSocialServiceMock();
+            
+            var chain = new AElfChain("http://192.168.66.61:8000");
+            
+            var contractProviderMock = new Mock<IContractProvider>();
+            contractProviderMock.Setup(provider => provider.GetContract(It.IsAny<string>(),
+                    It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()))
+                .Returns((string chainId, SuccessCallback<IContract> successCallback, ErrorCallback errorCallback) =>
+                {
+                    successCallback(new ContractBasic(chain, "2imqjpkCwnvYzfnr61Lp2XQVN2JU17LPkA9AZzmRZzV5LRRWmR"));
+                    return new List<string>().GetEnumerator();
+                });
+            
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
+
+            yield return didWallet.GetVerifierServers("AELF", (result) =>
+            {
+                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                Assert.AreNotEqual(null, result);
+            }, error =>
+            {
+                Assert.Fail(error);
+            });
+        }
+        
+        [UnityTest]
+        public IEnumerator GetVerifierServersTest()
+        {
+            var accountProviderMock = GetAccountProviderMock();
+            var socialServiceMock = GetSocialServiceMock();
+            var contractMock = GetContractMock<GetVerifierServersOutput>();
+            var contractProviderMock = GetContractProviderMock(contractMock);
+
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object);
+
+            return didWallet.GetVerifierServers("AELF", (result) =>
+            {
+                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                contractMock.Verify(contract => contract.CallTransactionAsync<GetVerifierServersOutput>(It.IsAny<BlockchainWallet>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>()), Times.Once());
+                Assert.AreNotEqual(null, result);
             }, error =>
             {
                 Assert.Fail(error);

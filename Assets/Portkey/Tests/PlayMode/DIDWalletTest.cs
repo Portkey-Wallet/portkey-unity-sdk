@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AElf.Client.Dto;
 using Google.Protobuf;
 using Moq;
 using NUnit.Framework;
@@ -45,6 +46,18 @@ namespace Portkey.Test
                 .Returns((BlockchainWallet wallet, string methodName, IMessage param) =>
                 {
                     return new Task<T>(() => new T());
+                });
+            contractMock.Setup(contract => contract.SendTransactionAsync(It.IsAny<BlockchainWallet>(),
+                    It.IsAny<string>(), It.IsAny<IMessage>()))
+                .Returns((BlockchainWallet wallet, string methodName, IMessage param) =>
+                {
+                    return new Task<IContract.TransactionInfoDto>(() => new IContract.TransactionInfoDto
+                    {
+                        transactionResult = new TransactionResultDto
+                        {
+                            Status = "status_mock"
+                        }
+                    });
                 });
             return contractMock;
         }

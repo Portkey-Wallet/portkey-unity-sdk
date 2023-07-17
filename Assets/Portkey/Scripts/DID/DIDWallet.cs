@@ -460,11 +460,9 @@ namespace Portkey.DID
                     CaHash = Hash.LoadFromHex(editManagerParams.caHash)
                 };
                 
-                var result = await contract.CallTransactionAsync<AddManagerInfoInput>(_managementAccount.Wallet, "AddManagerInfo", addManagerInfoInput);
+                var result = await contract.SendTransactionAsync(_managementAccount.Wallet, "AddManagerInfo", addManagerInfoInput);
                 
-                // TODO: we need a new proto for the output from calling AddManagerInfo, then we return the result
-                // TODO: output errorCallback if there is an error
-                successCallback(true);
+                successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
             }, errorCallback);
         }
 
@@ -483,17 +481,14 @@ namespace Portkey.DID
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                var result = await contract.CallTransactionAsync<RemoveManagerInfoInput>(_managementAccount.Wallet, "RemoveManagerInfo", removeManagerInfoInput);
-                
-                // TODO: we need a new proto for the output from calling RemoveManagerInfo, then we return the result
-                // TODO: output errorCallback if there is an error
+                var result = await contract.SendTransactionAsync(_managementAccount.Wallet, "RemoveManagerInfo", removeManagerInfoInput);
                 
                 if (IsCurrentAccount(param))
                 {
                     ClearDIDWallet();
                 }
                 
-                successCallback(true);
+                successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
             }, errorCallback);
         }
 

@@ -133,12 +133,12 @@ namespace Portkey.Network
             {
                 case "/api/app/account/register/request":
                     successCallback(@"{
-                    ""sessionId"": ""string""
+                    ""sessionId"": ""sessionId_mock""
                     }");
                     yield break;
                 case "/api/app/account/recovery/request":
                     successCallback(@"{
-                    ""sessionId"": ""string""
+                    ""sessionId"": ""sessionId_mock""
                     }");
                     yield break;
                 case "/api/app/account/verifyCode":

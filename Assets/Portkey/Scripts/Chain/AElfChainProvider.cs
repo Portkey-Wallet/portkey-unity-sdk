@@ -25,7 +25,7 @@ namespace Portkey.Chain
             {
                 throw new System.ArgumentException($"ChainInfo for chainId {chainId} is not found");
             }
-            var newChain = new AElfChain(chainUrl);
+            var newChain = new AElfChain(chainId, chainUrl);
             _chains[chainId] = newChain;
 
             return newChain;

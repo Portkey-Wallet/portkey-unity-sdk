@@ -12,6 +12,7 @@ namespace Portkey.Core
     /// </summary>
     public interface IChain
     {
+        string ChainId { get; }
         /// <summary>
         /// GenerateTransactionAsync is a method that can be used to generate a transaction for a method contract call.
         /// </summary>
@@ -34,5 +35,9 @@ namespace Portkey.Core
         /// <param name="input">Contains the transaction in byte array in hexadecimal.</param>
         /// <returns>The result of the transaction in byte array in hexadecimal.</returns>
         Task<string> ExecuteTransactionAsync(ExecuteTransactionDto input);
+
+        Task<BlockDto?> GetBlockByHeightAsync(long blockHeight, bool includeTransactions = false);
+        Task<SendTransactionOutput?> SendTransactionAsync(SendTransactionInput input);
+        Task<TransactionResultDto?> GetTransactionResultAsync(string transactionId);
     }
 }

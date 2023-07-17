@@ -23,6 +23,6 @@ namespace Portkey.Core
         /// </summary>
         /// <param name="password">Password to decrypt the wallet.</param>
         /// <param name="keyName"></param>
-        public void Load(string password, string keyName);
+        public IWallet Load(string password, string keyName);
     }
 }

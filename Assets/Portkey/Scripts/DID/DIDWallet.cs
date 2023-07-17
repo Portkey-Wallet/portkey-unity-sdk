@@ -5,6 +5,7 @@ using System.Linq;
 using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
+using Newtonsoft.Json;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
@@ -14,6 +15,8 @@ namespace Portkey.DID
 {
     public class DIDWallet<T> : IDIDWallet where T : AccountBase
     {
+        private const string DEFAULT_KEY_NAME = "portkey_sdk_did_wallet";
+        
         protected class AccountInfo
         {
             public string LoginAccount { get; set; } = null;
@@ -25,23 +28,33 @@ namespace Portkey.DID
             }
         }
         
+        [Serializable]
+        private class DIDInfo
+        {
+            public string aesPrivateKey;
+            public Dictionary<string, CAInfo> caInfo;
+            public AccountInfo accountInfo;
+        }
+        
         private IPortkeySocialService _socialService;
         private T _managementAccount;
         private IStorageSuite<string> _storageSuite;
         private IAccountProvider<T> _accountProvider;
         private IConnectService _connectService;
         private IContractProvider _contractProvider;
+        private IEncryption _encryption;
 
         private AccountInfo _accountInfo = new AccountInfo();
         private Dictionary<string, CAInfo> _caInfoMap = new Dictionary<string, CAInfo>();
 
-        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IAccountProvider<T> accountProvider, IConnectService connectService, IContractProvider contractProvider)
+        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IAccountProvider<T> accountProvider, IConnectService connectService, IContractProvider contractProvider, IEncryption encryption)
         {
             _socialService = socialService;
             _storageSuite = storageSuite;
             _accountProvider = accountProvider;
             _connectService = connectService;
             _contractProvider = contractProvider;
+            _encryption = encryption;
         }
 
         public void InitializeManagementAccount()
@@ -54,14 +67,47 @@ namespace Portkey.DID
             _managementAccount = _accountProvider.CreateAccount();
         }
 
-        public bool Save(string password, string keyName)
+        public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
         {
-            throw new System.NotImplementedException();
+            var encryptedPrivateKey = EncryptManagementAccount(password);
+            var data = JsonConvert.SerializeObject(new DIDInfo
+            {
+                aesPrivateKey = Convert.ToBase64String(encryptedPrivateKey),
+                caInfo = _caInfoMap,
+                accountInfo = _accountInfo
+            });
+            var encryptedData = _encryption.Encrypt(data, password);
+            var encryptedDataStr = Convert.ToBase64String(encryptedData);
+            _storageSuite.SetItem(keyName, encryptedDataStr);
+            return true;
+        }
+        
+        private byte[] EncryptManagementAccount(string password)
+        {
+            if (_managementAccount == null) throw new NullReferenceException("Management Account does not exist!");
+            return _encryption.Encrypt(_managementAccount.PrivateKey, password);
         }
 
-        public void Load(string password, string keyName)
+        public IWallet Load(string password, string keyName = DEFAULT_KEY_NAME)
         {
-            throw new System.NotImplementedException();
+            var encryptedDataStr = _storageSuite.GetItem(keyName);
+            if (encryptedDataStr == null)
+            {
+                throw new Exception("No data found.");
+            }
+            var encryptedData = Convert.FromBase64String(encryptedDataStr);
+            var data = _encryption.Decrypt(encryptedData, password);
+            if (data == null)
+            {
+                throw new Exception("Wrong password.");
+            }
+            var info = JsonConvert.DeserializeObject<DIDInfo>(data);
+            var privateKey = _encryption.Decrypt(Convert.FromBase64String(info.aesPrivateKey), password);
+            _managementAccount = _accountProvider.GetAccountFromPrivateKey(privateKey);
+            _caInfoMap = info.caInfo??new Dictionary<string, CAInfo>();
+            _accountInfo = info.accountInfo??new AccountInfo();
+
+            return this;
         }
 
         public IEnumerator Login(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
@@ -190,8 +236,7 @@ namespace Portkey.DID
             }
             yield return RemoveManager(param, result =>
             {
-                // TODO: result.error error handling
-                successCallback(true);
+                successCallback(result);
             }, errorCallback);
         }
 
@@ -412,7 +457,7 @@ namespace Portkey.DID
                 grant_type = "signature",
                 client_id = "CAServer_App",
                 scope = "CAServer",
-                signature = signature.ToString(),
+                signature = signature,
                 pubkey = publicKey,
                 timestamp = timestamp,
                 ca_hash = caHash,

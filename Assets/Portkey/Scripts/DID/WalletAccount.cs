@@ -7,8 +7,7 @@ using Portkey.Core;
 namespace Portkey.DID
 {
     /// <summary>
-    /// EOA Wallet Account.
-    /// TODO: implement this when AElf C# SDK is ready.
+    /// EOA Wallet, used to act as management account of DID wallet.
     /// </summary>
     public class WalletAccount : AccountBase
     {

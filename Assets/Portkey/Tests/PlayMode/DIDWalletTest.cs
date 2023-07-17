@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
 using Moq;
 using NUnit.Framework;
 using Portkey.Chain;
@@ -50,7 +49,7 @@ namespace Portkey.Test
             return contractMock;
         }
 
-        private static Mock<IContractProvider> GetContractProviderMock(IMock<IContract> contractMock)
+        private static Mock<IContractProvider> GetContractProviderMock(Mock<IContract> contractMock)
         {
             var contractProviderMock = new Mock<IContractProvider>();
             contractProviderMock.Setup(provider => provider.GetContract(It.IsAny<string>(),

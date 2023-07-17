@@ -37,7 +37,7 @@ namespace Portkey.Test
             var transactionAsync = new Transaction()
             {
                 From = from.ToAddress(),
-                To = Address.FromBase58(to),
+                To = to.ToAddress(),
                 MethodName = methodName,
                 Params = input.ToByteString()
             };

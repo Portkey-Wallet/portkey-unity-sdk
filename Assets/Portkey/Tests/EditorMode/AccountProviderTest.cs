@@ -8,8 +8,7 @@ namespace Portkey.Test
     {
         private const string PRIVATE_KEY = "03bd0cea9730bcfc8045248fd7f4841ea19315995c44801a3dfede0ca872f808";
         private const string PASSWORD = "123123";
-
-        /*
+        
         [Test]
         public void CreateTest()
         {
@@ -27,6 +26,6 @@ namespace Portkey.Test
             var account = accountProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
             
             Assert.AreEqual(PRIVATE_KEY, account.PrivateKey);
-        }*/
+        }
     }
 }

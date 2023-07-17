@@ -8,6 +8,7 @@ using Google.Protobuf.WellKnownTypes;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
+using UnityEngine;
 
 namespace Portkey.DID
 {
@@ -349,7 +350,16 @@ namespace Portkey.DID
 
                 var verifierItems = ConvertToVerifierItems(result);
                 successCallback(verifierItems);
+                //StaticCoroutine.StartCoroutine(WaitForOurTask(contract, successCallback));
             }, errorCallback);
+        }
+        
+        private IEnumerator WaitForOurTask(IContract contract, SuccessCallback<VerifierItem[]> successCallback) {
+            var task = contract.CallTransactionAsync<GetVerifierServersOutput>(_managementAccount.Wallet, "GetVerifierServers", new Empty());
+            yield return new WaitUntil(() => task.IsCompleted);
+                
+            var verifierItems = ConvertToVerifierItems(task.Result);
+            successCallback(verifierItems);
         }
 
         private static VerifierItem[] ConvertToVerifierItems(GetVerifierServersOutput result)

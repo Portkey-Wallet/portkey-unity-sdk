@@ -298,7 +298,7 @@ namespace Portkey.Test
             var accountProviderMock = GetAccountProviderMock();
             var socialServiceMock = GetSocialServiceMock();
             
-            var chain = new AElfChain("http://192.168.66.61:8000");
+            var chain = new AElfChain("AELF", "http://192.168.66.61:8000");
             
             var contractProviderMock = new Mock<IContractProvider>();
             contractProviderMock.Setup(provider => provider.GetContract(It.IsAny<string>(),

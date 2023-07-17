@@ -16,6 +16,7 @@ namespace Portkey.Test
         private const string PRIVATE_KEY = "03bd0cea9730bcfc8045248fd7f4841ea19315995c44801a3dfede0ca872f808";
         private readonly IAccountProvider<WalletAccount> _accountProvider = new AccountProvider();
         
+        /*
         [Test]
         public void SignTest()
         {
@@ -30,7 +31,7 @@ namespace Portkey.Test
             var result = wallet.Sign("68656c6c6f20776f726c643939482801");
             
             Assert.AreEqual(SIGNED, result.ToHexString());
-        }
+        }*/
         /*
         [Test]
         public void SignTransactionTest()

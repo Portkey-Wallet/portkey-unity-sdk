@@ -1,5 +1,5 @@
+using BIP39Wallet;
 using Portkey.Core;
-using Wallet;
 
 namespace Portkey.DID
 {
@@ -9,7 +9,7 @@ namespace Portkey.DID
         
         public WalletAccount GetAccountFromPrivateKey(string privateKey)
         {
-            var wallet = new global::Wallet.Wallet();
+            var wallet = new Wallet();
             var newWallet = wallet.GetWalletByPrivateKey(privateKey);
             
             // change to our own wrapper class
@@ -20,7 +20,7 @@ namespace Portkey.DID
 
         public WalletAccount CreateAccount()
         {
-            var wallet = new global::Wallet.Wallet();
+            var wallet = new Wallet();
 
             var newWallet = _mnemonic switch
             {
@@ -35,7 +35,7 @@ namespace Portkey.DID
             return new WalletAccount(blockchainWallet);
         }
 
-        private static BlockchainWallet GetBlockchainWallet(global::Wallet.Wallet.BlockchainWallet newWallet)
+        private static BlockchainWallet GetBlockchainWallet(Wallet.BlockchainWallet newWallet)
         {
             var blockchainWallet = new BlockchainWallet(newWallet.Address, newWallet.PrivateKey, newWallet.Mnemonic,
                 newWallet.PublicKey);

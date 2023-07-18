@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AElf;
 using AElf.Client.Dto;
 using Google.Protobuf;
 using Moq;
@@ -43,7 +44,7 @@ namespace Portkey.Test
         {
             var encryptionMock = new Mock<IEncryption>();
             encryptionMock.Setup(provider => provider.Encrypt(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns((string data, string password) => Convert.FromBase64String("encrypted_mock"));
+                .Returns((string data, string password) => "encrypted_mock".GetBytes());
             encryptionMock.Setup(provider => provider.Decrypt(It.IsAny<byte[]>(), It.IsAny<string>()))
                 .Returns((byte[] data, string password) => "decrypted_mock");
             return encryptionMock;
@@ -418,9 +419,9 @@ namespace Portkey.Test
             var socialServiceMock = GetSocialServiceMock();
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
-            var encryptionMock = GetEncryptionMock();
+            var encryption = new AESEncryption();
             
-            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryption);
             var accountLoginParams = new AccountLoginParams("loginGuardianIdentifier_mock",
                                             new GuardiansApproved[] { new GuardiansApproved() },
                                                     "extraData_mock",
@@ -432,12 +433,14 @@ namespace Portkey.Test
                 didWallet.Save(PASSWORD, KEY);
 
                 var cipherText = storageSuite.GetItem(KEY);
-                var encryption = new AESEncryption();
                 var cipherTextByte = Convert.FromBase64String(cipherText);
                 var data = encryption.Decrypt(cipherTextByte, PASSWORD);
                 var info = JsonConvert.DeserializeObject<DIDWallet<WalletAccount>.DIDInfo>(data);
+                var privateKey = encryption.Decrypt(Convert.FromBase64String(info.aesPrivateKey), PASSWORD);
                 
-                Assert.AreEqual(info.aesPrivateKey, Wallet.PrivateKey);
+                Assert.AreEqual(privateKey, Wallet.PrivateKey);
+                Assert.AreEqual("loginGuardianIdentifier_mock", info.accountInfo.LoginAccount);
+                Assert.AreEqual("caAddress_mock", info.caInfo["chainId_mock"].caAddress);
             }, error =>
             {
                 Assert.Fail(error);

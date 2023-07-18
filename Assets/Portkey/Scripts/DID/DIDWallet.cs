@@ -17,7 +17,7 @@ namespace Portkey.DID
     {
         private const string DEFAULT_KEY_NAME = "portkey_sdk_did_wallet";
         
-        protected class AccountInfo
+        public class AccountInfo
         {
             public string LoginAccount { get; set; } = null;
             public string Nickname { get; set; } = null;
@@ -28,8 +28,9 @@ namespace Portkey.DID
             }
         }
         
+        // data struct used for saving state of this DID Wallet to storage
         [Serializable]
-        private class DIDInfo
+        public class DIDInfo
         {
             public string aesPrivateKey;
             public Dictionary<string, CAInfo> caInfo;
@@ -116,10 +117,11 @@ namespace Portkey.DID
 
             if (!_accountInfo.IsLoggedIn())
             {
-                throw new Exception("Account not logged in.");
+                errorCallback("Account not logged in.");
+                yield break;
             }
 
-            return AddManager(param, result =>
+            yield return AddManager(param, result =>
             {
                 // TODO: result.error error handling
                 successCallback(result);
@@ -132,7 +134,8 @@ namespace Portkey.DID
 
             if (_accountInfo.IsLoggedIn())
             {
-                throw new Exception("Account already logged in.");
+                errorCallback("Account already logged in.");
+                yield break;
             }
 
             var recoveryParam = new RecoveryParams
@@ -144,7 +147,7 @@ namespace Portkey.DID
                 extraData = param.ExtraData,
                 context = param.Context
             };
-            return _socialService.Recovery(recoveryParam, (result) =>
+            yield return _socialService.Recovery(recoveryParam, (result) =>
             {
                 StaticCoroutine.StartCoroutine(_socialService.GetRecoverStatus(result.sessionId, QueryOptions.DefaultQueryOptions,
                     (status) =>

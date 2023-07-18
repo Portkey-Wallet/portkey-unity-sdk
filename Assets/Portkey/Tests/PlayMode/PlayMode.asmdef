@@ -16,7 +16,8 @@
         "Google.Protobuf.dll",
         "AElf.Client.dll",
         "AElf.Types.dll",
-        "Moq.dll"
+        "Moq.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

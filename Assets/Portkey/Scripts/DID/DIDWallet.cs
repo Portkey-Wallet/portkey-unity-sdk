@@ -29,7 +29,6 @@ namespace Portkey.DID
         }
         
         // data struct used for saving state of this DID Wallet to storage
-        [Serializable]
         public class DIDInfo
         {
             public string aesPrivateKey;

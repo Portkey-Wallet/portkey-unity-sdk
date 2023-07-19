@@ -268,7 +268,7 @@ GameObject:
   - component: {fileID: 41269097}
   - component: {fileID: 41269096}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: TransportTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1015,6 +1015,10 @@ PrefabInstance:
     - target: {fileID: 3147389759037355807, guid: a21f5b7cf1813452e925b83b504d4f28, type: 3}
       propertyPath: m_Name
       value: PortkeyUICanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 8596821250927798918, guid: a21f5b7cf1813452e925b83b504d4f28, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a21f5b7cf1813452e925b83b504d4f28, type: 3}

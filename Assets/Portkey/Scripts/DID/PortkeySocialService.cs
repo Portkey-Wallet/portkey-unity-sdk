@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Portkey.Core;
 using Portkey.Utilities;
-using Unity.Plastic.Newtonsoft.Json;
-using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Portkey.DID
@@ -74,7 +74,7 @@ namespace Portkey.DID
             return Get(jsonRequestData, successCallback, errorCallback);
         }
         
-        private static IHttp.successCallback JsonToObject<T>(SuccessCallback<T> successCallback, ErrorCallback errorCallback)
+        private static IHttp.SuccessCallback JsonToObject<T>(SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
             return (response) =>
             {

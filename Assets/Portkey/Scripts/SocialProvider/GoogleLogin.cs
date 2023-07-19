@@ -10,7 +10,7 @@ namespace Portkey.SocialProvider
 {
     public class GoogleLogin : ISocialLogin
     {
-        private class TokenExchangeResponse
+        private class RequestTokenResponse
         {
             public string access_token;
         }
@@ -208,7 +208,7 @@ namespace Portkey.SocialProvider
             {
                 Debugger.Log($"CodeExchange={response}");
 
-                var exchangeResponse = JsonUtility.FromJson<TokenExchangeResponse>(response);
+                var exchangeResponse = JsonUtility.FromJson<RequestTokenResponse>(response);
                 var accessToken = exchangeResponse.access_token;
 
                 RequestSocialInfo(accessToken);

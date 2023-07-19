@@ -9,19 +9,19 @@ namespace Portkey.Network
     {
         [SerializeField] private string response;
 
-        public override IEnumerator Get(JsonRequestData data, successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Get(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             successCallback(response);
             yield break;
         }
 
-        public override IEnumerator Post(JsonRequestData data, successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Post(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             successCallback(response);
             yield break;
         }
 
-        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();
         }

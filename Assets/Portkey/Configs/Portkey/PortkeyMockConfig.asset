@@ -9,13 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff6e57f4326f74baf85a3434bd0e2b4f, type: 3}
-  m_Name: PortkeyTestConfig
+  m_Script: {fileID: 11500000, guid: fb0c17e9a584a493ea4d16081f619a36, type: 3}
+  m_Name: PortkeyMockConfig
   m_EditorClassIdentifier: 
   apiBaseUrl: https://test.mock
-  chainInfos:
-  - chainId: TestMain
-    rpcUrl: http://192.168.66.61:8000
-    contractInfos:
-    - contractId: CAContract
-      contractAddress: 2imqjpkCwnvYzfnr61Lp2XQVN2JU17LPkA9AZzmRZzV5LRRWmR

@@ -18,8 +18,8 @@ namespace Portkey.GraphQL
         private const string QUERY_LOGINGUARDIANINFO = "loginGuardianInfo";
 
         public IEnumerator GetHolderInfoByManager(string manager, string chainId,
-            IGraphQL.successCallback<IList<CaHolderWithGuardian>> successCallback,
-            IGraphQL.errorCallback errorCallback)
+            SuccessCallback<IList<CaHolderWithGuardian>> successCallback,
+            ErrorCallback errorCallback)
         {
             var query = _graphQLConfig.GetQueryByName(QUERY_CAHOLDERMANAGERINFO);
             if (query == null)
@@ -85,14 +85,14 @@ namespace Portkey.GraphQL
                 errorCallback);
         }
 
-        public IEnumerator Query<T>(string query, IGraphQL.successCallback<T> successCallback,
-            IGraphQL.errorCallback errorCallback)
+        public IEnumerator Query<T>(string query, SuccessCallback<T> successCallback,
+            ErrorCallback errorCallback)
         {
             return _graphQLConfig.Query<T>(query, successCallback, errorCallback);
         }
 
-        public IEnumerator Query<T>(GraphQLQuery query, IGraphQL.successCallback<T> successCallback,
-            IGraphQL.errorCallback errorCallback)
+        public IEnumerator Query<T>(GraphQLQuery query, SuccessCallback<T> successCallback,
+            ErrorCallback errorCallback)
         {
             return _graphQLConfig.Query<T>(query, successCallback, errorCallback);
         }

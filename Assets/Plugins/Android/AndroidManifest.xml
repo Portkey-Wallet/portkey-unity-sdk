@@ -6,7 +6,6 @@
     android:versionName="0.1" >
 
     <uses-sdk
-        android:minSdkVersion="22"
         android:targetSdkVersion="30" />
 
     <supports-screens
@@ -58,6 +57,13 @@
             <meta-data
                 android:name="android.notch_support"
                 android:value="true" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="portkey.sdk" />
+            </intent-filter>
         </activity>
 
         <meta-data
@@ -81,7 +87,7 @@
     </application>
 
     <queries>
-        <package android:name="com.portkey.did" />
+        <package android:name="com.portkey.sdk" />
     </queries>
 
 </manifest>

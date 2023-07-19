@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace Portkey.GraphQL.Editor
 {
+#if UNITY_EDITOR
     /// <summary>
     /// GraphQLUnityEditor is a custom editor for GraphQLConfig.
     /// It helps user add custom queries to GraphQLConfig.
@@ -60,12 +61,10 @@ namespace Portkey.GraphQL.Editor
                 return;
             }
             
-#if UNITY_EDITOR
             if (graph.IsLoading)
             {
                 EditorGUILayout.LabelField("API is being introspected. Please wait...");
             }
-#endif
 
             EditorGUILayout.Space();
             EditorGUILayout.Space();
@@ -233,5 +232,6 @@ namespace Portkey.GraphQL.Editor
             }
         }
     }
+#endif
 }
 

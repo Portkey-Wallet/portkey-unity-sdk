@@ -11,7 +11,7 @@ namespace Portkey.Network
     [CreateAssetMenu(fileName = "RequestHttp", menuName = "Portkey/Network/RequestHttp")]
     public class RequestHttp : IHttp
     {
-        public override IEnumerator Get(JsonRequestData data, successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Get(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             data.JsonData??=string.Empty;
             
@@ -47,7 +47,7 @@ namespace Portkey.Network
             successCallback(request.downloadHandler.text);
         }
 
-        public override IEnumerator Post(JsonRequestData data, successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Post(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             data.JsonData??=string.Empty;
 
@@ -83,7 +83,7 @@ namespace Portkey.Network
             successCallback(request.downloadHandler.text);
         }
 
-        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             var formFields = ConvertToDictionary(JObject.FromObject(data.FieldFormsObject));
             

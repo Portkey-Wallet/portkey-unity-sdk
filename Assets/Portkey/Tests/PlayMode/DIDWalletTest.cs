@@ -8,6 +8,8 @@ using Google.Protobuf;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using Portkey.Chain;
+using Portkey.Contract;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.DID;
@@ -15,6 +17,7 @@ using Portkey.Encryption;
 using Portkey.Network;
 using Portkey.Storage;
 using Portkey.Utilities;
+using UnityEngine;
 using UnityEngine.TestTools;
 using Guardian = Portkey.Core.Guardian;
 using GuardianList = Portkey.Core.GuardianList;
@@ -55,10 +58,7 @@ namespace Portkey.Test
             var contractMock = new Mock<IContract>();
             contractMock.Setup(contract => contract.CallTransactionAsync<T>(It.IsAny<BlockchainWallet>(),
                     It.IsAny<string>(), It.IsAny<IMessage>()))
-                .Returns((BlockchainWallet wallet, string methodName, IMessage param) =>
-                {
-                    return new Task<T>(() => new T());
-                });
+                .Returns((BlockchainWallet wallet, string methodName, IMessage param) => Task.FromResult(new T()));
             contractMock.Setup(contract => contract.SendTransactionAsync(It.IsAny<BlockchainWallet>(),
                     It.IsAny<string>(), It.IsAny<IMessage>()))
                 .Returns((BlockchainWallet wallet, string methodName, IMessage param) =>
@@ -347,6 +347,9 @@ namespace Portkey.Test
             });
         }
         
+        /// <summary>
+        /// Used for testing Test server. Turn on only with test server VPN.
+        /// </summary>
         /*
         [UnityTest]
         public IEnumerator GetVerifierServersLiveTest()
@@ -377,12 +380,13 @@ namespace Portkey.Test
                 Assert.AreNotEqual(null, result);
             }, error =>
             {
+                done = true;
                 Assert.Fail(error);
             });
             
             while(!done)
             {
-                done = done;
+                yield return new WaitForSeconds(1);
             }
         }*/
         
@@ -397,16 +401,25 @@ namespace Portkey.Test
             
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
 
+            var done = false;
             yield return didWallet.GetVerifierServers("AELF", (result) =>
             {
+                done = true;
                 accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
                 contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 contractMock.Verify(contract => contract.CallTransactionAsync<GetVerifierServersOutput>(It.IsAny<BlockchainWallet>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>()), Times.Once());
                 Assert.AreNotEqual(null, result);
             }, error =>
             {
+                done = true;
                 Assert.Fail(error);
             });
+
+            while (!done)
+            {
+                yield return new WaitForSeconds(1);
+            }
+
         }
         
         [UnityTest]

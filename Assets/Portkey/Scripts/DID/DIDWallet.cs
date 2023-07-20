@@ -10,6 +10,7 @@ using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace Portkey.DID
 {
@@ -391,17 +392,13 @@ namespace Portkey.DID
         public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
         {
             InitializeManagementAccount();
-            yield return _contractProvider.GetContract(chainId, async (contract) =>
+            yield return _contractProvider.GetContract(chainId,  (contract) =>
             {
-                var result = await contract.CallTransactionAsync<GetVerifierServersOutput>(_managementAccount.Wallet, "GetVerifierServers", new Empty());
-
-                var verifierItems = ConvertToVerifierItems(result);
-                successCallback(verifierItems);
-                //StaticCoroutine.StartCoroutine(WaitForOurTask(contract, successCallback));
+                StaticCoroutine.StartCoroutine(GetVerifierServersAsync(contract, successCallback));
             }, errorCallback);
         }
         
-        private IEnumerator WaitForOurTask(IContract contract, SuccessCallback<VerifierItem[]> successCallback) {
+        private IEnumerator GetVerifierServersAsync(IContract contract, SuccessCallback<VerifierItem[]> successCallback) {
             var task = contract.CallTransactionAsync<GetVerifierServersOutput>(_managementAccount.Wallet, "GetVerifierServers", new Empty());
             yield return new WaitUntil(() => task.IsCompleted);
                 

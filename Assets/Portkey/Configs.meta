@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/NuGet.meta
+guid: 21167443d6314447d8049466b15922a4
+========
 guid: d31d2fd284d734ce2a1ae7a6c7c56dda
+>>>>>>>> master:Assets/Portkey/Configs.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

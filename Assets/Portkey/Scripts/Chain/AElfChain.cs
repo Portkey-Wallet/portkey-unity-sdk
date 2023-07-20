@@ -13,10 +13,12 @@ namespace Portkey.Chain
     public class AElfChain : IChain
     {
         private AElfClient _aelfClient;
-
-        public AElfChain(string rpcUrl)
+        public string ChainId { get; private set; }
+        
+        public AElfChain(string chainId, string rpcUrl)
         {
             _aelfClient = new AElfClient(rpcUrl);
+            ChainId = chainId;
         }
 
         public async Task<Transaction> GenerateTransactionAsync(string from, string to, string methodName, IMessage input)
@@ -32,6 +34,21 @@ namespace Portkey.Chain
         public async Task<string> ExecuteTransactionAsync(ExecuteTransactionDto input)
         {
             return await _aelfClient.ExecuteTransactionAsync(input);
+        }
+
+        public async Task<BlockDto> GetBlockByHeightAsync(long blockHeight, bool includeTransactions = false)
+        {
+            return await _aelfClient.GetBlockByHeightAsync(blockHeight, includeTransactions);
+        }
+
+        public async Task<SendTransactionOutput> SendTransactionAsync(SendTransactionInput input)
+        {
+            return await _aelfClient.SendTransactionAsync(input);
+        }
+
+        public async Task<TransactionResultDto> GetTransactionResultAsync(string transactionId)
+        {
+            return await _aelfClient.GetTransactionResultAsync(transactionId);
         }
     }
 }

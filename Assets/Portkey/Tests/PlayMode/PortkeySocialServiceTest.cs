@@ -69,7 +69,7 @@ namespace Portkey.Test
             
             return _portkeySocialService.Register(registerParam, (result) =>
             {
-                Assert.AreNotEqual("", result.sessionId);
+                Assert.AreEqual("sessionId_mock", result.sessionId);
             }, ErrorCallback);
         }
         
@@ -210,7 +210,7 @@ namespace Portkey.Test
             yield return _portkeySocialService.Recovery(requestParams, (result) =>
             {
                 done = true;
-                Assert.AreEqual(true, result.sessionId == "sessionId_mock");
+                Assert.AreEqual("sessionId_mock", result.sessionId);
             }, ErrorCallback);
 
             while (!done)
@@ -338,6 +338,21 @@ namespace Portkey.Test
             {
                 done = true;
                 Assert.AreEqual("userId_mock", result.userId);
+            }, ErrorCallback);
+
+            while (!done)
+                yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator GetChainsInfoTest()
+        {
+            var done = false;
+
+            yield return _portkeySocialService.GetChainsInfo( (result) =>
+            {
+                done = true;
+                Assert.NotZero(result.items.Length);
             }, ErrorCallback);
 
             while (!done)

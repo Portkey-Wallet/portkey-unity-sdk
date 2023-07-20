@@ -10,12 +10,14 @@ namespace Portkey.Core
         public string Address { get; private set; }
         public string PrivateKey { get; private set; }
         public string Mnemonic { get; private set; }
+        public string PublicKey { get; private set; }
         
-        public BlockchainWallet(string address, string privateKey, string mnemonic)
+        public BlockchainWallet(string address, string privateKey, string mnemonic, string publicKey)
         {
             Address = address;
             PrivateKey = privateKey;
             Mnemonic = mnemonic;
+            PublicKey = publicKey;
         }
     }
 }

@@ -32,7 +32,6 @@ namespace Portkey.SocialProvider
                 case AccountType.Phone:
                 case AccountType.Apple:
                     throw new NotImplementedException($"{type.ToString()} not yet implemented");
-                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }

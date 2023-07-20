@@ -587,6 +587,7 @@ GameObject:
   - component: {fileID: 8596821250927798918}
   - component: {fileID: 7150524539871364045}
   - component: {fileID: 1058882298470602853}
+  - component: {fileID: 6995375832735857145}
   m_Layer: 5
   m_Name: PortkeyUICanvas
   m_TagString: Untagged
@@ -696,6 +697,20 @@ MonoBehaviour:
   _request: {fileID: 11400000, guid: e645be7cb8d2e4a23abee15bbb39bdef, type: 2}
   _config: {fileID: 11400000, guid: 294c5e0f626c049ec8e2781bb3b081e9, type: 2}
   _test: {fileID: 7845053570121559519}
+  _graphQL: {fileID: 6995375832735857145}
+--- !u!114 &6995375832735857145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3147389759037355807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83b3c7fc8e97e4bf8b8c17035fb6b152, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _graphQLConfig: {fileID: 11400000, guid: a37600c4698fd45b6b3c20a379e09ee2, type: 2}
 --- !u!1 &3198205359527483469
 GameObject:
   m_ObjectHideFlags: 0

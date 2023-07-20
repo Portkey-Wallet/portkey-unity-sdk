@@ -12,7 +12,7 @@ namespace Portkey.GraphQL
     /// </summary>
     public class GraphQL : MonoBehaviour, IDIDGraphQL, IGraphQL
     {
-        [SerializeField] protected IGraphQL _graphQLConfig;
+        [SerializeField] protected GraphQLConfig _graphQLConfig;
 
         private const string QUERY_CAHOLDERMANAGERINFO = "caHolderManagerInfo";
         private const string QUERY_LOGINGUARDIANINFO = "loginGuardianInfo";

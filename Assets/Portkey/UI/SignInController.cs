@@ -160,6 +160,7 @@ namespace Portkey.UI
                     break;
                 default:
                     //Change to Login View
+                    gameObject.SetActive(false);
                     guardianApprovalView.SetActive(true);
                     break;
             }

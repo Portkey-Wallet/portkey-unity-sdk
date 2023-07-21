@@ -7,32 +7,32 @@ namespace Portkey.Core
     [Serializable]
     public class Context 
     {
-        public string clientId;
-        public string requestId;
+        public string clientId = null;
+        public string requestId = null;
     }
 
     [Serializable]
     public class GuardiansApproved
     {
         public AccountType type;
-        public string identifier;
-        public string verifierId;
-        public string verificationDoc;
-        public string signature;
+        public string identifier = null;
+        public string verifierId = null;
+        public string verificationDoc = null;
+        public string signature = null;
     }
 
     [Serializable]
     public class RegisterParams
     {
         public AccountType type;
-        public string loginGuardianIdentifier;
-        public string manager;
-        public string extraData;
-        public string chainId;
-        public string verifierId;
-        public string verificationDoc;
-        public string signature;
-        public Context context;
+        public string loginGuardianIdentifier = null;
+        public string manager = null;
+        public string extraData = null;
+        public string chainId = null;
+        public string verifierId = null;
+        public string verificationDoc = null;
+        public string signature = null;
+        public Context context = null;
     }
 
     [Serializable]
@@ -44,58 +44,58 @@ namespace Portkey.Core
     [Serializable]
     public class RecoveryParams
     {
-        public string loginGuardianIdentifier;
-        public string manager;
-        public GuardiansApproved[] guardiansApproved;
-        public string extraData;
-        public string chainId;
-        public Context context;
+        public string loginGuardianIdentifier = null;
+        public string manager = null;
+        public GuardiansApproved[] guardiansApproved = null;
+        public string extraData = null;
+        public string chainId = null;
+        public Context context = null;
     }
 
     [Serializable]
     public class GetCAHolderByManagerParams
     {
-        public string manager;
-        public string chainId;
+        public string manager = null;
+        public string chainId = null;
     }
 
     [Serializable]
     public class GetCAHolderByManagerResult
     {
-        public IList<CaHolderWithGuardian> caHolders;
+        public IList<CaHolderWithGuardian> caHolders = null;
     }
 
     [Serializable]
     public class Guardian
     {
-        public string guardianIdentifier;
-        public string identifierHash;
+        public string guardianIdentifier = null;
+        public string identifierHash = null;
         public bool isLoginGuardian = true;
-        public string salt;
+        public string salt = null;
         public AccountType type;
-        public string verifierId;
+        public string verifierId = null;
     }
     
     [Serializable]
     public class Manager
     {
-        public string address; //aelf.Address
-        public string extraData;
+        public string address = null; //aelf.Address
+        public string extraData = null;
     }
     
     [Serializable]
     public class IHolderInfo
     {
-        public string caAddress;
-        public string caHash;
-        public GuardianList guardianList;
-        public Manager[] managerInfos;
+        public string caAddress = null;
+        public string caHash = null;
+        public GuardianList guardianList = null;
+        public Manager[] managerInfos = null;
     }
 
     [Serializable]
     public class GuardianList
     {
-        public Guardian[] guardians;
+        public Guardian[] guardians = null;
     }
     
     [Serializable]
@@ -107,7 +107,7 @@ namespace Portkey.Core
     [Serializable]
     public class GetHolderInfoParams
     {
-        public string chainId;
+        public string chainId = null;
         public string caHash = null;
         public string guardianIdentifier = null;
     }
@@ -115,8 +115,8 @@ namespace Portkey.Core
     [Serializable]
     public class GetRegisterInfoParams
     {
-        public string loginGuardianIdentifier;
-        public string caHash;
+        public string loginGuardianIdentifier = null;
+        public string caHash = null;
     }
 
     [Serializable]
@@ -128,22 +128,22 @@ namespace Portkey.Core
     [Serializable]
     public class RegisterInfo
     {
-        public string originChainId;
+        public string originChainId = null;
     }
 
     [Serializable]
     public class ICountryItem
     {
-        public string country;
-        public string code;
-        public string iso;
+        public string country = null;
+        public string code = null;
+        public string iso = null;
     }
 
     [Serializable]
     public class IPhoneCountryCodeResult
     {
-        public ICountryItem[] data;
-        public ICountryItem locateData;
+        public ICountryItem[] data = null;
+        public ICountryItem locateData = null;
     }
     
     /// <summary>

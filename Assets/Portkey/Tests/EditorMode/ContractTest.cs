@@ -11,6 +11,7 @@ using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
 using UnityEngine.TestTools;
+using Empty = Google.Protobuf.WellKnownTypes.Empty;
 using Transaction = AElf.Types.Transaction;
 
 namespace Portkey.Test

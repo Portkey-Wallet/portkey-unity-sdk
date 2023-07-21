@@ -3,6 +3,7 @@
     public class SocialLoginInfo
     {
         public string access_token;
+        public AccountType accountType;
         public SocialInfo socialInfo;
     }
     

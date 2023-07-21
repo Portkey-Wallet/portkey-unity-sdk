@@ -6,11 +6,6 @@ namespace Portkey.Core
     public interface IWallet
     {
         /// <summary>
-        /// Initializes the Wallet with a new Account if it does not have one.
-        /// </summary>
-        public void InitializeManagementAccount();
-        
-        /// <summary>
         /// For saving the Wallet.
         /// </summary>
         /// <param name="password">Password to encrypt the wallet.</param>

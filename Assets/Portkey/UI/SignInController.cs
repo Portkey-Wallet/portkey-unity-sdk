@@ -1,8 +1,8 @@
-using System.Text.RegularExpressions;
+using System;
+using System.Linq;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Portkey.UI
 {
@@ -137,7 +137,7 @@ namespace Portkey.UI
         {
             var registerParam = new GetRegisterInfoParams
             {
-                loginGuardianIdentifier = Regex.Replace(guardianInfo.identifier, @"\s+", "")
+                loginGuardianIdentifier = String.Concat(guardianInfo.identifier.Where(c => !char.IsWhiteSpace(c)))
             };
             StartCoroutine(_portkeySocialService.GetRegisterInfo(registerParam, info =>
             {

@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using AElf.Types;
 using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
 using Newtonsoft.Json;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
 using UnityEngine;
-using System.Threading.Tasks;
+using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.DID
 {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Portkey.UI
 {
-    public class SignInController : MonoBehaviour
+    public class SignInViewController : MonoBehaviour
     {
         private enum State
         {
@@ -14,20 +14,11 @@ namespace Portkey.UI
             Signup
         }
         
-        private class GuardianIdentifierInfo
-        {
-            public string identifier;
-            public AccountType accountType;
-            public string token;
-            public bool isLoginGuardian;
-            public string chainId;
-        }
-        
         [SerializeField] private TextMeshProUGUI test;
         [SerializeField] private DID.DID did;
         [SerializeField] private GameObject errorView;
         [SerializeField] private GameObject guardianApprovalView;
-        
+
         private State _state = State.Login;
         private IPortkeySocialService _portkeySocialService;
         
@@ -137,7 +128,7 @@ namespace Portkey.UI
         {
             var registerParam = new GetRegisterInfoParams
             {
-                loginGuardianIdentifier = String.Concat(guardianInfo.identifier.Where(c => !char.IsWhiteSpace(c)))
+                loginGuardianIdentifier = string.Concat(guardianInfo.identifier.Where(c => !char.IsWhiteSpace(c)))
             };
             StartCoroutine(_portkeySocialService.GetRegisterInfo(registerParam, info =>
             {

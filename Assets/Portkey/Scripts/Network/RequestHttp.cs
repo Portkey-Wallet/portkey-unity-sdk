@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Portkey.Core;
 using Newtonsoft.Json.Linq;
@@ -11,21 +12,12 @@ namespace Portkey.Network
     [CreateAssetMenu(fileName = "RequestHttp", menuName = "Portkey/Network/RequestHttp")]
     public class RequestHttp : IHttp
     {
-        public override IEnumerator Get(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Get<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
-            data.JsonData??=string.Empty;
+            var url = GetUrlWithParameters(data);
+
+            using var request = UnityWebRequest.Get(url);
             
-            byte[] postData = Encoding.ASCII.GetBytes(data.JsonData);
-            using var request = new UnityWebRequest(data.Url, 
-                UnityWebRequest.kHttpVerbGET,
-                new DownloadHandlerBuffer(), 
-                new UploadHandlerRaw(postData))
-            {
-                disposeUploadHandlerOnDispose = true,
-                disposeDownloadHandlerOnDispose = true
-            };
-            
-            request.SetRequestHeader("Content-Type", data.ContentType);
             foreach (var header in data.Headers)
             {
                 request.SetRequestHeader(header.Key, header.Value);
@@ -35,7 +27,8 @@ namespace Portkey.Network
 
             if (request.error != null)
             {
-                errorCallback(request.error);
+                var errorMessage = GetErrorMessage(request);
+                errorCallback(errorMessage);
                 yield break;
             }
             
@@ -45,6 +38,42 @@ namespace Portkey.Network
                 yield break;
             }
             successCallback(request.downloadHandler.text);
+        }
+
+        private static string GetErrorMessage(UnityWebRequest request)
+        {
+            var errorMessage = request.error;
+            if (request.downloadHandler.text != null)
+            {
+                errorMessage += $"\n{request.downloadHandler.text}";
+            }
+
+            return errorMessage;
+        }
+
+        private static string GetUrlWithParameters<T>(FieldFormRequestData<T> data)
+        {
+            if (data.FieldFormsObject == null)
+            {
+                return data.Url;
+            }
+            
+            var url = new StringBuilder();
+            url.Append(data.Url);
+            var formFields = ConvertToDictionary(JObject.FromObject(data.FieldFormsObject));
+            if (formFields.Count > 0)
+            {
+                url.Append("?");
+            }
+
+            foreach (var field in formFields.Where(field => !string.IsNullOrEmpty(field.Value)))
+            {
+                url.Append($"{field.Key}={field.Value}&");
+            }
+            
+            var ret = url.ToString().TrimEnd('&');
+
+            return ret;
         }
 
         public override IEnumerator Post(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
@@ -71,7 +100,8 @@ namespace Portkey.Network
 
             if (request.error != null)
             {
-                errorCallback(request.error);
+                var errorMessage = GetErrorMessage(request);
+                errorCallback(errorMessage);
                 yield break;
             }
             
@@ -99,7 +129,8 @@ namespace Portkey.Network
 
             if (request.error != null)
             {
-                errorCallback(request.error);
+                var errorMessage = GetErrorMessage(request);
+                errorCallback(errorMessage);
                 yield break;
             }
             

@@ -18,7 +18,7 @@ namespace Portkey.Core
         /// <param name="successCallback">Callback function when Get is successful.</param>
         /// <param name="errorCallback">Callback function when error occurs. msg contains error message.</param>
         /// <returns>The response from the request.</returns>
-        public abstract IEnumerator Get(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback);
+        public abstract IEnumerator Get<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback);
         
         /// <summary>
         /// Make a POST request to the given url.

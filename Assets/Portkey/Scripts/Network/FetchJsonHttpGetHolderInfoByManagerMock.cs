@@ -10,7 +10,7 @@ namespace Portkey.Network
         [SerializeField] private string caHolderManagerInfoResponse;
         [SerializeField] private string loginGuardianInfoResponse;
 
-        public override IEnumerator Get(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Get<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             errorCallback("Should not be called!");
             yield break;

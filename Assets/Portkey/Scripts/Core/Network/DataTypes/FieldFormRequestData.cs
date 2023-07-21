@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace Portkey.Core
 {
+    public class Empty
+    {}
+    
     public class FieldFormRequestData<T> : IRequestData
     {
         public string Url;

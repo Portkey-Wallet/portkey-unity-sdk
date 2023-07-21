@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using Portkey.Core;
 using Portkey.Utilities;
 using UnityEngine;
+using Empty = Portkey.Core.Empty;
 
 namespace Portkey.DID
 {
@@ -13,6 +14,11 @@ namespace Portkey.DID
     /// </summary>
     public class PortkeySocialService : IPortkeySocialService
     {
+        private class Filter
+        {
+            public string filter;
+        }
+        
         private PortkeyConfig config;
         private IHttp _http;
         private GraphQL.GraphQL _graphQl;
@@ -44,9 +50,9 @@ namespace Portkey.DID
                 });
         }
         
-        private IEnumerator Get<T>(JsonRequestData jsonRequestData, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
+        private IEnumerator HttpGet<T1, T2>(FieldFormRequestData<T1> requestData, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
-            return _http.Get(jsonRequestData, JsonToObject<T>(successCallback, errorCallback),
+            return _http.Get(requestData, JsonToObject<T2>(successCallback, errorCallback),
                 (error) =>
                 {
                     errorCallback(error);
@@ -55,23 +61,24 @@ namespace Portkey.DID
         
         private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
         {
-            var jsonRequestData = new JsonRequestData
+            var requestData = new FieldFormRequestData<T1>()
             {
                 Url = GetFullApiUrl(url),
-                JsonData = JsonConvert.SerializeObject(requestParams),
+                FieldFormsObject = requestParams,
             };
             
-            return Get(jsonRequestData, successCallback, errorCallback);
+            return HttpGet(requestData, successCallback, errorCallback);
         }
         
         private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
-            var jsonRequestData = new JsonRequestData
+            var requestData = new FieldFormRequestData<Empty>
             {
                 Url = GetFullApiUrl(url),
+                FieldFormsObject = new Empty()
             };
             
-            return Get(jsonRequestData, successCallback, errorCallback);
+            return HttpGet(requestData, successCallback, errorCallback);
         }
         
         private static IHttp.SuccessCallback JsonToObject<T>(SuccessCallback<T> successCallback, ErrorCallback errorCallback)
@@ -137,7 +144,7 @@ namespace Portkey.DID
                     yield break;
                 }
             
-                yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{sessionId}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
+                yield return Get("/api/app/search/accountregisterindex", new Filter { filter = $"_id:{sessionId}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
                 {
                     StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
                 }, errorCallback);
@@ -170,7 +177,7 @@ namespace Portkey.DID
                     yield break;
                 }
             
-                yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{sessionId}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
+                yield return Get("/api/app/search/accountrecoverindex", new Filter { filter = $"_id:{sessionId}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
                 {
                     StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
                 }, errorCallback);
@@ -198,14 +205,14 @@ namespace Portkey.DID
 
         public IEnumerator GetCAHolderInfo(string authorization, string caHash, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
         {
-            var jsonRequestData = new JsonRequestData
+            var requestData = new FieldFormRequestData<Filter>()
             {
                 Url = GetFullApiUrl("/api/app/search/caholderindex"),
-                JsonData = JsonConvert.SerializeObject(new { filter = $"caHash:{caHash}" }),
+                FieldFormsObject = new Filter { filter = $"caHash:{caHash}" },
                 Headers = new Dictionary<string, string> { { "Authorization", authorization } }
             };
             
-            return Get(jsonRequestData, successCallback, errorCallback);
+            return HttpGet(requestData, successCallback, errorCallback);
         }
 
         public IEnumerator Register(RegisterParams requestParams, SuccessCallback<SessionIdResult> successCallback, ErrorCallback errorCallback)

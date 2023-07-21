@@ -217,7 +217,7 @@ namespace Portkey.SocialProvider
 
         private void RequestSocialInfo(string accessToken)
         {
-            var param = new JsonRequestData
+            var param = new FieldFormRequestData<Empty>()
             {
                 Url = USERINFO_ENDPOINT,
                 Headers = new Dictionary<string, string>
@@ -232,6 +232,7 @@ namespace Portkey.SocialProvider
                 var socialLoginInfo = new SocialLoginInfo
                 {
                     access_token = accessToken,
+                    accountType = AccountType.Google,
                     socialInfo = socialInfo
                 };
                 

@@ -14,20 +14,20 @@ namespace Portkey.DID
     /// </summary>
     public class PortkeySocialService : IPortkeySocialService
     {
-        private PortkeyConfig config;
+        private PortkeyConfig _config;
         private IHttp _http;
         private GraphQL.GraphQL _graphQl;
         
         public PortkeySocialService(PortkeyConfig config, IHttp http, GraphQL.GraphQL graphQl)
         {
-            this.config = config;
-            this._http = http;
+            _config = config;
+            _http = http;
             _graphQl = graphQl;
         }
 
         private string GetFullApiUrl(string url)
         {
-            return config.ApiBaseUrl + url;
+            return _config.ApiBaseUrl + url;
         }
         
         private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
@@ -38,20 +38,12 @@ namespace Portkey.DID
                 JsonData = JsonConvert.SerializeObject(requestParams),
             };
             
-            return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback),
-                (error) =>
-                {
-                    errorCallback(error);
-                });
+            return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback), errorCallback);
         }
         
         private IEnumerator Get<T>(JsonRequestData jsonRequestData, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
-            return _http.Get(jsonRequestData, JsonToObject<T>(successCallback, errorCallback),
-                (error) =>
-                {
-                    errorCallback(error);
-                });
+            return _http.Get(jsonRequestData, JsonToObject<T>(successCallback, errorCallback), errorCallback);
         }
         
         private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)

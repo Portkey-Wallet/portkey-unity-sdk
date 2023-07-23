@@ -252,25 +252,18 @@ namespace Portkey.DID
             
             InitializeManagementAccount();
             param.manager = _managementAccount.Address;
+            param.context = new Context
+            {
+                clientId = _managementAccount.Address,
+                requestId = Guid.NewGuid().ToString()
+            };
             
             yield return _socialService.Register(param, (result) =>
             {
-                StaticCoroutine.StartCoroutine(_socialService.GetRegisterStatus(result.sessionId, QueryOptions.DefaultQueryOptions,
-                    (status) =>
-                    {
-                        if (status.IsStatusPass())
-                        {
-                            UpdateAccountInfo(param.loginGuardianIdentifier);
-                            UpdateCAInfo(param.chainId, status.caHash, status.caAddress);
-                        }
-                        else
-                        {
-                            errorCallback($"Register failed: {status.registerMessage}");
-                            return;
-                        }
-
-                        successCallback(new RegisterResult(status, result.sessionId));
-                    }, errorCallback));
+                StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId, (status) =>
+                {
+                    successCallback(new RegisterResult(status, result.sessionId));
+                }, errorCallback));
             }, errorCallback);
         }
 
@@ -485,6 +478,12 @@ namespace Portkey.DID
                     successCallback(caHolderInfo);
                 }, errorCallback);
             }, errorCallback);
+        }
+
+        public void Reset()
+        {
+            ClearDIDWallet();
+            _managementAccount = null;
         }
 
         public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,

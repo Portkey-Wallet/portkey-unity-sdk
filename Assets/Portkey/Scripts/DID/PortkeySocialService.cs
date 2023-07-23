@@ -158,21 +158,21 @@ namespace Portkey.DID
             
                 yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
                 {
-                    StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
+                    StaticCoroutine.StartCoroutine(RepollIfNeeded(ret));
                 }, errorCallback);
             }
             
-            IEnumerator IsRepollNeeded(ArrayWrapper<RegisterStatusResult> requestParam)
+            IEnumerator RepollIfNeeded(ArrayWrapper<RegisterStatusResult> result)
             {
-                if(requestParam?.items == null || requestParam.items.Length == 0 || requestParam.items[0].registerStatus == "pending")
+                if(result?.items == null || result.items.Length == 0 || result.items[0].registerStatus == "pending")
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
                     ++queryOptions.reCount;
-                    yield return StaticCoroutine.StartCoroutine(Poll());
+                    yield return Poll();
                 }
                 else
                 {
-                    successCallback(requestParam.items[0]);
+                    successCallback(result.items[0]);
                 }
             }
         }
@@ -191,21 +191,21 @@ namespace Portkey.DID
             
                 yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{id}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
                 {
-                    StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
+                    StaticCoroutine.StartCoroutine(RepollIfNeeded(ret));
                 }, errorCallback);
             }
             
-            IEnumerator IsRepollNeeded(ArrayWrapper<RecoverStatusResult> requestParam)
+            IEnumerator RepollIfNeeded(ArrayWrapper<RecoverStatusResult> result)
             {
-                if(requestParam?.items == null || requestParam.items.Length == 0 || requestParam.items[0].recoveryStatus == "pending")
+                if(result?.items == null || result.items.Length == 0 || result.items[0].recoveryStatus == "pending")
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
                     ++queryOptions.reCount;
-                    yield return StaticCoroutine.StartCoroutine(Poll());
+                    yield return Poll();
                 }
                 else
                 {
-                    successCallback(requestParam.items[0]);
+                    successCallback(result.items[0]);
                 }
             }
         }

@@ -109,6 +109,11 @@ namespace Portkey.DID
             return _didWallet.GetCAHolderInfo(chainId, successCallback, errorCallback);
         }
 
+        public void Reset()
+        {
+            _didWallet.Reset();
+        }
+
         public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {

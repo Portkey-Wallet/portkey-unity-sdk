@@ -108,7 +108,14 @@ namespace Portkey.DID
                         break;
                     }
                     case JValue:
-                        successCallback(json.Value<T>());
+                        try
+                        {
+                            successCallback(json.Value<T>());
+                        }
+                        catch (Exception e)
+                        {
+                            errorCallback(e.Message);
+                        }
                         break;
                     default:
                         errorCallback("Unsupported type detected!");

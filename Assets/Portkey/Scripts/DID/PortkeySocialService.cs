@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Portkey.Core;
@@ -78,14 +79,32 @@ namespace Portkey.DID
         {
             return (response) =>
             {
-                var json = JToken.Parse(response);
+                JToken json;
+                try
+                {
+                    json = JToken.Parse(response);
+                }
+                catch (Exception e)
+                {
+                    errorCallback(e.Message);
+                    return;
+                }
 
                 switch (json)
                 {
                     case JObject:
                     {
-                        //deserialize response
-                        var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
+                        T deserializedObject;
+                        try
+                        {
+                            //deserialize response
+                            deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
+                        }
+                        catch (Exception e)
+                        {
+                            errorCallback(e.Message);
+                            return;
+                        }
                         //call success callback
                         successCallback(deserializedObject);
                         break;

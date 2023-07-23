@@ -16,7 +16,7 @@ namespace Portkey.UI
         
         [SerializeField] private TextMeshProUGUI test;
         [SerializeField] private DID.DID did;
-        [SerializeField] private GameObject errorView;
+        [SerializeField] private ErrorViewController errorView;
         [SerializeField] private GameObject guardianApprovalView;
 
         private State _state = State.Login;
@@ -118,7 +118,7 @@ namespace Portkey.UI
                 accountType = accountType,
                 token = token,
                 isLoginGuardian = isLoginGuardian,
-                chainId = ""
+                chainId = "AELF"
             };
 
             CheckChainInfo(input);
@@ -147,7 +147,8 @@ namespace Portkey.UI
             {
                 case true when _state != State.Login:
                 case false when _state != State.Signup:
-                    errorView.SetActive(true);
+                    errorView.gameObject.SetActive(true);
+                    errorView.SetGuardianIdentifierInfo(info);
                     break;
                 default:
                     //Change to Login View

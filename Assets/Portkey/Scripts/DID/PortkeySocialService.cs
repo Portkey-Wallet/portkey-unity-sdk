@@ -94,19 +94,17 @@ namespace Portkey.DID
                 {
                     case JObject:
                     {
-                        T deserializedObject;
                         try
                         {
                             //deserialize response
-                            deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
+                            var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
+                            //call success callback
+                            successCallback(deserializedObject);
                         }
                         catch (Exception e)
                         {
                             errorCallback(e.Message);
-                            return;
                         }
-                        //call success callback
-                        successCallback(deserializedObject);
                         break;
                     }
                     case JValue:

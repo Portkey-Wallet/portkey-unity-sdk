@@ -211,11 +211,11 @@ namespace Portkey.SocialProvider
                 var exchangeResponse = JsonUtility.FromJson<RequestTokenResponse>(response);
                 var accessToken = exchangeResponse.access_token;
 
-                RequestSocialInfo(accessToken);
+                RequestSocialInfo(accessToken, _successCallback, _errorCallback);
             }, _errorCallback));
         }
 
-        private void RequestSocialInfo(string accessToken)
+        public void RequestSocialInfo(string accessToken, ISocialLogin.AuthCallback successCallback, ErrorCallback errorCallback)
         {
             var param = new FieldFormRequestData<Empty>()
             {
@@ -236,8 +236,8 @@ namespace Portkey.SocialProvider
                     socialInfo = socialInfo
                 };
                 
-                _successCallback(socialLoginInfo);
-            }, _errorCallback));
+                successCallback(socialLoginInfo);
+            }, errorCallback));
         }
     }
 }

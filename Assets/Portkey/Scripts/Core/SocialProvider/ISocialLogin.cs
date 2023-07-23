@@ -4,5 +4,6 @@ namespace Portkey.Core
     {
         delegate void AuthCallback(SocialLoginInfo info);
         void Authenticate(AuthCallback successCallback, ErrorCallback errorCallback);
+        void RequestSocialInfo(string accessToken, AuthCallback successCallback, ErrorCallback errorCallback);
     }
 }

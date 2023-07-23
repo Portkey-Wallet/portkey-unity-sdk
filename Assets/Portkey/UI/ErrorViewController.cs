@@ -6,9 +6,9 @@ namespace Portkey.UI
 {
     public class ErrorViewController : MonoBehaviour
     {
-        [SerializeField] private GameObject pinView;
+        [SerializeField] private SetPINViewController pinView;
         
-        private GuardianIdentifierInfo _info;
+        private GuardianIdentifierInfo _guardianIdentifierInfo;
         
         public void OnClickClose()
         {
@@ -22,13 +22,14 @@ namespace Portkey.UI
 
         public void OnClickSignUp()
         {
-            pinView.SetActive(true);
+            pinView.gameObject.SetActive(true);
+            pinView.SetGuardianIdentifierInfo(_guardianIdentifierInfo);
             CloseView();
         }
         
         public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)
         {
-            _info = info;
+            _guardianIdentifierInfo = info;
         }
     }
 }

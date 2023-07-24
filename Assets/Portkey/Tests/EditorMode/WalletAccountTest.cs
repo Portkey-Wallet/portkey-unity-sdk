@@ -19,31 +19,21 @@ namespace Portkey.Test
         [Test]
         public void SignTest()
         {
-            var wallet = new WalletAccount(new BlockchainWallet("", "", "", ""))
-            {
-                PrivateKeyNow = PRIVATE_KEY
-            };
-
             const string SIGNED =
                 "59EF1D3B2B853FCA1E33D07765DEBAAF38A81442CFE90822D4334E8FCE9889D80C99A0BE1858C1F26B4D99987EFF6003F33B7C3F32BBDB9CEEC68A1E8A4DB4B000";
-            //var wallet = _accountProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
+            var wallet = _accountProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
             var result = wallet.Sign("68656c6c6f20776f726c643939482801");
             
             Assert.AreEqual(SIGNED, result.ToHexString());
         }
-        /*
+        
         [Test]
         public void SignTransactionTest()
         {
-            var wallet = new WalletAccount(new BlockchainWallet("", "", ""))
-            {
-                PrivateKeyNow = PRIVATE_KEY
-            };
-
             var transaction = new Transaction()
             {
                 From = "TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T".ToAddress(),
-                To = Address.FromBase58("65dDNxzcd35jESiidFXN5JV8Z7pCwaFnepuYQToNefSgqk9"),
+                To = "2imqjpkCwnvYzfnr61Lp2XQVN2JU17LPkA9AZzmRZzV5LRRWmR".ToAddress(),
                 MethodName = "GetVerifierServers",
                 Params = new Empty().ToByteString(),
                 RefBlockNumber = 1,
@@ -51,12 +41,12 @@ namespace Portkey.Test
             };
 
             const string SIGNED =
-                "59EF1D3B2B853FCA1E33D07765DEBAAF38A81442CFE90822D4334E8FCE9889D80C99A0BE1858C1F26B4D99987EFF6003F33B7C3F32BBDB9CEEC68A1E8A4DB4B000";
-            //var wallet = _accountProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
+                "WMfWt3EGPQ06YpVmXup4tXjZQBunSrgycHKeu3ZT4/F9oSgi2oSKN7ZhNu9dUjsDkTgRkb/2F9LDPcpTm8BgTwE\u003d";
+            var wallet = _accountProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
             var result = wallet.SignTransaction(transaction);
             
-            Assert.AreEqual(SIGNED, result.Signature.ToString());
-        }*/
+            Assert.AreEqual(SIGNED, result.Signature.ToBase64());
+        }
     }
 
     internal static class ByteArrayExtension

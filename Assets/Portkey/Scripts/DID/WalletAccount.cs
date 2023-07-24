@@ -1,30 +1,28 @@
 using AElf;
-using AElf.Client;
 using AElf.Cryptography;
 using AElf.Types;
+using Google.Protobuf;
 using Portkey.Core;
 
 namespace Portkey.DID
 {
     /// <summary>
-    /// EOA Wallet Account.
-    /// TODO: implement this when AElf C# SDK is ready.
+    /// EOA Wallet, used to act as management account of DID wallet.
     /// </summary>
     public class WalletAccount : AccountBase
     {
-        //TODO: remove this and replace with PrivateKey
-        public string PrivateKeyNow { get; set; }
-
         public override Transaction SignTransaction(Transaction transaction)
         {
-            var client = new AElfClient("http://localhost:1235");
-            return client.SignTransaction(PrivateKeyNow, transaction);
+            var byteArray = transaction.GetHash().ToByteArray();
+            var numArray = CryptoHelper.SignWithPrivateKey(ByteArrayHelper.HexStringToByteArray(PrivateKey), byteArray);
+            transaction.Signature = ByteString.CopyFrom(numArray);
+            return transaction;
         }
 
         public override byte[] Sign(string data)
         {
             var byteData = data.GetBytes();
-            var privy = ByteArrayHelper.HexStringToByteArray(PrivateKeyNow);
+            var privy = ByteArrayHelper.HexStringToByteArray(PrivateKey);
             return CryptoHelper.SignWithPrivateKey(privy, byteData);
         }
 

@@ -87,7 +87,7 @@ namespace Portkey.UI
 
                 StartCoroutine(did.GetVerifierServers(chainInfo.chainId, result =>
                 {
-                    if (result == null)
+                    if (result == null || result.Length == 0)
                     {
                         OnError($"Verifier server [{chainInfo.chainId}] not found");
                         return;

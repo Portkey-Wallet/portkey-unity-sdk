@@ -143,11 +143,13 @@ namespace Portkey.DID
 
         public IEnumerator GetRegisterStatus(string id, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
+            var pollCount = 0;
+            
             yield return Poll();
 
             IEnumerator Poll()
             {
-                if(queryOptions.reCount > queryOptions.maxCount)
+                if(pollCount > queryOptions.maxCount)
                 {
                     errorCallback("timeout");
                     yield break;
@@ -164,7 +166,7 @@ namespace Portkey.DID
                 if(result?.items == null || result.items.Length == 0 || result.items[0].registerStatus == "pending")
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
-                    ++queryOptions.reCount;
+                    ++pollCount;
                     yield return Poll();
                 }
                 else
@@ -176,11 +178,13 @@ namespace Portkey.DID
 
         public IEnumerator GetRecoverStatus(string id, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
+            var pollCount = 0;
+            
             yield return Poll();
             
             IEnumerator Poll()
             {
-                if(queryOptions.reCount > queryOptions.maxCount)
+                if(pollCount > queryOptions.maxCount)
                 {
                     errorCallback("timeout");
                     yield break;
@@ -197,7 +201,7 @@ namespace Portkey.DID
                 if(result?.items == null || result.items.Length == 0 || result.items[0].recoveryStatus == "pending")
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
-                    ++queryOptions.reCount;
+                    ++pollCount;
                     yield return Poll();
                 }
                 else

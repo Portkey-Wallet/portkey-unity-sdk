@@ -1,13 +1,11 @@
-using System;
 using System.Linq;
 using AElf.Client.Extensions;
 using AElf.Types;
 using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
 using NUnit.Framework;
-using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.DID;
+using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.Test
 {

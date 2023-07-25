@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using Portkey.Chain;
 using Portkey.Contract;
 using Portkey.Core;
@@ -98,10 +99,29 @@ namespace Portkey.DID
         {
             return _didWallet.GetHolderInfo(param, successCallback, errorCallback);
         }
-
+        
         public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
         {
-            return _didWallet.GetVerifierServers(chainId, successCallback, errorCallback);
+            yield return _portkeySocialService.GetChainsInfo((chainInfos) =>
+            {
+                var chainInfo = chainInfos.items.FirstOrDefault(info => info.chainId == chainId);
+                if (chainInfo == null)
+                {
+                    errorCallback($"Chain info [{chainId}] not found");
+                    return;
+                }
+
+                StartCoroutine(_didWallet.GetVerifierServers(chainInfo.chainId, result =>
+                {
+                    if (result == null || result.Length == 0)
+                    {
+                        errorCallback($"Verifier server [{chainInfo.chainId}] not found");
+                        return;
+                    }
+                    
+                    successCallback(result);
+                }, errorCallback));
+            }, errorCallback);
         }
 
         public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)

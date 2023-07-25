@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Newtonsoft.Json;
 using Portkey.Core;
@@ -6,12 +7,14 @@ namespace Portkey.DID
 {
     public class ConnectService<T> : IConnectService where T : IHttp
     {
+        private const string URI = "/connect/token";
+        
         private string _apiUrl;
         private T _http;
         
         public ConnectService(string apiUrl, T http)
         {
-            _apiUrl = apiUrl + "/connect/token";
+            _apiUrl = apiUrl + URI;
             _http = http;
         }
 
@@ -25,12 +28,20 @@ namespace Portkey.DID
             
             yield return _http.PostFieldForm(fieldForm, (response) =>
             {
-                var token = JsonConvert.DeserializeObject<ConnectToken>(response);
-                if (token == null)
+                try
                 {
-                    errorCallback("Failed to deserialize token");
+                    var token = JsonConvert.DeserializeObject<ConnectToken>(response);
+                    if (token == null)
+                    {
+                        errorCallback("Failed to deserialize token");
+                        return;
+                    }
+                    successCallback(token);
                 }
-                successCallback(token);
+                catch (Exception e)
+                {
+                    errorCallback(e.Message);
+                }
             }, errorCallback);
         }
     }

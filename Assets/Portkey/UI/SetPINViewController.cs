@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
@@ -74,39 +75,18 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            //TODO: save PIN into storage
-            //TODO: Get verifier server
-            StartCoroutine(_portkeySocialService.GetChainsInfo((chainInfos) =>
-            {
-                var chainInfo = chainInfos.items.FirstOrDefault(info => info.chainId == _guardianIdentifierInfo.chainId);
-                if(chainInfo == null)
-                {
-                    OnError($"Chain info [{_guardianIdentifierInfo.chainId}] not found");
-                    return;
-                }
+            //Sign up flow
+            //save PIN into storage
+            //Get verifier server
+            //VerifyGoogleToken
+            //service.register
 
-                StartCoroutine(did.GetVerifierServers(chainInfo.chainId, result =>
-                {
-                    if (result == null || result.Length == 0)
-                    {
-                        OnError($"Verifier server [{chainInfo.chainId}] not found");
-                        return;
-                    }
-
-                    var verifierServer = result[0];
-                    CheckAccessTokenExpired(verifierServer);
-                }, OnError));
-            }, OnError));
-            //TODO: VerifyGoogleToken
-            //TODO: service.register
-            
-            //_portkeySocialService.VerifyGoogleToken()
-            
-            //CloseView();
+            StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, CheckAccessTokenExpired, OnError));
         }
 
-        private void CheckAccessTokenExpired(VerifierItem verifier)
+        private void CheckAccessTokenExpired(VerifierItem[] verifierServerList)
         {
+            var verifier = verifierServerList[0];
             // check if login access token is expired
             var login = did.GetSocialLogin(_guardianIdentifierInfo.accountType);
             login.RequestSocialInfo(_guardianIdentifierInfo.token, (socialInfo) =>
@@ -159,6 +139,17 @@ namespace Portkey.UI
 
         public void Register(VerifierItem verifier, VerifyVerificationCodeResult verificationResult)
         {
+            var extraData = "";
+            try
+            {
+                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo(Application.platform));
+            }
+            catch (Exception e)
+            {
+                OnError(e.Message);
+                return;
+            }
+            
             var guardianIdentifier = string.Concat(_guardianIdentifierInfo.identifier.Where(c => !char.IsWhiteSpace(c)));
             var param = new RegisterParams
             {
@@ -166,6 +157,7 @@ namespace Portkey.UI
                 loginGuardianIdentifier = guardianIdentifier,
                 chainId = _guardianIdentifierInfo.chainId,
                 verifierId = verifier.id,
+                extraData = extraData,
                 verificationDoc = verificationResult.verificationDoc,
                 signature = verificationResult.signature
             };
@@ -179,8 +171,14 @@ namespace Portkey.UI
                 
                 // logged in, open wallet view and close PIN view
                 walletView.SetActive(true);
+                Debugger.Log("Register success!");
                 CloseView();
             }, OnError));
+        }
+        
+        private static string EncodeExtraData(DeviceInfoType deviceInfo)
+        {
+            return JsonConvert.SerializeObject(deviceInfo);
         }
 
         private static VerificationDoc ProcessVerificationDoc(string verificationDoc)
@@ -200,7 +198,8 @@ namespace Portkey.UI
         private void OnError(string error)
         {
             //errorView.SetActive(true);
-            //CloseView();
+            Debugger.LogError(error);
+            CloseView();
         }
 
         private void OnSetPINError(string error)

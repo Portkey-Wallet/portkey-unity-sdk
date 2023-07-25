@@ -18,7 +18,7 @@ namespace Portkey.Test
         private const string URL = "https://my-json-server.typicode.com/typicode/demo/posts";
         private const string FAIL_URL = "https://google.com";
 
-        private IHttp _request = new FetchJsonHttp();
+        private IHttp _request = new RequestHttp();
 
         public void SuccessCallback(string response)
         {
@@ -53,7 +53,14 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpGet()
         {
             Debug.Log("Get to " + URL);
-            yield return _request.Get(URL, SuccessCallback, ErrorCallback);
+            
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = URL,
+                JsonData = ""
+            };
+            
+            yield return _request.Get(jsonRequestData, SuccessCallback, ErrorCallback);
         }
         
         /// <summary>
@@ -64,7 +71,14 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpPost()
         {
             Debug.Log("Posting to " + URL);
-            yield return _request.Post(URL, "", SuccessCallback, ErrorCallback);
+            
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = URL,
+                JsonData = ""
+            };
+            
+            yield return _request.Post(jsonRequestData, SuccessCallback, ErrorCallback);
         }
 #endif
         
@@ -75,7 +89,14 @@ namespace Portkey.Test
         public IEnumerator TestFetchJsonHttpPostFailURL()
         {
             Debug.Log("Posting to " + FAIL_URL);
-            yield return _request.Post(FAIL_URL, "", SuccessFailCallback, FailErrorCallback);
+            
+            var jsonRequestData = new JsonRequestData
+            {
+                Url = FAIL_URL,
+                JsonData = ""
+            };
+            
+            yield return _request.Post(jsonRequestData, SuccessFailCallback, FailErrorCallback);
         }
     }
 }

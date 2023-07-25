@@ -1,5 +1,4 @@
-using System;
-using System.Linq;
+using Portkey.Utilities;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
@@ -17,7 +16,7 @@ namespace Portkey.UI
         [SerializeField] private TextMeshProUGUI test;
         [SerializeField] private DID.DID did;
         [SerializeField] private ErrorViewController errorView;
-        [SerializeField] private GameObject guardianApprovalView;
+        [SerializeField] private GuardiansApprovalView guardianApprovalView;
 
         private State _state = State.Login;
         private IPortkeySocialService _portkeySocialService;
@@ -128,7 +127,7 @@ namespace Portkey.UI
         {
             var registerParam = new GetRegisterInfoParams
             {
-                loginGuardianIdentifier = string.Concat(guardianInfo.identifier.Where(c => !char.IsWhiteSpace(c)))
+                loginGuardianIdentifier = guardianInfo.identifier.RemoveAllWhiteSpaces()
             };
             StartCoroutine(_portkeySocialService.GetRegisterInfo(registerParam, info =>
             {
@@ -153,9 +152,15 @@ namespace Portkey.UI
                 default:
                     //Change to Login View
                     gameObject.SetActive(false);
-                    guardianApprovalView.SetActive(true);
+                    OpenGuardiansApprovalView(info);
                     break;
             }
+        }
+
+        private void OpenGuardiansApprovalView(GuardianIdentifierInfo info)
+        {
+            guardianApprovalView.SetGuardianIdentifierInfo(info);
+            guardianApprovalView.gameObject.SetActive(true);
         }
     }
 }

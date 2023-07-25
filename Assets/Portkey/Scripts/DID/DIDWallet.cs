@@ -4,10 +4,14 @@ using System.Collections.Generic;
 using AElf;
 using AElf.Kernel;
 using Portkey.Core;
+using Portkey.Utilities;
 
 namespace Portkey.DID
 {
-
+    /// <summary>
+    /// DID Wallet class. Still WIP. Will be implemented in another branch.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class DIDWallet<T> : IDIDWallet where T : AccountBase
     {
         protected class AccountInfo
@@ -124,16 +128,19 @@ namespace Portkey.DID
         {
             if(_connectService == null)
             {
-                throw new Exception("ConnectService is not initialized.");
+                errorCallback("ConnectService is not initialized.");
+                yield break;
             }
             if(_managementAccount == null)
             {
-                throw new Exception("Management Account is not initialized.");
+                errorCallback("Management Account is not initialized.");
+                yield break;
             }
             var caHash = _caInfoMap[chainId]?.caHash;
             if(caHash == null)
             {
-                throw new Exception($"CA Hash on Chain ID: ({chainId}) does not exists.");
+                errorCallback($"CA Hash on Chain ID: ({chainId}) does not exists.");
+                yield break;
             }
 
             var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
@@ -159,7 +166,7 @@ namespace Portkey.DID
                     return;
                 }
                 
-                _socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
+                StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
                 {
                     if(caHolderInfo == null)
                     {
@@ -172,7 +179,7 @@ namespace Portkey.DID
                         _accountInfo.Nickname = caHolderInfo.nickName;
                     }
                     successCallback(caHolderInfo);
-                }, errorCallback);
+                }, errorCallback));
             }, errorCallback);
         }
 

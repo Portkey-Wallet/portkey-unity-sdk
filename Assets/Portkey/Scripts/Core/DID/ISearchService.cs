@@ -66,13 +66,11 @@ namespace Portkey.Core
     public class QueryOptions
     {
         public long interval;
-        public long reCount;
         public long maxCount;
         
         public static readonly QueryOptions DefaultQueryOptions = new QueryOptions
         {
             interval = 500,
-            reCount = 0,
             maxCount = 20
         };
     }

@@ -34,6 +34,7 @@ Welcome to the Portkey Unity SDK! This software development kit (SDK) is designe
     - If you require to generate C# classes from .proto, please use the installation below:
         ```
         brew install protobuf@21
+        export PATH="$(brew --prefix protobuf@21)/bin:$PATH"
         ```
 
 To start using the Portkey Unity SDK, follow these steps:

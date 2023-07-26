@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7505748388690801037}
   m_Layer: 5
-  m_Name: VerifierType
+  m_Name: GuardianType
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1435,6 +1435,7 @@ GameObject:
   - component: {fileID: 48666193866096638}
   - component: {fileID: 3071819833202832008}
   - component: {fileID: 571552895751545678}
+  - component: {fileID: 5457812956464255593}
   m_Layer: 5
   m_Name: GuardianItem
   m_TagString: Untagged
@@ -1505,6 +1506,42 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &5457812956464255593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8060759402571597785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee8d5955b14614043a0c433592344ede, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  verifierIcons:
+  - name: Portkey
+    icon: {fileID: 8948051555916283073}
+  - name: Minerva
+    icon: {fileID: 783045339311507634}
+  - name: DoKewCapital
+    icon: {fileID: 9019517467883451388}
+  - name: Gauss
+    icon: {fileID: 5106744236601125476}
+  - name: CryptoGuardians
+    icon: {fileID: 7084798048111499119}
+  guardianIcons:
+  - type: 3
+    icon: {fileID: 6062321346390916233}
+  - type: 2
+    icon: {fileID: 9016689071810295903}
+  - type: 0
+    icon: {fileID: 5419809704679792807}
+  - type: 1
+    icon: {fileID: 3017729394624534197}
+  account: {fileID: 7845546401861524077}
+  detail: {fileID: 7411209293370184297}
+  verifyButton: {fileID: 7144191270618835853}
+  verifiedCheck: {fileID: 1743204427681282870}
 --- !u!1 &8374517580466995021
 GameObject:
   m_ObjectHideFlags: 0
@@ -1847,6 +1884,34 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2623015030887455876, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2623015030887455876, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2623015030887455876, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 5457812956464255593}
+    - target: {fileID: 2623015030887455876, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2623015030887455876, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnClickVerify
+      objectReference: {fileID: 0}
+    - target: {fileID: 2623015030887455876, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Portkey.UI.GuardianItemComponent, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2623015030887455876, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 3783689761926155701, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
       propertyPath: m_text
       value: Verify
@@ -1952,5 +2017,10 @@ PrefabInstance:
 --- !u!224 &888388107386246058 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7800154276341696865, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+  m_PrefabInstance: {fileID: 6947794984005737163}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7144191270618835853 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 238341831157985606, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
   m_PrefabInstance: {fileID: 6947794984005737163}
   m_PrefabAsset: {fileID: 0}

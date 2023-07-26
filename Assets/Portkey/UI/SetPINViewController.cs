@@ -16,6 +16,12 @@ namespace Portkey.UI
             ENTER_PIN = 0,
             CONFIRM_PIN = 1
         }
+
+        public enum OperationType
+        {
+            SIGN_UP = 0,
+            SIGN_IN = 1
+        }
         
         private class VerificationDoc
         {
@@ -58,11 +64,11 @@ namespace Portkey.UI
         {
             set => _guardiansApprovedList = value;
         }
-        
         public GuardianIdentifierInfo GuardianIdentifierInfo
         {
             set => _guardianIdentifierInfo = value;
         }
+        public OperationType Operation { get; set; } = OperationType.SIGN_UP;
 
         private string CurrentPIN
         {
@@ -111,10 +117,21 @@ namespace Portkey.UI
             
             did.Reset();
             
-            Register(verifierId, verificationResult);
+            if(Operation == OperationType.SIGN_UP)
+            {
+                Register(verifierId, verificationResult);
+            }
+            else
+            {
+                Login(verifierId, verificationResult);
+            }
         }
 
-        public void Register(string verifierId, VerifyVerificationCodeResult verificationResult)
+        private void Login(string verifierId, VerifyVerificationCodeResult verificationResult)
+        {
+        }
+
+        private void Register(string verifierId, VerifyVerificationCodeResult verificationResult)
         {
             var extraData = "";
             try

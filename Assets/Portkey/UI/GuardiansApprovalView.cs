@@ -259,6 +259,7 @@ public class GuardiansApprovalView : MonoBehaviour
         setPINViewController.gameObject.SetActive(true);
         setPINViewController.GuardiansApprovedList = _approvedGuardians;
         setPINViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
+        setPINViewController.Operation = SetPINViewController.OperationType.SIGN_IN;
     }
 
     private void CloseView()

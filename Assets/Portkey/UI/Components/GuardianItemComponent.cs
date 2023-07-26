@@ -67,8 +67,8 @@ namespace Portkey.UI
             var verifierType = _userGuardianStatus.guardianItem.verifier.name;
             DisplayVerifierIcon(verifierType);
             
-            account.text = _userGuardianStatus.guardianItem.identifier;
-            detail.text = _userGuardianStatus.guardianItem.guardian.verifierId;
+            account.text = _userGuardianStatus.guardianItem.firstName;
+            detail.text = _userGuardianStatus.guardianItem.thirdPartyEmail;
             
             DisplayVerificationStatus(_userGuardianStatus.status);
         }

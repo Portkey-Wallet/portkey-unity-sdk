@@ -13,11 +13,7 @@ namespace Portkey.UI
         public Guardian guardian = null;
         public string identifier = null;
         public VerifierItem verifier = null;
-        public string key = null; // `${identifier}&${verifier?.name}`,
-        public string thirdPartyEmail = null;
-        public bool isPrivate = false;
-        public string firstName = null;
-        public string lastName = null;
+        public string key = null; // `${identifier}&${verifier?.name}
         public string accessToken = null;
     }
     public class UserGuardianStatus

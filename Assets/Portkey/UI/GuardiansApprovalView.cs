@@ -27,9 +27,14 @@ public class GuardiansApprovalView : MonoBehaviour
     [Range(0.0f, 1.0f)]
     [SerializeField] private float minProgress = 0.0f;
     
+    [Header("Expiry Time")]
+    [SerializeField] private int expiryInMilliseconds = 360000;
+    
     private GuardianIdentifierInfo _guardianIdentifierInfo;
     private List<UserGuardianStatus> _guardianStatusList = new List<UserGuardianStatus>();
     private List<GuardiansApproved> _approvedGuardians = new List<GuardiansApproved>();
+    private float _timeElapsed = 0.0f;
+    private bool _startTimer = false;
 
     private void OnEnable()
     {
@@ -75,10 +80,50 @@ public class GuardiansApprovalView : MonoBehaviour
     private void InitializeUI()
     {
         totalGuardiansText.text = $"/{_guardianStatusList.Count.ToString()}";
-        UpdateTotalVerifiedGuardiansText();
-        
+        UpdateUI();
+
         ClearGuardianItems();
         CreateGuardianItems(_guardianStatusList);
+    }
+
+    private void UpdateUI()
+    {
+        UpdateTotalVerifiedGuardiansText();
+        UpdateGuardianProgressDial();
+
+        SetSendButtonInteractable(VerifiedCount(_guardianStatusList) >= did.GetApprovalCount(_guardianStatusList.Count));
+    }
+
+    private void Update()
+    {
+        if (!_startTimer)
+        {
+            return;
+        }
+        
+        _timeElapsed += Time.deltaTime;
+        if(_timeElapsed >= expiryInMilliseconds / 1000.0f)
+        {
+            ResetGuardianStatusList();
+            InitializeUI();
+            ResetTimer();
+        }
+    }
+    
+    private void ResetGuardianStatusList()
+    {
+        _guardianStatusList.ForEach(status => status.status = VerifierStatus.NotVerified);
+    }
+
+    private void ResetTimer()
+    {
+        _startTimer = false;
+        _timeElapsed = 0.0f;
+    }
+
+    private void SetSendButtonInteractable(bool interactable)
+    {
+        completeButton.interactable = interactable;
     }
 
     private void ClearGuardianItems()
@@ -145,8 +190,12 @@ public class GuardiansApprovalView : MonoBehaviour
 
     private void OnUserGuardianStatusChanged(UserGuardianStatus status)
     {
-        UpdateTotalVerifiedGuardiansText();
-        
+        UpdateUI();
+        _startTimer = true;
+    }
+
+    private void UpdateGuardianProgressDial()
+    {
         var percentage = (float)VerifiedCount(_guardianStatusList) / _guardianStatusList.Count;
         percentage = Mathf.Clamp(percentage, minProgress, 1.0f);
         guardianProgressDial.fillAmount = percentage;

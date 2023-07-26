@@ -97,10 +97,10 @@ namespace Portkey.UI
                 accessToken = _guardianIdentifierInfo.token,
                 chainId = _guardianIdentifierInfo.chainId
             };
-            socialVerifier.AuthenticateIfAccessTokenExpired(param, SignUp, OnError);
+            socialVerifier.AuthenticateIfAccessTokenExpired(param, OnAuthenticated, OnError);
         }
 
-        private void SignUp(string verifierId, string accessToken, VerifyVerificationCodeResult verificationResult)
+        private void OnAuthenticated(string verifierId, string accessToken, VerifyVerificationCodeResult verificationResult)
         {
             if (_guardianIdentifierInfo.identifier == null)
             {

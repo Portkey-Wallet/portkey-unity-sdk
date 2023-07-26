@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Portkey.UI
 {
-    public class PINProgress : MonoBehaviour
+    public class PINProgressComponent : MonoBehaviour
     {
         [SerializeField] private List<Image> pinProgressIndicatorList;
         [SerializeField] private Color activatedColor;

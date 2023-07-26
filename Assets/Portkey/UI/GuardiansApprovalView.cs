@@ -10,6 +10,7 @@ using UnityEngine;
 public class GuardiansApprovalView : MonoBehaviour
 {
     [SerializeField] private DID did;
+    [SerializeField] private GameObject guardianItemList;
     
     private GuardianIdentifierInfo _guardianIdentifierInfo;
     private List<UserGuardianStatus> _guardianStatusList = new List<UserGuardianStatus>();
@@ -71,7 +72,13 @@ public class GuardiansApprovalView : MonoBehaviour
             }
 
             _guardianStatusList = currentGuardiansList;
+            CreateGuardianItems(_guardianStatusList);
         }, OnError));
+    }
+
+    private static void CreateGuardianItems(List<UserGuardianStatus> guardianStatusList)
+    {
+        
     }
 
     private static bool IsMatchingAccessTokenInfo(GuardianIdentifierInfo guardianIdentifierInfo, GuardianItem baseGuardian)

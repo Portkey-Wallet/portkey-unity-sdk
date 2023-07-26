@@ -31,7 +31,7 @@ namespace Portkey.UI
         //[SerializeField] private GameObject walletView;
         //[SerializeField] private DID.DID did;
         //[SerializeField] private GameObject guardianApprovalView;
-        [SerializeField] private PINProgress pinProgress;
+        [SerializeField] private PINProgressComponent pinProgress;
         [FormerlySerializedAs("pinLength")] [SerializeField] private int maxPINLength = 6;
         [SerializeField] private TextMeshProUGUI header;
         [SerializeField] private TextMeshProUGUI errorMessage;

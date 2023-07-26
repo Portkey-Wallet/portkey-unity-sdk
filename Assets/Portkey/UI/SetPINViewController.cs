@@ -58,6 +58,11 @@ namespace Portkey.UI
         {
             set => _guardiansApprovedList = value;
         }
+        
+        public GuardianIdentifierInfo GuardianIdentifierInfo
+        {
+            set => _guardianIdentifierInfo = value;
+        }
 
         private string CurrentPIN
         {
@@ -68,11 +73,6 @@ namespace Portkey.UI
         private void Start()
         {
             _portkeySocialService = did.PortkeySocialService;
-        }
-        
-        public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)
-        {
-            _guardianIdentifierInfo = info;
         }
 
         private void OnSetPINSuccess()

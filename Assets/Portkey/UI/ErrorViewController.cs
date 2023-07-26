@@ -23,7 +23,7 @@ namespace Portkey.UI
         public void OnClickSignUp()
         {
             pinView.gameObject.SetActive(true);
-            pinView.SetGuardianIdentifierInfo(_guardianIdentifierInfo);
+            pinView.GuardianIdentifierInfo = _guardianIdentifierInfo;
             CloseView();
         }
         

@@ -146,7 +146,7 @@ public class GuardiansApprovalView : MonoBehaviour
             key = key
         };
 
-        if (IsMatchingAccessTokenInfo(_guardianIdentifierInfo, guardianItem))
+        if (IsMatchingGuardianIdentifier(_guardianIdentifierInfo, guardianItem))
         {
             guardianItem.accessToken = _guardianIdentifierInfo.token;
         }
@@ -192,6 +192,11 @@ public class GuardiansApprovalView : MonoBehaviour
 
     private void OnUserGuardianStatusChanged(UserGuardianStatus status)
     {
+        if (IsMatchingGuardianIdentifier(_guardianIdentifierInfo, status.guardianItem))
+        {
+            _guardianIdentifierInfo.token = status.guardianItem.accessToken;
+        }
+        
         UpdateUI();
         _startTimer = true;
     }
@@ -213,9 +218,9 @@ public class GuardiansApprovalView : MonoBehaviour
         return statusList.Count(guardianStatus => guardianStatus.status == VerifierStatus.Verified);
     }
 
-    private static bool IsMatchingAccessTokenInfo(GuardianIdentifierInfo guardianIdentifierInfo, GuardianItem baseGuardian)
+    private static bool IsMatchingGuardianIdentifier(GuardianIdentifierInfo guardianIdentifierInfo, GuardianItem guardianItem)
     {
-        return guardianIdentifierInfo.token != null && guardianIdentifierInfo.identifier == baseGuardian.identifier && guardianIdentifierInfo.accountType == baseGuardian.guardian.type;
+        return guardianIdentifierInfo.token != null && guardianIdentifierInfo.identifier == guardianItem.identifier && guardianIdentifierInfo.accountType == guardianItem.guardian.type;
     }
 
     public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)
@@ -246,8 +251,14 @@ public class GuardiansApprovalView : MonoBehaviour
             _approvedGuardians.Add(guardiansApproved);
         }
         
+        OpenSetPINView();
+    }
+
+    private void OpenSetPINView()
+    {
         setPINViewController.gameObject.SetActive(true);
         setPINViewController.GuardiansApprovedList = _approvedGuardians;
+        setPINViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
     }
 
     private void CloseView()

@@ -32,13 +32,14 @@ namespace Portkey.UI
         //[SerializeField] private DID.DID did;
         //[SerializeField] private GameObject guardianApprovalView;
         [SerializeField] private PINProgressComponent pinProgress;
-        [FormerlySerializedAs("pinLength")] [SerializeField] private int maxPINLength = 6;
+        [SerializeField] private int maxPINLength = 6;
         [SerializeField] private TextMeshProUGUI header;
         [SerializeField] private TextMeshProUGUI errorMessage;
         [SerializeField] private DID.DID did;
         [SerializeField] private GameObject walletView;
         
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
+        private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
         private IPortkeySocialService _portkeySocialService;
         private GameObject previousView = null;
         private State _currentState = State.ENTER_PIN;
@@ -52,6 +53,11 @@ namespace Portkey.UI
             "Set PIN", 
             "Confirm PIN"
         };
+        
+        public List<GuardiansApproved> GuardiansApprovedList
+        {
+            set => _guardiansApprovedList = value;
+        }
 
         private string CurrentPIN
         {

@@ -43,6 +43,15 @@ namespace Portkey.DID
             
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _contractProvider, _encryption);
         }
+        
+        public int GetApprovalCount(int length)
+        {
+            if (length <= _config.MinApprovals)
+            {
+                return length;
+            }
+            return (int) (_config.MinApprovals * length / (float)_config.Denominator + 1);
+        }
 
         public ISocialLogin GetSocialLogin(AccountType type)
         {

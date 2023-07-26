@@ -76,6 +76,10 @@ namespace Portkey.Core
         [SerializeField]
         private string googleWebGLClientId = "931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com";
 
+        [Header("Approval Settings")]
+        [SerializeField] private int minApprovals = 3;
+        [SerializeField] private int denominator = 5;
+
         /// <summary>
         /// A getter for the chain infos.
         /// </summary>
@@ -86,7 +90,9 @@ namespace Portkey.Core
         public string GoogleMobileClientId => googleMobileClientId;
         public string GoogleMobileProtocol => googleMobileProtocol;
         public string GoogleWebGLClientId => googleWebGLClientId;
-
+        public int MinApprovals => minApprovals;
+        public int Denominator => denominator;
+        
         public void OnBeforeSerialize()
         {
         }

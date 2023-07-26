@@ -24,6 +24,7 @@ namespace Portkey.DID
         private IChainProvider _chainProvider;
         private IContractProvider _contractProvider;
         private IEncryption _encryption;
+        private ISocialVerifierProvider _socialVerifierProvider;
         
         private DIDWallet<WalletAccount> _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
@@ -32,6 +33,7 @@ namespace Portkey.DID
         {
             _socialProvider = new SocialLoginProvider(_config, _request);
             _portkeySocialService = new PortkeySocialService(_config, _request, _graphQL);
+            _socialVerifierProvider = new SocialVerifierProvider(_socialProvider, _portkeySocialService);
             _storageSuite = new NonPersistentStorage<string>();
             _accountProvider = new AccountProvider();
             _connectService = new ConnectService<IHttp>(_config.ApiBaseUrl, _request);
@@ -45,6 +47,11 @@ namespace Portkey.DID
         public ISocialLogin GetSocialLogin(AccountType type)
         {
             return _socialProvider.GetSocialLogin(type);
+        }
+
+        public ISocialVerifier GetSocialVerifier(AccountType type)
+        {
+            return _socialVerifierProvider.GetSocialVerifier(type);
         }
 
         public bool Save(string password, string keyName)

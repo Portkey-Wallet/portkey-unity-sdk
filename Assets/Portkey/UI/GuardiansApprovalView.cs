@@ -5,13 +5,18 @@ using Portkey.Core;
 using Portkey.DID;
 using Portkey.UI;
 using Portkey.Utilities;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GuardiansApprovalView : MonoBehaviour
 {
     [SerializeField] private DID did;
     [SerializeField] private GameObject guardianItemList;
     [SerializeField] private GameObject guardianItemPrefab;
+    [SerializeField] private TextMeshProUGUI totalGuardiansText;
+    [SerializeField] private TextMeshProUGUI totalVerifiedGuardiansText;
+    [SerializeField] private Button completeButton;
     
     private GuardianIdentifierInfo _guardianIdentifierInfo;
     private List<UserGuardianStatus> _guardianStatusList = new List<UserGuardianStatus>();
@@ -38,13 +43,13 @@ public class GuardiansApprovalView : MonoBehaviour
         StartCoroutine(did.GetHolderInfo(param, (result) =>
         {
             var guardians = (result?.guardianList == null)? Array.Empty<Guardian>() : result.guardianList.guardians;
-            var guardianStatusMap = _guardianStatusList.ToDictionary(status => $"{(status.guardianItem.guardian.guardianIdentifier ?? status.guardianItem.guardian.identifierHash)}&{status.guardianItem.guardian.verifierId}", status => status);
+            var guardianStatusMap = _guardianStatusList.ToDictionary(status => $"{(status.guardianItem.identifier ?? status.guardianItem.guardian.identifierHash)}&{status.guardianItem.guardian.verifierId}", status => status);
             var approvedMap = _approvedGuardians.ToDictionary(approval => $"{approval.identifier}&{approval.verifierId}", approval => approval);
-
+            
             var currentGuardiansList = new List<UserGuardianStatus>();
             foreach (var guardian in guardians)
             {
-                var newGuardianStatus = CreateUserGuardianStatus(guardian, guardianStatusMap, approvedMap);
+                var newGuardianStatus = CreateUserGuardianStatus(guardian, guardianStatusMap);
                 newGuardianStatus.guardianItem.verifier = verifierMap[guardian.verifierId];
                 
                 newGuardianStatus = UpdateStatusIfApproved(GetGuardianKey(guardian), newGuardianStatus, approvedMap);
@@ -54,9 +59,17 @@ public class GuardiansApprovalView : MonoBehaviour
 
             _guardianStatusList = currentGuardiansList;
             
-            ClearGuardianItems();
-            CreateGuardianItems(_guardianStatusList);
+            InitializeUI();
         }, OnError));
+    }
+
+    private void InitializeUI()
+    {
+        totalGuardiansText.text = $"/{_guardianStatusList.Count.ToString()}";
+        UpdateTotalVerifiedGuardiansText();
+        
+        ClearGuardianItems();
+        CreateGuardianItems(_guardianStatusList);
     }
 
     private void ClearGuardianItems()
@@ -67,8 +80,7 @@ public class GuardiansApprovalView : MonoBehaviour
         }
     }
 
-    private UserGuardianStatus CreateUserGuardianStatus(Guardian guardian,
-        Dictionary<string, UserGuardianStatus> guardianStatusMap, Dictionary<string, GuardiansApproved> approvedMap)
+    private UserGuardianStatus CreateUserGuardianStatus(Guardian guardian, Dictionary<string, UserGuardianStatus> guardianStatusMap)
     {
         var key = GetGuardianKey(guardian);
         var identifier = guardian.guardianIdentifier ?? guardian.identifierHash;
@@ -115,9 +127,21 @@ public class GuardiansApprovalView : MonoBehaviour
             var guardianItem = Instantiate(guardianItemPrefab, guardianItemList.transform).GetComponent<GuardianItemComponent>();
             if(guardianItem != null)
             {
-                guardianItem.SetUserGuardianStatus(userGuardianStatus);
+                guardianItem.SetDID(did);
+                guardianItem.SetUserGuardianStatus(userGuardianStatus, OnUserGuardianStatusChanged);
+                guardianItem.SetGuardianIdentifierInfo(_guardianIdentifierInfo);
             }
         }
+    }
+
+    private void OnUserGuardianStatusChanged(UserGuardianStatus status)
+    {
+        UpdateTotalVerifiedGuardiansText();
+    }
+
+    private void UpdateTotalVerifiedGuardiansText()
+    {
+        totalVerifiedGuardiansText.text = _guardianStatusList.Count(guardianStatus => guardianStatus.status == VerifierStatus.Verified).ToString();
     }
 
     private static bool IsMatchingAccessTokenInfo(GuardianIdentifierInfo guardianIdentifierInfo, GuardianItem baseGuardian)

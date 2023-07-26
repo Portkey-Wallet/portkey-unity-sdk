@@ -12,6 +12,7 @@ using UnityEngine.UI;
 public class GuardiansApprovalView : MonoBehaviour
 {
     [SerializeField] private DID did;
+    [SerializeField] private SetPINViewController setPINViewController;
     
     [Header("Guardian Item List")]
     [SerializeField] private GameObject guardianItemList;
@@ -224,5 +225,32 @@ public class GuardiansApprovalView : MonoBehaviour
     private void OnError(string error)
     {
         Debugger.LogError(error);
+    }
+
+    public void OnClickSend()
+    {
+        CloseView();
+
+        var verifiedStatusList = _guardianStatusList.Where(status => status.signature != null && status.verificationDoc != null);
+        foreach (var status in verifiedStatusList)
+        {
+            var guardiansApproved = new GuardiansApproved
+            {
+                type = status.guardianItem.guardian.type,
+                identifier = status.guardianItem.identifier ?? status.guardianItem.guardian.identifierHash ?? "",
+                signature = status.signature,
+                verificationDoc = status.verificationDoc,
+                verifierId = status.guardianItem.verifier?.id ?? ""
+            };
+            _approvedGuardians.Add(guardiansApproved);
+        }
+        
+        setPINViewController.gameObject.SetActive(true);
+        setPINViewController.GuardiansApprovedList = _approvedGuardians;
+    }
+
+    private void CloseView()
+    {
+        gameObject.SetActive(false);
     }
 }

@@ -75,10 +75,6 @@ namespace Portkey.UI
             _guardianIdentifierInfo = info;
         }
 
-        public void OnClickSetPIN()
-        {
-        }
-
         private void OnSetPINSuccess()
         {
             //Sign up flow
@@ -102,54 +98,17 @@ namespace Portkey.UI
                 chainId = _guardianIdentifierInfo.chainId
             };
             socialVerifier.AuthenticateIfAccessTokenExpired(param, SignUp, OnError);
-            //CheckAccessTokenExpired(verifier.id);
         }
 
-        private void CheckAccessTokenExpired(string verifierId)
-        {
-            // check if login access token is expired
-            var login = did.GetSocialLogin(_guardianIdentifierInfo.accountType);
-            login.RequestSocialInfo(_guardianIdentifierInfo.token, (socialInfo) =>
-            {
-                if(socialInfo == null)
-                {
-                    //login expired, need to re-login
-                    login.Authenticate((info) =>
-                    {
-                        _guardianIdentifierInfo.token = info.access_token;
-                        VerifyGoogleToken(verifierId);
-                    }, OnError);
-                }
-                else
-                {
-                    VerifyGoogleToken(verifierId);
-                }
-            }, OnError);
-        }
-
-        private void VerifyGoogleToken(string verifierId)
-        {
-            var param = new VerifyGoogleTokenParams
-            {
-                accessToken = _guardianIdentifierInfo.token,
-                chainId = _guardianIdentifierInfo.chainId,
-                verifierId = verifierId
-            };
-            StartCoroutine(_portkeySocialService.VerifyGoogleToken(param, (verificationResult) =>
-            {
-                var verificationDoc = ProcessVerificationDoc(verificationResult.verificationDoc);
-                //TODO: set guardian list
-                SignUp(verifierId, verificationResult);
-            }, OnError));
-        }
-
-        private void SignUp(string verifierId, VerifyVerificationCodeResult verificationResult)
+        private void SignUp(string verifierId, string accessToken, VerifyVerificationCodeResult verificationResult)
         {
             if (_guardianIdentifierInfo.identifier == null)
             {
                 OnError("Account missing!");
                 return;
             }
+            _guardianIdentifierInfo.token = accessToken;
+            
             did.Reset();
             
             Register(verifierId, verificationResult);

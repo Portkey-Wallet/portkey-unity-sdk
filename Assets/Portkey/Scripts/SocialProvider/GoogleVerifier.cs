@@ -55,7 +55,7 @@ namespace Portkey.SocialProvider
                 {
                     //var verificationDoc = ProcessVerificationDoc(verificationResult.verificationDoc);
                     //TODO: set guardian list
-                    successCallback(param.verifierId, verificationResult);
+                    successCallback(param.verifierId, param.accessToken, verificationResult);
                 }, errorCallback));
             }
         }

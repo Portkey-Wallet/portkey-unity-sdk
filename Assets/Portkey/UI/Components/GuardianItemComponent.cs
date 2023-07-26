@@ -53,11 +53,9 @@ namespace Portkey.UI
         {
             _userGuardianStatus = status;
             _onUserGuardianStatusChanged = onUserGuardianStatusChanged;
-            
-            InitializeUI();
         }
 
-        private void InitializeUI()
+        public void InitializeUI()
         {
             var guardianType = _userGuardianStatus.guardianItem.guardian.type;
             DisplayGuardianIcon(guardianType);
@@ -139,14 +137,15 @@ namespace Portkey.UI
             }
         }
         
-        private void OnVerified(string verifierId, VerifyVerificationCodeResult verificationResult)
+        private void OnVerified(string verifierId, string accessToken, VerifyVerificationCodeResult verificationResult)
         {
             _userGuardianStatus.status = VerifierStatus.Verified;
             _userGuardianStatus.verificationDoc = verificationResult.verificationDoc;
             _userGuardianStatus.signature = verificationResult.signature;
+            _userGuardianStatus.guardianItem.accessToken = accessToken;
             DisplayVerificationStatus(_userGuardianStatus.status);
             
-            _onUserGuardianStatusChanged(_userGuardianStatus);
+            _onUserGuardianStatusChanged?.Invoke(_userGuardianStatus);
         }
 
         private void OnError(string error)

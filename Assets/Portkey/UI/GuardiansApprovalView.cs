@@ -185,6 +185,7 @@ public class GuardiansApprovalView : MonoBehaviour
                 guardianItem.SetDID(did);
                 guardianItem.SetUserGuardianStatus(userGuardianStatus, OnUserGuardianStatusChanged);
                 guardianItem.SetGuardianIdentifierInfo(_guardianIdentifierInfo);
+                guardianItem.InitializeUI();
             }
         }
     }

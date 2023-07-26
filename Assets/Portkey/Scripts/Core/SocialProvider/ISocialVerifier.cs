@@ -7,7 +7,7 @@ namespace Portkey.Core
         public string chainId;
     }
     
-    public delegate void AuthCallback(string verifierId, VerifyVerificationCodeResult verificationResult);
+    public delegate void AuthCallback(string verifierId, string accessToken, VerifyVerificationCodeResult verificationResult);
     
     public interface ISocialVerifier
     {

@@ -33,10 +33,10 @@ RectTransform:
   m_Father: {fileID: 3010899191566392680}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -25}
+  m_SizeDelta: {x: 17.16, y: 50}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &3828586851585437730
 CanvasRenderer:
@@ -627,10 +627,10 @@ RectTransform:
   m_Father: {fileID: 3010899191566392680}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 158.36, y: -25}
+  m_SizeDelta: {x: 20, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1002819887360960748
 CanvasRenderer:
@@ -3019,7 +3019,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1900730439402492346
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3058,6 +3058,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   did: {fileID: 1058882298470602853}
   guardianItemList: {fileID: 759658559723670806}
+  guardianItemPrefab: {fileID: 8060759402571597785, guid: 61c04e3bb0d9c424ba1e1e354bf15df7, type: 3}
 --- !u!1 &5260805775474643109
 GameObject:
   m_ObjectHideFlags: 0
@@ -3265,10 +3266,10 @@ RectTransform:
   m_Father: {fileID: 3010899191566392680}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 180.84, y: -25}
+  m_SizeDelta: {x: 10.48, y: 50}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &1477009296102882880
 CanvasRenderer:
@@ -4565,7 +4566,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &6697531141968989653
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4607,7 +4608,7 @@ MonoBehaviour:
   test: {fileID: 7845053570121559519}
   did: {fileID: 1058882298470602853}
   errorView: {fileID: 1720345245375175756}
-  guardianApprovalView: {fileID: 5202293059705102020}
+  guardianApprovalView: {fileID: 4753605759836814766}
 --- !u!1 &8421088593639825472
 GameObject:
   m_ObjectHideFlags: 0

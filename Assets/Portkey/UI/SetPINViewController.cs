@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using Portkey.Core;
+using Portkey.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -87,6 +87,20 @@ namespace Portkey.UI
         private void CheckAccessTokenExpired(VerifierItem[] verifierServerList)
         {
             var verifier = verifierServerList[0];
+            var socialVerifier = did.GetSocialVerifier(AccountType.Google);
+
+            var param = new VerifyAccessTokenParam
+            {
+                verifierId = verifier.id,
+                accessToken = _guardianIdentifierInfo.token,
+                chainId = _guardianIdentifierInfo.chainId
+            };
+            socialVerifier.AuthenticateIfAccessTokenExpired(param, SignUp, OnError);
+            //CheckAccessTokenExpired(verifier.id);
+        }
+
+        private void CheckAccessTokenExpired(string verifierId)
+        {
             // check if login access token is expired
             var login = did.GetSocialLogin(_guardianIdentifierInfo.accountType);
             login.RequestSocialInfo(_guardianIdentifierInfo.token, (socialInfo) =>
@@ -97,35 +111,33 @@ namespace Portkey.UI
                     login.Authenticate((info) =>
                     {
                         _guardianIdentifierInfo.token = info.access_token;
-                        VerifyGoogleToken(verifier);
+                        VerifyGoogleToken(verifierId);
                     }, OnError);
                 }
                 else
                 {
-                    VerifyGoogleToken(verifier);
+                    VerifyGoogleToken(verifierId);
                 }
             }, OnError);
-
-            VerifyGoogleToken(verifier);
         }
 
-        private void VerifyGoogleToken(VerifierItem verifier)
+        private void VerifyGoogleToken(string verifierId)
         {
             var param = new VerifyGoogleTokenParams
             {
                 accessToken = _guardianIdentifierInfo.token,
                 chainId = _guardianIdentifierInfo.chainId,
-                verifierId = verifier.id
+                verifierId = verifierId
             };
             StartCoroutine(_portkeySocialService.VerifyGoogleToken(param, (verificationResult) =>
             {
                 var verificationDoc = ProcessVerificationDoc(verificationResult.verificationDoc);
                 //TODO: set guardian list
-                SignUp(verifier, verificationResult);
+                SignUp(verifierId, verificationResult);
             }, OnError));
         }
 
-        private void SignUp(VerifierItem verifier, VerifyVerificationCodeResult verificationResult)
+        private void SignUp(string verifierId, VerifyVerificationCodeResult verificationResult)
         {
             if (_guardianIdentifierInfo.identifier == null)
             {
@@ -134,10 +146,10 @@ namespace Portkey.UI
             }
             did.Reset();
             
-            Register(verifier, verificationResult);
+            Register(verifierId, verificationResult);
         }
 
-        public void Register(VerifierItem verifier, VerifyVerificationCodeResult verificationResult)
+        public void Register(string verifierId, VerifyVerificationCodeResult verificationResult)
         {
             var extraData = "";
             try
@@ -149,14 +161,14 @@ namespace Portkey.UI
                 OnError(e.Message);
                 return;
             }
-            
-            var guardianIdentifier = string.Concat(_guardianIdentifierInfo.identifier.Where(c => !char.IsWhiteSpace(c)));
+
+            var guardianIdentifier = _guardianIdentifierInfo.identifier.RemoveAllWhiteSpaces();
             var param = new RegisterParams
             {
                 type = _guardianIdentifierInfo.accountType, 
                 loginGuardianIdentifier = guardianIdentifier,
                 chainId = _guardianIdentifierInfo.chainId,
-                verifierId = verifier.id,
+                verifierId = verifierId,
                 extraData = extraData,
                 verificationDoc = verificationResult.verificationDoc,
                 signature = verificationResult.signature

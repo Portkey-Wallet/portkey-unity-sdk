@@ -12,11 +12,20 @@ using UnityEngine.UI;
 public class GuardiansApprovalView : MonoBehaviour
 {
     [SerializeField] private DID did;
+    
+    [Header("Guardian Item List")]
     [SerializeField] private GameObject guardianItemList;
     [SerializeField] private GameObject guardianItemPrefab;
+    
+    [Header("Guardian Info")]
     [SerializeField] private TextMeshProUGUI totalGuardiansText;
     [SerializeField] private TextMeshProUGUI totalVerifiedGuardiansText;
     [SerializeField] private Button completeButton;
+    
+    [Header("Progress Dial")]
+    [SerializeField] private Image guardianProgressDial;
+    [Range(0.0f, 1.0f)]
+    [SerializeField] private float minProgress = 0.0f;
     
     private GuardianIdentifierInfo _guardianIdentifierInfo;
     private List<UserGuardianStatus> _guardianStatusList = new List<UserGuardianStatus>();
@@ -137,11 +146,20 @@ public class GuardiansApprovalView : MonoBehaviour
     private void OnUserGuardianStatusChanged(UserGuardianStatus status)
     {
         UpdateTotalVerifiedGuardiansText();
+        
+        var percentage = (float)VerifiedCount(_guardianStatusList) / _guardianStatusList.Count;
+        percentage = Mathf.Clamp(percentage, minProgress, 1.0f);
+        guardianProgressDial.fillAmount = percentage;
     }
 
     private void UpdateTotalVerifiedGuardiansText()
     {
-        totalVerifiedGuardiansText.text = _guardianStatusList.Count(guardianStatus => guardianStatus.status == VerifierStatus.Verified).ToString();
+        totalVerifiedGuardiansText.text = VerifiedCount(_guardianStatusList).ToString();
+    }
+
+    private static int VerifiedCount(List<UserGuardianStatus> statusList)
+    {
+        return statusList.Count(guardianStatus => guardianStatus.status == VerifierStatus.Verified);
     }
 
     private static bool IsMatchingAccessTokenInfo(GuardianIdentifierInfo guardianIdentifierInfo, GuardianItem baseGuardian)

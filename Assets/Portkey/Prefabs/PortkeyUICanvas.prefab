@@ -652,20 +652,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.1254902, g: 0.8039216, b: 0.52156866, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 0
+  m_Type: 3
   m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
   m_FillClockwise: 1
-  m_FillOrigin: 0
+  m_FillOrigin: 2
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
 --- !u!1 &1332070321005209483
@@ -3060,6 +3060,8 @@ MonoBehaviour:
   totalGuardiansText: {fileID: 6184208625790487908}
   totalVerifiedGuardiansText: {fileID: 2675294584254300586}
   completeButton: {fileID: 743817033010874411}
+  guardianProgressDial: {fileID: 6046659091073412313}
+  minProgress: 0.2
 --- !u!1 &5260805775474643109
 GameObject:
   m_ObjectHideFlags: 0

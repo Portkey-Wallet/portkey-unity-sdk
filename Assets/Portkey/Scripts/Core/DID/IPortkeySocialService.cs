@@ -74,8 +74,13 @@ namespace Portkey.Core
         public string salt = null;
         public AccountType type;
         public string verifierId = null;
+        public string thirdPartyEmail = null;
+        public string isPrivate = null;
+        public string firstName = null;
+        public string lastName = null;
     }
-    
+
+
     [Serializable]
     public class Manager
     {

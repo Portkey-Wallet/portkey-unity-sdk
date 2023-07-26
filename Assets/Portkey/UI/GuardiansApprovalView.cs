@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Portkey.Core;
@@ -11,9 +12,8 @@ public class GuardiansApprovalView : MonoBehaviour
     [SerializeField] private DID did;
     
     private GuardianIdentifierInfo _guardianIdentifierInfo;
-    private Dictionary<string, VerifierItem> _verifierMap = new Dictionary<string, VerifierItem>();
-    private List<Guardian> _guardianList = null;
-    private List<Guardian> _approvedGuardians = null;
+    private List<UserGuardianStatus> _guardianStatusList = new List<UserGuardianStatus>();
+    private List<GuardiansApproved> _approvedGuardians = new List<GuardiansApproved>();
 
     private void OnEnable()
     {
@@ -22,11 +22,11 @@ public class GuardiansApprovalView : MonoBehaviour
     
     private void StoreVerifierServers(VerifierItem[] verifierServers)
     {
-        _verifierMap = verifierServers.ToDictionary(server => server.id, server => server);
-        GetGuardianList();
+        var verifierMap = verifierServers.ToDictionary(verifier => verifier.id, verifier => verifier);
+        GetGuardianStatusList(verifierMap);
     }
 
-    private void GetGuardianList()
+    private void GetGuardianStatusList(IReadOnlyDictionary<string, VerifierItem> verifierMap)
     {
         var param = new GetHolderInfoParams
         {
@@ -35,29 +35,48 @@ public class GuardiansApprovalView : MonoBehaviour
         };
         StartCoroutine(did.GetHolderInfo(param, (result) =>
         {
-            var guardians = result?.guardianList?? new GuardianList();
+            var guardians = (result?.guardianList == null)? Array.Empty<Guardian>() : result.guardianList.guardians;
+            var guardianStatusMap = _guardianStatusList.ToDictionary(status => $"{(status.guardianItem.guardian.guardianIdentifier ?? status.guardianItem.guardian.identifierHash)}&{status.guardianItem.guardian.verifierId}", status => status);
+            var approvedMap = _approvedGuardians.ToDictionary(approval => $"{approval.identifier}&{approval.verifierId}", approval => approval);
 
-            Dictionary<string, Guardian> guardianMap = new Dictionary<string, Guardian>();
-            if (_guardianList != null)
+            var currentGuardiansList = new List<UserGuardianStatus>();
+            foreach (var guardian in guardians)
             {
-                foreach (var guardian in _guardianList)
+                var key = $"{guardian.guardianIdentifier}&{guardian.verifierId}";
+                var identifier = guardian.guardianIdentifier ?? guardian.identifierHash;
+                var verifier = verifierMap[guardian.verifierId];
+                var guardianItem = new GuardianItem
                 {
-                    var identifier = (guardian.guardianIdentifier == null)? guardian.identifierHash : guardian.guardianIdentifier;
-                    var key = $"{identifier}&{guardian.verifierId}";
-                    guardianMap[key] = guardian;
-                }
-            }
-            Dictionary<string, Guardian> approvedMap = new Dictionary<string, Guardian>();
-            if (_approvedGuardians != null)
-            {
-                foreach (var guardian in _approvedGuardians)
+                    guardian = guardian,
+                    verifier = verifier,
+                    identifier = identifier,
+                    key = key
+                };
+                
+                if(IsMatchingAccessTokenInfo(_guardianIdentifierInfo, guardianItem))
                 {
-                    var key = $"{guardian.guardianIdentifier}&{guardian.verifierId}";
-                    approvedMap[key] = guardian;
+                    guardianItem.accessToken = _guardianIdentifierInfo.token;
                 }
+
+                var newGuardianStatus = guardianStatusMap.TryGetValue(key, out var guardianStatus) ? guardianStatus : new UserGuardianStatus();
+                if (approvedMap.TryGetValue(key, out var approvedGuardian))
+                {
+                    newGuardianStatus.status = VerifierStatus.Verified;
+                    newGuardianStatus.verificationDoc = approvedGuardian.verificationDoc;
+                    newGuardianStatus.signature = approvedGuardian.signature;
+                }
+
+                newGuardianStatus.guardianItem = guardianItem;
+                currentGuardiansList.Add(newGuardianStatus);
             }
-            
+
+            _guardianStatusList = currentGuardiansList;
         }, OnError));
+    }
+
+    private static bool IsMatchingAccessTokenInfo(GuardianIdentifierInfo guardianIdentifierInfo, GuardianItem baseGuardian)
+    {
+        return guardianIdentifierInfo.token != null && guardianIdentifierInfo.identifier == baseGuardian.identifier && guardianIdentifierInfo.accountType == baseGuardian.guardian.type;
     }
 
     public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)

@@ -4,8 +4,8 @@ namespace Portkey.Core
 {
     public class EditManagerParams
     {
-        public string chainId;
-        public string caHash;
-        public ManagerInfo managerInfo;
+        public string chainId = null;
+        public string caHash = null;
+        public ManagerInfo managerInfo = null;
     }
 }

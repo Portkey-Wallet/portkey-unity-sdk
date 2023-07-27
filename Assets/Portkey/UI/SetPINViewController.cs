@@ -129,6 +129,38 @@ namespace Portkey.UI
 
         private void Login(string verifierId, VerifyVerificationCodeResult verificationResult)
         {
+            var extraData = "";
+            try
+            {
+                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo(Application.platform));
+            }
+            catch (Exception e)
+            {
+                OnError(e.Message);
+                return;
+            }
+
+            var guardianIdentifier = _guardianIdentifierInfo.identifier.RemoveAllWhiteSpaces();
+            var param = new AccountLoginParams
+            {
+                loginGuardianIdentifier = guardianIdentifier,
+                guardiansApprovedList = _guardiansApprovedList.ToArray(),
+                chainId = _guardianIdentifierInfo.chainId,
+                extraData = extraData
+            };
+            StartCoroutine(did.Login(param, result =>
+            {
+                if(result.Status.caAddress == null || result.Status.caHash == null)
+                {
+                    OnError("Register failed! Missing caAddress or caHash.");
+                    return;
+                }
+                
+                // logged in, open wallet view and close PIN view
+                walletView.SetActive(true);
+                Debugger.Log("Login success!");
+                CloseView();
+            }, OnError));
         }
 
         private void Register(string verifierId, VerifyVerificationCodeResult verificationResult)

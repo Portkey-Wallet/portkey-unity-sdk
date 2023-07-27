@@ -3055,7 +3055,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   did: {fileID: 1058882298470602853}
-  setPINViewController: {fileID: 0}
+  setPINViewController: {fileID: 4979886695840012266}
   guardianItemList: {fileID: 759658559723670806}
   guardianItemPrefab: {fileID: 8060759402571597785, guid: 61c04e3bb0d9c424ba1e1e354bf15df7, type: 3}
   totalGuardiansText: {fileID: 6184208625790487908}

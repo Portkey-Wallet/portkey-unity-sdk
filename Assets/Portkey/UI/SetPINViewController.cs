@@ -5,7 +5,6 @@ using Portkey.Core;
 using Portkey.Utilities;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Portkey.UI
 {
@@ -42,7 +41,7 @@ namespace Portkey.UI
         [SerializeField] private TextMeshProUGUI header;
         [SerializeField] private TextMeshProUGUI errorMessage;
         [SerializeField] private DID.DID did;
-        [SerializeField] private GameObject walletView;
+        [SerializeField] private WalletViewController walletView;
         
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
@@ -150,17 +149,44 @@ namespace Portkey.UI
             };
             StartCoroutine(did.Login(param, result =>
             {
-                if(result.Status.caAddress == null || result.Status.caHash == null)
+                if(IsCAValid(result.Status))
                 {
-                    OnError("Register failed! Missing caAddress or caHash.");
+                    OnError("Login failed! Missing caAddress or caHash.");
                     return;
                 }
                 
-                // logged in, open wallet view and close PIN view
-                walletView.SetActive(true);
                 Debugger.Log("Login success!");
-                CloseView();
+                
+                var walletInfo = CreateDIDWalletInfo(result.Status, result.SessionId, AddManagerType.Recovery);
+                // logged in, open wallet view and close PIN view
+                OpenWalletView(walletInfo);
             }, OnError));
+        }
+
+        private DIDWalletInfo CreateDIDWalletInfo(CAInfo caInfo, string sessionId, AddManagerType type)
+        {
+            var walletInfo = new DIDWalletInfo
+            {
+                caInfo = caInfo,
+                pin = CurrentPIN,
+                chainId = _guardianIdentifierInfo.chainId,
+                wallet = did.GetWallet(),
+                managerInfo = new ManagerInfoType
+                {
+                    managerUniqueId = sessionId,
+                    guardianIdentifier = _guardianIdentifierInfo.identifier,
+                    accountType = _guardianIdentifierInfo.accountType,
+                    type = type
+                }
+            };
+            return walletInfo;
+        }
+
+        private void OpenWalletView(DIDWalletInfo walletInfo)
+        {
+            walletView.gameObject.SetActive(true);
+            walletView.WalletInfo = walletInfo;
+            CloseView();
         }
 
         private void Register(string verifierId, VerifyVerificationCodeResult verificationResult)
@@ -189,19 +215,25 @@ namespace Portkey.UI
             };
             StartCoroutine(did.Register(param, result =>
             {
-                if(result.Status.caAddress == null || result.Status.caHash == null)
+                if(IsCAValid(result.Status))
                 {
                     OnError("Register failed! Missing caAddress or caHash.");
                     return;
                 }
                 
-                // logged in, open wallet view and close PIN view
-                walletView.SetActive(true);
                 Debugger.Log("Register success!");
-                CloseView();
+
+                var walletInfo = CreateDIDWalletInfo(result.Status, result.SessionId, AddManagerType.Register);
+                // logged in, open wallet view and close PIN view
+                OpenWalletView(walletInfo);
             }, OnError));
         }
-        
+
+        private static bool IsCAValid(CAInfo caInfo)
+        {
+            return caInfo.caAddress == null || caInfo.caHash == null;
+        }
+
         private static string EncodeExtraData(DeviceInfoType deviceInfo)
         {
             return JsonConvert.SerializeObject(deviceInfo);

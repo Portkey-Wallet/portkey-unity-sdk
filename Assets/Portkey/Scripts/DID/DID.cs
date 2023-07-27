@@ -22,7 +22,7 @@ namespace Portkey.DID
         private IAccountProvider<WalletAccount> _accountProvider;
         private IConnectService _connectService;
         private IChainProvider _chainProvider;
-        private IContractProvider _contractProvider;
+        private IContractProvider _caContractProvider;
         private IEncryption _encryption;
         private ISocialVerifierProvider _socialVerifierProvider;
         
@@ -38,10 +38,10 @@ namespace Portkey.DID
             _accountProvider = new AccountProvider();
             _connectService = new ConnectService<IHttp>(_config.ApiBaseUrl, _request);
             _chainProvider = new AElfChainProvider();
-            _contractProvider = new CAContractProvider(_portkeySocialService, _chainProvider);
+            _caContractProvider = new CAContractProvider(_portkeySocialService, _chainProvider);
             _encryption = new AESEncryption();
             
-            _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _contractProvider, _encryption);
+            _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
         }
         
         public int GetApprovalCount(int length)
@@ -148,6 +148,11 @@ namespace Portkey.DID
         public void Reset()
         {
             _didWallet.Reset();
+        }
+
+        public BlockchainWallet GetWallet()
+        {
+            return _didWallet.GetWallet();
         }
 
         public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,

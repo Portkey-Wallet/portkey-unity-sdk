@@ -56,5 +56,6 @@ namespace Portkey.Core
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
         void Reset();
         BlockchainWallet GetWallet();
+        bool IsLoggedIn();
     }
 }

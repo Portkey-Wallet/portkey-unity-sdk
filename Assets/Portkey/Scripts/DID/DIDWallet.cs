@@ -542,5 +542,10 @@ namespace Portkey.DID
             _caInfoMap.Clear();
             _accountInfo = new AccountInfo();
         }
+
+        public bool IsLoggedIn()
+        {
+            return _caInfoMap.Count > 0 && _accountInfo.IsLoggedIn();
+        }
     }
 }

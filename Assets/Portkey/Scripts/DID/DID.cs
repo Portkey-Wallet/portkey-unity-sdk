@@ -155,6 +155,11 @@ namespace Portkey.DID
             return _didWallet.GetWallet();
         }
 
+        public bool IsLoggedIn()
+        {
+            return _didWallet.IsLoggedIn();
+        }
+
         public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {

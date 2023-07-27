@@ -31,11 +31,7 @@ namespace Portkey.UI
             public string salt;
         }
 
-        //[SerializeField] private GameObject errorView;
-        //[SerializeField] private GameObject pinView;
-        //[SerializeField] private GameObject walletView;
-        //[SerializeField] private DID.DID did;
-        //[SerializeField] private GameObject guardianApprovalView;
+        [SerializeField] private ErrorViewController errorView;
         [SerializeField] private PINProgressComponent pinProgress;
         [SerializeField] private int maxPINLength = 6;
         [SerializeField] private TextMeshProUGUI header;
@@ -255,9 +251,8 @@ namespace Portkey.UI
 
         private void OnError(string error)
         {
-            //errorView.SetActive(true);
             Debugger.LogError(error);
-            CloseView();
+            errorView.ShowErrorText(error);
         }
 
         private void OnSetPINError(string error)
@@ -325,6 +320,11 @@ namespace Portkey.UI
             }
             CurrentPIN = CurrentPIN[..^1];
             pinProgress.SetPINProgress(CurrentPIN.Length);
+        }
+        
+        public void OnClickClose()
+        {
+            CloseView();
         }
 
         public void OnClickBack()

@@ -10,6 +10,12 @@ namespace Portkey.UI
         public void ShowErrorText(string error)
         {
             errorText.text = error;
+            gameObject.SetActive(true);
+        }
+        
+        public void OnClickClose()
+        {
+            gameObject.SetActive(false);
         }
     }
 }

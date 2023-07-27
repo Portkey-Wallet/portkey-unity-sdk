@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Portkey.UI
 {
     public class UnregisteredViewController : MonoBehaviour
     {
-        [SerializeField] private SetPINViewController pinView;
+        [SerializeField] private SetPINViewController setPinViewController;
+        [SerializeField] private SignInViewController signInViewController;
         
         private GuardianIdentifierInfo _guardianIdentifierInfo;
         
@@ -22,8 +24,9 @@ namespace Portkey.UI
 
         public void OnClickSignUp()
         {
-            pinView.gameObject.SetActive(true);
-            pinView.GuardianIdentifierInfo = _guardianIdentifierInfo;
+            setPinViewController.gameObject.SetActive(true);
+            setPinViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
+            setPinViewController.SetPreviousView(signInViewController.gameObject);
             CloseView();
         }
         

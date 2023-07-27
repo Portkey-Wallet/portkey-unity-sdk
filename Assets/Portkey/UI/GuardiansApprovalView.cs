@@ -13,6 +13,8 @@ public class GuardiansApprovalView : MonoBehaviour
 {
     [SerializeField] private DID did;
     [SerializeField] private SetPINViewController setPINViewController;
+    [SerializeField] private SignInViewController signInViewController;
+    [SerializeField] private ErrorViewController errorView;
     
     [Header("Guardian Item List")]
     [SerializeField] private GameObject guardianItemList;
@@ -231,6 +233,7 @@ public class GuardiansApprovalView : MonoBehaviour
     private void OnError(string error)
     {
         Debugger.LogError(error);
+        errorView.ShowErrorText(error);
     }
 
     public void OnClickSend()
@@ -260,10 +263,22 @@ public class GuardiansApprovalView : MonoBehaviour
         setPINViewController.GuardiansApprovedList = _approvedGuardians;
         setPINViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
         setPINViewController.Operation = SetPINViewController.OperationType.SIGN_IN;
+        setPINViewController.SetPreviousView(gameObject);
     }
 
     private void CloseView()
     {
         gameObject.SetActive(false);
+    }
+    
+    public void OnClickClose()
+    {
+        CloseView();
+    }
+    
+    public void OnClickBack()
+    {
+        CloseView();
+        signInViewController.gameObject.SetActive(true);
     }
 }

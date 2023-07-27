@@ -16,6 +16,7 @@ namespace Portkey.UI
         
         [Header("View")]
         [SerializeField] private SignInViewController signInViewController;
+        [SerializeField] private ErrorViewController errorView;
 
         private DIDWalletInfo walletInfo = null;
         
@@ -58,6 +59,7 @@ namespace Portkey.UI
         private void OnError(string error)
         {
             Debug.LogError(error);
+            errorView.ShowErrorText(error);
         }
 
         private void CloseView()

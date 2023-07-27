@@ -13,11 +13,11 @@ namespace Portkey.UI
             Signup
         }
         
-        [SerializeField] private TextMeshProUGUI test;
         [SerializeField] private DID.DID did;
         [SerializeField] private UnregisteredViewController unregisteredView;
         [SerializeField] private GuardiansApprovalView guardianApprovalView;
-
+        [SerializeField] private ErrorViewController errorView;
+        
         private State _state = State.Login;
         private IPortkeySocialService _portkeySocialService;
         
@@ -39,22 +39,21 @@ namespace Portkey.UI
         {
             var accountType = (AccountType)type;
             var socialLogin = did.GetSocialLogin(accountType);
-            socialLogin.Authenticate(AuthCallback, ErrorCallback);
+            socialLogin.Authenticate(AuthCallback, OnError);
         }
 
         private void AuthCallback(SocialLoginInfo info)
         {
             Debugger.Log(
                 $"User: {info.socialInfo.name}\nAEmail: {info.socialInfo.email}\nAccess Code: ${info.access_token}");
-            test.text =
-                $"User: {info.socialInfo.name}\nAEmail: {info.socialInfo.email}\nAccess Code: ${info.access_token}";
 
             ValidateIdentifier(info);
         }
 
-        private void ErrorCallback(string error)
+        private void OnError(string error)
         {
-            test.text = error;
+            Debugger.LogError(error);
+            errorView.ShowErrorText(error);
         }
 
         private void ValidateIdentifier(SocialLoginInfo info)
@@ -74,8 +73,6 @@ namespace Portkey.UI
             };
             StartCoroutine(_portkeySocialService.GetRegisterInfo(param, (result) =>
             {
-                test.text = result.originChainId;
-
                 var getHolderInfoParam = new GetHolderInfoParams
                 {
                     guardianIdentifier = identifier,
@@ -104,7 +101,7 @@ namespace Portkey.UI
                 }
                 else
                 {
-                    ErrorCallback(error);
+                    OnError(error);
                 }
             }));
         }

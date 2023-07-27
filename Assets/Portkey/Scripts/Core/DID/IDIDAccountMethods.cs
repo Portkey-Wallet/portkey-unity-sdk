@@ -55,5 +55,6 @@ namespace Portkey.Core
         IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback);
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
         void Reset();
+        BlockchainWallet GetWallet();
     }
 }

@@ -481,6 +481,11 @@ namespace Portkey.DID
             _managementAccount = null;
         }
 
+        public BlockchainWallet GetWallet()
+        {
+            return _managementAccount?.Wallet;
+        }
+
         public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {

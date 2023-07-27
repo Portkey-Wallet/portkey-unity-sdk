@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AElf.Client.Extensions;
 using AElf.Types;
-using Google.Protobuf;
 using Newtonsoft.Json;
 using Portkey.Contracts.CA;
 using Portkey.Core;
@@ -213,6 +213,7 @@ namespace Portkey.DID
             if(param.caHash == null && _caInfoMap.TryGetValue(param.chainId, out var caInfo))
             {
                 param.caHash = caInfo.caHash;
+                Debugger.Log($"CAHash: {param.caHash}");
             }
             if(param.caHash == null)
             {
@@ -221,16 +222,13 @@ namespace Portkey.DID
             }
             if (param.managerInfo == null)
             {
-                var address = new Address
-                {
-                    Value = ByteString.CopyFromUtf8(_managementAccount.Address)
-                };
                 param.managerInfo = new ManagerInfo
                 {
-                    Address = address,
+                    Address = _managementAccount.Address.ToAddress(),
                     ExtraData = "extraData"
                 };
             }
+            Debugger.Log("Removing Manager...");
             yield return RemoveManager(param, result =>
             {
                 successCallback(result);
@@ -530,7 +528,7 @@ namespace Portkey.DID
                     ClearDIDWallet();
                 }
                 
-                successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
+                successCallback(result.transactionResult.Status == "MINED");
             }, errorCallback);
         }
 

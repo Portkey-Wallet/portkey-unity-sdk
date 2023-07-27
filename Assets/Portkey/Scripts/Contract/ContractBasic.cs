@@ -72,6 +72,8 @@ namespace Portkey.Contract
 
             var txWithSign = _chain.SignTransaction(wallet.PrivateKey, transaction);
 
+            Debugger.Log("Sending Transaction...");
+            
             // Send the transfer transaction to chain node
             var result = await _chain.SendTransactionAsync(new SendTransactionInput
             {

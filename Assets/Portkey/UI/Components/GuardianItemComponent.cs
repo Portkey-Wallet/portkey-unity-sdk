@@ -173,7 +173,7 @@ namespace Portkey.UI
         {
             ShowLoading(false);
             Debugger.LogError(error);
-            _errorView.ShowErrorText(error);
+            _errorView.ShowErrorText("Error: Network error occurred!");
         }
     }
 }

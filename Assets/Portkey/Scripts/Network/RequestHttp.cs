@@ -40,7 +40,7 @@ namespace Portkey.Network
                 yield break;
             }
             
-            Debugger.Log(request.downloadHandler.text);
+            Debugger.Log($"Responsed from url: {url}\n{request.downloadHandler.text}");
             successCallback(request.downloadHandler.text);
         }
 

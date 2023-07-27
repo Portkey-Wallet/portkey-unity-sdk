@@ -9,12 +9,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GuardiansApprovalView : MonoBehaviour
+public class GuardiansApprovalViewController : MonoBehaviour
 {
     [SerializeField] private DID did;
     [SerializeField] private SetPINViewController setPINViewController;
     [SerializeField] private SignInViewController signInViewController;
     [SerializeField] private ErrorViewController errorView;
+    [SerializeField] private GameObject loadingView;
     
     [Header("Guardian Item List")]
     [SerializeField] private GameObject guardianItemList;
@@ -38,10 +39,14 @@ public class GuardiansApprovalView : MonoBehaviour
     private List<GuardiansApproved> _approvedGuardians = new List<GuardiansApproved>();
     private float _timeElapsed = 0.0f;
     private bool _startTimer = false;
+    private Action _onCompleted;
 
-    private void OnEnable()
+    public void InitializeData(Action onCompleted)
     {
-        StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, StoreVerifierServers, OnError));
+        _onCompleted = onCompleted;
+        
+        ShowLoading(true);
+        StaticCoroutine.StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, StoreVerifierServers, OnError));
     }
     
     private void StoreVerifierServers(VerifierItem[] verifierServers)
@@ -57,7 +62,7 @@ public class GuardiansApprovalView : MonoBehaviour
             guardianIdentifier = _guardianIdentifierInfo.identifier.RemoveAllWhiteSpaces(),
             chainId = _guardianIdentifierInfo.chainId
         };
-        StartCoroutine(did.GetHolderInfo(param, (result) =>
+        StaticCoroutine.StartCoroutine(did.GetHolderInfo(param, (result) =>
         {
             var guardians = (result?.guardianList == null)? Array.Empty<Guardian>() : result.guardianList.guardians;
             var guardianStatusMap = _guardianStatusList.ToDictionary(status => $"{(status.guardianItem.identifier ?? status.guardianItem.guardian.identifierHash)}&{status.guardianItem.guardian.verifierId}", status => status);
@@ -87,6 +92,9 @@ public class GuardiansApprovalView : MonoBehaviour
 
         ClearGuardianItems();
         CreateGuardianItems(_guardianStatusList);
+        
+        _onCompleted?.Invoke();
+        ShowLoading(false);
     }
 
     private void UpdateUI()
@@ -187,6 +195,8 @@ public class GuardiansApprovalView : MonoBehaviour
                 guardianItem.SetDID(did);
                 guardianItem.SetUserGuardianStatus(userGuardianStatus, OnUserGuardianStatusChanged);
                 guardianItem.SetGuardianIdentifierInfo(_guardianIdentifierInfo);
+                guardianItem.ErrorView = errorView;
+                guardianItem.LoadingView = loadingView;
                 guardianItem.InitializeUI();
             }
         }
@@ -280,5 +290,10 @@ public class GuardiansApprovalView : MonoBehaviour
     {
         CloseView();
         signInViewController.gameObject.SetActive(true);
+    }
+    
+    private void ShowLoading(bool show)
+    {
+        loadingView.gameObject.SetActive(show);
     }
 }

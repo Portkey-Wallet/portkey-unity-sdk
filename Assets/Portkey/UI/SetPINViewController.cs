@@ -38,6 +38,7 @@ namespace Portkey.UI
         [SerializeField] private TextMeshProUGUI errorMessage;
         [SerializeField] private DID.DID did;
         [SerializeField] private WalletViewController walletView;
+        [SerializeField] private GameObject loadingView;
         
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
@@ -78,12 +79,7 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            //Sign up flow
-            //save PIN into storage
-            //Get verifier server
-            //VerifyGoogleToken
-            //service.register
-
+            ShowLoading(true);
             StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, CheckAccessTokenExpired, OnError));
         }
 
@@ -182,6 +178,7 @@ namespace Portkey.UI
         {
             walletView.gameObject.SetActive(true);
             walletView.WalletInfo = walletInfo;
+            ShowLoading(false);
             CloseView();
         }
 
@@ -251,14 +248,14 @@ namespace Portkey.UI
 
         private void OnError(string error)
         {
+            ShowLoading(false);
             Debugger.LogError(error);
             errorView.ShowErrorText(error);
         }
-
-        private void OnSetPINError(string error)
+        
+        private void ShowLoading(bool show)
         {
-            //errorView.SetActive(true);
-            CloseView();
+            loadingView.gameObject.SetActive(show);
         }
 
         private void CloseView()

@@ -1,7 +1,7 @@
 using Portkey.Utilities;
 using Portkey.Core;
-using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Portkey.UI
 {
@@ -15,8 +15,9 @@ namespace Portkey.UI
         
         [SerializeField] private DID.DID did;
         [SerializeField] private UnregisteredViewController unregisteredView;
-        [SerializeField] private GuardiansApprovalView guardianApprovalView;
+        [FormerlySerializedAs("guardianApprovalView")] [SerializeField] private GuardiansApprovalViewController guardianApprovalViewController;
         [SerializeField] private ErrorViewController errorView;
+        [SerializeField] private GameObject loadingView;
         
         private State _state = State.Login;
         private IPortkeySocialService _portkeySocialService;
@@ -39,7 +40,15 @@ namespace Portkey.UI
         {
             var accountType = (AccountType)type;
             var socialLogin = did.GetSocialLogin(accountType);
+            
+            ShowLoading(true);
+            
             socialLogin.Authenticate(AuthCallback, OnError);
+        }
+
+        private void ShowLoading(bool show)
+        {
+            loadingView.gameObject.SetActive(show);
         }
 
         private void AuthCallback(SocialLoginInfo info)
@@ -53,6 +62,7 @@ namespace Portkey.UI
         private void OnError(string error)
         {
             Debugger.LogError(error);
+            ShowLoading(false);
             errorView.ShowErrorText(error);
         }
 
@@ -139,6 +149,8 @@ namespace Portkey.UI
 
         private void CheckSignUpOrLogin(GuardianIdentifierInfo info)
         {
+            ShowLoading(false);
+            
             switch (info.isLoginGuardian)
             {
                 case true when _state != State.Login:
@@ -148,16 +160,21 @@ namespace Portkey.UI
                     break;
                 default:
                     //Change to Login View
-                    gameObject.SetActive(false);
-                    OpenGuardiansApprovalView(info);
+                    PrepareGuardiansApprovalView(info);
                     break;
             }
         }
 
-        private void OpenGuardiansApprovalView(GuardianIdentifierInfo info)
+        private void PrepareGuardiansApprovalView(GuardianIdentifierInfo info)
         {
-            guardianApprovalView.SetGuardianIdentifierInfo(info);
-            guardianApprovalView.gameObject.SetActive(true);
+            guardianApprovalViewController.SetGuardianIdentifierInfo(info);
+            guardianApprovalViewController.InitializeData(OpenGuardiansApprovalView);
+        }
+        
+        private void OpenGuardiansApprovalView()
+        {
+            guardianApprovalViewController.gameObject.SetActive(true);
+            CloseView();
         }
 
         public void OnClickClose()

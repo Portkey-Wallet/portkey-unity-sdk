@@ -290,11 +290,13 @@ namespace Portkey.Test
             var encryptionMock = GetEncryptionMock();
             
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
-            var accountLoginParams = new AccountLoginParams("loginGuardianIdentifier_mock",
-                                            new GuardiansApproved[] { new GuardiansApproved() },
-                                                    "extraData_mock",
-                                                        "chainId_mock",
-                                                                new Context());
+            var accountLoginParams = new AccountLoginParams
+            {
+                loginGuardianIdentifier = "loginGuardianIdentifier_mock",
+                guardiansApprovedList = new GuardiansApproved[] { new GuardiansApproved() },
+                chainId = "chainId_mock",
+                extraData = "extraData_mock"
+            };
             
             yield return didWallet.Login(accountLoginParams, (result) =>
             {
@@ -320,11 +322,13 @@ namespace Portkey.Test
             var encryptionMock = GetEncryptionMock();
             
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
-            var accountLoginParams = new AccountLoginParams("loginGuardianIdentifier_mock",
-                                                    new GuardiansApproved[] { new GuardiansApproved() },
-                                                            "extraData_mock",
-                                                            "chainId_mock",
-                                                            new Context());
+            var accountLoginParams = new AccountLoginParams
+            {
+                loginGuardianIdentifier = "loginGuardianIdentifier_mock",
+                guardiansApprovedList = new GuardiansApproved[] { new GuardiansApproved() },
+                chainId = "chainId_mock",
+                extraData = "extraData_mock"
+            };
             
             return didWallet.Login(accountLoginParams, (result) =>
             {
@@ -434,11 +438,13 @@ namespace Portkey.Test
             var encryption = new AESEncryption();
             
             var didWallet = new DIDWallet<WalletAccount>(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryption);
-            var accountLoginParams = new AccountLoginParams("loginGuardianIdentifier_mock",
-                                            new GuardiansApproved[] { new GuardiansApproved() },
-                                                    "extraData_mock",
-                                                        "chainId_mock",
-                                                                new Context());
+            var accountLoginParams = new AccountLoginParams
+            {
+                loginGuardianIdentifier = "loginGuardianIdentifier_mock",
+                guardiansApprovedList = new GuardiansApproved[] { new GuardiansApproved() },
+                chainId = "chainId_mock",
+                extraData = "extraData_mock"
+            };
             
             yield return didWallet.Login(accountLoginParams, (result) =>
             {
@@ -451,7 +457,7 @@ namespace Portkey.Test
                 var privateKey = encryption.Decrypt(Convert.FromBase64String(info.aesPrivateKey), PASSWORD);
                 
                 Assert.AreEqual(privateKey, Wallet.PrivateKey);
-                Assert.AreEqual("loginGuardianIdentifier_mock", info.accountInfo.LoginAccount);
+                Assert.AreEqual("guardianIdentifier_mock", info.accountInfo.LoginAccount);
                 Assert.AreEqual("caAddress_mock", info.caInfo["chainId_mock"].caAddress);
             }, error =>
             {

@@ -136,32 +136,27 @@ namespace Portkey.DID
                 errorCallback("Account already logged in.");
                 yield break;
             }
+            
+            var context = new Context
+            {
+                clientId = _managementAccount.Address,
+                requestId = Guid.NewGuid().ToString()
+            };
 
             var recoveryParam = new RecoveryParams
             {
-                chainId = param.ChainId,
-                loginGuardianIdentifier = param.LoginGuardianIdentifier,
+                chainId = param.chainId,
+                loginGuardianIdentifier = param.loginGuardianIdentifier,
                 manager = _managementAccount.Address,
-                guardiansApproved = param.GuardiansApprovedList,
-                extraData = param.ExtraData,
-                context = param.Context
+                guardiansApproved = param.guardiansApprovedList,
+                extraData = param.extraData,
+                context = context
             };
             yield return _socialService.Recovery(recoveryParam, (result) =>
             {
-                StaticCoroutine.StartCoroutine(_socialService.GetRecoverStatus(result.sessionId, QueryOptions.DefaultQueryOptions,
+                StaticCoroutine.StartCoroutine(GetLoginStatus(param.chainId, result.sessionId,
                     (status) =>
                     {
-                        if (status.IsStatusPass())
-                        {
-                            UpdateAccountInfo(param.LoginGuardianIdentifier);
-                            UpdateCAInfo(param.ChainId, status.caHash, status.caAddress);
-                        }
-                        else
-                        {
-                            errorCallback($"Register failed: {status.recoveryMessage}");
-                            return;
-                        }
-
                         successCallback(new LoginResult(status, result.sessionId));
                     }, errorCallback));
             }, errorCallback);

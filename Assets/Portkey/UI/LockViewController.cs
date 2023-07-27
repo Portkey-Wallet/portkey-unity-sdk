@@ -28,8 +28,14 @@ public class LockViewController : MonoBehaviour
         {
             return;
         }
+        
         PIN += number.ToString();
         pinProgress.SetPINProgress(PIN.Length);
+        
+        if (PIN.Length != pinProgress.GetMaxPINLength())
+        {
+            return;
+        }
         
         if(PIN == setPinViewController.CurrentPIN)
         {

@@ -178,7 +178,7 @@ namespace Portkey.DID
             {
                 if(result?.items == null || result.items.Length == 0 || result.items[0].registerStatus == "pending")
                 {
-                    yield return new WaitForSeconds(queryOptions.interval);
+                    yield return new WaitForSeconds(queryOptions.interval/1000.0f);
                     ++pollCount;
                     yield return Poll();
                 }
@@ -215,7 +215,7 @@ namespace Portkey.DID
                 if(result?.items == null || result.items.Length == 0 || result.items[0].recoveryStatus == "pending")
                 {
                     Debugger.Log($"We got nothing, repoll...");
-                    yield return new WaitForSeconds(queryOptions.interval);
+                    yield return new WaitForSeconds(queryOptions.interval/1000.0f);
                     ++pollCount;
                     yield return Poll();
                 }

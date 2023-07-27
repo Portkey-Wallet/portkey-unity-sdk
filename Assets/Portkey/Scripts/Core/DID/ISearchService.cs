@@ -65,6 +65,9 @@ namespace Portkey.Core
     [Serializable]
     public class QueryOptions
     {
+        /// <summary>
+        /// interval is in milliseconds
+        /// </summary>
         public long interval;
         public long maxCount;
         

@@ -15,7 +15,7 @@ namespace Portkey.UI
         
         [SerializeField] private TextMeshProUGUI test;
         [SerializeField] private DID.DID did;
-        [SerializeField] private ErrorViewController errorView;
+        [SerializeField] private UnregisteredViewController unregisteredView;
         [SerializeField] private GuardiansApprovalView guardianApprovalView;
 
         private State _state = State.Login;
@@ -146,8 +146,8 @@ namespace Portkey.UI
             {
                 case true when _state != State.Login:
                 case false when _state != State.Signup:
-                    errorView.gameObject.SetActive(true);
-                    errorView.SetGuardianIdentifierInfo(info);
+                    unregisteredView.gameObject.SetActive(true);
+                    unregisteredView.SetGuardianIdentifierInfo(info);
                     break;
                 default:
                     //Change to Login View

@@ -1,35 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace Portkey.UI
 {
     public class ErrorViewController : MonoBehaviour
     {
-        [SerializeField] private SetPINViewController pinView;
+        [SerializeField] private TextMeshProUGUI errorText;
         
-        private GuardianIdentifierInfo _guardianIdentifierInfo;
-        
-        public void OnClickClose()
+        public void ShowErrorText(string error)
         {
-            CloseView();
-        }
-
-        private void CloseView()
-        {
-            gameObject.SetActive(false);
-        }
-
-        public void OnClickSignUp()
-        {
-            pinView.gameObject.SetActive(true);
-            pinView.GuardianIdentifierInfo = _guardianIdentifierInfo;
-            CloseView();
-        }
-        
-        public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)
-        {
-            _guardianIdentifierInfo = info;
+            errorText.text = error;
         }
     }
 }

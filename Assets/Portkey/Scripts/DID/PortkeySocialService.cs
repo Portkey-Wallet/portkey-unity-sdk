@@ -81,10 +81,12 @@ namespace Portkey.DID
                 JToken json;
                 try
                 {
+                    Debugger.Log($"Parsing: {response}");
                     json = JToken.Parse(response);
                 }
                 catch (Exception e)
                 {
+                    Debugger.LogException(e);
                     errorCallback(e.Message);
                     return;
                 }
@@ -95,6 +97,7 @@ namespace Portkey.DID
                     {
                         try
                         {
+                            Debugger.Log($"Deserializing: {json.ToString()}");
                             //deserialize response
                             var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
                             //call success callback
@@ -102,6 +105,7 @@ namespace Portkey.DID
                         }
                         catch (Exception e)
                         {
+                            Debugger.LogException(e);
                             errorCallback(e.Message);
                         }
                         break;
@@ -109,10 +113,12 @@ namespace Portkey.DID
                     case JValue:
                         try
                         {
+                            Debugger.Log($"Deserializing to Value...");
                             successCallback(json.Value<T>());
                         }
                         catch (Exception e)
                         {
+                            Debugger.LogException(e);
                             errorCallback(e.Message);
                         }
                         break;
@@ -199,6 +205,7 @@ namespace Portkey.DID
             
                 yield return Get("/api/app/search/accountrecoverindex", new Filter { filter = $"_id:{sessionId}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
                 {
+                    Debugger.Log($"Recover status returned..");
                     StaticCoroutine.StartCoroutine(RepollIfNeeded(ret));
                 }, errorCallback);
             }
@@ -207,12 +214,14 @@ namespace Portkey.DID
             {
                 if(result?.items == null || result.items.Length == 0 || result.items[0].recoveryStatus == "pending")
                 {
+                    Debugger.Log($"We got nothing, repoll...");
                     yield return new WaitForSeconds(queryOptions.interval);
                     ++pollCount;
                     yield return Poll();
                 }
                 else
                 {
+                    Debugger.Log($"Success callback..");
                     successCallback(result.items[0]);
                 }
             }

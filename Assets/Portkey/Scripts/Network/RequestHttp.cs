@@ -23,6 +23,8 @@ namespace Portkey.Network
                 request.SetRequestHeader(header.Key, header.Value);
             }
             
+            Debugger.Log(url);
+            
             yield return request.SendWebRequest();
 
             if (request.error != null)
@@ -37,6 +39,8 @@ namespace Portkey.Network
                 errorCallback(request.responseCode.ToString());
                 yield break;
             }
+            
+            Debugger.Log(request.downloadHandler.text);
             successCallback(request.downloadHandler.text);
         }
 

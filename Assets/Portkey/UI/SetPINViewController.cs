@@ -33,7 +33,6 @@ namespace Portkey.UI
 
         [SerializeField] private ErrorViewController errorView;
         [SerializeField] private PINProgressComponent pinProgress;
-        [SerializeField] private int maxPINLength = 6;
         [SerializeField] private TextMeshProUGUI header;
         [SerializeField] private TextMeshProUGUI errorMessage;
         [SerializeField] private DID.DID did;
@@ -66,7 +65,7 @@ namespace Portkey.UI
         }
         public OperationType Operation { get; set; } = OperationType.SIGN_UP;
 
-        private string CurrentPIN
+        public string CurrentPIN
         {
             get => _stateToPIN[(int)_currentState];
             set => _stateToPIN[(int)_currentState] = value;
@@ -265,14 +264,14 @@ namespace Portkey.UI
 
         public void OnClickNumber(int number)
         {
-            if (CurrentPIN.Length == maxPINLength)
+            if (CurrentPIN.Length == pinProgress.GetMaxPINLength())
             {
                 return;
             }
             CurrentPIN += number.ToString();
             pinProgress.SetPINProgress(CurrentPIN.Length);
             
-            if (CurrentPIN.Length != maxPINLength)
+            if (CurrentPIN.Length != pinProgress.GetMaxPINLength())
             {
                 return;
             }
@@ -281,6 +280,7 @@ namespace Portkey.UI
             if (_currentState == State.ENTER_PIN)
             {
                 ChangeState(State.CONFIRM_PIN);
+                errorMessage.text = "";
             }
             else
             {

@@ -21,5 +21,10 @@ namespace Portkey.UI
                 pinProgressIndicatorList[i].color = color;
             }
         }
+        
+        public int GetMaxPINLength()
+        {
+            return pinProgressIndicatorList.Count;
+        }
     }
 }

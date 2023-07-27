@@ -159,5 +159,15 @@ namespace Portkey.UI
             guardianApprovalView.SetGuardianIdentifierInfo(info);
             guardianApprovalView.gameObject.SetActive(true);
         }
+
+        public void OnClickClose()
+        {
+            CloseView();
+        }
+        
+        private void CloseView()
+        {
+            gameObject.SetActive(false);
+        }
     }
 }

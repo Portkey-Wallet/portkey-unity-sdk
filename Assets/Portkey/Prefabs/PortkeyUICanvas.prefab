@@ -977,6 +977,7 @@ MonoBehaviour:
   did: {fileID: 1058882298470602853}
   addressText: {fileID: 5976212666146240357}
   signInViewController: {fileID: 2058989683410225390}
+  errorView: {fileID: 0}
 --- !u!1 &2045206250395084373
 GameObject:
   m_ObjectHideFlags: 0
@@ -1998,6 +1999,7 @@ RectTransform:
   - {fileID: 2643963775989522190}
   - {fileID: 1900730439402492346}
   - {fileID: 7634800151713287718}
+  - {fileID: 5088756301278275746}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3098,6 +3100,7 @@ MonoBehaviour:
   did: {fileID: 1058882298470602853}
   setPINViewController: {fileID: 4979886695840012266}
   signInViewController: {fileID: 0}
+  errorView: {fileID: 0}
   guardianItemList: {fileID: 759658559723670806}
   guardianItemPrefab: {fileID: 8060759402571597785, guid: 61c04e3bb0d9c424ba1e1e354bf15df7, type: 3}
   totalGuardiansText: {fileID: 6184208625790487908}
@@ -3274,6 +3277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fcd52cc7e594a0eb74a5d04a86fc85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  errorView: {fileID: 0}
   pinProgress: {fileID: 3090228614305500969}
   maxPINLength: 6
   header: {fileID: 6349875265650024062}
@@ -3833,6 +3837,42 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 100}
   m_SizeDelta: {x: -60, y: 485}
   m_Pivot: {x: 0.5, y: 0}
+--- !u!1 &6237369506817972160
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5088756301278275746}
+  m_Layer: 5
+  m_Name: Loading
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5088756301278275746
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6237369506817972160}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 432931669224132903}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &6271462974844316483
 GameObject:
   m_ObjectHideFlags: 0
@@ -5067,7 +5107,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98e69d4700b954b3e90963aefd3b32e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  test: {fileID: 0}
   did: {fileID: 1058882298470602853}
   unregisteredView: {fileID: 2935962257760947544}
   guardianApprovalView: {fileID: 4753605759836814766}
@@ -7036,6 +7075,34 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6697531141968989653}
     m_Modifications:
+    - target: {fileID: 1134814214517539818, guid: 75214260a2cae45cf956319375e91556, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1134814214517539818, guid: 75214260a2cae45cf956319375e91556, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1134814214517539818, guid: 75214260a2cae45cf956319375e91556, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2058989683410225390}
+    - target: {fileID: 1134814214517539818, guid: 75214260a2cae45cf956319375e91556, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1134814214517539818, guid: 75214260a2cae45cf956319375e91556, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnClickClose
+      objectReference: {fileID: 0}
+    - target: {fileID: 1134814214517539818, guid: 75214260a2cae45cf956319375e91556, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Portkey.UI.SignInViewController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1134814214517539818, guid: 75214260a2cae45cf956319375e91556, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 7693481484384904156, guid: 75214260a2cae45cf956319375e91556, type: 3}
       propertyPath: m_Name
       value: CloseButton

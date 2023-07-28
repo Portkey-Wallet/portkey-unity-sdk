@@ -2,7 +2,7 @@ using AElf.Types;
 
 namespace Portkey.Core
 {
-    public abstract class AccountBase : IAccountMethods
+    public abstract class AccountBase : ISigner
     {
         public BlockchainWallet Wallet { get; private set; }
         public string Address => Wallet.Address;

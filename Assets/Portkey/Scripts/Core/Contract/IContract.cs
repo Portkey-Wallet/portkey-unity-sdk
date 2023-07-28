@@ -19,6 +19,6 @@ namespace Portkey.Core
         /// <param name="param">Parameters for calling the method from the contract.</param>
         /// <typeparam name="T">Protobuf IMessage inherited classes corresponding to the called contract method.</typeparam>
         /// <returns>Results in the form of IMessage.</returns>
-        Task<T> CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param) where T : IMessage<T>, new();
+        Task<T> CallTransactionAsync<T>(ExternallyOwnedAccount wallet, string methodName, IMessage param) where T : IMessage<T>, new();
     }
 }

@@ -19,7 +19,7 @@ namespace Portkey.Test
             var account1 = accountProvider.CreateAccount();
             var account2 = accountProvider.CreateAccount();
             
-            Assert.AreEqual(account1.Wallet.Mnemonic, account2.Wallet.Mnemonic);
+            Assert.AreEqual(account1.Wallet.PrivateKey, account2.Wallet.PrivateKey);
         }
         
         [Test]

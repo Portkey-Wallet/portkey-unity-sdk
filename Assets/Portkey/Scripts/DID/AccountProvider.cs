@@ -35,9 +35,9 @@ namespace Portkey.DID
             return new WalletAccount(blockchainWallet);
         }
 
-        private static BlockchainWallet GetBlockchainWallet(Wallet.BlockchainWallet newWallet)
+        private static ExternallyOwnedAccount GetBlockchainWallet(Wallet.BlockchainWallet newWallet)
         {
-            var blockchainWallet = new BlockchainWallet(newWallet.Address, newWallet.PrivateKey, newWallet.Mnemonic,
+            var blockchainWallet = new ExternallyOwnedAccount(newWallet.Address, newWallet.PrivateKey,
                 newWallet.PublicKey);
             return blockchainWallet;
         }

@@ -27,7 +27,7 @@ namespace Portkey.Contract
             ContractAddress = contractAddress;
         }
         
-        public async Task<T> CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param) where T : IMessage<T>, new()
+        public async Task<T> CallTransactionAsync<T>(ExternallyOwnedAccount wallet, string methodName, IMessage param) where T : IMessage<T>, new()
         {
             try
             {

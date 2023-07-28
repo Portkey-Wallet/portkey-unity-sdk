@@ -1690,6 +1690,7 @@ MonoBehaviour:
   addressText: {fileID: 5976212666146240357}
   signInViewController: {fileID: 2058989683410225390}
   errorView: {fileID: 5037432561597435791}
+  loadingView: {fileID: 6237369506817972160}
 --- !u!1 &2045206250395084373
 GameObject:
   m_ObjectHideFlags: 0

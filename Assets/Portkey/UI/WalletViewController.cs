@@ -17,6 +17,7 @@ namespace Portkey.UI
         [Header("View")]
         [SerializeField] private SignInViewController signInViewController;
         [SerializeField] private ErrorViewController errorView;
+        [SerializeField] private GameObject loadingView;
 
         private DIDWalletInfo walletInfo = null;
         
@@ -36,15 +37,19 @@ namespace Portkey.UI
             {
                 chainId = walletInfo.chainId
             };
+
+            ShowLoading(true);
             
             StartCoroutine(did.Logout(param, OnSuccessLogout, OnError));
         }
         
         private void OnSuccessLogout(bool success)
         {
+            ShowLoading(false);
+            
             if (!success)
             {
-                Debugger.LogError("Log out failed.");
+                OnError("Log out failed.");
                 return;
             }
             OpenSignInView();
@@ -60,11 +65,18 @@ namespace Portkey.UI
         {
             Debug.LogError(error);
             errorView.ShowErrorText(error);
+            
+            ShowLoading(false);
         }
 
         private void CloseView()
         {
             gameObject.SetActive(false);
+        }
+        
+        private void ShowLoading(bool show)
+        {
+            loadingView.gameObject.SetActive(show);
         }
     }
 }

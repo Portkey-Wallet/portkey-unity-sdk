@@ -56,6 +56,8 @@ To start using the Portkey Unity SDK, follow these steps:
         npm run codegen
         ```
     - The generated C# code will appear in Assets/Portkey/Scripts/__Generated__/GraphQLCodeGen.cs
+- Contract C# Code generator to generate C# classes from .proto files
+    - https://github.com/AElfProject/contract-plugin/blob/master/src/contract_csharp_generator.cc
 
 ## Usage
 To use the Unity SDK in your project, follow these steps:

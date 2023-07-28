@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace Portkey.Core
 {
-    public interface IDIDWallet : IWallet, IDIDAccountMethods
+    public interface IDIDWallet : IWallet, IDIDAccountApi
     {
         /// <summary>
         /// For adding a manager account to the DID.

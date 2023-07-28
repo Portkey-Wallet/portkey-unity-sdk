@@ -32,7 +32,7 @@ namespace Portkey.Core
         }
     }
     
-    public interface IDIDAccountMethods
+    public interface IDIDAccountApi
     {
         /// <summary>
         /// For logging in with scan.

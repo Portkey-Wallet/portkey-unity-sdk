@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace Portkey.Core
 {
     using ScanLoginParam = EditManagerParams;
@@ -32,6 +34,9 @@ namespace Portkey.Core
         }
     }
     
+    /// <summary>
+    /// Interface for the calling of Portkey DID Backend API.
+    /// </summary>
     public interface IDIDAccountApi
     {
         /// <summary>
@@ -48,5 +53,15 @@ namespace Portkey.Core
         public GetCAHolderByManagerResult GetHolderInfo(GetHolderInfoParams param);
         VerifierItem[] GetVerifierServers(string chainId);
         CAHolderInfo GetCAHolderInfo(string chainId);
+        /// <summary>
+        /// For adding a manager account to the DID.
+        /// </summary>
+        /// <param name="editManagerParams">Parameters for adding manager account.</param>
+        public IEnumerator AddManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// For removing a manager account to the DID.
+        /// </summary>
+        /// <param name="editManagerParams">Parameters for removing manager account.</param>
+        public IEnumerator RemoveManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
     }
 }

@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace Portkey.Core
 {
     public interface IDIDWallet : IDIDAccountApi

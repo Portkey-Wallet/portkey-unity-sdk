@@ -1,7 +1,10 @@
 using System.Threading.Tasks;
+using AElf;
 using AElf.Client;
 using AElf.Client.Dto;
 using AElf.Types;
+using BIP39.HDWallet;
+using BIP39.HDWallet.Core;
 using Google.Protobuf;
 using Portkey.Core;
 
@@ -28,7 +31,13 @@ namespace Portkey.Chain
 
         public Transaction SignTransaction(string privateKeyHex, Transaction transaction)
         {
-            return _aelfClient.SignTransaction(privateKeyHex, transaction);
+            var byteArray = transaction.GetHash().ToByteArray();
+            Wallets bip39Wallet = new xBIP39Wallet();
+            bip39Wallet.PrivateKey = ByteArrayHelper.HexStringToByteArray(privateKeyHex);
+            var numArray = bip39Wallet.Sign(byteArray);
+            transaction.Signature = ByteString.CopyFrom(numArray);
+            return transaction;
+            //return _aelfClient.SignTransaction(privateKeyHex, transaction);
         }
 
         public async Task<string> ExecuteTransactionAsync(ExecuteTransactionDto input)

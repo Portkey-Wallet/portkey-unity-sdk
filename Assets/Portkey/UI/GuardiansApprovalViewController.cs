@@ -299,4 +299,12 @@ public class GuardiansApprovalViewController : MonoBehaviour
     {
         loadingView.DisplayLoading(show, text);
     }
+
+    public void ResetView()
+    {
+        _guardianStatusList = new List<UserGuardianStatus>();
+        _approvedGuardians = new List<GuardiansApproved>();
+        _timeElapsed = 0.0f;
+        _startTimer = false;
+    }
 }

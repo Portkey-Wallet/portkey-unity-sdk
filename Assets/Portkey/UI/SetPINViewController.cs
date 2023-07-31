@@ -341,7 +341,7 @@ namespace Portkey.UI
             CloseView();
         }
 
-        private void ResetToEnterPINState(bool error = false)
+        public void ResetToEnterPINState(bool error = false)
         {
             if (error)
             {

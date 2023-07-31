@@ -1691,6 +1691,8 @@ MonoBehaviour:
   signInViewController: {fileID: 2058989683410225390}
   errorView: {fileID: 5037432561597435791}
   loadingView: {fileID: 1010083445183272794}
+  setPinViewController: {fileID: 4979886695840012266}
+  guardiansApprovalViewController: {fileID: 4753605759836814766}
 --- !u!1 &2045206250395084373
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,7 +15,7 @@ public class LockViewController : MonoBehaviour
     
     private void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus && did.IsLoggedIn())
+        if (pauseStatus && did.IsLoggedIn() && setPinViewController.CurrentPIN != "")
         {
             errorMessage.text = "";
             body.SetActive(true);
@@ -37,6 +37,7 @@ public class LockViewController : MonoBehaviour
             return;
         }
         
+        PIN = "";
         if(PIN == setPinViewController.CurrentPIN)
         {
             body.SetActive(false);
@@ -44,7 +45,6 @@ public class LockViewController : MonoBehaviour
         else
         {
             errorMessage.text = "PINs do not match!";
-            PIN = "";
             pinProgress.SetPINProgress(0);
         }
     }

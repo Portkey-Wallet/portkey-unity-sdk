@@ -18,6 +18,8 @@ namespace Portkey.UI
         [SerializeField] private SignInViewController signInViewController;
         [SerializeField] private ErrorViewController errorView;
         [SerializeField] private LoadingViewController loadingView;
+        [SerializeField] private SetPINViewController setPinViewController;
+        [SerializeField] private GuardiansApprovalViewController guardiansApprovalViewController;
 
         private DIDWalletInfo walletInfo = null;
         
@@ -52,7 +54,15 @@ namespace Portkey.UI
                 OnError("Log out failed.");
                 return;
             }
+
+            ResetViews();
             OpenSignInView();
+        }
+
+        private void ResetViews()
+        {
+            setPinViewController.ResetToEnterPINState();
+            guardiansApprovalViewController.ResetView();
         }
 
         private void OpenSignInView()

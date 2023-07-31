@@ -25,11 +25,14 @@ public class GuardiansApprovalViewController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI totalGuardiansText;
     [SerializeField] private TextMeshProUGUI totalVerifiedGuardiansText;
     [SerializeField] private Button completeButton;
-    
+
     [Header("Progress Dial")]
     [SerializeField] private Image guardianProgressDial;
     [Range(0.0f, 1.0f)]
-    [SerializeField] private float minProgress = 0.0f;
+    [SerializeField] private float maxProgress = 0.875f;
+    [SerializeField] private GameObject completeProgress;
+    [SerializeField] private GameObject dialProgress;
+    
     
     [Header("Expiry Time")]
     [SerializeField] private int expiryInMilliseconds = 360000;
@@ -217,9 +220,27 @@ public class GuardiansApprovalViewController : MonoBehaviour
 
     private void UpdateGuardianProgressDial()
     {
-        var percentage = (float)VerifiedCount(_guardianStatusList) / _guardianStatusList.Count;
-        percentage = Mathf.Clamp(percentage, minProgress, 1.0f);
-        guardianProgressDial.fillAmount = percentage;
+        var verifiedCount = VerifiedCount(_guardianStatusList);
+        var approvalCount = did.GetApprovalCount(_guardianStatusList.Count);
+
+        if (verifiedCount == approvalCount)
+        {
+            SetCompleteProgressDial(true);
+        }
+        else
+        {
+            SetCompleteProgressDial(false);
+            
+            var percentage = (float)verifiedCount / approvalCount;
+            percentage = Mathf.Clamp(percentage, 0.0f, maxProgress);
+            guardianProgressDial.fillAmount = percentage;
+        }
+    }
+
+    private void SetCompleteProgressDial(bool complete)
+    {
+        completeProgress.SetActive(complete);
+        dialProgress.SetActive(!complete);
     }
 
     private void UpdateTotalVerifiedGuardiansText()

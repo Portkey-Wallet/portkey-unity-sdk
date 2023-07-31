@@ -4236,7 +4236,9 @@ MonoBehaviour:
   totalVerifiedGuardiansText: {fileID: 2675294584254300586}
   completeButton: {fileID: 743817033010874411}
   guardianProgressDial: {fileID: 6046659091073412313}
-  minProgress: 0.2
+  maxProgress: 0.875
+  completeProgress: {fileID: 420342729298473735}
+  dialProgress: {fileID: 8925662625040746830}
   expiryInMilliseconds: 360000
 --- !u!1 &5260805775474643109
 GameObject:

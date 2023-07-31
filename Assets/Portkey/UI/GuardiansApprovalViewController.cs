@@ -15,7 +15,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     [SerializeField] private SetPINViewController setPINViewController;
     [SerializeField] private SignInViewController signInViewController;
     [SerializeField] private ErrorViewController errorView;
-    [SerializeField] private GameObject loadingView;
+    [SerializeField] private LoadingViewController loadingView;
     
     [Header("Guardian Item List")]
     [SerializeField] private GameObject guardianItemList;
@@ -45,7 +45,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     {
         _onCompleted = onCompleted;
         
-        ShowLoading(true);
+        ShowLoading(true, "Getting Verifier Servers...");
         StaticCoroutine.StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, StoreVerifierServers, OnError));
     }
     
@@ -57,6 +57,8 @@ public class GuardiansApprovalViewController : MonoBehaviour
 
     private void GetGuardianStatusList(IReadOnlyDictionary<string, VerifierItem> verifierMap)
     {
+        ShowLoading(true, "Getting Guardian status...");
+        
         var param = new GetHolderInfoParams
         {
             guardianIdentifier = _guardianIdentifierInfo.identifier.RemoveAllWhiteSpaces(),
@@ -242,6 +244,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     
     private void OnError(string error)
     {
+        ShowLoading(false);
         Debugger.LogError(error);
         errorView.ShowErrorText(error);
     }
@@ -292,8 +295,8 @@ public class GuardiansApprovalViewController : MonoBehaviour
         signInViewController.gameObject.SetActive(true);
     }
     
-    private void ShowLoading(bool show)
+    private void ShowLoading(bool show, string text = "")
     {
-        loadingView.gameObject.SetActive(show);
+        loadingView.DisplayLoading(show, text);
     }
 }

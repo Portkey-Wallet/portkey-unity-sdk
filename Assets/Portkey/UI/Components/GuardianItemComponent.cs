@@ -35,13 +35,13 @@ namespace Portkey.UI
         private Dictionary<string, GameObject> _verifierIconMap = null;
         private Dictionary<AccountType, GameObject> _guardianIconMap = null;
         private DID.DID _did = null;
-        private GameObject _loadingView = null;
+        private LoadingViewController _loadingView = null;
         private ErrorViewController _errorView = null;
         
         public delegate void OnUserGuardianStatusChanged(UserGuardianStatus status);
         private OnUserGuardianStatusChanged _onUserGuardianStatusChanged = null;
         
-        public GameObject LoadingView
+        public LoadingViewController LoadingView
         {
             set => _loadingView = value;
         }
@@ -56,9 +56,9 @@ namespace Portkey.UI
             _did = did;
         }
         
-        private void ShowLoading(bool show)
+        private void ShowLoading(bool show, string text = "")
         {
-            _loadingView.gameObject.SetActive(show);
+            _loadingView.DisplayLoading(show, text);
         }
 
         public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)
@@ -124,7 +124,7 @@ namespace Portkey.UI
 
         public void OnClickVerify()
         {
-            ShowLoading(true);
+            ShowLoading(true, "Verifying Guardian...");
             
             var loginType = _userGuardianStatus.guardianItem.guardian.type;
             // let's see if we need this when we implement email and phone, very likely we don't need this

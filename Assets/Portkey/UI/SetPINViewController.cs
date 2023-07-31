@@ -37,7 +37,7 @@ namespace Portkey.UI
         [SerializeField] private TextMeshProUGUI errorMessage;
         [SerializeField] private DID.DID did;
         [SerializeField] private WalletViewController walletView;
-        [SerializeField] private GameObject loadingView;
+        [SerializeField] private LoadingViewController loadingView;
         
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
@@ -78,7 +78,7 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            ShowLoading(true);
+            ShowLoading(true, "Checking social credentials...");
             StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, CheckAccessTokenExpired, OnError));
         }
 
@@ -109,10 +109,12 @@ namespace Portkey.UI
             
             if(Operation == OperationType.SIGN_UP)
             {
+                ShowLoading(true, "Registering...");
                 Register(verifierId, verificationResult);
             }
             else
             {
+                ShowLoading(true, "Signing in...");
                 Login(verifierId, verificationResult);
             }
         }
@@ -252,9 +254,9 @@ namespace Portkey.UI
             errorView.ShowErrorText(error);
         }
         
-        private void ShowLoading(bool show)
+        private void ShowLoading(bool show, string text = "")
         {
-            loadingView.gameObject.SetActive(show);
+            loadingView.DisplayLoading(show, text);
         }
 
         private void CloseView()

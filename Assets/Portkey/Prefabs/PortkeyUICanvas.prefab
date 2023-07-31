@@ -1690,7 +1690,7 @@ MonoBehaviour:
   addressText: {fileID: 5976212666146240357}
   signInViewController: {fileID: 2058989683410225390}
   errorView: {fileID: 5037432561597435791}
-  loadingView: {fileID: 6237369506817972160}
+  loadingView: {fileID: 1010083445183272794}
 --- !u!1 &2045206250395084373
 GameObject:
   m_ObjectHideFlags: 0
@@ -4227,7 +4227,7 @@ MonoBehaviour:
   setPINViewController: {fileID: 4979886695840012266}
   signInViewController: {fileID: 2058989683410225390}
   errorView: {fileID: 5037432561597435791}
-  loadingView: {fileID: 6237369506817972160}
+  loadingView: {fileID: 1010083445183272794}
   guardianItemList: {fileID: 759658559723670806}
   guardianItemPrefab: {fileID: 8060759402571597785, guid: 61c04e3bb0d9c424ba1e1e354bf15df7, type: 3}
   totalGuardiansText: {fileID: 6184208625790487908}
@@ -4410,7 +4410,7 @@ MonoBehaviour:
   errorMessage: {fileID: 2756956093969332288}
   did: {fileID: 1058882298470602853}
   walletView: {fileID: 3453700473384200439}
-  loadingView: {fileID: 6237369506817972160}
+  loadingView: {fileID: 1010083445183272794}
 --- !u!1 &5393661468796496764
 GameObject:
   m_ObjectHideFlags: 0
@@ -5088,6 +5088,7 @@ GameObject:
   - component: {fileID: 5088756301278275746}
   - component: {fileID: 7637165327047182219}
   - component: {fileID: 5636432354509816032}
+  - component: {fileID: 1010083445183272794}
   m_Layer: 5
   m_Name: Loading
   m_TagString: Untagged
@@ -5154,6 +5155,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1010083445183272794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6237369506817972160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 129e8c18209a54dbfb6b2462c9694507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 4608978883338044266}
 --- !u!1 &6451841758894141442
 GameObject:
   m_ObjectHideFlags: 0
@@ -6576,7 +6590,7 @@ MonoBehaviour:
   unregisteredView: {fileID: 2935962257760947544}
   guardianApprovalViewController: {fileID: 4753605759836814766}
   errorView: {fileID: 5037432561597435791}
-  loadingView: {fileID: 6237369506817972160}
+  loadingView: {fileID: 1010083445183272794}
 --- !u!1 &8421088593639825472
 GameObject:
   m_ObjectHideFlags: 0

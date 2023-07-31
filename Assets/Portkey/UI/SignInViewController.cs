@@ -17,7 +17,7 @@ namespace Portkey.UI
         [SerializeField] private UnregisteredViewController unregisteredView;
         [FormerlySerializedAs("guardianApprovalView")] [SerializeField] private GuardiansApprovalViewController guardianApprovalViewController;
         [SerializeField] private ErrorViewController errorView;
-        [SerializeField] private GameObject loadingView;
+        [SerializeField] private LoadingViewController loadingView;
         
         private State _state = State.Login;
         private IPortkeySocialService _portkeySocialService;
@@ -41,14 +41,14 @@ namespace Portkey.UI
             var accountType = (AccountType)type;
             var socialLogin = did.GetSocialLogin(accountType);
             
-            ShowLoading(true);
+            ShowLoading(true, "Authenticating social credentials...");
             
             socialLogin.Authenticate(AuthCallback, OnError);
         }
 
-        private void ShowLoading(bool show)
+        private void ShowLoading(bool show, string text = "")
         {
-            loadingView.gameObject.SetActive(show);
+            loadingView.DisplayLoading(show, text);
         }
 
         private void AuthCallback(SocialLoginInfo info)

@@ -17,7 +17,7 @@ namespace Portkey.UI
         [Header("View")]
         [SerializeField] private SignInViewController signInViewController;
         [SerializeField] private ErrorViewController errorView;
-        [SerializeField] private GameObject loadingView;
+        [SerializeField] private LoadingViewController loadingView;
 
         private DIDWalletInfo walletInfo = null;
         
@@ -38,7 +38,7 @@ namespace Portkey.UI
                 chainId = walletInfo.chainId
             };
 
-            ShowLoading(true);
+            ShowLoading(true, "Signing out...");
             
             StartCoroutine(did.Logout(param, OnSuccessLogout, OnError));
         }
@@ -74,9 +74,9 @@ namespace Portkey.UI
             gameObject.SetActive(false);
         }
         
-        private void ShowLoading(bool show)
+        private void ShowLoading(bool show, string text = "")
         {
-            loadingView.gameObject.SetActive(show);
+            loadingView.DisplayLoading(show, text);
         }
     }
 }

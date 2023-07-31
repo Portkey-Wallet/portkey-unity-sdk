@@ -4,22 +4,21 @@ using KeyPair = Portkey.Core.KeyPair;
 
 namespace Portkey.DID
 {
-    public class AccountProvider : IAccountProvider<WalletAccount>
+    public class WalletProvider : IWalletProvider
     {
         private string _mnemonic = null;
         
-        public WalletAccount GetAccountFromPrivateKey(string privateKey)
+        public WalletBase GetAccountFromPrivateKey(string privateKey)
         {
             var wallet = new Wallet();
             var newWallet = wallet.GetWalletByPrivateKey(privateKey);
             
-            // change to our own wrapper class
-            var blockchainWallet = GetBlockchainWallet(newWallet);
+            var keyPair = GetKeyPair(newWallet);
             
-            return new WalletAccount(blockchainWallet);
+            return new AElfWallet(keyPair);
         }
 
-        public WalletAccount CreateAccount()
+        public WalletBase CreateAccount()
         {
             var wallet = new Wallet();
 
@@ -29,15 +28,15 @@ namespace Portkey.DID
                 _ => wallet.GetWalletByMnemonic(_mnemonic)
             };
             _mnemonic = newWallet.Mnemonic;
-
-            // change to our own wrapper class
-            var blockchainWallet = GetBlockchainWallet(newWallet);
             
-            return new WalletAccount(blockchainWallet);
+            var keyPair = GetKeyPair(newWallet);
+
+            return new AElfWallet(keyPair);
         }
 
-        private static KeyPair GetBlockchainWallet(Wallet.BlockchainWallet newWallet)
+        private static KeyPair GetKeyPair(Wallet.BlockchainWallet newWallet)
         {
+            // change to our own wrapper class
             var blockchainWallet = new KeyPair(newWallet.Address, newWallet.PrivateKey,
                 newWallet.PublicKey);
             return blockchainWallet;

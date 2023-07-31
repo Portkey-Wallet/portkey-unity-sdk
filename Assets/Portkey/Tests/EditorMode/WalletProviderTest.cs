@@ -4,7 +4,7 @@ using Portkey.DID;
 
 namespace Portkey.Test
 {
-    public class AccountProviderTest
+    public class WalletProviderTest
     {
         private const string PRIVATE_KEY = "83829798ac92d428ed13b29fe60ace1a7a10e7a347bdc9f23a85615339068f1c";
         private const string ADDRESS = "TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T";
@@ -15,9 +15,9 @@ namespace Portkey.Test
         [Test]
         public void CreateTest()
         {
-            IAccountProvider<WalletAccount> accountProvider = new AccountProvider();
-            var account1 = accountProvider.CreateAccount();
-            var account2 = accountProvider.CreateAccount();
+            IWalletProvider walletProvider = new WalletProvider();
+            var account1 = walletProvider.CreateAccount();
+            var account2 = walletProvider.CreateAccount();
             
             Assert.AreEqual(account1.KeyPair.PrivateKey, account2.KeyPair.PrivateKey);
         }
@@ -25,8 +25,8 @@ namespace Portkey.Test
         [Test]
         public void GetAccountFromPrivateKeyTest()
         {
-            IAccountProvider<WalletAccount> accountProvider = new AccountProvider();
-            var account = accountProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
+            IWalletProvider walletProvider = new WalletProvider();
+            var account = walletProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
             
             Assert.AreEqual(PRIVATE_KEY, account.PrivateKey);
             Assert.AreEqual(PUBLIC_KEY, account.PublicKey);
@@ -35,8 +35,8 @@ namespace Portkey.Test
         [Test]
         public void GetAccountFromPrivateKeyFailTest()
         {
-            IAccountProvider<WalletAccount> accountProvider = new AccountProvider();
-            var account = accountProvider.GetAccountFromPrivateKey(ANOTHER_PRIVATE_KEY);
+            IWalletProvider walletProvider = new WalletProvider();
+            var account = walletProvider.GetAccountFromPrivateKey(ANOTHER_PRIVATE_KEY);
             
             Assert.AreNotEqual(PRIVATE_KEY, account.PrivateKey);
         }

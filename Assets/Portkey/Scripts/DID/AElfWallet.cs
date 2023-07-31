@@ -9,7 +9,7 @@ namespace Portkey.DID
     /// <summary>
     /// EOA Wallet, used to act as management account of DID wallet.
     /// </summary>
-    public class WalletAccount : AccountBase
+    public class AElfWallet : WalletBase
     {
         public override Transaction SignTransaction(Transaction transaction)
         {
@@ -26,7 +26,7 @@ namespace Portkey.DID
             return CryptoHelper.SignWithPrivateKey(privy, byteData);
         }
 
-        public WalletAccount(KeyPair keyPair) : base(keyPair)
+        public AElfWallet(KeyPair keyPair) : base(keyPair)
         {
         }
     }

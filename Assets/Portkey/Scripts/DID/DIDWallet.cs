@@ -12,7 +12,7 @@ namespace Portkey.DID
     /// DID Wallet class. Still WIP. Will be implemented in another branch.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class DIDWallet<T> : IDIDWallet where T : AccountBase
+    public class DIDWallet : IDIDWallet
     {
         protected class AccountInfo
         {
@@ -21,20 +21,20 @@ namespace Portkey.DID
         }
         
         private IPortkeySocialService _socialService;
-        private T _managementAccount;
+        private WalletBase _managementAccount;
         private IStorageSuite<string> _storageSuite;
-        private IAccountProvider<T> _accountProvider;
+        private IWalletProvider _walletProvider;
         private IConnectService _connectService;
         
         private AccountInfo _accountInfo = new AccountInfo();
         private Dictionary<string, ChainInfo> _chainsInfoMap = new Dictionary<string, ChainInfo>();
         private Dictionary<string, CAInfo> _caInfoMap = new Dictionary<string, CAInfo>();
 
-        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IAccountProvider<T> accountProvider, IConnectService connectService)
+        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectService connectService)
         {
             _socialService = socialService;
             _storageSuite = storageSuite;
-            _accountProvider = accountProvider;
+            _walletProvider = walletProvider;
             _connectService = connectService;
         }
         
@@ -58,7 +58,7 @@ namespace Portkey.DID
                 return;
             }
             
-            _managementAccount = _accountProvider.CreateAccount();
+            _managementAccount = _walletProvider.CreateAccount();
         }
 
         public bool Save(string password, string keyName)

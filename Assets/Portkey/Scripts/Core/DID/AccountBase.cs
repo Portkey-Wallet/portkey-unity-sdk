@@ -4,14 +4,14 @@ namespace Portkey.Core
 {
     public abstract class AccountBase : ISigner
     {
-        public ExternallyOwnedAccount Wallet { get; private set; }
-        public string Address => Wallet.Address;
-        public string PrivateKey => Wallet.PrivateKey;
-        public string PublicKey => Wallet.PublicKey;
+        public KeyPair KeyPair { get; private set; }
+        public string Address => KeyPair.Address;
+        public string PrivateKey => KeyPair.PrivateKey;
+        public string PublicKey => KeyPair.PublicKey;
         
-        public AccountBase(ExternallyOwnedAccount wallet)
+        public AccountBase(KeyPair keyPair)
         {
-            Wallet = wallet;
+            KeyPair = keyPair;
         }
         
         public abstract Transaction SignTransaction(Transaction transaction);

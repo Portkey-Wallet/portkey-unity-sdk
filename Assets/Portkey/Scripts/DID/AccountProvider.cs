@@ -1,5 +1,6 @@
 using BIP39Wallet;
 using Portkey.Core;
+using KeyPair = Portkey.Core.KeyPair;
 
 namespace Portkey.DID
 {
@@ -35,9 +36,9 @@ namespace Portkey.DID
             return new WalletAccount(blockchainWallet);
         }
 
-        private static ExternallyOwnedAccount GetBlockchainWallet(Wallet.BlockchainWallet newWallet)
+        private static KeyPair GetBlockchainWallet(Wallet.BlockchainWallet newWallet)
         {
-            var blockchainWallet = new ExternallyOwnedAccount(newWallet.Address, newWallet.PrivateKey,
+            var blockchainWallet = new KeyPair(newWallet.Address, newWallet.PrivateKey,
                 newWallet.PublicKey);
             return blockchainWallet;
         }

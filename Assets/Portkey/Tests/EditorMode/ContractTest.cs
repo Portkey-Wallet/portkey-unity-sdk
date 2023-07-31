@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using AElf.Client.Dto;
 using AElf.Client.Extensions;
-using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using NUnit.Framework;
@@ -65,7 +64,7 @@ namespace Portkey.Test
     /// </summary>
     public class ContractTest
     {
-        private readonly ExternallyOwnedAccount _wallet = new ExternallyOwnedAccount("TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T",
+        private readonly KeyPair _keyPair = new KeyPair("TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T",
                                                                         "83829798ac92d428ed13b29fe60ace1a7a10e7a347bdc9f23a85615339068f1c",
                                                                         "045ab0516fda4eeb504ad8d7ce8a2a24e5af6004afa9ff3ee26f2c697e334be48c31597e1905711a6aa749fc475787000b5d6260bcf0d457f23c60aa60bb6c8602");
         
@@ -80,7 +79,7 @@ namespace Portkey.Test
             IChain aelfChainMock = new AElfChainMock();
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_wallet, "GetVerifierServers", new Empty()));
+            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_keyPair, "GetVerifierServers", new Empty()));
         
             Assert.AreEqual("594ebf395cdba58b0e725d71eb3c1a17d57662b0667a92f770f341d4e794b76b", result.VerifierServers[0].Id.ToHex());
         }
@@ -99,7 +98,7 @@ namespace Portkey.Test
             IChain aelfChainMock = new AElfChainMock((() => throw new Exception(EXCEPION_MESSAGE)));
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_wallet, "GetVerifierServers", new Empty()));
+            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_keyPair, "GetVerifierServers", new Empty()));
         
             Assert.AreEqual(0, result.VerifierServers.Count);
         }

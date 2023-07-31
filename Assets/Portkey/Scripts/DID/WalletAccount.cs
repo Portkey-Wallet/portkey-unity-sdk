@@ -26,7 +26,7 @@ namespace Portkey.DID
             return CryptoHelper.SignWithPrivateKey(privy, byteData);
         }
 
-        public WalletAccount(ExternallyOwnedAccount wallet) : base(wallet)
+        public WalletAccount(KeyPair keyPair) : base(keyPair)
         {
         }
     }

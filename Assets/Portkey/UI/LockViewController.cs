@@ -37,7 +37,6 @@ public class LockViewController : MonoBehaviour
             return;
         }
         
-        PIN = "";
         if(PIN == setPinViewController.CurrentPIN)
         {
             body.SetActive(false);
@@ -47,6 +46,7 @@ public class LockViewController : MonoBehaviour
             errorMessage.text = "PINs do not match!";
             pinProgress.SetPINProgress(0);
         }
+        PIN = "";
     }
     
     public void OnClickBackspace()

@@ -168,7 +168,7 @@ namespace Portkey.UI
         private void PrepareGuardiansApprovalView(GuardianIdentifierInfo info)
         {
             guardianApprovalViewController.SetGuardianIdentifierInfo(info);
-            guardianApprovalViewController.InitializeData(OpenGuardiansApprovalView);
+            guardianApprovalViewController.InitializeData(OpenGuardiansApprovalView, OnError);
         }
         
         private void OpenGuardiansApprovalView()

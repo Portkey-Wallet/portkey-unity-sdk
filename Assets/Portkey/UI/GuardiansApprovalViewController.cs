@@ -43,13 +43,15 @@ public class GuardiansApprovalViewController : MonoBehaviour
     private float _timeElapsed = 0.0f;
     private bool _startTimer = false;
     private Action _onCompleted;
+    private ErrorCallback _onErrorInitData;
 
-    public void InitializeData(Action onCompleted)
+    public void InitializeData(Action onCompleted, ErrorCallback errorCallback)
     {
         _onCompleted = onCompleted;
+        _onErrorInitData = errorCallback;
         
         ShowLoading(true, "Loading...");
-        StaticCoroutine.StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, StoreVerifierServers, OnError));
+        StaticCoroutine.StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, StoreVerifierServers, _onErrorInitData));
     }
     
     private void StoreVerifierServers(VerifierItem[] verifierServers)
@@ -85,7 +87,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
             _guardianStatusList = currentGuardiansList;
             
             InitializeUI();
-        }, OnError));
+        }, _onErrorInitData));
     }
 
     private void InitializeUI()

@@ -13,6 +13,7 @@ namespace Portkey.UI
         
         [Header("UI")]
         [SerializeField] private TextMeshProUGUI addressText;
+        [SerializeField] private GameObject confirmSignOutDialog;
         
         [Header("View")]
         [SerializeField] private SignInViewController signInViewController;
@@ -31,6 +32,7 @@ namespace Portkey.UI
         private void Start()
         {
             addressText.text = walletInfo.caInfo.caAddress;
+            confirmSignOutDialog.SetActive(false);
         }
 
         public void OnClickSignOut()

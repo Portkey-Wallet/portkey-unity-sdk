@@ -46,7 +46,7 @@ namespace Portkey.UI
                 chainId = walletInfo.chainId
             };
 
-            ShowLoading(true, "Signing out...");
+            ShowLoading(true, "Signing out of Portkey...");
             
             StartCoroutine(did.Logout(param, OnSuccessLogout, OnError));
         }

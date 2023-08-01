@@ -78,7 +78,15 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            ShowLoading(true, "Initiating social recovery...");
+            if (Operation == OperationType.SIGN_UP)
+            {
+                ShowLoading(true, "Creating address on the chain...");
+            }
+            else
+            {
+                ShowLoading(true, "Initiating social recovery");
+            }
+
             StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, CheckAccessTokenExpired, OnError));
         }
 
@@ -109,12 +117,10 @@ namespace Portkey.UI
             
             if(Operation == OperationType.SIGN_UP)
             {
-                ShowLoading(true, "Registering...");
                 Register(verifierId, verificationResult);
             }
             else
             {
-                ShowLoading(true, "Signing in...");
                 Login(verifierId, verificationResult);
             }
         }

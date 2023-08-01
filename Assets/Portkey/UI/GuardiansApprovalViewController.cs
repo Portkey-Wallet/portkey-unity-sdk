@@ -312,6 +312,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     
     public void OnClickBack()
     {
+        ResetView();
         CloseView();
         signInViewController.gameObject.SetActive(true);
     }

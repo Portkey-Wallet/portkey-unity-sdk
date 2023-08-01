@@ -16,6 +16,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     [SerializeField] private SignInViewController signInViewController;
     [SerializeField] private ErrorViewController errorView;
     [SerializeField] private LoadingViewController loadingView;
+    [SerializeField] private GameObject infoDialog;
     
     [Header("Guardian Item List")]
     [SerializeField] private GameObject guardianItemList;
@@ -103,6 +104,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
         expireText.text = "Expire after 1 hour.";
         totalGuardiansText.text = $"/{_guardianStatusList.Count.ToString()}";
         completeButtonGameObject.SetActive(true);
+        infoDialog.SetActive(false);
         
         UpdateGuardianInfoUI();
 
@@ -356,5 +358,10 @@ public class GuardiansApprovalViewController : MonoBehaviour
         
         _timeElapsed = 0.0f;
         _startTimer = false;
+    }
+
+    public void OnClickInfoDialog()
+    {
+        infoDialog.SetActive(!infoDialog.activeSelf);
     }
 }

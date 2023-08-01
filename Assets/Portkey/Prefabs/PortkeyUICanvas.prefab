@@ -4233,14 +4233,16 @@ MonoBehaviour:
   loadingView: {fileID: 1010083445183272794}
   guardianItemList: {fileID: 759658559723670806}
   guardianItemPrefab: {fileID: 8060759402571597785, guid: 61c04e3bb0d9c424ba1e1e354bf15df7, type: 3}
+  expireText: {fileID: 5705114853056425569}
   totalGuardiansText: {fileID: 6184208625790487908}
   totalVerifiedGuardiansText: {fileID: 2675294584254300586}
+  completeButtonGameObject: {fileID: 3277073801744524777}
   completeButton: {fileID: 743817033010874411}
   guardianProgressDial: {fileID: 6046659091073412313}
   maxProgress: 0.875
   completeProgress: {fileID: 420342729298473735}
   dialProgress: {fileID: 8925662625040746830}
-  expiryInMilliseconds: 360000
+  expiryInMilliseconds: 3600000
 --- !u!1 &5260805775474643109
 GameObject:
   m_ObjectHideFlags: 0
@@ -9977,6 +9979,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &3277073801744524777 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 238341831157985606, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}
+  m_PrefabInstance: {fileID: 3329360668832896175}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &4759166947833568718 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7800154276341696865, guid: 1bcfe458cf66a445bb9afea0bd33e109, type: 3}

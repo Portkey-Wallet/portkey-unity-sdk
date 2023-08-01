@@ -20,10 +20,12 @@ public class GuardiansApprovalViewController : MonoBehaviour
     [Header("Guardian Item List")]
     [SerializeField] private GameObject guardianItemList;
     [SerializeField] private GameObject guardianItemPrefab;
-    
-    [Header("Guardian Info")]
+
+    [Header("Guardian Info")] 
+    [SerializeField] private TextMeshProUGUI expireText;
     [SerializeField] private TextMeshProUGUI totalGuardiansText;
     [SerializeField] private TextMeshProUGUI totalVerifiedGuardiansText;
+    [SerializeField] private GameObject completeButtonGameObject;
     [SerializeField] private Button completeButton;
 
     [Header("Progress Dial")]
@@ -40,10 +42,16 @@ public class GuardiansApprovalViewController : MonoBehaviour
     private GuardianIdentifierInfo _guardianIdentifierInfo;
     private List<UserGuardianStatus> _guardianStatusList = new List<UserGuardianStatus>();
     private List<GuardiansApproved> _approvedGuardians = new List<GuardiansApproved>();
+    private List<GuardianItemComponent> _guardianItemComponents = new List<GuardianItemComponent>();
     private float _timeElapsed = 0.0f;
     private bool _startTimer = false;
     private Action _onCompleted;
     private ErrorCallback _onErrorInitData;
+
+    private void Start()
+    {
+        _startTimer = true;
+    }
 
     public void InitializeData(Action onCompleted, ErrorCallback errorCallback)
     {
@@ -92,8 +100,11 @@ public class GuardiansApprovalViewController : MonoBehaviour
 
     private void InitializeUI()
     {
+        expireText.text = "Expire after 1 hour.";
         totalGuardiansText.text = $"/{_guardianStatusList.Count.ToString()}";
-        UpdateUI();
+        completeButtonGameObject.SetActive(true);
+        
+        UpdateGuardianInfoUI();
 
         ClearGuardianItems();
         CreateGuardianItems(_guardianStatusList);
@@ -102,7 +113,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
         ShowLoading(false);
     }
 
-    private void UpdateUI()
+    private void UpdateGuardianInfoUI()
     {
         UpdateTotalVerifiedGuardiansText();
         UpdateGuardianProgressDial();
@@ -120,10 +131,21 @@ public class GuardiansApprovalViewController : MonoBehaviour
         _timeElapsed += Time.deltaTime;
         if(_timeElapsed >= expiryInMilliseconds / 1000.0f)
         {
-            ResetGuardianStatusList();
-            InitializeUI();
+            UpdateExpiredUI();
             ResetTimer();
         }
+    }
+
+    private void UpdateExpiredUI()
+    {
+        expireText.text = "Expired";
+        ExpireGuardianItems();
+        completeButtonGameObject.SetActive(false);
+    }
+
+    private void ExpireGuardianItems()
+    {
+        _guardianItemComponents.Where(item => item.VerifierStatus != VerifierStatus.Verified).ToList().ForEach(item => item.SetExpired(true));
     }
     
     private void ResetGuardianStatusList()
@@ -148,9 +170,11 @@ public class GuardiansApprovalViewController : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+
+        _guardianItemComponents = new List<GuardianItemComponent>();
     }
 
-    private UserGuardianStatus CreateUserGuardianStatus(Guardian guardian, Dictionary<string, UserGuardianStatus> guardianStatusMap)
+    private UserGuardianStatus CreateUserGuardianStatus(Guardian guardian, IReadOnlyDictionary<string, UserGuardianStatus> guardianStatusMap)
     {
         var key = GetGuardianKey(guardian);
         var identifier = guardian.guardianIdentifier ?? guardian.identifierHash;
@@ -203,6 +227,8 @@ public class GuardiansApprovalViewController : MonoBehaviour
                 guardianItem.ErrorView = errorView;
                 guardianItem.LoadingView = loadingView;
                 guardianItem.InitializeUI();
+                
+                _guardianItemComponents.Add(guardianItem);
             }
         }
     }
@@ -214,8 +240,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
             _guardianIdentifierInfo.token = status.guardianItem.accessToken;
         }
         
-        UpdateUI();
-        _startTimer = true;
+        UpdateGuardianInfoUI();
     }
 
     private void UpdateGuardianProgressDial()
@@ -326,6 +351,9 @@ public class GuardiansApprovalViewController : MonoBehaviour
     {
         _guardianStatusList = new List<UserGuardianStatus>();
         _approvedGuardians = new List<GuardiansApproved>();
+        
+        ClearGuardianItems();
+        
         _timeElapsed = 0.0f;
         _startTimer = false;
     }

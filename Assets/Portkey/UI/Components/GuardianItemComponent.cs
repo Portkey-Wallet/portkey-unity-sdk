@@ -30,6 +30,7 @@ namespace Portkey.UI
         [SerializeField] private GameObject verifyButton = null;
         [SerializeField] private GameObject verifiedCheck = null;
         [SerializeField] private GameObject loginAccount = null;
+        [SerializeField] private GameObject expiredText = null;
 
         private UserGuardianStatus _userGuardianStatus = null;
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
@@ -39,6 +40,8 @@ namespace Portkey.UI
         private LoadingViewController _loadingView = null;
         private ErrorViewController _errorView = null;
         
+        public VerifierStatus VerifierStatus => _userGuardianStatus.status;
+
         public delegate void OnUserGuardianStatusChanged(UserGuardianStatus status);
         private OnUserGuardianStatusChanged _onUserGuardianStatusChanged = null;
         
@@ -60,6 +63,20 @@ namespace Portkey.UI
         private void ShowLoading(bool show, string text = "")
         {
             _loadingView.DisplayLoading(show, text);
+        }
+
+        public void SetExpired(bool expired)
+        {
+            expiredText.SetActive(expired);
+            if (!expired)
+            {
+                DisplayVerificationStatus(_userGuardianStatus.status);
+            }
+            else
+            {
+                verifiedCheck.SetActive(false);
+                verifyButton.SetActive(false);
+            }
         }
 
         public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)
@@ -90,16 +107,10 @@ namespace Portkey.UI
 
         private void DisplayVerificationStatus(VerifierStatus status)
         {
-            if (status == VerifierStatus.Verified)
-            {
-                verifyButton.SetActive(false);
-                verifiedCheck.SetActive(true);
-            }
-            else
-            {
-                verifyButton.SetActive(true);
-                verifiedCheck.SetActive(false);
-            }
+            var verified = status == VerifierStatus.Verified;
+
+            verifyButton.SetActive(!verified);
+            verifiedCheck.SetActive(verified);
         }
 
         private void DisplayGuardianIcon(AccountType guardianType)

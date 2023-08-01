@@ -29,6 +29,7 @@ namespace Portkey.UI
         [SerializeField] private TextMeshProUGUI detail = null;
         [SerializeField] private GameObject verifyButton = null;
         [SerializeField] private GameObject verifiedCheck = null;
+        [SerializeField] private GameObject loginAccount = null;
 
         private UserGuardianStatus _userGuardianStatus = null;
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
@@ -82,6 +83,7 @@ namespace Portkey.UI
             
             account.text = _userGuardianStatus.guardianItem.guardian.firstName;
             detail.text = _userGuardianStatus.guardianItem.guardian.thirdPartyEmail;
+            loginAccount.SetActive(_userGuardianStatus.guardianItem.guardian.isLoginGuardian);
             
             DisplayVerificationStatus(_userGuardianStatus.status);
         }

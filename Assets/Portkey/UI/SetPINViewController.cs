@@ -293,7 +293,8 @@ namespace Portkey.UI
                 else
                 {
                     errorMessage.text = "Pins do not match";
-                    ResetToEnterPINState();
+                    CurrentPIN = "";
+                    pinProgress.SetPINProgress(0);
                 }
             }
         }

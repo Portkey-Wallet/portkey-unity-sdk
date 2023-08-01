@@ -90,7 +90,7 @@ namespace Portkey.UI
             }
             else
             {
-                ShowLoading(true, "Initiating social recovery");
+                ShowLoading(true, "Initiating social recovery...");
             }
 
             StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, CheckAccessTokenExpired, OnError));
@@ -136,7 +136,7 @@ namespace Portkey.UI
             var extraData = "";
             try
             {
-                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo(Application.platform));
+                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
             }
             catch (Exception e)
             {
@@ -200,7 +200,7 @@ namespace Portkey.UI
             var extraData = "";
             try
             {
-                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo(Application.platform));
+                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
             }
             catch (Exception e)
             {
@@ -242,7 +242,12 @@ namespace Portkey.UI
 
         private static string EncodeExtraData(DeviceInfoType deviceInfo)
         {
-            return JsonConvert.SerializeObject(deviceInfo);
+            var extraData = new ExtraData
+            {
+                transactionTime = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds().ToString(),
+                deviceInfo = JsonConvert.SerializeObject(deviceInfo)
+            };
+            return JsonConvert.SerializeObject(extraData);
         }
 
         private static VerificationDoc ProcessVerificationDoc(string verificationDoc)

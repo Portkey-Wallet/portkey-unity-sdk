@@ -7,8 +7,10 @@ namespace Portkey.Core
         public string deviceName;
         public string deviceType;
         
-        public static DeviceInfoType GetDeviceInfo(RuntimePlatform platform)
+        public static DeviceInfoType GetDeviceInfo()
         {
+            var platform = Application.platform;
+            
             var info = new DeviceInfoType
             {
                 deviceName = "Other",
@@ -18,9 +20,11 @@ namespace Portkey.Core
             switch (platform)
             {
                 case RuntimePlatform.Android:
+                    info.deviceName = SystemInfo.deviceModel;
                     info.deviceType = "ANDROID";
                     break;
                 case RuntimePlatform.IPhonePlayer:
+                    info.deviceName = SystemInfo.deviceModel;
                     info.deviceType = "IOS";
                     break;
                 case RuntimePlatform.WindowsPlayer:

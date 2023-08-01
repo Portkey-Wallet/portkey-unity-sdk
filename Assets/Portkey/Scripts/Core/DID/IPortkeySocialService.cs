@@ -4,6 +4,13 @@ using System.Collections.Generic;
 
 namespace Portkey.Core
 {
+    public class ExtraData
+    {
+        public string transactionTime;
+        public string deviceInfo;
+        public string version = "2.0.0";
+    }
+    
     [Serializable]
     public class Context 
     {

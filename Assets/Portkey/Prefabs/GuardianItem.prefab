@@ -1637,11 +1637,11 @@ MonoBehaviour:
     icon: {fileID: 8948051555916283073}
   - name: Minerva
     icon: {fileID: 783045339311507634}
-  - name: DoKewCapital
+  - name: DokewCapital
     icon: {fileID: 9019517467883451388}
   - name: Gauss
     icon: {fileID: 5106744236601125476}
-  - name: CryptoGuardians
+  - name: CryptoGuardian
     icon: {fileID: 7084798048111499119}
   guardianIcons:
   - type: 3

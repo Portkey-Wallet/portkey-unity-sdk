@@ -53,11 +53,26 @@ namespace Portkey.SocialProvider
                 };
                 StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyGoogleToken(verifyGoogleParam, (verificationResult) =>
                 {
-                    //var verificationDoc = ProcessVerificationDoc(verificationResult.verificationDoc);
+                    var verificationDoc = ProcessVerificationDoc(verificationResult.verificationDoc, param.verifierId);
                     //TODO: set guardian list
-                    successCallback(param.verifierId, param.accessToken, verificationResult);
+                    successCallback(verificationDoc, param.accessToken, verificationResult);
                 }, errorCallback));
             }
+        }
+        
+        private static VerificationDoc ProcessVerificationDoc(string verificationDoc, string verifierId)
+        {
+            var documentValue = verificationDoc.Split(',');
+            var verificationDocObj = new VerificationDoc
+            {
+                verifierId = verifierId,
+                type = documentValue[0],
+                identifierHash = documentValue[1],
+                verificationTime = documentValue[2],
+                verifierAddress = documentValue[3],
+                salt = documentValue[4]
+            };
+            return verificationDocObj;
         }
     }
 }

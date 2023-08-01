@@ -21,15 +21,6 @@ namespace Portkey.UI
             SIGN_UP = 0,
             SIGN_IN = 1
         }
-        
-        private class VerificationDoc
-        {
-            public string type;
-            public string guardianIdentifier;
-            public string verificationTime;
-            public string verifierAddress;
-            public string salt;
-        }
 
         [SerializeField] private ErrorViewController errorView;
         [SerializeField] private PINProgressComponent pinProgress;
@@ -110,7 +101,7 @@ namespace Portkey.UI
             socialVerifier.AuthenticateIfAccessTokenExpired(param, OnAuthenticated, OnError);
         }
 
-        private void OnAuthenticated(string verifierId, string accessToken, VerifyVerificationCodeResult verificationResult)
+        private void OnAuthenticated(VerificationDoc verifierDoc, string accessToken, VerifyVerificationCodeResult verificationResult)
         {
             if (_guardianIdentifierInfo.identifier == null)
             {
@@ -123,11 +114,11 @@ namespace Portkey.UI
             
             if(Operation == OperationType.SIGN_UP)
             {
-                Register(verifierId, verificationResult);
+                Register(verifierDoc.verifierId, verificationResult);
             }
             else
             {
-                Login(verifierId, verificationResult);
+                Login(verifierDoc.verifierId, verificationResult);
             }
         }
 
@@ -248,20 +239,6 @@ namespace Portkey.UI
                 deviceInfo = JsonConvert.SerializeObject(deviceInfo)
             };
             return JsonConvert.SerializeObject(extraData);
-        }
-
-        private static VerificationDoc ProcessVerificationDoc(string verificationDoc)
-        {
-            var documentValue = verificationDoc.Split(',');
-            var verificationDocObj = new VerificationDoc
-            {
-                type = documentValue[0],
-                guardianIdentifier = documentValue[1],
-                verificationTime = documentValue[2],
-                verifierAddress = documentValue[3],
-                salt = documentValue[4]
-            };
-            return verificationDocObj;
         }
 
         private void OnError(string error)

@@ -169,16 +169,23 @@ namespace Portkey.UI
             }
         }
         
-        private void OnVerified(string verifierId, string accessToken, VerifyVerificationCodeResult verificationResult)
+        private void OnVerified(VerificationDoc verificationDoc, string accessToken, VerifyVerificationCodeResult verificationResult)
         {
-            _userGuardianStatus.status = VerifierStatus.Verified;
-            _userGuardianStatus.verificationDoc = verificationResult.verificationDoc;
-            _userGuardianStatus.signature = verificationResult.signature;
-            _userGuardianStatus.guardianItem.accessToken = accessToken;
-            DisplayVerificationStatus(_userGuardianStatus.status);
+            if (verificationDoc.identifierHash != _userGuardianStatus.guardianItem.guardian.identifierHash)
+            {
+                OnError("Account does not match your guardian.");
+            }
+            else
+            {
+                _userGuardianStatus.status = VerifierStatus.Verified;
+                _userGuardianStatus.verificationDoc = verificationResult.verificationDoc;
+                _userGuardianStatus.signature = verificationResult.signature;
+                _userGuardianStatus.guardianItem.accessToken = accessToken;
+                DisplayVerificationStatus(_userGuardianStatus.status);
             
-            _onUserGuardianStatusChanged?.Invoke(_userGuardianStatus);
-            
+                _onUserGuardianStatusChanged?.Invoke(_userGuardianStatus);   
+            }
+
             ShowLoading(false);
         }
 
@@ -186,7 +193,7 @@ namespace Portkey.UI
         {
             ShowLoading(false);
             Debugger.LogError(error);
-            _errorView.ShowErrorText("Error: Network error occurred!");
+            _errorView.ShowErrorText(error);
         }
     }
 }

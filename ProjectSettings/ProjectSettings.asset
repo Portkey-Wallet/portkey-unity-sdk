@@ -808,6 +808,7 @@ PlayerSettings:
   webGLDecompressionFallback: 0
   webGLPowerPreference: 2
   scriptingDefineSymbols:
+    Android: PORTKEY_DEVELOPMENT
     Standalone: PORTKEY_DEVELOPMENT
   additionalCompilerArguments: {}
   platformArchitecture: {}

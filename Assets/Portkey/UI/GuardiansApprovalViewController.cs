@@ -48,7 +48,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     {
         _onCompleted = onCompleted;
         
-        ShowLoading(true, "Getting Verifier Servers...");
+        ShowLoading(true, "Loading...");
         StaticCoroutine.StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, StoreVerifierServers, OnError));
     }
     
@@ -60,8 +60,6 @@ public class GuardiansApprovalViewController : MonoBehaviour
 
     private void GetGuardianStatusList(IReadOnlyDictionary<string, VerifierItem> verifierMap)
     {
-        ShowLoading(true, "Getting Guardian status...");
-        
         var param = new GetHolderInfoParams
         {
             guardianIdentifier = _guardianIdentifierInfo.identifier.RemoveAllWhiteSpaces(),

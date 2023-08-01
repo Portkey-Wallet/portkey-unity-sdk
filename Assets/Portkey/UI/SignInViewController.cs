@@ -41,7 +41,7 @@ namespace Portkey.UI
             var accountType = (AccountType)type;
             var socialLogin = did.GetSocialLogin(accountType);
             
-            ShowLoading(true, "Authenticating social credentials...");
+            ShowLoading(true, "Loading...");
             
             socialLogin.Authenticate(AuthCallback, OnError);
         }

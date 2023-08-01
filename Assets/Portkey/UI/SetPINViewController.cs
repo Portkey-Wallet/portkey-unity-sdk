@@ -78,7 +78,7 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            ShowLoading(true, "Checking social credentials...");
+            ShowLoading(true, "Initiating social recovery...");
             StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, CheckAccessTokenExpired, OnError));
         }
 

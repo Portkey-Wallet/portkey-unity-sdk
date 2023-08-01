@@ -126,7 +126,7 @@ namespace Portkey.UI
 
         public void OnClickVerify()
         {
-            ShowLoading(true, "Verifying Guardian...");
+            ShowLoading(true, "Loading...");
             
             var loginType = _userGuardianStatus.guardianItem.guardian.type;
             // let's see if we need this when we implement email and phone, very likely we don't need this

@@ -123,7 +123,7 @@ namespace Portkey.DID
                 var chainInfo = chainInfos.items.FirstOrDefault(info => info.chainId == chainId);
                 if (chainInfo == null)
                 {
-                    errorCallback("Network error occurred!");
+                    errorCallback("Network Error!");
                     return;
                 }
 
@@ -131,7 +131,7 @@ namespace Portkey.DID
                 {
                     if (result == null || result.Length == 0)
                     {
-                        errorCallback("Network error occurred!");
+                        errorCallback("Network Error!");
                         return;
                     }
                     

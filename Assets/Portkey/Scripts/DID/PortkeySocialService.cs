@@ -172,7 +172,7 @@ namespace Portkey.DID
             {
                 if(pollCount > queryOptions.maxCount)
                 {
-                    errorCallback("Network error: Time out.");
+                    errorCallback("Network Error!");
                     yield break;
                 }
             
@@ -207,7 +207,7 @@ namespace Portkey.DID
             {
                 if(pollCount > queryOptions.maxCount)
                 {
-                    errorCallback("Network error: Time out.");
+                    errorCallback("Network Error!");
                     yield break;
                 }
             

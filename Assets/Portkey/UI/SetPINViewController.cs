@@ -44,8 +44,8 @@ namespace Portkey.UI
         };
         private List<string> _stateToHeader = new List<string>
         {
-            "Set PIN", 
-            "Confirm PIN"
+            "Enter pin to protect your device", 
+            "Confirm Pin"
         };
         
         public VerifierItem VerifierItem
@@ -86,7 +86,7 @@ namespace Portkey.UI
             }
             else
             {
-                ShowLoading(true, "Initiating social recovery...");
+                ShowLoading(true, "Initiating social recovery");
             }
             
             CheckAccessTokenExpired();
@@ -292,7 +292,8 @@ namespace Portkey.UI
                 }
                 else
                 {
-                    ResetToEnterPINState(true);
+                    errorMessage.text = "Pins do not match";
+                    ResetToEnterPINState();
                 }
             }
         }
@@ -346,12 +347,8 @@ namespace Portkey.UI
             CloseView();
         }
 
-        public void ResetToEnterPINState(bool error = false)
+        public void ResetToEnterPINState()
         {
-            if (error)
-            {
-                errorMessage.text = "PINs do not match!";
-            }
             ClearPIN();
             ChangeState(State.ENTER_PIN);
             

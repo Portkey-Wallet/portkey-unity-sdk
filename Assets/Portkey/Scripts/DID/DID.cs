@@ -123,7 +123,7 @@ namespace Portkey.DID
                 var chainInfo = chainInfos.items.FirstOrDefault(info => info.chainId == chainId);
                 if (chainInfo == null)
                 {
-                    errorCallback($"Chain info [{chainId}] not found");
+                    errorCallback("Network error occurred!");
                     return;
                 }
 
@@ -131,7 +131,7 @@ namespace Portkey.DID
                 {
                     if (result == null || result.Length == 0)
                     {
-                        errorCallback($"Verifier server [{chainInfo.chainId}] not found");
+                        errorCallback("Network error occurred!");
                         return;
                     }
                     

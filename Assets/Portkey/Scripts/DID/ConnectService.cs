@@ -28,10 +28,13 @@ namespace Portkey.DID
                 var token = JsonConvert.DeserializeObject<ConnectToken>(response);
                 if (token == null)
                 {
-                    errorCallback("Failed to deserialize token");
+                    errorCallback("Failed to deserialize token.");
                 }
                 successCallback(token);
-            }, errorCallback);
+            }, (error) =>
+            {
+                errorCallback(error.message);
+            });
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Portkey.Network
 
         public override IEnumerator Get<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
-            errorCallback("Should not be called!");
+            errorCallback(new ErrorMessage { message = "Should not be called!" });
             yield break;
         }
 

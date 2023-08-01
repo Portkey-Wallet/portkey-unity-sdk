@@ -212,7 +212,15 @@ namespace Portkey.SocialProvider
                 var accessToken = exchangeResponse.access_token;
 
                 RequestSocialInfo(accessToken, _successCallback, _errorCallback);
-            }, _errorCallback));
+            }, OnError(_errorCallback)));
+        }
+
+        private static IHttp.ErrorCallback OnError(ErrorCallback errorCallback)
+        {
+            return (error) =>
+            {
+                errorCallback(error.message);
+            };
         }
 
         public void RequestSocialInfo(string accessToken, ISocialLogin.AuthCallback successCallback, ErrorCallback errorCallback)
@@ -237,7 +245,7 @@ namespace Portkey.SocialProvider
                 };
                 
                 successCallback(socialLoginInfo);
-            }, errorCallback));
+            }, OnError(errorCallback)));
         }
     }
 }

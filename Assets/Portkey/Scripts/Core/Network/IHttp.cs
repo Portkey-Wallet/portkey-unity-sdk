@@ -8,7 +8,15 @@ namespace Portkey.Core
     /// </summary>
     public abstract class IHttp : ScriptableObject
     {
+        public class ErrorMessage
+        {
+            public string message = "";
+            public string details = "";
+            public long code = 0;
+        }
+        
         public delegate void SuccessCallback(string response);
+        public delegate void ErrorCallback(ErrorMessage error);
         
         /// <summary>
         /// Make a GET request to the given url.

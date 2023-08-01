@@ -12,11 +12,14 @@ namespace Portkey.Network
     [CreateAssetMenu(fileName = "RequestHttp", menuName = "Portkey/Network/RequestHttp")]
     public class RequestHttp : IHttp
     {
+        private readonly int HTTP_TIMEOUT = 30;
+        
         public override IEnumerator Get<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             var url = GetUrlWithParameters(data);
 
             using var request = UnityWebRequest.Get(url);
+            request.timeout = HTTP_TIMEOUT;
             
             foreach (var header in data.Headers)
             {
@@ -27,16 +30,10 @@ namespace Portkey.Network
             
             yield return request.SendWebRequest();
 
-            if (request.error != null)
+            if (request.error != null || request.result != UnityWebRequest.Result.Success)
             {
                 var errorMessage = GetErrorMessage(request);
                 errorCallback(errorMessage);
-                yield break;
-            }
-            
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                errorCallback(request.responseCode.ToString());
                 yield break;
             }
             
@@ -44,13 +41,16 @@ namespace Portkey.Network
             successCallback(request.downloadHandler.text);
         }
 
-        private static string GetErrorMessage(UnityWebRequest request)
+        private static ErrorMessage GetErrorMessage(UnityWebRequest request)
         {
-            var errorMessage = request.error;
-            if (request.downloadHandler.text != null)
+            var errorDetails = (request.downloadHandler.text != null) ? request.downloadHandler.text : string.Empty;
+            
+            var errorMessage = new ErrorMessage
             {
-                errorMessage += $"\n{request.downloadHandler.text}";
-            }
+                message = request.error,
+                details = errorDetails,
+                code = request.responseCode
+            };
 
             return errorMessage;
         }
@@ -91,7 +91,8 @@ namespace Portkey.Network
                 new UploadHandlerRaw(postData))
             {
                 disposeUploadHandlerOnDispose = true,
-                disposeDownloadHandlerOnDispose = true
+                disposeDownloadHandlerOnDispose = true,
+                timeout = HTTP_TIMEOUT
             };
             
             request.SetRequestHeader("Content-Type", data.ContentType);
@@ -102,18 +103,13 @@ namespace Portkey.Network
 
             yield return request.SendWebRequest();
 
-            if (request.error != null)
+            if (request.error != null || request.result != UnityWebRequest.Result.Success)
             {
                 var errorMessage = GetErrorMessage(request);
                 errorCallback(errorMessage);
                 yield break;
             }
             
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                errorCallback(request.responseCode.ToString());
-                yield break;
-            }
             successCallback(request.downloadHandler.text);
         }
 
@@ -128,21 +124,17 @@ namespace Portkey.Network
             {
                 request.SetRequestHeader(header.Key, header.Value);
             }
+            request.timeout = HTTP_TIMEOUT;
 
             yield return request.SendWebRequest();
 
-            if (request.error != null)
+            if (request.error != null || request.result != UnityWebRequest.Result.Success)
             {
                 var errorMessage = GetErrorMessage(request);
                 errorCallback(errorMessage);
                 yield break;
             }
             
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                errorCallback(request.responseCode.ToString());
-                yield break;
-            }
             successCallback(request.downloadHandler.text);
         }
         

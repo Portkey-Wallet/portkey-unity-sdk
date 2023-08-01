@@ -163,6 +163,8 @@ namespace Portkey.Core
     /// </summary>
     public interface IPortkeySocialService : IVerificationService, ISearchService
     {
+        public static readonly string UNREGISTERED_CODE = "3002";
+        
         /// <summary>
         /// Coroutine to register a new account.
         /// </summary>

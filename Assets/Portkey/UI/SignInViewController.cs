@@ -105,7 +105,7 @@ namespace Portkey.UI
                 }));
             }, (error) =>
             {
-                if (error.Contains("3002"))
+                if (error.Contains(IPortkeySocialService.UNREGISTERED_CODE))
                 {
                     CheckChainInfo(identifier, accountType, token, false);
                 }

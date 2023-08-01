@@ -31,6 +31,7 @@ namespace Portkey.UI
         [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private GameObject confirmBackView;
         
+        private VerifierItem _verifierItem = null;
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
         private IPortkeySocialService _portkeySocialService;
@@ -47,6 +48,10 @@ namespace Portkey.UI
             "Confirm PIN"
         };
         
+        public VerifierItem VerifierItem
+        {
+            set => _verifierItem = value;
+        }
         public List<GuardiansApproved> GuardiansApprovedList
         {
             set => _guardiansApprovedList = value;
@@ -83,13 +88,13 @@ namespace Portkey.UI
             {
                 ShowLoading(true, "Initiating social recovery...");
             }
-
-            StartCoroutine(did.GetVerifierServers(_guardianIdentifierInfo.chainId, CheckAccessTokenExpired, OnError));
+            
+            CheckAccessTokenExpired();
         }
 
-        private void CheckAccessTokenExpired(VerifierItem[] verifierServerList)
+        private void CheckAccessTokenExpired()
         {
-            var verifier = verifierServerList[0];
+            var verifier = _verifierItem;
             var socialVerifier = did.GetSocialVerifier(AccountType.Google);
 
             var param = new VerifyAccessTokenParam
@@ -118,11 +123,11 @@ namespace Portkey.UI
             }
             else
             {
-                Login(verifierDoc.verifierId, verificationResult);
+                Login();
             }
         }
 
-        private void Login(string verifierId, VerifyVerificationCodeResult verificationResult)
+        private void Login()
         {
             var extraData = "";
             try

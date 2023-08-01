@@ -320,6 +320,11 @@ public class GuardiansApprovalViewController : MonoBehaviour
 
     private void OpenSetPINView()
     {
+        foreach (var status in _guardianStatusList.Where(status => IsMatchingGuardianIdentifier(_guardianIdentifierInfo, status.guardianItem)))
+        {
+            setPINViewController.VerifierItem = status.guardianItem.verifier;
+            break;
+        }
         setPINViewController.gameObject.SetActive(true);
         setPINViewController.GuardiansApprovedList = _approvedGuardians;
         setPINViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;

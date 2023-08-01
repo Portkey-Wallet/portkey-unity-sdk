@@ -38,6 +38,7 @@ namespace Portkey.UI
         [SerializeField] private DID.DID did;
         [SerializeField] private WalletViewController walletView;
         [SerializeField] private LoadingViewController loadingView;
+        [SerializeField] private GameObject confirmBackView;
         
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
@@ -74,6 +75,11 @@ namespace Portkey.UI
         private void Start()
         {
             _portkeySocialService = did.PortkeySocialService;
+        }
+
+        private void OnEnable()
+        {
+            ResetToEnterPINState();
         }
 
         private void OnSetPINSuccess()
@@ -339,6 +345,12 @@ namespace Portkey.UI
                 ResetToEnterPINState();
                 return;
             }
+            
+            confirmBackView.SetActive(true);
+        }
+
+        public void OnClickConfirmBack()
+        {
             if (previousView == null)
             {
                 throw new Exception("No previous view set");
@@ -355,12 +367,16 @@ namespace Portkey.UI
             }
             ClearPIN();
             ChangeState(State.ENTER_PIN);
+            
+            confirmBackView.SetActive(false);
         }
 
         private void ClearPIN()
         {
             _stateToPIN[(int)State.ENTER_PIN] = "";
             _stateToPIN[(int)State.CONFIRM_PIN] = "";
+            
+            pinProgress.SetPINProgress(0);
         }
 
         public void SetPreviousView(GameObject view)

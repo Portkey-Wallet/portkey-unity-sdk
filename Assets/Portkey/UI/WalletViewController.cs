@@ -32,6 +32,10 @@ namespace Portkey.UI
         private void Start()
         {
             addressText.text = walletInfo.caInfo.caAddress;
+        }
+
+        private void OnEnable()
+        {
             confirmSignOutDialog.SetActive(false);
         }
 

@@ -225,7 +225,7 @@ namespace Portkey.DID
                 param.managerInfo = new ManagerInfo
                 {
                     Address = _managementAccount.Address.ToAddress(),
-                    ExtraData = "extraData"
+                    ExtraData = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds().ToString()
                 };
             }
             Debugger.Log("Removing Manager...");
@@ -514,7 +514,7 @@ namespace Portkey.DID
                 errorCallback("Management Account does not exist.");
                 yield break;
             }
-
+            
             yield return _contractProvider.GetContract(param.chainId, async (contract) =>
             {
                 var removeManagerInfoInput = new RemoveManagerInfoInput

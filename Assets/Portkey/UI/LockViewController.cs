@@ -21,6 +21,12 @@ public class LockViewController : MonoBehaviour
             body.SetActive(true);
         }
     }
+
+    public void ResetView()
+    {
+        errorMessage.text = "";
+        body.SetActive(false);
+    }
     
     public void OnClickNumber(int number)
     {
@@ -31,6 +37,7 @@ public class LockViewController : MonoBehaviour
         
         PIN += number.ToString();
         pinProgress.SetPINProgress(PIN.Length);
+        errorMessage.text = "";
         
         if (PIN.Length != pinProgress.GetMaxPINLength())
         {

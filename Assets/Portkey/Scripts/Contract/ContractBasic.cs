@@ -61,8 +61,8 @@ namespace Portkey.Contract
             var transaction = await _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param);
 
             // As different nodes have different block height,
-            // we need to give the next transaction a lower height (-50) so transaction can be successful
-            var refBlockNumber = transaction.RefBlockNumber - 50;
+            // we need to give the next transaction a lower height (-10) so transaction can be successful
+            var refBlockNumber = transaction.RefBlockNumber - 10;
             refBlockNumber = Math.Max(0, refBlockNumber);
 
             var blockDto = await _chain.GetBlockByHeightAsync(refBlockNumber);

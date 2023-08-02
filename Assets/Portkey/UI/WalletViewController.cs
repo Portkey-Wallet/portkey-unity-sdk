@@ -21,7 +21,8 @@ namespace Portkey.UI
         [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private SetPINViewController setPinViewController;
         [SerializeField] private GuardiansApprovalViewController guardiansApprovalViewController;
-
+        [SerializeField] private LockViewController lockViewController;
+        
         private DIDWalletInfo walletInfo = null;
         
         public DIDWalletInfo WalletInfo
@@ -69,6 +70,7 @@ namespace Portkey.UI
         {
             setPinViewController.ResetToEnterPINState();
             guardiansApprovalViewController.ResetView();
+            lockViewController.ResetView();
         }
 
         private void OpenSignInView()

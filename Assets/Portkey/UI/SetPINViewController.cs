@@ -281,7 +281,6 @@ namespace Portkey.UI
             if (_currentState == State.ENTER_PIN)
             {
                 ChangeState(State.CONFIRM_PIN);
-                errorMessage.text = "";
             }
             else
             {
@@ -352,6 +351,7 @@ namespace Portkey.UI
         {
             ClearPIN();
             ChangeState(State.ENTER_PIN);
+            errorMessage.text = "";
             
             confirmBackView.SetActive(false);
         }

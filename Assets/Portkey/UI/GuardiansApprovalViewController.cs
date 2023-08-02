@@ -102,7 +102,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     private void InitializeUI()
     {
         expireText.text = "Expire after 1 hour.";
-        totalGuardiansText.text = $"/{_guardianStatusList.Count.ToString()}";
+        totalGuardiansText.text = $"/{did.GetApprovalCount(_guardianStatusList.Count).ToString()}";
         completeButtonGameObject.SetActive(true);
         infoDialog.SetActive(false);
         
@@ -120,7 +120,13 @@ public class GuardiansApprovalViewController : MonoBehaviour
         UpdateTotalVerifiedGuardiansText();
         UpdateGuardianProgressDial();
 
-        SetSendButtonInteractable(VerifiedCount(_guardianStatusList) >= did.GetApprovalCount(_guardianStatusList.Count));
+        var isCompletedVerification = VerifiedCount(_guardianStatusList) >= did.GetApprovalCount(_guardianStatusList.Count);
+        SetSendButtonInteractable(isCompletedVerification);
+
+        if (isCompletedVerification)
+        {
+            CompleteVerificationForGuardianItems();
+        }
     }
 
     private void Update()
@@ -148,6 +154,11 @@ public class GuardiansApprovalViewController : MonoBehaviour
     private void ExpireGuardianItems()
     {
         _guardianItemComponents.Where(item => item.VerifierStatus != VerifierStatus.Verified).ToList().ForEach(item => item.SetExpired(true));
+    }
+    
+    private void CompleteVerificationForGuardianItems()
+    {
+        _guardianItemComponents.Where(item => item.VerifierStatus != VerifierStatus.Verified).ToList().ForEach(item => item.SetEndOperation());
     }
     
     private void ResetGuardianStatusList()

@@ -78,6 +78,13 @@ namespace Portkey.UI
                 verifyButton.SetActive(false);
             }
         }
+        
+        public void SetEndOperation()
+        {
+            expiredText.SetActive(false);
+            verifiedCheck.SetActive(false);
+            verifyButton.SetActive(false);
+        }
 
         public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)
         {

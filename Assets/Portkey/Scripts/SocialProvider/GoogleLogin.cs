@@ -219,7 +219,7 @@ namespace Portkey.SocialProvider
         {
             return (error) =>
             {
-                errorCallback(error.message);
+                errorCallback(error.message + error.details);
             };
         }
 

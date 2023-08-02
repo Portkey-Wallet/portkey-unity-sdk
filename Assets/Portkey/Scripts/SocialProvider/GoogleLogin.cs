@@ -142,7 +142,7 @@ namespace Portkey.SocialProvider
                 return;
             }
                 
-            RequestSocialInfo(accessToken);
+            RequestSocialInfo(accessToken, _successCallback, _errorCallback);
         }
         
 #endif

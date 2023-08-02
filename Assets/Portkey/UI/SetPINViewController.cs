@@ -271,6 +271,7 @@ namespace Portkey.UI
             }
             CurrentPIN += number.ToString();
             pinProgress.SetPINProgress(CurrentPIN.Length);
+            errorMessage.text = "";
             
             if (CurrentPIN.Length != pinProgress.GetMaxPINLength())
             {

@@ -7,9 +7,7 @@ namespace Portkey.UI
 {
     public class PINProgressComponent : MonoBehaviour
     {
-        [SerializeField] private List<Image> pinProgressIndicatorList;
-        [SerializeField] private Color activatedColor;
-        [SerializeField] private Color deactivatedColor;
+        [SerializeField] private List<ProgressIndicatorComponent> pinProgressIndicatorList;
         
         public void SetPINProgress(int progress)
         {
@@ -17,8 +15,7 @@ namespace Portkey.UI
             
             for (var i = 0; i < pinProgressIndicatorList.Count; i++)
             {
-                var color = i < progress ? activatedColor : deactivatedColor;
-                pinProgressIndicatorList[i].color = color;
+                pinProgressIndicatorList[i].SetProgress(i < progress);
             }
         }
         

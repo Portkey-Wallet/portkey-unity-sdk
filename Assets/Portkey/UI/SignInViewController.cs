@@ -30,7 +30,7 @@ namespace Portkey.UI
 
             if (Application.absoluteURL.Contains("access_token="))
             {
-                SignIn();
+                SignIn((int)AccountType.Google);
             }
 
 #endif

@@ -26,8 +26,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI expireText;
     [SerializeField] private TextMeshProUGUI totalGuardiansText;
     [SerializeField] private TextMeshProUGUI totalVerifiedGuardiansText;
-    [SerializeField] private GameObject completeButtonGameObject;
-    [SerializeField] private Button completeButton;
+    [SerializeField] private ButtonComponent completeButtonGameObject;
 
     [Header("Progress Dial")]
     [SerializeField] private Image guardianProgressDial;
@@ -103,7 +102,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     {
         expireText.text = "Expire after 1 hour.";
         totalGuardiansText.text = $"/{did.GetApprovalCount(_guardianStatusList.Count).ToString()}";
-        completeButtonGameObject.SetActive(true);
+        completeButtonGameObject.gameObject.SetActive(true);
         infoDialog.SetActive(false);
         
         UpdateGuardianInfoUI();
@@ -148,7 +147,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     {
         expireText.text = "Expired";
         ExpireGuardianItems();
-        completeButtonGameObject.SetActive(false);
+        completeButtonGameObject.gameObject.SetActive(false);
     }
 
     private void ExpireGuardianItems()
@@ -174,7 +173,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
 
     private void SetSendButtonInteractable(bool interactable)
     {
-        completeButton.interactable = interactable;
+        completeButtonGameObject.SetDisabled(!interactable);
     }
 
     private void ClearGuardianItems()

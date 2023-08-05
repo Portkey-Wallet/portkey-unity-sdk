@@ -87,7 +87,7 @@ namespace Portkey.SocialProvider
             public string code;
             public string redirect_uri;
             public string client_id;
-#if !UNITY_ANDROID
+#if !UNITY_ANDROID || UNITY_EDITOR
             public string code_verifier;
 #endif
 #if UNITY_STANDALONE || UNITY_EDITOR || UNITY_ANDROID
@@ -298,7 +298,7 @@ namespace Portkey.SocialProvider
                     code = code,
                     redirect_uri = _redirectUri,
                     client_id = _clientId,
-#if !UNITY_ANDROID
+#if !UNITY_ANDROID || UNITY_EDITOR
                     code_verifier = codeVerifier,
 #endif
 #if UNITY_STANDALONE || UNITY_EDITOR || UNITY_ANDROID

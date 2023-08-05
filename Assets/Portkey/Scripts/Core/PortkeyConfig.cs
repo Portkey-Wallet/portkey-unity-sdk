@@ -71,6 +71,8 @@ namespace Portkey.Core
         private string googleMobileClientId = "931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com";
         [SerializeField]
         private string googleMobileProtocol = "portkey.sdk";
+        [SerializeField] 
+        private string googleMobileClientSecret = "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";
         
         [Header("Google WebGL Login")]
         [SerializeField]
@@ -89,6 +91,7 @@ namespace Portkey.Core
         public string GooglePCClientSecret => googlePCClientSecret;
         public string GoogleMobileClientId => googleMobileClientId;
         public string GoogleMobileProtocol => googleMobileProtocol;
+        public string GoogleMobileClientSecret => googleMobileClientSecret;
         public string GoogleWebGLClientId => googleWebGLClientId;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;

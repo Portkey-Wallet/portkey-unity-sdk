@@ -31,6 +31,11 @@ android {
     
     dependencies {
         implementation "androidx.biometric:biometric:1.1.0"
+        implementation 'androidx.appcompat:appcompat:1.6.1'
+        implementation 'com.google.android.gms:play-services-auth:20.6.0'
+        implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+        implementation 'androidx.media3:media3-common:1.0.0-alpha03'
+
     }
 
     aaptOptions {

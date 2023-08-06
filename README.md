@@ -27,24 +27,23 @@ Welcome to the Portkey Unity SDK! This software development kit (SDK) is designe
 - Unity 2021.3.26f1 or later
 - Xcode 12.5 or later (for iOS builds)
 - Android Studio 4.2.2 or later (for Android builds)
-- Unity Package: com.unity.nuget.newtonsoft-json@3.2 (Newtonsoft)
 
-### Dependencies
-- Google Protobuf 3.19.4
-    - If you require to generate C# classes from .proto, please use the installation below:
-        ```
-        brew install protobuf@21
-        export PATH="$(brew --prefix protobuf@21)/bin:$PATH"
-        ```
+### Setup
 
 To start using the Portkey Unity SDK, follow these steps:
 
-1. Clone the repository or download the SDK package from the [releases](https://github.com/Portkey-Wallet/portkey-unity-sdk/releases) section.
-2. Extract the contents of the package to a desired location in your Unity project.
-3. Open your Unity project.
-4. In the Unity editor, navigate to **Assets > Import Package > Custom Package**.
-5. Select the extracted package file (e.g., `UnitySDK.unitypackage`) and click **Open**.
-6. Unity will import the SDK assets and libraries into your project.
+1. Set up your Unity project.
+2. Open <root>/Packages/manifest.json
+3. Add the following line to the dependencies section:
+    ```
+    "nuget.moq": "1.0.0",
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    ```
+4. Download the SDK package from the [releases](https://github.com/Portkey-Wallet/portkey-unity-sdk/releases) section.
+5. Open your Unity project.
+6. In the Unity editor, navigate to **Assets > Import Package > Custom Package**.
+7. Select the SDK package file (e.g., `portkey-unity-sdk-v1.0.0-alpha.unitypackage`) and click **Open**.
+8. Unity will import the SDK assets and libraries into your project.
 
 ### Tools
 - GraphQL C# Code Generator (For generating data structs of GraphQL's query responses)
@@ -58,6 +57,12 @@ To start using the Portkey Unity SDK, follow these steps:
     - The generated C# code will appear in Assets/Portkey/Scripts/__Generated__/GraphQLCodeGen.cs
 - Contract C# Code generator to generate C# classes from .proto files
     - https://github.com/AElfProject/contract-plugin/blob/master/src/contract_csharp_generator.cc
+- Google Protobuf 3.19.4
+    - If you require to generate C# classes from .proto, please use the installation below:
+        ```
+        brew install protobuf@21
+        export PATH="$(brew --prefix protobuf@21)/bin:$PATH"
+        ```
 
 ## Usage
 To use the Unity SDK in your project, follow these steps:
@@ -70,7 +75,7 @@ To use the Unity SDK in your project, follow these steps:
 6. Write your custom code to interact with the SDK's functionality.
 7. Build and run your Unity application or game to test the integration.
 
-## Examples (TODO)
+## Examples (WIP)
 Check out the following code snippet to see an example of how to use the Unity SDK:
 
 ```csharp

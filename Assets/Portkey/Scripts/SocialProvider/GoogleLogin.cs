@@ -62,7 +62,7 @@ namespace Portkey.SocialProvider
                     if (output.isError)
                     {
                         Debugger.LogError(output.message);
-                        _errorCallback?.Invoke(output.message);
+                        _errorCallback?.Invoke("Network Error!");
                     }
                     else
                     {

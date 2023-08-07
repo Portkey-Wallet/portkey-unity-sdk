@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Linq;
+using Portkey.Biometric;
 using Portkey.Chain;
 using Portkey.Contract;
 using Portkey.Core;
@@ -25,6 +26,7 @@ namespace Portkey.DID
         private IContractProvider _caContractProvider;
         private IEncryption _encryption;
         private ISocialVerifierProvider _socialVerifierProvider;
+        private IBiometricProvider _biometricProvider;
         
         private DIDWallet<WalletAccount> _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
@@ -40,6 +42,7 @@ namespace Portkey.DID
             _chainProvider = new AElfChainProvider();
             _caContractProvider = new CAContractProvider(_portkeySocialService, _chainProvider);
             _encryption = new AESEncryption();
+            _biometricProvider = new BiometricProvider();
             
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
         }

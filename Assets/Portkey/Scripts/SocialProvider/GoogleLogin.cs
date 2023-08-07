@@ -66,7 +66,6 @@ namespace Portkey.SocialProvider
                     }
                     else
                     {
-                        Debugger.LogError(output.message);
                         RequestToken(output.message, CodeVerifier);
                     }
                     yield break;

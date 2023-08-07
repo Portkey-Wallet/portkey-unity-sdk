@@ -80,15 +80,6 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            if (Operation == OperationType.SIGN_UP)
-            {
-                ShowLoading(true, "Creating address on the chain...");
-            }
-            else
-            {
-                ShowLoading(true, "Initiating social recovery");
-            }
-            
             CheckAccessTokenExpired();
         }
 
@@ -103,7 +94,19 @@ namespace Portkey.UI
                 accessToken = _guardianIdentifierInfo.token,
                 chainId = _guardianIdentifierInfo.chainId
             };
-            socialVerifier.AuthenticateIfAccessTokenExpired(param, OnAuthenticated, OnError);
+            socialVerifier.AuthenticateIfAccessTokenExpired(param, OnAuthenticated, OnStartLoading, OnError);
+        }
+        
+        private void OnStartLoading(bool show)
+        {
+            if (Operation == OperationType.SIGN_UP)
+            {
+                ShowLoading(show, "Creating address on the chain...");
+            }
+            else
+            {
+                ShowLoading(show, "Initiating social recovery");
+            }
         }
 
         private void OnAuthenticated(VerificationDoc verifierDoc, string accessToken, VerifyVerificationCodeResult verificationResult)

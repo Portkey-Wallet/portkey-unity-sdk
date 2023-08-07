@@ -66,6 +66,7 @@ namespace Portkey.SocialProvider
                     }
                     else
                     {
+                        _startLoadCallback?.Invoke(true);
                         RequestToken(output.message, CodeVerifier);
                     }
                     yield break;
@@ -108,6 +109,7 @@ namespace Portkey.SocialProvider
         private string _state;
         private ISocialLogin.AuthCallback _successCallback;
         private ErrorCallback _errorCallback;
+        private SuccessCallback<bool> _startLoadCallback;
 
         private IHttp _request;
         
@@ -138,10 +140,11 @@ namespace Portkey.SocialProvider
         }
         
 #if UNITY_STANDALONE || UNITY_EDITOR
-        public void Authenticate(ISocialLogin.AuthCallback successCallback, ErrorCallback errorCallback)
+        public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
             _successCallback = successCallback;
             _errorCallback = errorCallback;
+            _startLoadCallback = startLoadCallback;
             _redirectUri = $"http://localhost:{Utilities.GetRandomUnusedPort()}/";
 
             Authenticate();
@@ -183,7 +186,7 @@ namespace Portkey.SocialProvider
             HandleAuthenticationResponse(context.Request.QueryString);
         }
 #elif UNITY_ANDROID
-        public void Authenticate(ISocialLogin.AuthCallback successCallback, ErrorCallback errorCallback)
+        public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
             #if UNITY_EDITOR
 
@@ -193,6 +196,7 @@ namespace Portkey.SocialProvider
 
             _successCallback = successCallback;
             _errorCallback = errorCallback;
+            _startLoadCallback = startLoadCallback;
             _redirectUri = "";
 
             StaticCoroutine.StartCoroutine(HandleGoogleAuthOutput());
@@ -202,7 +206,7 @@ namespace Portkey.SocialProvider
         
 #elif UNITY_WSA || UNITY_IOS
 
-        public void Authenticate(ISocialLogin.AuthCallback successCallback, ErrorCallback errorCallback)
+        public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
             #if UNITY_EDITOR
 
@@ -212,6 +216,7 @@ namespace Portkey.SocialProvider
 
             _successCallback = successCallback;
             _errorCallback = errorCallback;
+            _startLoadCallback = startLoadCallback;
             _redirectUri = $"{_protocol}:/oauth2callback";
             
             Authenticate();
@@ -219,11 +224,14 @@ namespace Portkey.SocialProvider
 
 #elif UNITY_WEBGL
 
-        public void Authenticate(ISocialLogin.AuthCallback successCallback, ErrorCallback errorCallback)
+        public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
             _successCallback = successCallback;
             _errorCallback = errorCallback;
+            _startLoadCallback = startLoadCallback;
             _redirectUri = Application.absoluteURL;
+
+            _startLoadCallback?.Invoke(true);
 
             var accessToken = Utilities.ParseQueryString(Application.absoluteURL).Get("access_token");
             if (accessToken == null)
@@ -246,6 +254,7 @@ namespace Portkey.SocialProvider
             var authorizationRequest = $"{AUTHORIZATION_ENDPOINT}?response_type=code&client_id={_clientId}&state={_state}&scope={Uri.EscapeDataString(ACCESS_SCOPE)}&redirect_uri={Uri.EscapeDataString(_redirectUri)}&code_challenge={codeChallenge}&code_challenge_method=S256";
 
 #if UNITY_STANDALONE || UNITY_EDITOR
+            _startLoadCallback?.Invoke(true);
             Application.OpenURL(authorizationRequest);
 #elif UNITY_ANDROID
             var callback = new JavaAuthCallback(this);
@@ -257,6 +266,9 @@ namespace Portkey.SocialProvider
             unityGoogleLoginPlugin.SetStatic("clientId", _clientId);
             unityGoogleLoginPlugin.CallStatic("SetCallback", callback);
             unityGoogleLoginPlugin.CallStatic("Call", currentActivity);
+#else
+            _startLoadCallback?.Invoke(true);
+            Application.OpenURL(authorizationRequest);
 #endif
         }
 

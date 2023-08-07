@@ -14,7 +14,7 @@ namespace Portkey.SocialProvider
             _portkeySocialService = portkeySocialService;
         }
         
-        public void AuthenticateIfAccessTokenExpired(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
+        public void AuthenticateIfAccessTokenExpired(VerifyAccessTokenParam param, AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
             if(param.accessToken == null)
             {
@@ -22,7 +22,7 @@ namespace Portkey.SocialProvider
                 {
                     param.accessToken = info.access_token;
                     VerifyGoogleToken();
-                }, errorCallback);
+                }, startLoadCallback, errorCallback);
                 return;
             }
             // check if login access token is expired
@@ -35,7 +35,7 @@ namespace Portkey.SocialProvider
                     {
                         param.accessToken = info.access_token;
                         VerifyGoogleToken();
-                    }, errorCallback);
+                    }, startLoadCallback, errorCallback);
                 }
                 else
                 {

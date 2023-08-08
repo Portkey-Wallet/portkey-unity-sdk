@@ -38,10 +38,10 @@ namespace Portkey.Test
             Assert.Fail(param);
         }
         
-        public void FailErrorCallback(string param)
+        public void FailErrorCallback(IHttp.ErrorMessage error)
         {
-            Debug.Log("FailErrorCallback: " + param);
-            Assert.Pass(param);
+            Debug.Log("FailErrorCallback: " + error.message);
+            Assert.Pass(error.message);
         }
         
 #if TEST_FETCHJSONHTTP

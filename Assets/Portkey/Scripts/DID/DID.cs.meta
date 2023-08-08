@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Portkey/Scripts/DID/DID.cs.meta
+guid: 1b927a62a71d34d58bc723fa038d2c07
+========
+guid: c2280420789b14742952d6ae4d81a0f4
+>>>>>>>> feature/did-wallet:Assets/Portkey/Scripts/Core/DID/AccountBase.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

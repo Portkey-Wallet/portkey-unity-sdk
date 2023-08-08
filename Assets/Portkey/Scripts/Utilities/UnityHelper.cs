@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Portkey.Utilities
 {
+#if UNITY_EDITOR
     /// <summary>
     /// Helper class to provide some unity specific functionality.
     /// </summary>
@@ -31,4 +32,5 @@ namespace Portkey.Utilities
             return AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guids[0]));
         }
     }
+#endif
 }

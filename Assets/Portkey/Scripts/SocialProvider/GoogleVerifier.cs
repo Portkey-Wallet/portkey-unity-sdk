@@ -25,11 +25,14 @@ namespace Portkey.SocialProvider
                 }, startLoadCallback, errorCallback);
                 return;
             }
+            
+            startLoadCallback(true);
             // check if login access token is expired
             _socialLogin.RequestSocialInfo(param.accessToken, (socialInfo) =>
             {
                 if(socialInfo == null)
                 {
+                    startLoadCallback(false);
                     //login expired, need to re-login
                     _socialLogin.Authenticate((info) =>
                     {

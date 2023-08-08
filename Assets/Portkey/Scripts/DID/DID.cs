@@ -47,54 +47,6 @@ namespace Portkey.DID
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
         }
 
-        /*
-        private class JavaCallback : AndroidJavaProxy
-        {
-            public JavaCallback() : base("co.infinum.goldfinger.Goldfinger$Callback")
-            {
-                
-            }
-
-            public virtual void onResult(AndroidJavaObject result)
-            {
-                Debugger.LogError("Biometric authentication succeeded.");
-            }
-
-            public virtual void onError(AndroidJavaObject e)
-            {
-                Debugger.LogError($"Biometric authentication failed. {e.Call<string>("getMessage")}.");
-            }
-        }
-
-        private void Start()
-        {
-            using var currentActivity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
-            using var context = currentActivity.Call<AndroidJavaObject>("getApplicationContext");
-            using var goldFinger = (new AndroidJavaObject("co.infinum.goldfinger.Goldfinger$Builder", context)).Call<AndroidJavaObject>("build");
-            var canAuthenticate = goldFinger.Call<bool>("canAuthenticate");
-            if (canAuthenticate)
-            {
-                using var unityNativePluginFragment = new AndroidJavaClass("co.infinum.goldfinger.UnityNativePluginFragment");
-                unityNativePluginFragment.CallStatic("Call", currentActivity);
-                    
-                using var promptParams = new AndroidJavaObject("co.infinum.goldfinger.Goldfinger$PromptParams");
-                promptParams.Set("dialogOwner", unityNativePluginFragment);
-                promptParams.Set("title", "Biometric Authentication");
-                promptParams.Set("subtitle", "Portkey");
-                promptParams.Set("description", "Please authenticate to continue.");
-                promptParams.Set("negativeButtonText", "Cancel");
-                promptParams.Set("confirmationRequired", true);
-                promptParams.Set("deviceCredentialsAllowed", true);
-
-                goldFinger.Call("authenticate", promptParams, new JavaCallback());
-            }
-            else
-            {
-                Debugger.LogError("Does not support biometric authentication.");
-            }
-        }
-        */
-
         public int GetApprovalCount(int length)
         {
             if (length <= _config.MinApprovals)
@@ -102,6 +54,11 @@ namespace Portkey.DID
                 return length;
             }
             return (int) (_config.MinApprovals * length / (float)_config.Denominator + 1);
+        }
+        
+        public IBiometric GetBiometric()
+        {
+            return _biometricProvider.GetBiometric();
         }
 
         public ISocialLogin GetSocialLogin(AccountType type)

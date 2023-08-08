@@ -1,3 +1,5 @@
+using System;
+using Portkey.Core;
 using Portkey.DID;
 using Portkey.UI;
 using TMPro;
@@ -12,20 +14,68 @@ public class LockViewController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI errorMessage;
 
     private string PIN = "";
+    private bool openLock = false;
     
     private void OnApplicationPause(bool pauseStatus)
     {
         if (pauseStatus && did.IsLoggedIn() && setPinViewController.CurrentPIN != "")
         {
             errorMessage.text = "";
-            body.SetActive(true);
+            DisplayLock(true);
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (!openLock)
+        {
+            return;
+        }
+
+        openLock = false;
+        
+        if(setPinViewController.UseBiometric)
+        {
+            PromptBiometric();
+        }
+    }
+
+    private void PromptBiometric()
+    {
+        var biometric = did.GetBiometric();
+        if (biometric == null)
+        {
+            return;
+        }
+
+        var promptInfo = new IBiometric.BiometricPromptInfo
+        {
+            title = "Biometric Authentication",
+            subtitle = "Biometric Authentication",
+            description = "You may choose to autheticate with your biometric or cancel.",
+            negativeButtonText = "Cancel"
+        };
+        biometric.Authenticate(promptInfo, pass =>
+        {
+            DisplayLock(!pass);
+        }, OnError);
+    }
+    
+    private void OnError(string error)
+    {
+        Debugger.LogError(error);
     }
 
     public void ResetView()
     {
         errorMessage.text = "";
-        body.SetActive(false);
+        DisplayLock(false);
+    }
+
+    private void DisplayLock(bool display)
+    {
+        body.SetActive(display);
+        openLock = display;
     }
     
     public void OnClickNumber(int number)
@@ -46,7 +96,7 @@ public class LockViewController : MonoBehaviour
         
         if(PIN == setPinViewController.CurrentPIN)
         {
-            body.SetActive(false);
+            DisplayLock(false);
         }
         else
         {

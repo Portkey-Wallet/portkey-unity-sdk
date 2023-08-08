@@ -14,30 +14,35 @@ public class LockViewController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI errorMessage;
 
     private string PIN = "";
-    private bool openLock = false;
+    private bool openBiometric = false;
+    private bool isBiometricPromptOpened = false;
     
     private void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus && did.IsLoggedIn() && setPinViewController.CurrentPIN != "")
+        if (pauseStatus && did.IsLoggedIn() && setPinViewController.CurrentPIN != "" && !isBiometricPromptOpened)
         {
-            errorMessage.text = "";
+            ResetPIN();
             DisplayLock(true);
+            openBiometric = setPinViewController.UseBiometric;
         }
+    }
+
+    private void ResetPIN()
+    {
+        PIN = "";
+        errorMessage.text = "";
     }
 
     private void LateUpdate()
     {
-        if (!openLock)
+        if (!openBiometric)
         {
             return;
         }
 
-        openLock = false;
+        openBiometric = false;
         
-        if(setPinViewController.UseBiometric)
-        {
-            PromptBiometric();
-        }
+        PromptBiometric();
     }
 
     private void PromptBiometric()
@@ -47,6 +52,8 @@ public class LockViewController : MonoBehaviour
         {
             return;
         }
+        
+        isBiometricPromptOpened = true;
 
         var promptInfo = new IBiometric.BiometricPromptInfo
         {
@@ -58,24 +65,27 @@ public class LockViewController : MonoBehaviour
         biometric.Authenticate(promptInfo, pass =>
         {
             DisplayLock(!pass);
+            isBiometricPromptOpened = false;
         }, OnError);
     }
     
     private void OnError(string error)
     {
+        isBiometricPromptOpened = false;
         Debugger.LogError(error);
     }
 
     public void ResetView()
     {
-        errorMessage.text = "";
+        ResetPIN();
         DisplayLock(false);
+        openBiometric = false;
+        isBiometricPromptOpened = false;
     }
 
     private void DisplayLock(bool display)
     {
         body.SetActive(display);
-        openLock = display;
     }
     
     public void OnClickNumber(int number)

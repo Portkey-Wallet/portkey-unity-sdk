@@ -21,6 +21,6 @@ namespace Portkey.Core
     
     public interface ISocialVerifier
     {
-        void AuthenticateIfAccessTokenExpired(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback);
+        void AuthenticateIfAccessTokenExpired(VerifyAccessTokenParam param, AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback);
     }
 }

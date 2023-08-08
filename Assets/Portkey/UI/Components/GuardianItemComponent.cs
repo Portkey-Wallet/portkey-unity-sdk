@@ -144,8 +144,6 @@ namespace Portkey.UI
 
         public void OnClickVerify()
         {
-            ShowLoading(true, "Loading...");
-            
             var loginType = _userGuardianStatus.guardianItem.guardian.type;
             // let's see if we need this when we implement email and phone, very likely we don't need this
             if (loginType == AccountType.Google || loginType == AccountType.Apple)
@@ -172,8 +170,13 @@ namespace Portkey.UI
                     chainId = _guardianIdentifierInfo.chainId
                 };
                 
-                socialVerifier.AuthenticateIfAccessTokenExpired(param, OnVerified, OnError);
+                socialVerifier.AuthenticateIfAccessTokenExpired(param, OnVerified, OnStartLoading, OnError);
             }
+        }
+        
+        private void OnStartLoading(bool show)
+        {
+            ShowLoading(show, "Loading...");
         }
         
         private void OnVerified(VerificationDoc verificationDoc, string accessToken, VerifyVerificationCodeResult verificationResult)

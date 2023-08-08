@@ -24,7 +24,7 @@ namespace Portkey.Biometric
             }
         }
         
-        public void Authenticate(IBiometric.SuccessCallback onSuccess, ErrorCallback onError)
+        public void Authenticate(IBiometric.BiometricPromptInfo info, IBiometric.SuccessCallback onSuccess, ErrorCallback onError)
         {
             var callback = new BiometricJavaAuthCallback();
             
@@ -32,12 +32,19 @@ namespace Portkey.Biometric
             using var currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
             using var context = currentActivity.Call<AndroidJavaObject>("getApplicationContext");
             using var biometricPlugin = new AndroidJavaClass("com.portkey.biometricunityplugin.BiometricUnityActivity");
-            biometricPlugin.SetStatic("title", "Biometric Authentication");
-            biometricPlugin.SetStatic("negativeButtonText", "Cancel");
-            biometricPlugin.SetStatic("description", "You may choose to autheticate with your biometric or cancel.");
-            biometricPlugin.SetStatic("subtitle", "Biometric Authentication");
+            biometricPlugin.SetStatic("title", info.title);
+            biometricPlugin.SetStatic("negativeButtonText", info.negativeButtonText);
+            biometricPlugin.SetStatic("description", info.description);
+            biometricPlugin.SetStatic("subtitle", info.subtitle);
             biometricPlugin.CallStatic("SetCallback", callback);
             biometricPlugin.CallStatic("Call", currentActivity);
+            
+            /*
+             * "Biometric Authentication"
+             * "Cancel"
+             * "You may choose to autheticate with your biometric or cancel."
+             * "Biometric Authentication"
+             */
         }
     }
 }

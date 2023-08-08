@@ -11,6 +11,7 @@ namespace Portkey.Biometric
 #elif UNITY_ANDROID
             return new AndroidBiometric();
 #elif UNITY_IOS
+            return null;
 #else
             return null;
 #endif

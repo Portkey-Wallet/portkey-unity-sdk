@@ -81,6 +81,10 @@ namespace Portkey.Core
         [Header("Google WebGL Login")]
         [SerializeField]
         private string googleWebGLClientId = "931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com";
+        [SerializeField]
+        private string googleWebGLLoginUrl = "https://openlogin.portkey.finance/";
+        [SerializeField]
+        private string googleWebGLRedirectUri = "https://openlogin.portkey.finance/auth-callback";
 
         [Header("Approval Settings")]
         [SerializeField] private int minApprovals = 3;
@@ -98,6 +102,8 @@ namespace Portkey.Core
         public string GoogleIOSProtocol => googleIosProtocol;
         public string GoogleIOSClientId => googleIosClientId;
         public string GoogleWebGLClientId => googleWebGLClientId;
+        public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
+        public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;
         

@@ -8,6 +8,10 @@ using Portkey.Core;
 using Portkey.Utilities;
 using UnityEngine;
 
+#if UNITY_WEBGL
+using System.Runtime.InteropServices;
+#endif
+
 namespace Portkey.SocialProvider
 {
     public class GoogleLogin : ISocialLogin
@@ -122,12 +126,11 @@ namespace Portkey.SocialProvider
             _clientId = config.GooglePCClientId;
             _clientSecret = config.GooglePCClientSecret;
 #elif UNITY_ANDROID
-            _clientId = config.GoogleMobileClientId;
-            _clientSecret = config.GoogleMobileClientSecret;
-            _protocol = config.GoogleMobileProtocol;
+            _clientId = config.GoogleAndroidClientId;
+            _clientSecret = config.GoogleAndroidClientSecret;
 #elif UNITY_WSA || UNITY_IOS
-            _clientId = config.GoogleMobileClientId;
-            _protocol = config.GoogleMobileProtocol;
+            _clientId = config.GoogleIOSClientId;
+            _protocol = config.GoogleIOSProtocol;
 
             Application.deepLinkActivated += deepLink =>
             {
@@ -224,9 +227,18 @@ namespace Portkey.SocialProvider
 
 #elif UNITY_WEBGL
 
+        private class PostData
+        {
+            public string clientId;
+            public string redirectUri;
+        }
+
+        [DllImport("__Internal")]
+        private static extern void Listen();
+
         public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
-            _successCallback = successCallback;
+            /*_successCallback = successCallback;
             _errorCallback = errorCallback;
             _startLoadCallback = startLoadCallback;
             _redirectUri = Application.absoluteURL;
@@ -236,15 +248,32 @@ namespace Portkey.SocialProvider
             var accessToken = Utilities.ParseQueryString(Application.absoluteURL).Get("access_token");
             if (accessToken == null)
             {
+                Debugger.LogError($"Authenticate: {_clientId} {_redirectUri}");
                 Application.OpenURL($"{AUTHORIZATION_ENDPOINT}?response_type=token&scope={ACCESS_SCOPE}&client_id={_clientId}&redirect_uri={_redirectUri}");
                 return;
             }
                 
-            RequestSocialInfo(accessToken, _successCallback, _errorCallback);
+            Debugger.LogError($"RequestSocialInfo: {accessToken}");
+            RequestSocialInfo(accessToken, _successCallback, _errorCallback);*/
+
+            _successCallback = successCallback;
+            _errorCallback = errorCallback;
+            _startLoadCallback = startLoadCallback;
+            _redirectUri = "https://openlogin.portkey.finance/auth-callback";
+            var loginUrl = "https://openlogin.portkey.finance/";
+            var loginUri = "social-login/";
+            var loginType = "Google";
+
+            _startLoadCallback?.Invoke(true);
+
+            Listen();
+
+            Debugger.Log("Authenticating for WebGL");
+            Application.OpenURL($"{loginUrl}{loginUri}{loginType}?clientId={_clientId}&redirectUri={_redirectUri}");
         }
         
 #endif
-        
+
         private void Authenticate()
         {
             _state = Guid.NewGuid().ToString();
@@ -342,6 +371,9 @@ namespace Portkey.SocialProvider
 
         public void RequestSocialInfo(string accessToken, ISocialLogin.AuthCallback successCallback, ErrorCallback errorCallback)
         {
+            successCallback ??= _successCallback;
+            errorCallback ??= _errorCallback;
+            
             var param = new FieldFormRequestData<Empty>()
             {
                 Url = USERINFO_ENDPOINT,

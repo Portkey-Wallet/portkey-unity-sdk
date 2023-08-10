@@ -21,8 +21,10 @@ MonoBehaviour:
       contractAddress: 2imqjpkCwnvYzfnr61Lp2XQVN2JU17LPkA9AZzmRZzV5LRRWmR
   googlePCClientId: 931335042992-4cvdlgo4etblfe4t7dk9i1q7oouj2od0.apps.googleusercontent.com
   googlePCClientSecret: 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
-  googleMobileClientId: 931335042992-ousd4tdbui5n2msmqj94ppp632a27ofv.apps.googleusercontent.com
-  googleMobileProtocol: portkey.sdk
+  googleAndroidClientId: 931335042992-ousd4tdbui5n2msmqj94ppp632a27ofv.apps.googleusercontent.com
+  googleAndroidClientSecret: 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
+  googleIosClientId: 931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com
+  googleIosProtocol: portkey.sdk
   googleWebGLClientId: 931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com
   minApprovals: 3
   denominator: 5

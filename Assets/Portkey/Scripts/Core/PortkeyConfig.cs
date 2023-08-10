@@ -66,13 +66,17 @@ namespace Portkey.Core
         [SerializeField]
         private string googlePCClientSecret = "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";
         
-        [Header("Google Mobile Login")]
+        [Header("Google Android Login")]
         [SerializeField]
-        private string googleMobileClientId = "931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com";
-        [SerializeField]
-        private string googleMobileProtocol = "portkey.sdk";
+        private string googleAndroidClientId = "931335042992-ousd4tdbui5n2msmqj94ppp632a27ofv.apps.googleusercontent.com";
         [SerializeField] 
-        private string googleMobileClientSecret = "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";
+        private string googleAndroidClientSecret = "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";
+        
+        [Header("Google iOS/WSA Login")]
+        [SerializeField]
+        private string googleIosClientId = "931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com";
+        [SerializeField]
+        private string googleIosProtocol = "portkey.sdk";
         
         [Header("Google WebGL Login")]
         [SerializeField]
@@ -89,9 +93,10 @@ namespace Portkey.Core
         public string ApiBaseUrl => apiBaseUrl;
         public string GooglePCClientId => googlePCClientId;
         public string GooglePCClientSecret => googlePCClientSecret;
-        public string GoogleMobileClientId => googleMobileClientId;
-        public string GoogleMobileProtocol => googleMobileProtocol;
-        public string GoogleMobileClientSecret => googleMobileClientSecret;
+        public string GoogleAndroidClientId => googleAndroidClientId;
+        public string GoogleAndroidClientSecret => googleAndroidClientSecret;
+        public string GoogleIOSProtocol => googleIosProtocol;
+        public string GoogleIOSClientId => googleIosClientId;
         public string GoogleWebGLClientId => googleWebGLClientId;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;

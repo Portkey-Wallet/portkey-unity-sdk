@@ -1,0 +1,23 @@
+<linker>
+
+    <assembly fullname="AElf.Types">
+
+        <namespace fullname="AElf.Types" preserve="all" />
+
+    </assembly>
+
+    <assembly fullname="AElf.Cryptography">
+
+        <namespace fullname="AElf.Cryptography" preserve="all" />
+
+    </assembly>
+
+    <assembly fullname="AElf.Client">
+
+        <namespace fullname="AElf.Client" preserve="all" />
+        <namespace fullname="AElf.Client.Dto" preserve="all" />
+    </assembly>
+    
+    
+
+</linker>

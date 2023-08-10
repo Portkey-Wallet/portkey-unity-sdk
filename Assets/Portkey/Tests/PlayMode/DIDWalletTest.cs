@@ -55,20 +55,13 @@ namespace Portkey.Test
         {
             var contractMock = new Mock<IContract>();
             contractMock.Setup(contract => contract.CallTransactionAsync<T>(It.IsAny<BlockchainWallet>(),
-                    It.IsAny<string>(), It.IsAny<IMessage>()))
-                .Returns((BlockchainWallet wallet, string methodName, IMessage param) => Task.FromResult(new T()));
+                    It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<T>>(),
+                    It.IsAny<ErrorCallback>()))
+                .Callback<T>(value => { });
             contractMock.Setup(contract => contract.SendTransactionAsync(It.IsAny<BlockchainWallet>(),
-                    It.IsAny<string>(), It.IsAny<IMessage>()))
-                .Returns((BlockchainWallet wallet, string methodName, IMessage param) =>
-                {
-                    return new Task<IContract.TransactionInfoDto>(() => new IContract.TransactionInfoDto
-                    {
-                        transactionResult = new TransactionResultDto
-                        {
-                            Status = "status_mock"
-                        }
-                    });
-                });
+                    It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<IContract.TransactionInfoDto>>(),
+                    It.IsAny<ErrorCallback>()))
+                .Callback<IContract.TransactionInfoDto>(value => { });
             return contractMock;
         }
 
@@ -410,7 +403,8 @@ namespace Portkey.Test
                 done = true;
                 accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
                 contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
-                contractMock.Verify(contract => contract.CallTransactionAsync<GetVerifierServersOutput>(It.IsAny<BlockchainWallet>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>()), Times.Once());
+                contractMock.Verify(contract => contract.CallTransactionAsync<GetVerifierServersOutput>(It.IsAny<BlockchainWallet>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
+                    It.IsAny<ErrorCallback>()), Times.Once());
                 Assert.AreNotEqual(null, result);
             }, error =>
             {

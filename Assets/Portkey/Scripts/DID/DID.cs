@@ -39,7 +39,7 @@ namespace Portkey.DID
             _storageSuite = new NonPersistentStorage<string>();
             _accountProvider = new AccountProvider();
             _connectService = new ConnectService<IHttp>(_config.ApiBaseUrl, _request);
-            _chainProvider = new AElfChainProvider();
+            _chainProvider = new AElfChainProvider(_request);
             _caContractProvider = new CAContractProvider(_portkeySocialService, _chainProvider);
             _encryption = new AESEncryption();
             

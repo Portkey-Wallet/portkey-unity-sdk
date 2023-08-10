@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using AElf.Client.Extensions;
 using AElf.Types;
 using Newtonsoft.Json;
 using Portkey.Contracts.CA;
@@ -379,16 +378,16 @@ namespace Portkey.DID
             InitializeManagementAccount();
             yield return _contractProvider.GetContract(chainId,  (contract) =>
             {
-                StaticCoroutine.StartCoroutine(GetVerifierServersAsync(contract, successCallback));
+                StaticCoroutine.StartCoroutine(GetVerifierServersAsync(contract, successCallback, errorCallback));
             }, errorCallback);
         }
         
-        private IEnumerator GetVerifierServersAsync(IContract contract, SuccessCallback<VerifierItem[]> successCallback) {
-            var task = contract.CallTransactionAsync<GetVerifierServersOutput>(_managementAccount.Wallet, "GetVerifierServers", new Empty());
-            yield return new WaitUntil(() => task.IsCompleted);
-                
-            var verifierItems = ConvertToVerifierItems(task.Result);
-            successCallback(verifierItems);
+        private IEnumerator GetVerifierServersAsync(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback) {
+            yield return contract.CallTransactionAsync<GetVerifierServersOutput>(_managementAccount.Wallet, "GetVerifierServers", new Empty(), result =>
+            {
+                var verifierItems = ConvertToVerifierItems(result);
+                successCallback(verifierItems);
+            }, errorCallback);
         }
 
         private static VerifierItem[] ConvertToVerifierItems(GetVerifierServersOutput result)
@@ -492,7 +491,7 @@ namespace Portkey.DID
                 throw new Exception("Manager Account does not exist.");
             }
             
-            yield return _contractProvider.GetContract(editManagerParams.chainId, async (contract) =>
+            yield return _contractProvider.GetContract(editManagerParams.chainId, (contract) =>
             {
                 var addManagerInfoInput = new AddManagerInfoInput
                 {
@@ -500,9 +499,10 @@ namespace Portkey.DID
                     CaHash = Hash.LoadFromHex(editManagerParams.caHash)
                 };
                 
-                var result = await contract.SendTransactionAsync(_managementAccount.Wallet, "AddManagerInfo", addManagerInfoInput);
-                
-                successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
+                StaticCoroutine.StartCoroutine(contract.SendTransactionAsync(_managementAccount.Wallet, "AddManagerInfo", addManagerInfoInput, result =>
+                {
+                    successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
+                }, errorCallback));
             }, errorCallback);
         }
 
@@ -515,20 +515,21 @@ namespace Portkey.DID
                 yield break;
             }
             
-            yield return _contractProvider.GetContract(param.chainId, async (contract) =>
+            yield return _contractProvider.GetContract(param.chainId, (contract) =>
             {
                 var removeManagerInfoInput = new RemoveManagerInfoInput
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                var result = await contract.SendTransactionAsync(_managementAccount.Wallet, "RemoveManagerInfo", removeManagerInfoInput);
-                
-                if (IsCurrentAccount(param))
+                StaticCoroutine.StartCoroutine(contract.SendTransactionAsync(_managementAccount.Wallet, "RemoveManagerInfo", removeManagerInfoInput, result =>
                 {
-                    ClearDIDWallet();
-                }
+                    if (IsCurrentAccount(param))
+                    {
+                        ClearDIDWallet();
+                    }
                 
-                successCallback(result.transactionResult.Status == "MINED");
+                    successCallback(result.transactionResult.Status == "MINED");
+                }, errorCallback));
             }, errorCallback);
         }
 

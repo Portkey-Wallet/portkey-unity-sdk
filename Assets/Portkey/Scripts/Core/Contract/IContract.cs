@@ -1,8 +1,7 @@
 using System.Collections;
-using System.Threading.Tasks;
-using AElf.Client.Dto;
 using AElf.Types;
 using Google.Protobuf;
+using Portkey.Chain.Dto;
 
 namespace Portkey.Core
 {
@@ -27,7 +26,7 @@ namespace Portkey.Core
         /// <param name="param">Parameters for calling the method from the contract.</param>
         /// <typeparam name="T">Protobuf IMessage inherited classes corresponding to the called contract method.</typeparam>
         /// <returns>Results in the form of IMessage.</returns>
-        Task<T> CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param) where T : IMessage<T>, new();
+        IEnumerator CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new();
 
         /// <summary>
         /// SendTransactionAsync is a generic method that can be used to call a contract Set method and execute the transaction.
@@ -36,6 +35,6 @@ namespace Portkey.Core
         /// <param name="methodName">Name of the method to call from the contract.</param>
         /// <param name="param">Parameters for calling the method from the contract.</param>
         /// <returns>Result information of the transaction.</returns>
-        Task<TransactionInfoDto> SendTransactionAsync(BlockchainWallet wallet, string methodName, IMessage param);
+        IEnumerator SendTransactionAsync(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<TransactionInfoDto> successCallback, ErrorCallback errorCallback);
     }
 }

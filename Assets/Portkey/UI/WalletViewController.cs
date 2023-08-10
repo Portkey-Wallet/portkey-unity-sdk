@@ -1,6 +1,9 @@
-using System;
-using Portkey.Contracts.CA;
+using System.Collections;
+using System.Linq;
+using Portkey.Contract;
+using AElf.Contracts.MultiToken;
 using Portkey.Core;
+using Portkey.Utilities;
 using TMPro;
 using UnityEngine;
 
@@ -13,6 +16,8 @@ namespace Portkey.UI
         [Header("UI")]
         [SerializeField] private TextMeshProUGUI addressText;
         [SerializeField] private GameObject confirmSignOutDialog;
+        [SerializeField] private TextMeshProUGUI tokenLabelText;
+        [SerializeField] private TextMeshProUGUI tokenBalanceText;
         
         [Header("View")]
         [SerializeField] private SignInViewController signInViewController;
@@ -22,28 +27,76 @@ namespace Portkey.UI
         [SerializeField] private GuardiansApprovalViewController guardiansApprovalViewController;
         [SerializeField] private LockViewController lockViewController;
         
-        private DIDWalletInfo walletInfo = null;
+        private DIDWalletInfo _walletInfo = null;
+        private ContractBasic _tokenContract = null;
+        private string _tokenSymbol = "ELF";
+        private bool _isSignOut = false;
         
         public DIDWalletInfo WalletInfo
         {
-            set => walletInfo = value;
+            set => _walletInfo = value;
         }
-
-        private void Start()
-        {
-            addressText.text = walletInfo.caInfo.caAddress;
-        }
-
+        
         private void OnEnable()
         {
             confirmSignOutDialog.SetActive(false);
+            _isSignOut = false;
+
+            StartCoroutine(_tokenContract == null ? GetChainInfo() : PollTokenBalance());
+        }
+
+        private IEnumerator GetChainInfo()
+        {
+            yield return did.PortkeySocialService.GetChainsInfo(chains =>
+            {
+                var chainInfos = chains.items?.ToDictionary(info => info.chainId, info => info);
+                if (chainInfos == null || !chainInfos.TryGetValue(_walletInfo.chainId, out var chainInfo))
+                {
+                    return;
+                }
+                
+                var tokenAddress = chainInfo.defaultToken.address;
+                _tokenSymbol = chainInfo.defaultToken.symbol;
+
+                _tokenContract = new ContractBasic(did.GetChain(_walletInfo.chainId), tokenAddress);
+                
+                StartCoroutine(PollTokenBalance());
+            }, OnError);
+        }
+        
+        private IEnumerator PollTokenBalance()
+        {
+            while (!_isSignOut)
+            {
+                yield return UpdateTokenBalance();
+                yield return new WaitForSeconds(5);
+            }
+        }
+        
+        private void Start()
+        {
+            addressText.text = _walletInfo.caInfo.caAddress;
+        }
+
+        private IEnumerator UpdateTokenBalance()
+        {
+            var balanceInput = new GetBalanceInput()
+            {
+                Owner = did.GetWallet().Address.ToAddress(),
+                Symbol = _tokenSymbol
+            };
+            yield return _tokenContract.CallTransactionAsync<GetBalanceOutput>(did.GetWallet(), "GetBalance", balanceInput, output =>
+            {
+                tokenLabelText.text = output.Symbol;
+                tokenBalanceText.text = output.Balance.ToString();
+            }, OnError);
         }
 
         public void OnClickSignOut()
         {
             var param = new EditManagerParams
             {
-                chainId = walletInfo.chainId
+                chainId = _walletInfo.chainId
             };
 
             ShowLoading(true, "Signing out of Portkey...");
@@ -61,6 +114,9 @@ namespace Portkey.UI
                 return;
             }
 
+            _tokenContract = null;
+            _isSignOut = true;
+            
             ResetViews();
             OpenSignInView();
         }

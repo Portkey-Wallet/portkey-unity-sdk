@@ -812,6 +812,7 @@ PlayerSettings:
     Android: PORTKEY_DEVELOPMENT
     Standalone: PORTKEY_DEVELOPMENT
     WebGL: PORTKEY_DEVELOPMENT
+    iPhone: PORTKEY_DEVELOPMENT
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}

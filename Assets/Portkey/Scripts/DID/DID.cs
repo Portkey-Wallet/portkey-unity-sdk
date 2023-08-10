@@ -45,6 +45,8 @@ namespace Portkey.DID
             
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
         }
+        
+        public IChain GetChain(string chainId) => _chainProvider.GetChain(chainId);
 
         /*
         private class JavaCallback : AndroidJavaProxy

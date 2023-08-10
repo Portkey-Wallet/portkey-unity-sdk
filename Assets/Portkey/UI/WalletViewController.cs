@@ -1,5 +1,4 @@
 using System;
-using AElf.Client.Extensions;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using TMPro;

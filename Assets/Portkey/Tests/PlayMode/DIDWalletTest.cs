@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using AElf;
-using AElf.Client.Dto;
 using Google.Protobuf;
 using Moq;
 using Newtonsoft.Json;

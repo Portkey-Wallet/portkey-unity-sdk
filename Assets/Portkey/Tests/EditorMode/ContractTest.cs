@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using AElf.Client.Dto;
-using AElf.Client.Extensions;
 using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;

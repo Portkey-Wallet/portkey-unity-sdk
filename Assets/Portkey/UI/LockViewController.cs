@@ -31,6 +31,7 @@ public class LockViewController : MonoBehaviour
     {
         PIN = "";
         errorMessage.text = "";
+        pinProgress.SetPINProgress(0);
     }
 
     private void LateUpdate()

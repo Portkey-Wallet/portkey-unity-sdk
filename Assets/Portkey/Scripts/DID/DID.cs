@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Linq;
+using Newtonsoft.Json;
 using Portkey.Biometric;
 using Portkey.Chain;
 using Portkey.Contract;

@@ -41,6 +41,7 @@ namespace Portkey.UI
         {
             confirmSignOutDialog.SetActive(false);
             _isSignOut = false;
+            tokenBalanceText.text = "loading...";
 
             StartCoroutine(_tokenContract == null ? GetChainInfo() : PollTokenBalance());
         }

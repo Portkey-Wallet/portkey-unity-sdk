@@ -27,6 +27,8 @@ public class GuardiansApprovalViewController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI totalGuardiansText;
     [SerializeField] private TextMeshProUGUI totalVerifiedGuardiansText;
     [SerializeField] private ButtonComponent completeButtonGameObject;
+    [SerializeField] private GameObject guardiansInfoLayout;
+    [SerializeField] private GameObject guardiansInfoTextLayout;
 
     [Header("Progress Dial")]
     [SerializeField] private Image guardianProgressDial;
@@ -47,6 +49,7 @@ public class GuardiansApprovalViewController : MonoBehaviour
     private bool _startTimer = false;
     private Action _onCompleted;
     private ErrorCallback _onErrorInitData;
+    private bool _isUpdatedGuardianUIInfo = false;
 
     private void Start()
     {
@@ -109,9 +112,22 @@ public class GuardiansApprovalViewController : MonoBehaviour
 
         ClearGuardianItems();
         CreateGuardianItems(_guardianStatusList);
-        
+
         _onCompleted?.Invoke();
         ShowLoading(false);
+    }
+
+    private void LateUpdate()
+    {
+        if (!_isUpdatedGuardianUIInfo)
+        {
+            return;
+        }
+        
+        _isUpdatedGuardianUIInfo = false;
+        
+        LayoutRebuilder.ForceRebuildLayoutImmediate(guardiansInfoTextLayout.transform as RectTransform);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(guardiansInfoLayout.transform as RectTransform);
     }
 
     private void UpdateGuardianInfoUI()
@@ -126,6 +142,8 @@ public class GuardiansApprovalViewController : MonoBehaviour
         {
             CompleteVerificationForGuardianItems();
         }
+        
+        _isUpdatedGuardianUIInfo = true;
     }
 
     private void Update()

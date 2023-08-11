@@ -6350,6 +6350,8 @@ MonoBehaviour:
   totalGuardiansText: {fileID: 6184208625790487908}
   totalVerifiedGuardiansText: {fileID: 2675294584254300586}
   completeButtonGameObject: {fileID: 4568003280628650370}
+  guardiansInfoLayout: {fileID: 3843469944724849929}
+  guardiansInfoTextLayout: {fileID: 1204104207529784499}
   guardianProgressDial: {fileID: 6046659091073412313}
   maxProgress: 0.875
   completeProgress: {fileID: 420342729298473735}

@@ -30,7 +30,7 @@ namespace Portkey.UI
         [SerializeField] private WalletViewController walletView;
         [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private GameObject confirmBackView;
-        
+
         private VerifierItem _verifierItem = null;
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
@@ -68,6 +68,12 @@ namespace Portkey.UI
             set => _stateToPIN[(int)_currentState] = value;
         }
 
+        public bool UseBiometric
+        {
+            get;
+            private set;
+        } = false;
+
         private void Start()
         {
             _portkeySocialService = did.PortkeySocialService;
@@ -80,7 +86,36 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            CheckAccessTokenExpired();
+            var biometricAvailable = InitializeBiometric(CheckAccessTokenExpired);
+
+            if (!biometricAvailable)
+            {
+                CheckAccessTokenExpired();   
+            }
+        }
+
+        private bool InitializeBiometric(Action onBiometricAuthenticated = null)
+        {
+            var biometric = did.GetBiometric();
+            if (biometric == null)
+            {
+                return false;
+            }
+
+            var promptInfo = new IBiometric.BiometricPromptInfo
+            {
+                title = "Enable Biometric",
+                subtitle = "Enable biometric to protect your account",
+                description = "You may choose to enable authenticating with your biometric or skip this step.",
+                negativeButtonText = "Skip"
+            };
+            biometric.Authenticate(promptInfo, pass =>
+            {
+                UseBiometric = pass;
+                onBiometricAuthenticated?.Invoke();
+            }, OnError);
+
+            return true;
         }
 
         private void CheckAccessTokenExpired()
@@ -356,6 +391,7 @@ namespace Portkey.UI
             ClearPIN();
             ChangeState(State.ENTER_PIN);
             errorMessage.text = "";
+            UseBiometric = false;
             
             confirmBackView.SetActive(false);
         }

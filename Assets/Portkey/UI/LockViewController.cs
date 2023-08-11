@@ -1,3 +1,5 @@
+using System;
+using Portkey.Core;
 using Portkey.DID;
 using Portkey.UI;
 using TMPro;
@@ -12,20 +14,78 @@ public class LockViewController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI errorMessage;
 
     private string PIN = "";
+    private bool openBiometric = false;
+    private bool isBiometricPromptOpened = false;
     
     private void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus && did.IsLoggedIn() && setPinViewController.CurrentPIN != "")
+        if (pauseStatus && did.IsLoggedIn() && setPinViewController.CurrentPIN != "" && !isBiometricPromptOpened)
         {
-            errorMessage.text = "";
-            body.SetActive(true);
+            ResetPIN();
+            DisplayLock(true);
+            openBiometric = setPinViewController.UseBiometric;
         }
+    }
+
+    private void ResetPIN()
+    {
+        PIN = "";
+        errorMessage.text = "";
+    }
+
+    private void LateUpdate()
+    {
+        if (!openBiometric)
+        {
+            return;
+        }
+
+        openBiometric = false;
+        
+        PromptBiometric();
+    }
+
+    private void PromptBiometric()
+    {
+        var biometric = did.GetBiometric();
+        if (biometric == null)
+        {
+            return;
+        }
+        
+        isBiometricPromptOpened = true;
+
+        var promptInfo = new IBiometric.BiometricPromptInfo
+        {
+            title = "Biometric Authentication",
+            subtitle = "Biometric Authentication",
+            description = "You may choose to autheticate with your biometric or cancel.",
+            negativeButtonText = "Cancel"
+        };
+        biometric.Authenticate(promptInfo, pass =>
+        {
+            DisplayLock(!pass);
+            isBiometricPromptOpened = false;
+        }, OnError);
+    }
+    
+    private void OnError(string error)
+    {
+        isBiometricPromptOpened = false;
+        Debugger.LogError(error);
     }
 
     public void ResetView()
     {
-        errorMessage.text = "";
-        body.SetActive(false);
+        ResetPIN();
+        DisplayLock(false);
+        openBiometric = false;
+        isBiometricPromptOpened = false;
+    }
+
+    private void DisplayLock(bool display)
+    {
+        body.SetActive(display);
     }
     
     public void OnClickNumber(int number)
@@ -46,7 +106,7 @@ public class LockViewController : MonoBehaviour
         
         if(PIN == setPinViewController.CurrentPIN)
         {
-            body.SetActive(false);
+            DisplayLock(false);
         }
         else
         {

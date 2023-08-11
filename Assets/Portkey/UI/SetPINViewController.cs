@@ -223,8 +223,8 @@ namespace Portkey.UI
 
         private void OpenWalletView(DIDWalletInfo walletInfo)
         {
-            walletView.gameObject.SetActive(true);
             walletView.WalletInfo = walletInfo;
+            walletView.gameObject.SetActive(true);
             ShowLoading(false);
             CloseView();
         }

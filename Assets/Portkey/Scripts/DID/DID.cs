@@ -220,6 +220,38 @@ namespace Portkey.DID
         {
             Debugger.LogError(error);
         }
+        
+#elif UNITY_IOS
+        
+        public void IOSPortkeySocialLoginOnSuccess(string accessToken)
+        {
+            Debugger.Log($"IOSPortkeySocialLoginOnSuccess {accessToken}");
+            try
+            {
+                var socialLogin = GetSocialLogin(AccountType.Google);
+                socialLogin.RequestSocialInfo(accessToken, null, null);
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+                throw;
+            }
+        }
+        
+        public void IOSPortkeySocialLoginOnFailure(string error)
+        {
+            try
+            {
+                var socialLogin = GetSocialLogin(AccountType.Google);
+                socialLogin.HandleError("Login Cancelled!");
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+                throw;
+            }
+        }
+        
 #endif
     }
 }

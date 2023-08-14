@@ -8,7 +8,7 @@ using Portkey.Core;
 using Portkey.Utilities;
 using UnityEngine;
 
-#if UNITY_WEBGL
+#if UNITY_WEBGL || UNITY_IOS
 using System.Runtime.InteropServices;
 #endif
 
@@ -209,8 +209,28 @@ namespace Portkey.SocialProvider
             
             Authenticate();
         }
+#elif UNITY_IOS
+
+        [DllImport ("__Internal")]
+        private static extern void SignIn ();
+
+        public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
+        {
+            #if UNITY_EDITOR
+
+            Debugger.LogWarning("Deep links don't work inside Editor.");
+
+            #endif
+
+            _successCallback = successCallback;
+            _errorCallback = errorCallback;
+            _startLoadCallback = startLoadCallback;
+            _redirectUri = $"{_protocol}:/oauth2callback";
+            
+            Authenticate();
+        }
         
-#elif UNITY_WSA || UNITY_IOS
+#elif UNITY_WSA
 
         public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
@@ -272,6 +292,9 @@ namespace Portkey.SocialProvider
             unityGoogleLoginPlugin.SetStatic("clientId", _clientId);
             unityGoogleLoginPlugin.CallStatic("SetCallback", callback);
             unityGoogleLoginPlugin.CallStatic("Call", currentActivity);
+#elif UNITY_IOS
+            _startLoadCallback?.Invoke(true);
+            SignIn();
 #else
             _startLoadCallback?.Invoke(true);
             Application.OpenURL(authorizationRequest);
@@ -372,6 +395,11 @@ namespace Portkey.SocialProvider
                 
                 successCallback(socialLoginInfo);
             }, OnError(errorCallback)));
+        }
+
+        public void HandleError(string error)
+        {
+            _errorCallback?.Invoke(error);
         }
     }
 }

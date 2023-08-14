@@ -17,6 +17,7 @@ namespace Portkey.Core
         }
         
         string ContractAddress { get; }
+        string ChainId { get; }
         
         /// <summary>
         /// CallTransactionAsync is a generic method that can be used to call a contract Get method and execute the transaction.

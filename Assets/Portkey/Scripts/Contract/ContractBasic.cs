@@ -19,6 +19,7 @@ namespace Portkey.Contract
         
         private readonly IChain _chain;
         public string ContractAddress { get; protected set; }
+        public string ChainId => _chain.ChainId;
 
         /// <summary>
         /// Constructor for ContractBasic to initialize the contract address and its respective chain.

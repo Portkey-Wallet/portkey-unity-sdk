@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using Portkey.Contract;
@@ -9,15 +10,25 @@ using UnityEngine;
 
 namespace Portkey.UI
 {
+    [Serializable]
+    public class TokenUIInfo
+    {
+        public TextMeshProUGUI chainLabelText;
+        public TextMeshProUGUI addressText;
+        public TextMeshProUGUI tokenLabelText;
+        public TextMeshProUGUI tokenBalanceText;
+    }
+    
     public class WalletViewController : MonoBehaviour
     {
         [SerializeField] private DID.DID did;
         
         [Header("UI")]
-        [SerializeField] private TextMeshProUGUI addressText;
         [SerializeField] private GameObject confirmSignOutDialog;
-        [SerializeField] private TextMeshProUGUI tokenLabelText;
-        [SerializeField] private TextMeshProUGUI tokenBalanceText;
+        [SerializeField] private TextMeshProUGUI chainInfoText;
+
+        [Header("Token UI")]
+        [SerializeField] private TokenUIInfo[] tokenInfos;
         
         [Header("View")]
         [SerializeField] private SignInViewController signInViewController;
@@ -28,9 +39,9 @@ namespace Portkey.UI
         [SerializeField] private LockViewController lockViewController;
         
         private DIDWalletInfo _walletInfo = null;
-        private ContractBasic _tokenContract = null;
-        private string _tokenSymbol = "ELF";
         private bool _isSignOut = false;
+
+        private readonly string LOADING_MESSAGE = "Loading...";
         
         public DIDWalletInfo WalletInfo
         {
@@ -41,9 +52,21 @@ namespace Portkey.UI
         {
             confirmSignOutDialog.SetActive(false);
             _isSignOut = false;
-            tokenBalanceText.text = "loading...";
+            chainInfoText.text = LOADING_MESSAGE;
+            ResetTokenUIInfos();
 
-            StartCoroutine(_tokenContract == null ? GetChainInfo() : PollTokenBalance());
+            StartCoroutine(GetChainInfo());
+        }
+
+        private void ResetTokenUIInfos()
+        {
+            foreach (var info in tokenInfos)
+            {
+                info.tokenBalanceText.text = "";
+                info.chainLabelText.text = LOADING_MESSAGE;
+                info.addressText.text = "";
+                info.tokenLabelText.text = "";
+            }
         }
 
         private IEnumerator GetChainInfo()
@@ -51,45 +74,64 @@ namespace Portkey.UI
             yield return did.PortkeySocialService.GetChainsInfo(chains =>
             {
                 var chainInfos = chains.items?.ToDictionary(info => info.chainId, info => info);
-                if (chainInfos == null || !chainInfos.TryGetValue(_walletInfo.chainId, out var chainInfo))
+                if (chainInfos == null || !chainInfos.TryGetValue(_walletInfo.chainId, out var currChainInfo))
                 {
                     return;
                 }
                 
-                var tokenAddress = chainInfo.defaultToken.address;
-                _tokenSymbol = chainInfo.defaultToken.symbol;
+                chainInfoText.text = currChainInfo.chainId;
 
-                _tokenContract = new ContractBasic(did.GetChain(_walletInfo.chainId), tokenAddress);
+                var index = 0;
+                foreach (var chainInfo in chainInfos)
+                {
+                    if(index >= tokenInfos.Length)
+                        break;
+                    
+                    var token = chainInfo.Value.defaultToken;
+                    var tokenAddress = token.address;
+                    
+                    var tokenSymbol = token.symbol;
+                    var tokenContract = new ContractBasic(did.GetChain(chainInfo.Key), tokenAddress);
                 
-                StartCoroutine(PollTokenBalance());
+                    StartCoroutine(PollTokenBalance(index, tokenContract, token));
+
+                    ++index;
+                }
             }, OnError);
         }
         
-        private IEnumerator PollTokenBalance()
+        private IEnumerator PollTokenBalance(int index, IContract tokenContract, DefaultToken token)
         {
             while (!_isSignOut)
             {
-                yield return UpdateTokenBalance();
+                yield return UpdateTokenBalanceUI(index, tokenContract, token);
                 yield return new WaitForSeconds(5);
             }
         }
-        
-        private void Start()
-        {
-            addressText.text = _walletInfo.caInfo.caAddress;
-        }
 
-        private IEnumerator UpdateTokenBalance()
+        private IEnumerator UpdateTokenBalanceUI(int index, IContract tokenContract, DefaultToken token)
         {
             var balanceInput = new GetBalanceInput()
             {
-                Owner = did.GetWallet().Address.ToAddress(),
-                Symbol = _tokenSymbol
+                Owner = _walletInfo.caInfo.caAddress.ToAddress(),
+                Symbol = token.symbol
             };
-            yield return _tokenContract.CallTransactionAsync<GetBalanceOutput>(did.GetWallet(), "GetBalance", balanceInput, output =>
+            yield return tokenContract.CallTransactionAsync<GetBalanceOutput>(_walletInfo.wallet, "GetBalance", balanceInput, output =>
             {
-                tokenLabelText.text = output.Symbol;
-                tokenBalanceText.text = output.Balance.ToString();
+                tokenInfos[index].chainLabelText.text = tokenContract.ChainId;
+                tokenInfos[index].tokenLabelText.text = output.Symbol;
+                var decimals = 0;
+                try
+                {
+                    decimals = int.Parse(token.decimals);
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                var denominator = Math.Pow(10, decimals);
+                tokenInfos[index].tokenBalanceText.text = (output.Balance / denominator).ToString();
+                tokenInfos[index].addressText.text = $"{output.Symbol}_{_walletInfo.caInfo.caAddress}_{tokenContract.ChainId}";
             }, OnError);
         }
 
@@ -115,7 +157,6 @@ namespace Portkey.UI
                 return;
             }
 
-            _tokenContract = null;
             _isSignOut = true;
             
             ResetViews();

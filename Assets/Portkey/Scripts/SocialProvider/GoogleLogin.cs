@@ -271,10 +271,19 @@ namespace Portkey.SocialProvider
 
             _startLoadCallback?.Invoke(true);
 
-            Listen();
+            SetupAuthenticationCallback();
 
             Debugger.Log("Authenticating for WebGL");
             Application.OpenURL($"{_url}{loginUri}{loginType}?clientId={_clientId}&redirectUri={_redirectUri}");
+        }
+        
+        private void SetupAuthenticationCallback()
+        {
+            var gameObject = new GameObject("WebGLPortkeyGoogleLoginCallback");
+            var callbackComponent = gameObject.AddComponent<WebGLPortkeyGooglelLoginCallback>();
+            callbackComponent.SocialLogin = this;
+
+            Listen();
         }
         
 #endif

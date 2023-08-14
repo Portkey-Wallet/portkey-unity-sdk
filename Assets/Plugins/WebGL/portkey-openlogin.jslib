@@ -7,13 +7,13 @@ mergeInto(LibraryManager.library, {
       const type = event.data.type;
       switch (type) {
         case 'PortkeySocialLoginOnSuccess':
-          window.unityInstance.SendMessage('PortkeyUICanvas', 'WebGLPortkeySocialLoginOnSuccess', JSON.stringify(event.data.data));
-          //resolve(event.data.data);
+          window.unityInstance.SendMessage('WebGLPortkeyGoogleLoginCallback', 'OnSuccess', JSON.stringify(event.data.data));
+
           console.log(event.data.data);
           break;
         case 'PortkeySocialLoginOnFailure':
-          window.unityInstance.SendMessage('PortkeyUICanvas', 'WebGLPortkeySocialLoginOnFailure', JSON.stringify(event.data.error));
-          //reject(event.data.error);
+          window.unityInstance.SendMessage('WebGLPortkeyGoogleLoginCallback', 'OnFailure', JSON.stringify(event.data.error));
+
           console.log(event.data.error);
           break;
         default:

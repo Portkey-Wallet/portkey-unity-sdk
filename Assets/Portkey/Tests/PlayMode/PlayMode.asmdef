@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Scripts",
-        "TestUtilities"
+        "TestUtilities",
+        "PortkeyUnityHelper"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -14,7 +15,6 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Google.Protobuf.dll",
-        "AElf.Client.dll",
         "AElf.Types.dll",
         "Moq.dll",
         "Newtonsoft.Json.dll"

@@ -16,7 +16,6 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Google.Protobuf.dll",
-        "AElf.Client.dll",
         "AElf.Types.dll"
     ],
     "autoReferenced": false,

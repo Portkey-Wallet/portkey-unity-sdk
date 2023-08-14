@@ -227,7 +227,15 @@ namespace Portkey.SocialProvider
             _startLoadCallback = startLoadCallback;
             _redirectUri = $"{_protocol}:/oauth2callback";
             
+            SetupAuthenticationCallback();
             Authenticate();
+        }
+        
+        private void SetupAuthenticationCallback()
+        {
+            var gameObject = new GameObject("IOSPortkeyGoogleLoginCallback");
+            var callbackComponent = gameObject.AddComponent<IOSPortkeyGoogleLoginCallback>();
+            callbackComponent.SocialLogin = this;
         }
         
 #elif UNITY_WSA

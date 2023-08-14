@@ -20,12 +20,12 @@
                               completion:^(GIDSignInResult * _Nullable signInResult,
                                            NSError * _Nullable error) {
         if (error) {
-            UnitySendMessage("PortkeyUICanvas", "IOSPortkeySocialLoginOnFailure", [error.domain.description UTF8String]);
+            UnitySendMessage("IOSPortkeyGoogleLoginCallback", "OnFailure", [error.domain.description UTF8String]);
             return;
         }
 
 
-    UnitySendMessage("PortkeyUICanvas", "IOSPortkeySocialLoginOnSuccess", [signInResult.user.accessToken.tokenString UTF8String]);
+    UnitySendMessage("IOSPortkeyGoogleLoginCallback", "OnSuccess", [signInResult.user.accessToken.tokenString UTF8String]);
   }];
 }
 

@@ -183,44 +183,5 @@ namespace Portkey.DID
         {
             return _didWallet.RemoveManager(editManagerParams, successCallback, errorCallback);
         }
-        
-#if UNITY_WEBGL
-        private class WebGLPortkeySocialLoginData
-        {
-            public string token;
-            //Google or Apple
-            public string provider;
-        }
-
-        private static AccountType GetAccountType(string provider) => provider switch
-        {
-            "Google" => AccountType.Google,
-            "Apple" => AccountType.Apple,
-            _ => throw new Exception("Not supported provider")
-        };
-        
-        public void WebGLPortkeySocialLoginOnSuccess(string data)
-        {
-            Debugger.Log($"WebGLPortkeySocialLoginOnSuccess {data}");
-            try
-            {
-                var loginData = JsonConvert.DeserializeObject<WebGLPortkeySocialLoginData>(data);
-                
-                var socialLogin = GetSocialLogin(GetAccountType(loginData.provider));
-                socialLogin.RequestSocialInfo(loginData.token, null, null);
-            }
-            catch (Exception e)
-            {
-                Debugger.LogException(e);
-                throw;
-            }
-        }
-        
-        public void WebGLPortkeySocialLoginOnFailure(string error)
-        {
-            Debugger.LogError(error);
-        }
-
-#endif
     }
 }

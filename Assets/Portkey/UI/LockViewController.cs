@@ -1,9 +1,9 @@
-using System;
 using Portkey.Core;
 using Portkey.DID;
 using Portkey.UI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LockViewController : MonoBehaviour
 {
@@ -12,6 +12,7 @@ public class LockViewController : MonoBehaviour
     [SerializeField] private SetPINViewController setPinViewController;
     [SerializeField] private GameObject body;
     [SerializeField] private TextMeshProUGUI errorMessage;
+    [SerializeField] private Button biometricButton;
 
     private string PIN = "";
     private bool openBiometric = false;
@@ -87,6 +88,7 @@ public class LockViewController : MonoBehaviour
     private void DisplayLock(bool display)
     {
         body.SetActive(display);
+        biometricButton.gameObject.SetActive(display && did.GetBiometric() != null);
     }
     
     public void OnClickNumber(int number)
@@ -125,5 +127,10 @@ public class LockViewController : MonoBehaviour
         }
         PIN = PIN[..^1];
         pinProgress.SetPINProgress(PIN.Length);
+    }
+    
+    public void OnClickBiometric()
+    {
+        PromptBiometric();
     }
 }

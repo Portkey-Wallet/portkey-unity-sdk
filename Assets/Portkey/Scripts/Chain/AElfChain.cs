@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using AElf;
 using AElf.Types;
-using BIP39.HDWallet;
-using BIP39.HDWallet.Core;
 using Google.Protobuf;
 using Newtonsoft.Json;
 using Portkey.Chain.Dto;
@@ -103,9 +101,8 @@ namespace Portkey.Chain
         public Transaction SignTransaction(string privateKeyHex, Transaction transaction)
         {
             var byteArray = transaction.GetHash().ToByteArray();
-            Wallets bip39Wallet = new xBIP39Wallet();
-            bip39Wallet.PrivateKey = ByteArrayHelper.HexStringToByteArray(privateKeyHex);
-            var numArray = bip39Wallet.Sign(byteArray);
+            var privateKey = ByteArrayHelper.HexStringToByteArray(privateKeyHex);
+            var numArray = BIP39Wallet.BIP39Wallet.Wallet.Sign(privateKey, byteArray);
             transaction.Signature = ByteString.CopyFrom(numArray);
             return transaction;
         }

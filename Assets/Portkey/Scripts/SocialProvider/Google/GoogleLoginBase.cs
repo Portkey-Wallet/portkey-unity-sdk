@@ -7,15 +7,23 @@ namespace Portkey.SocialProvider
 {
     public abstract class GoogleLoginBase : ISocialLogin
     {
+        protected const string AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
+        protected const string TOKEN_ENDPOINT = "https://www.googleapis.com/oauth2/v4/token";
         private const string USERINFO_ENDPOINT = "https://www.googleapis.com/oauth2/v3/userinfo";
-        
+        protected const string ACCESS_SCOPE = "openid email profile";
+
         protected ISocialLogin.AuthCallback _successCallback;
         protected ErrorCallback _errorCallback;
         protected SuccessCallback<bool> _startLoadCallback;
 
         protected IHttp _request;
         
-        public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
+        public GoogleLoginBase(IHttp request)
+        {
+            _request = request;
+        }
+        
+        public virtual void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
             _successCallback = successCallback;
             _errorCallback = errorCallback;
@@ -59,7 +67,7 @@ namespace Portkey.SocialProvider
             _errorCallback?.Invoke(error);
         }
         
-        private static IHttp.ErrorCallback OnError(ErrorCallback errorCallback)
+        protected static IHttp.ErrorCallback OnError(ErrorCallback errorCallback)
         {
             return (error) =>
             {

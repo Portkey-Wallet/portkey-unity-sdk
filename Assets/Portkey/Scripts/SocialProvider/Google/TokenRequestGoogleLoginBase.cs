@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -22,16 +23,24 @@ namespace Portkey.SocialProvider
     /// authentication token is required to acquire the access token from Google API.
     /// </summary>
     /// <typeparam name="T">GetAccessTokenParam or its inherited class used as parameters to get access token from Google API.</typeparam>
-    public abstract class TokenRequestGoogleLoginBase<T> : GoogleLoginBase where T : GetAccessTokenParam, new()
+    public abstract class TokenRequestGoogleLoginBase<T> : GoogleLoginBase where T : GetAccessTokenParam
     {
         private class RequestTokenResponse
         {
             public string access_token;
         }
-        
-        private const string TOKEN_ENDPOINT = "https://www.googleapis.com/oauth2/v4/token";
-        
+
         protected string _state;
+
+        public TokenRequestGoogleLoginBase(IHttp request) : base(request)
+        {
+        }
+        
+        public override void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
+        {
+            _state = Guid.NewGuid().ToString();
+            base.Authenticate(successCallback, startLoadCallback, errorCallback);
+        }
         
         protected void HandleAuthenticationResponse(NameValueCollection parameters)
         {
@@ -59,15 +68,15 @@ namespace Portkey.SocialProvider
                 Debugger.LogError("Unsynchronized state.");
             }
         }
-        
-        protected abstract T CreateGetAccessTokenParam<T>(string code);
+
+        protected abstract T CreateGetAccessTokenParam(string code);
 
         protected void RequestToken(string code)
         {
             var requestData  = new FieldFormRequestData<T>
             {
                 Url = TOKEN_ENDPOINT,
-                FieldFormsObject = CreateGetAccessTokenParam<T>(code)
+                FieldFormsObject = CreateGetAccessTokenParam(code)
             };
             
             StaticCoroutine.StartCoroutine(_request.PostFieldForm(requestData, (response) =>

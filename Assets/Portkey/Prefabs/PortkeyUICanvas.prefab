@@ -11042,7 +11042,7 @@ MonoBehaviour:
   setPinViewController: {fileID: 4979886695840012266}
   body: {fileID: 1053819497835100268}
   errorMessage: {fileID: 3631141053284647115}
-  biometricButton: {fileID: 0}
+  biometricButton: {fileID: 5095124421128527996}
 --- !u!1 &8885243795505762409
 GameObject:
   m_ObjectHideFlags: 0

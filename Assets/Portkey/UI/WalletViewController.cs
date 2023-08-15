@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Portkey.Contract;
 using AElf.Contracts.MultiToken;
@@ -42,6 +43,9 @@ namespace Portkey.UI
         private bool _isSignOut = false;
 
         private readonly string LOADING_MESSAGE = "Loading...";
+        private readonly string SIDE_CHAIN_ID = "tDVV";
+
+        private readonly Dictionary<string, string> _chainIdToCaAddress = new Dictionary<string, string>();
         
         public DIDWalletInfo WalletInfo
         {
@@ -53,6 +57,7 @@ namespace Portkey.UI
             confirmSignOutDialog.SetActive(false);
             _isSignOut = false;
             chainInfoText.text = LOADING_MESSAGE;
+            _chainIdToCaAddress.Clear();
             ResetTokenUIInfos();
 
             StartCoroutine(GetChainInfo());
@@ -80,26 +85,49 @@ namespace Portkey.UI
                 }
                 
                 chainInfoText.text = currChainInfo.chainId;
-
-                var index = 0;
-                foreach (var chainInfo in chainInfos)
-                {
-                    if(index >= tokenInfos.Length)
-                        break;
-                    
-                    var token = chainInfo.Value.defaultToken;
-                    var tokenAddress = token.address;
-                    
-                    var tokenSymbol = token.symbol;
-                    var tokenContract = new ContractBasic(did.GetChain(chainInfo.Key), tokenAddress);
                 
-                    StartCoroutine(PollTokenBalance(index, tokenContract, token));
+                _chainIdToCaAddress["AELF"] = _walletInfo.caInfo.caAddress;
+                
+                var getHolderInfoParam = new GetHolderInfoParams
+                {
+                    caHash = _walletInfo.caInfo.caHash,
+                    chainId = SIDE_CHAIN_ID
+                };
+                StartCoroutine(did.GetHolderInfoByContract(getHolderInfoParam, (holderInfo) =>
+                {
+                    if (holderInfo == null || holderInfo.guardianList == null ||
+                        holderInfo.guardianList.guardians == null)
+                    {
+                        return;
+                    }
 
-                    ++index;
-                }
+                    _chainIdToCaAddress[SIDE_CHAIN_ID] = holderInfo.caAddress;
+
+                    SetupTokenUpdate(chainInfos);
+                }, OnError));
             }, OnError);
         }
-        
+
+        private void SetupTokenUpdate(Dictionary<string, ChainInfo> chainInfos)
+        {
+            var index = 0;
+            foreach (var chainInfo in chainInfos)
+            {
+                if (index >= tokenInfos.Length)
+                    break;
+
+                var token = chainInfo.Value.defaultToken;
+                var tokenAddress = token.address;
+
+                var tokenSymbol = token.symbol;
+                var tokenContract = new ContractBasic(did.GetChain(chainInfo.Key), tokenAddress);
+
+                StartCoroutine(PollTokenBalance(index, tokenContract, token));
+
+                ++index;
+            }
+        }
+
         private IEnumerator PollTokenBalance(int index, IContract tokenContract, DefaultToken token)
         {
             while (!_isSignOut)
@@ -111,13 +139,19 @@ namespace Portkey.UI
 
         private IEnumerator UpdateTokenBalanceUI(int index, IContract tokenContract, DefaultToken token)
         {
+            if (!_chainIdToCaAddress.TryGetValue(tokenContract.ChainId, out var caAddress))
+            {
+                yield break;
+            }
+            
             var balanceInput = new GetBalanceInput()
             {
-                Owner = _walletInfo.caInfo.caAddress.ToAddress(),
+                Owner = caAddress.ToAddress(),
                 Symbol = token.symbol
             };
             yield return tokenContract.CallTransactionAsync<GetBalanceOutput>(_walletInfo.wallet, "GetBalance", balanceInput, output =>
             {
+                var ownerAddress = output.Owner;
                 tokenInfos[index].chainLabelText.text = tokenContract.ChainId;
                 tokenInfos[index].tokenLabelText.text = output.Symbol;
                 var decimals = 0;
@@ -131,7 +165,7 @@ namespace Portkey.UI
                 }
                 var denominator = Math.Pow(10, decimals);
                 tokenInfos[index].tokenBalanceText.text = (output.Balance / denominator).ToString();
-                tokenInfos[index].addressText.text = $"{output.Symbol}_{_walletInfo.caInfo.caAddress}_{tokenContract.ChainId}";
+                tokenInfos[index].addressText.text = $"{output.Symbol}_{caAddress}_{tokenContract.ChainId}";
             }, OnError);
         }
 

@@ -127,7 +127,13 @@ namespace Portkey.DID
         {
             return _didWallet.GetHolderInfo(param, successCallback, errorCallback);
         }
-        
+
+        public IEnumerator GetHolderInfoByContract(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback,
+            ErrorCallback errorCallback)
+        {
+            return _didWallet.GetHolderInfoByContract(param, successCallback, errorCallback);
+        }
+
         public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
         {
             yield return _portkeySocialService.GetChainsInfo((chainInfos) =>

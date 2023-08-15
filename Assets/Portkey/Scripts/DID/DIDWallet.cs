@@ -367,6 +367,75 @@ namespace Portkey.DID
                 successCallback(info);
             }, errorCallback);
         }
+        
+        private static AccountType GetAccountType(GuardianType type) => type switch
+        {
+            GuardianType.OfEmail => AccountType.Email,
+            GuardianType.OfPhone => AccountType.Phone,
+            GuardianType.OfGoogle => AccountType.Google,
+            GuardianType.OfApple => AccountType.Apple,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), $"Not expected account type: {type}")
+        }; 
+
+        public IEnumerator GetHolderInfoByContract(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
+        {
+            yield return _contractProvider.GetContract(param.chainId,  (contract) =>
+            {
+                var holderInfoInput = new GetHolderInfoInput
+                {
+                    CaHash = Hash.LoadFromHex(param.caHash)
+                };
+                StaticCoroutine.StartCoroutine(contract.CallTransactionAsync<GetHolderInfoOutput>(_managementAccount.Wallet, "GetHolderInfo", holderInfoInput, result =>
+                {
+                    var holderInfo = ConvertToHolderInfo(result);
+                    UpdateCAInfo(param.chainId, holderInfo.caHash, holderInfo.caAddress);
+
+                    successCallback(holderInfo);
+                }, errorCallback));
+            }, errorCallback);
+        }
+
+        private IHolderInfo ConvertToHolderInfo(GetHolderInfoOutput result)
+        {
+            var newGuardianList = new Core.GuardianList
+            {
+                guardians = new Core.Guardian[result.GuardianList.Guardians.Count]
+            };
+            for (var i = 0; i < result.GuardianList.Guardians.Count; ++i)
+            {
+                var guardian = result.GuardianList.Guardians[i];
+                var newGuardian = new Core.Guardian
+                {
+                    identifierHash = guardian.IdentifierHash.ToHex(),
+                    isLoginGuardian = guardian.IsLoginGuardian,
+                    salt = guardian.Salt,
+                    type = GetAccountType(guardian.Type),
+                    verifierId = guardian.VerifierId.ToHex()
+                };
+                newGuardianList.guardians[i] = newGuardian;
+            }
+
+            var newManagerInfos = new Manager[result.ManagerInfos.Count];
+            for (var j = 0; j < result.ManagerInfos.Count; ++j)
+            {
+                var manager = result.ManagerInfos[j];
+                var newManager = new Manager
+                {
+                    address = manager.Address.ToBase58(),
+                    extraData = manager.ExtraData
+                };
+                newManagerInfos[j] = newManager;
+            }
+
+            var holderInfo = new IHolderInfo
+            {
+                caHash = result.CaHash.ToHex(),
+                caAddress = result.CaAddress.ToBase58(),
+                guardianList = newGuardianList,
+                managerInfos = newManagerInfos
+            };
+            return holderInfo;
+        }
 
         private bool IsLoginAccountTheRequestedGuardian(GetHolderInfoParams param, IHolderInfo holderInfo)
         {

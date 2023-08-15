@@ -18,12 +18,14 @@ namespace Portkey.SocialProvider
 
         protected IHttp _request;
         
+        protected string ClientId { get; set; }
+        
         public GoogleLoginBase(IHttp request)
         {
             _request = request;
         }
         
-        public virtual void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
+        public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
         {
             _successCallback = successCallback;
             _errorCallback = errorCallback;

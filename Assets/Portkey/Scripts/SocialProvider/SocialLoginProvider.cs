@@ -6,9 +6,9 @@ namespace Portkey.SocialProvider
 {
     public class SocialLoginProvider : ISocialProvider
     {
-        private PortkeyConfig _config;
-        private IHttp _request;
-        private Dictionary<AccountType, ISocialLogin> _socialLogins = new Dictionary<AccountType, ISocialLogin>();
+        private readonly PortkeyConfig _config;
+        private readonly IHttp _request;
+        private readonly Dictionary<AccountType, ISocialLogin> _socialLogins = new Dictionary<AccountType, ISocialLogin>();
 
         public SocialLoginProvider(PortkeyConfig config, IHttp request)
         {
@@ -18,23 +18,38 @@ namespace Portkey.SocialProvider
         
         public ISocialLogin GetSocialLogin(AccountType type)
         {
-            switch (type)
+            if (_socialLogins.TryGetValue(type, out var socialLogin))
             {
-                case AccountType.Google:
-                    if (_socialLogins.TryGetValue(type, out var google))
-                    {
-                        return google;
-                    }
-                    google = new GoogleLogin(_config, _request);
-                    _socialLogins.Add(type, google);
-                    return google;
-                case AccountType.Email:
-                case AccountType.Phone:
-                case AccountType.Apple:
-                    throw new NotImplementedException($"{type.ToString()} not yet implemented");
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                return socialLogin;
             }
+            
+            socialLogin = CreateSocialLogin(type);
+            _socialLogins.Add(type, socialLogin);
+            return socialLogin;
+        }
+
+        private ISocialLogin CreateSocialLogin(AccountType type) => type switch
+        {
+            AccountType.Google => GetGoogleLoginByPlatform(),
+            AccountType.Email => null,
+            AccountType.Phone => null,
+            AccountType.Apple => null,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), $"Not expected account type: {type}")
+        };
+
+        private ISocialLogin GetGoogleLoginByPlatform()
+        {
+#if UNITY_EDITOR || UNITY_STANDALONE
+            return new PCGoogleLogin(_config, _request);
+#elif UNITY_IOS
+            return new IOSGoogleLogin(_config, _request);
+#elif UNITY_ANDROID
+            return new AndroidGoogleLogin(_config, _request);
+#elif UNITY_WEBGL
+            return new WebGLGoogleLogin(_config, _request);
+#else
+            throw new NotImplementedException("Platform not supported");
+#endif
         }
     }
 }

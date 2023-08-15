@@ -1,15 +1,10 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using Portkey.Core;
-using Portkey.SocialProvider;
 using Portkey.Utilities;
 using UnityEngine;
 
 namespace Portkey.SocialProvider
 {
-    public class GetAccessTokenParam
+    public abstract class GetAccessTokenParam
     {
         public string code;
         public string redirect_uri;
@@ -30,53 +25,18 @@ namespace Portkey.SocialProvider
             public string access_token;
         }
 
-        protected string _state;
-
-        public TokenRequestGoogleLoginBase(IHttp request) : base(request)
+        protected TokenRequestGoogleLoginBase(IHttp request) : base(request)
         {
         }
-        
-        public override void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
-        {
-            _state = Guid.NewGuid().ToString();
-            base.Authenticate(successCallback, startLoadCallback, errorCallback);
-        }
-        
-        protected void HandleAuthenticationResponse(NameValueCollection parameters)
-        {
-            var error = parameters.Get("error");
-            if (error != null)
-            {
-                _errorCallback?.Invoke(error);
-                return;
-            }
 
-            var state = parameters.Get("state");
-            var code = parameters.Get("code");
-            var scope = parameters.Get("scope");
-            if (state == null || code == null || scope == null)
-            {
-                return;
-            }
+        protected abstract T CreateGetAccessTokenParam(string authCode);
 
-            if (state == _state)
-            {
-                RequestToken(code);
-            }
-            else
-            {
-                Debugger.LogError("Unsynchronized state.");
-            }
-        }
-
-        protected abstract T CreateGetAccessTokenParam(string code);
-
-        protected void RequestToken(string code)
+        protected void RequestAccessToken(string authCode)
         {
             var requestData  = new FieldFormRequestData<T>
             {
                 Url = TOKEN_ENDPOINT,
-                FieldFormsObject = CreateGetAccessTokenParam(code)
+                FieldFormsObject = CreateGetAccessTokenParam(authCode)
             };
             
             StaticCoroutine.StartCoroutine(_request.PostFieldForm(requestData, (response) =>

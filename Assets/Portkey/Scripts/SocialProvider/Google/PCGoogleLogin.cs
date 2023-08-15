@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 using Portkey.Core;
 using UnityEngine;
 
@@ -12,25 +13,25 @@ namespace Portkey.SocialProvider
     
     public class PCGoogleLogin : TokenRequestGoogleLoginBase<PCGetAccessTokenParam>
     {
-
-        private readonly string _clientId;
         private readonly string _clientSecret;
         private string _redirectUri;
-
-        private string CodeVerifier { get; set; }
+        private string _state;
+        private string _codeVerifier;
 
         public PCGoogleLogin(PortkeyConfig config, IHttp request) : base(request)
         {
-            _clientId = config.GooglePCClientId;
+            ClientId = config.GooglePCClientId;
             _clientSecret = config.GooglePCClientSecret;
         }
-        
+
         protected override void OnAuthenticate()
         {
+            _state = Guid.NewGuid().ToString();
+            _codeVerifier = Guid.NewGuid().ToString();
             _redirectUri = $"http://localhost:{Utilities.GetRandomUnusedPort()}/";
-
-            Listen();
+            
             Authenticate();
+            Listen();
         }
         
         private void Listen()
@@ -68,25 +69,50 @@ namespace Portkey.SocialProvider
             HandleAuthenticationResponse(context.Request.QueryString);
         }
 
+        private void HandleAuthenticationResponse(NameValueCollection parameters)
+        {
+            var error = parameters.Get("error");
+            if (error != null)
+            {
+                _errorCallback?.Invoke(error);
+                return;
+            }
+
+            var state = parameters.Get("state");
+            var code = parameters.Get("code");
+            var scope = parameters.Get("scope");
+            if (state == null || code == null || scope == null)
+            {
+                return;
+            }
+
+            if (state == _state)
+            {
+                RequestAccessToken(code);
+            }
+            else
+            {
+                Debugger.LogError("Unsynchronized state.");
+            }
+        }
+
         private void Authenticate()
         {
-            CodeVerifier = Guid.NewGuid().ToString();
-
-            var codeChallenge = Utilities.GetCodeChallenge(CodeVerifier);
-            var authorizationRequest = $"{AUTHORIZATION_ENDPOINT}?response_type=code&client_id={_clientId}&state={_state}&scope={Uri.EscapeDataString(ACCESS_SCOPE)}&redirect_uri={Uri.EscapeDataString(_redirectUri)}&code_challenge={codeChallenge}&code_challenge_method=S256";
+            var codeChallenge = Utilities.GetCodeChallenge(_codeVerifier);
+            var authorizationRequest = $"{AUTHORIZATION_ENDPOINT}?response_type=code&client_id={ClientId}&state={_state}&scope={Uri.EscapeDataString(ACCESS_SCOPE)}&redirect_uri={Uri.EscapeDataString(_redirectUri)}&code_challenge={codeChallenge}&code_challenge_method=S256";
 
             _startLoadCallback?.Invoke(true);
             Application.OpenURL(authorizationRequest);
         }
 
-        protected override PCGetAccessTokenParam CreateGetAccessTokenParam(string code)
+        protected override PCGetAccessTokenParam CreateGetAccessTokenParam(string authCode)
         {
             return new PCGetAccessTokenParam
             {
-                code = code,
+                code = authCode,
                 redirect_uri = _redirectUri,
-                client_id = _clientId,
-                code_verifier = CodeVerifier,
+                client_id = ClientId,
+                code_verifier = _codeVerifier,
                 client_secret = _clientSecret,
                 scope = ACCESS_SCOPE,
                 grant_type = "authorization_code"

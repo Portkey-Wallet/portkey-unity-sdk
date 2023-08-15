@@ -72,14 +72,12 @@ namespace Portkey.Core
         [SerializeField] 
         private string googleAndroidClientSecret = "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";
         
-        [Header("Google iOS/WSA Login")]
+        [Header("Google iOS Login")]
         [SerializeField]
         private string googleIosClientId = "931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com";
         [SerializeField]
         private string googleIosDotReverseClientId = "com.googleusercontent.apps.931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker";
-        [SerializeField]
-        private string googleIosProtocol = "portkey.sdk";
-        
+
         [Header("Google WebGL Login")]
         [SerializeField]
         private string googleWebGLClientId = "931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com";
@@ -101,7 +99,6 @@ namespace Portkey.Core
         public string GooglePCClientSecret => googlePCClientSecret;
         public string GoogleAndroidClientId => googleAndroidClientId;
         public string GoogleAndroidClientSecret => googleAndroidClientSecret;
-        public string GoogleIOSProtocol => googleIosProtocol;
         public string GoogleIOSClientId => googleIosClientId;
         public string GoogleIOSDotReverseClientId => googleIosDotReverseClientId;
         public string GoogleWebGLClientId => googleWebGLClientId;

@@ -2,17 +2,12 @@ using AElf.Types;
 
 namespace Portkey.Core
 {
-    public abstract class WalletBase : ISigner
+    public abstract class IWallet : ISigner
     {
-        public KeyPair KeyPair { get; private set; }
+        protected KeyPair KeyPair { get; set; }
+        protected string PrivateKey => KeyPair.PrivateKey;
         public string Address => KeyPair.Address;
-        public string PrivateKey => KeyPair.PrivateKey;
         public string PublicKey => KeyPair.PublicKey;
-        
-        public WalletBase(KeyPair keyPair)
-        {
-            KeyPair = keyPair;
-        }
         
         public abstract Transaction SignTransaction(Transaction transaction);
 

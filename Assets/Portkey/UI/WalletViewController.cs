@@ -43,7 +43,6 @@ namespace Portkey.UI
         private bool _isSignOut = false;
 
         private readonly string LOADING_MESSAGE = "Loading...";
-        private readonly string SIDE_CHAIN_ID = "tDVV";
 
         private readonly Dictionary<string, string> _chainIdToCaAddress = new Dictionary<string, string>();
         
@@ -86,25 +85,7 @@ namespace Portkey.UI
                 
                 chainInfoText.text = currChainInfo.chainId;
                 
-                _chainIdToCaAddress["AELF"] = _walletInfo.caInfo.caAddress;
-                
-                var getHolderInfoParam = new GetHolderInfoParams
-                {
-                    caHash = _walletInfo.caInfo.caHash,
-                    chainId = SIDE_CHAIN_ID
-                };
-                StartCoroutine(did.GetHolderInfoByContract(getHolderInfoParam, (holderInfo) =>
-                {
-                    if (holderInfo == null || holderInfo.guardianList == null ||
-                        holderInfo.guardianList.guardians == null)
-                    {
-                        return;
-                    }
-
-                    _chainIdToCaAddress[SIDE_CHAIN_ID] = holderInfo.caAddress;
-
-                    SetupTokenUpdate(chainInfos);
-                }, OnError));
+                SetupTokenUpdate(chainInfos);
             }, OnError);
         }
 
@@ -122,10 +103,31 @@ namespace Portkey.UI
                 var tokenSymbol = token.symbol;
                 var tokenContract = new ContractBasic(did.GetChain(chainInfo.Key), tokenAddress);
 
-                StartCoroutine(PollTokenBalance(index, tokenContract, token));
+                RequestHolderInfoByChainId(chainInfo.Key, index, tokenContract, token);
 
                 ++index;
             }
+        }
+
+        private void RequestHolderInfoByChainId(string chainId, int index, ContractBasic tokenContract, DefaultToken token)
+        {
+            var getHolderInfoParam = new GetHolderInfoParams
+            {
+                caHash = _walletInfo.caInfo.caHash,
+                chainId = chainId
+            };
+            StartCoroutine(did.GetHolderInfoByContract(getHolderInfoParam, (holderInfo) =>
+            {
+                if (holderInfo == null || holderInfo.guardianList == null ||
+                    holderInfo.guardianList.guardians == null)
+                {
+                    return;
+                }
+
+                _chainIdToCaAddress[chainId] = holderInfo.caAddress;
+
+                StartCoroutine(PollTokenBalance(index, tokenContract, token));
+            }, OnError));
         }
 
         private IEnumerator PollTokenBalance(int index, IContract tokenContract, DefaultToken token)

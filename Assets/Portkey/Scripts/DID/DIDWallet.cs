@@ -553,7 +553,7 @@ namespace Portkey.DID
             _managementAccount = null;
         }
 
-        public WalletBase GetWallet()
+        public IWallet GetWallet()
         {
             return _managementAccount;
         }

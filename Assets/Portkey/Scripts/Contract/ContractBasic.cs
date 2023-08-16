@@ -32,7 +32,7 @@ namespace Portkey.Contract
             ContractAddress = contractAddress ?? throw new ArgumentException("Contract address cannot be null.");
         }
         
-        public IEnumerator CallTransactionAsync<T>(WalletBase wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
+        public IEnumerator CallTransactionAsync<T>(IWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
         {
             yield return _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param, transaction =>
             {
@@ -52,7 +52,7 @@ namespace Portkey.Contract
             }, errorCallback);
         }
 
-        public IEnumerator SendTransactionAsync(WalletBase wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
+        public IEnumerator SendTransactionAsync(IWallet wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
         {
             yield return _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param, transaction =>
             {

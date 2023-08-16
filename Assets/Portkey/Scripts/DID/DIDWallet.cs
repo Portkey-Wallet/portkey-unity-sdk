@@ -24,18 +24,18 @@ namespace Portkey.DID
         private WalletBase _managementAccount;
         private IStorageSuite<string> _storageSuite;
         private Core.IWalletProvider _walletProvider;
-        private IConnectService _connectService;
+        private IConnectionService _connectionService;
         
         private AccountInfo _accountInfo = new AccountInfo();
         private Dictionary<string, ChainInfo> _chainsInfoMap = new Dictionary<string, ChainInfo>();
         private Dictionary<string, CAInfo> _caInfoMap = new Dictionary<string, CAInfo>();
 
-        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, Core.IWalletProvider walletProvider, IConnectService connectService)
+        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, Core.IWalletProvider walletProvider, IConnectionService connectionService)
         {
             _socialService = socialService;
             _storageSuite = storageSuite;
             _walletProvider = walletProvider;
-            _connectService = connectService;
+            _connectionService = connectionService;
         }
         
         private IEnumerator GetChainsInfo(SuccessCallback<Dictionary<string, ChainInfo>> successCallback, ErrorCallback errorCallback)
@@ -126,7 +126,7 @@ namespace Portkey.DID
 
         public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
         {
-            if(_connectService == null)
+            if(_connectionService == null)
             {
                 errorCallback("ConnectService is not initialized.");
                 yield break;
@@ -158,7 +158,7 @@ namespace Portkey.DID
                 chain_id = chainId
             };
             
-            yield return _connectService.GetConnectToken(requestTokenConfig, (token) =>
+            yield return _connectionService.GetConnectToken(requestTokenConfig, (token) =>
             {
                 if(token == null)
                 {

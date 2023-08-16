@@ -5,14 +5,14 @@ using Portkey.Core;
 
 namespace Portkey.DID
 {
-    public class ConnectService<T> : IConnectService where T : IHttp
+    public class ConnectionService<T> : IConnectionService where T : IHttp
     {
         private const string URI = "/connect/token";
         
         private string _apiUrl;
         private T _http;
         
-        public ConnectService(string apiUrl, T http)
+        public ConnectionService(string apiUrl, T http)
         {
             _apiUrl = apiUrl + URI;
             _http = http;

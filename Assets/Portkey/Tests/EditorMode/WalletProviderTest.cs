@@ -11,7 +11,7 @@ namespace Portkey.Test
         private const string PUBLIC_KEY = "045ab0516fda4eeb504ad8d7ce8a2a24e5af6004afa9ff3ee26f2c697e334be48c31597e1905711a6aa749fc475787000b5d6260bcf0d457f23c60aa60bb6c8602";
         
         private const string ANOTHER_PRIVATE_KEY = "03bd0cea9730bcfc8045248fd7f4841ea19315995c44801a3dfede0ca872f808";
-        
+
         [Test]
         public void CreateTest()
         {
@@ -19,7 +19,7 @@ namespace Portkey.Test
             var account1 = walletProvider.CreateAccount();
             var account2 = walletProvider.CreateAccount();
             
-            Assert.AreEqual(account1.KeyPair.PrivateKey, account2.KeyPair.PrivateKey);
+            Assert.AreEqual(account1.PublicKey, account2.PublicKey);
         }
         
         [Test]
@@ -28,7 +28,7 @@ namespace Portkey.Test
             IWalletProvider walletProvider = new WalletProvider();
             var account = walletProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
             
-            Assert.AreEqual(PRIVATE_KEY, account.PrivateKey);
+            Assert.AreEqual(ADDRESS, account.Address);
             Assert.AreEqual(PUBLIC_KEY, account.PublicKey);
         }
         
@@ -38,7 +38,7 @@ namespace Portkey.Test
             IWalletProvider walletProvider = new WalletProvider();
             var account = walletProvider.GetAccountFromPrivateKey(ANOTHER_PRIVATE_KEY);
             
-            Assert.AreNotEqual(PRIVATE_KEY, account.PrivateKey);
+            Assert.AreNotEqual(PUBLIC_KEY, account.PublicKey);
         }
     }
 }

@@ -9,9 +9,11 @@ namespace Portkey.DID
     /// <summary>
     /// EOA Wallet, used to act as management account of DID wallet.
     /// </summary>
-    public class AElfWallet : WalletBase
+    public class AElfWallet : IWallet
     {
-        public override Transaction SignTransaction(Transaction transaction)
+        private readonly KeyPair _keyPair;
+
+        public Transaction SignTransaction(Transaction transaction)
         {
             var byteArray = transaction.GetHash().ToByteArray();
             var signature = Sign(byteArray);
@@ -20,7 +22,7 @@ namespace Portkey.DID
             return transaction;
         }
 
-        public override byte[] Sign(string data)
+        public byte[] Sign(string data)
         {
             var privateKeyBytes = ByteArrayHelper.HexStringToByteArray(PrivateKey);
             var signature = Sign(Encoding.UTF8.GetBytes(data));
@@ -35,8 +37,12 @@ namespace Portkey.DID
             return signature;
         }
 
-        public AElfWallet(KeyPair keyPair) : base(keyPair)
+        public AElfWallet(KeyPair keyPair)
         {
+            _keyPair = keyPair;
         }
+
+        public string Address => _keyPair.Address;
+        public string PublicKey => _keyPair.PublicKey;
     }
 }

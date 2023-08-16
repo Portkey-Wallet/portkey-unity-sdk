@@ -8,7 +8,7 @@ namespace Portkey.DID
     {
         private string _mnemonic = null;
         
-        public WalletBase GetAccountFromPrivateKey(string privateKey)
+        public IWallet GetAccountFromPrivateKey(string privateKey)
         {
             var newWallet = BIP39Wallet.BIP39Wallet.Wallet.GetWalletByPrivateKey(privateKey);
             
@@ -18,7 +18,7 @@ namespace Portkey.DID
             return new AElfWallet(blockchainWallet);
         }
 
-        public WalletBase CreateAccount()
+        public IWallet CreateAccount()
         {
             var newWallet = _mnemonic switch
             {

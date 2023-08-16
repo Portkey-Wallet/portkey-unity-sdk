@@ -42,7 +42,7 @@ namespace Portkey.DID
         }
         
         private IPortkeySocialService _socialService;
-        private WalletBase _managementAccount;
+        private IWallet _managementAccount;
         private IStorageSuite<string> _storageSuite;
         private IWalletProvider _walletProvider;
         private IConnectionService _connectionService;

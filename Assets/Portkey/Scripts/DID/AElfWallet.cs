@@ -28,7 +28,6 @@ namespace Portkey.DID
 
         public AElfWallet(KeyPair keyPair) : base(keyPair)
         {
-            KeyPair = keyPair;
         }
     }
 }

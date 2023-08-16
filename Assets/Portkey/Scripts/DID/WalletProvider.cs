@@ -4,11 +4,11 @@ using KeyPair = Portkey.Core.KeyPair;
 
 namespace Portkey.DID
 {
-    public class WalletProvider : IWalletProvider
+    public class WalletProvider : Core.IWalletProvider
     {
         private string _mnemonic = null;
         
-        public IWallet GetAccountFromPrivateKey(string privateKey)
+        public WalletBase GetAccountFromPrivateKey(string privateKey)
         {
             var wallet = new Wallet();
             var newWallet = wallet.GetWalletByPrivateKey(privateKey);
@@ -18,7 +18,7 @@ namespace Portkey.DID
             return new AElfWallet(keyPair);
         }
 
-        public IWallet CreateAccount()
+        public WalletBase CreateAccount()
         {
             var wallet = new Wallet();
 

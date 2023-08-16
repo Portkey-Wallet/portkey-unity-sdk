@@ -12,7 +12,7 @@ namespace Portkey.Test
     public class AElfWalletTest
     {
         private const string PRIVATE_KEY = "03bd0cea9730bcfc8045248fd7f4841ea19315995c44801a3dfede0ca872f808";
-        private readonly IWalletProvider _walletProvider = new WalletProvider();
+        private readonly IWalletProvider _walletProvider = new DID.WalletProvider();
         
         [Test]
         public void SignTest()

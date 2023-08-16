@@ -21,16 +21,16 @@ namespace Portkey.DID
         }
         
         private IPortkeySocialService _socialService;
-        private IWallet _managementAccount;
+        private WalletBase _managementAccount;
         private IStorageSuite<string> _storageSuite;
-        private IWalletProvider _walletProvider;
+        private Core.IWalletProvider _walletProvider;
         private IConnectService _connectService;
         
         private AccountInfo _accountInfo = new AccountInfo();
         private Dictionary<string, ChainInfo> _chainsInfoMap = new Dictionary<string, ChainInfo>();
         private Dictionary<string, CAInfo> _caInfoMap = new Dictionary<string, CAInfo>();
 
-        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectService connectService)
+        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, Core.IWalletProvider walletProvider, IConnectService connectService)
         {
             _socialService = socialService;
             _storageSuite = storageSuite;

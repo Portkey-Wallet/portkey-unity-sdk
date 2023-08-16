@@ -10,7 +10,6 @@ using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
 using UnityEngine;
-using System.Threading.Tasks;
 
 namespace Portkey.DID
 {
@@ -93,7 +92,7 @@ namespace Portkey.DID
             return _encryption.Encrypt(_managementAccount.PrivateKey, password);
         }
 
-        public IWallet Load(string password, string keyName = DEFAULT_KEY_NAME)
+        public IDIDWallet Load(string password, string keyName = DEFAULT_KEY_NAME)
         {
             var encryptedDataStr = _storageSuite.GetItem(keyName);
             if (encryptedDataStr == null)
@@ -108,7 +107,7 @@ namespace Portkey.DID
             }
             var info = JsonConvert.DeserializeObject<DIDInfo>(data);
             var privateKey = _encryption.Decrypt(Convert.FromBase64String(info.aesPrivateKey), password);
-            _managementAccount = _accountProvider.GetAccountFromPrivateKey(privateKey);
+            _managementAccount = _walletProvider.GetAccountFromPrivateKey(privateKey);
             _caInfoMap = info.caInfo??new Dictionary<string, CAInfo>();
             _accountInfo = info.accountInfo??new AccountInfo();
 

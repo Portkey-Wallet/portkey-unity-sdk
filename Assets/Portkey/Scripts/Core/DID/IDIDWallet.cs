@@ -15,6 +15,6 @@ namespace Portkey.Core
         /// </summary>
         /// <param name="password">Password to decrypt the DID Wallet Info.</param>
         /// <param name="keyName"></param>
-        public void Load(string password, string keyName);
+        public IDIDWallet Load(string password, string keyName);
     }
 }

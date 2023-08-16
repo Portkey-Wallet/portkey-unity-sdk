@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Portkey.Core;
@@ -13,20 +14,20 @@ namespace Portkey.DID
     /// </summary>
     public class PortkeySocialService : IPortkeySocialService
     {
-        private PortkeyConfig config;
+        private PortkeyConfig _config;
         private IHttp _http;
         private GraphQL.GraphQL _graphQl;
         
         public PortkeySocialService(PortkeyConfig config, IHttp http, GraphQL.GraphQL graphQl)
         {
-            this.config = config;
-            this._http = http;
+            _config = config;
+            _http = http;
             _graphQl = graphQl;
         }
 
         private string GetFullApiUrl(string url)
         {
-            return config.ApiBaseUrl + url;
+            return _config.ApiBaseUrl + url;
         }
         
         private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
@@ -37,20 +38,12 @@ namespace Portkey.DID
                 JsonData = JsonConvert.SerializeObject(requestParams),
             };
             
-            return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback),
-                (error) =>
-                {
-                    errorCallback(error);
-                });
+            return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback), errorCallback);
         }
         
         private IEnumerator Get<T>(JsonRequestData jsonRequestData, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
         {
-            return _http.Get(jsonRequestData, JsonToObject<T>(successCallback, errorCallback),
-                (error) =>
-                {
-                    errorCallback(error);
-                });
+            return _http.Get(jsonRequestData, JsonToObject<T>(successCallback, errorCallback), errorCallback);
         }
         
         private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, ErrorCallback errorCallback)
@@ -78,20 +71,43 @@ namespace Portkey.DID
         {
             return (response) =>
             {
-                var json = JToken.Parse(response);
+                JToken json;
+                try
+                {
+                    json = JToken.Parse(response);
+                }
+                catch (Exception e)
+                {
+                    errorCallback(e.Message);
+                    return;
+                }
 
                 switch (json)
                 {
                     case JObject:
                     {
-                        //deserialize response
-                        var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
-                        //call success callback
-                        successCallback(deserializedObject);
+                        try
+                        {
+                            //deserialize response
+                            var deserializedObject = JsonConvert.DeserializeObject<T>(json.ToString());
+                            //call success callback
+                            successCallback(deserializedObject);
+                        }
+                        catch (Exception e)
+                        {
+                            errorCallback(e.Message);
+                        }
                         break;
                     }
                     case JValue:
-                        successCallback(json.Value<T>());
+                        try
+                        {
+                            successCallback(json.Value<T>());
+                        }
+                        catch (Exception e)
+                        {
+                            errorCallback(e.Message);
+                        }
                         break;
                     default:
                         errorCallback("Unsupported type detected!");
@@ -127,11 +143,13 @@ namespace Portkey.DID
 
         public IEnumerator GetRegisterStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
+            var pollCount = 0;
+            
             yield return Poll();
 
             IEnumerator Poll()
             {
-                if(queryOptions.reCount > queryOptions.maxCount)
+                if(pollCount > queryOptions.maxCount)
                 {
                     errorCallback("timeout");
                     yield break;
@@ -139,32 +157,34 @@ namespace Portkey.DID
             
                 yield return Get("/api/app/search/accountregisterindex", new { filter = $"_id:{sessionId}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
                 {
-                    StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
+                    StaticCoroutine.StartCoroutine(RepollIfNeeded(ret));
                 }, errorCallback);
             }
             
-            IEnumerator IsRepollNeeded(ArrayWrapper<RegisterStatusResult> requestParam)
+            IEnumerator RepollIfNeeded(ArrayWrapper<RegisterStatusResult> result)
             {
-                if(requestParam?.items == null || requestParam.items.Length == 0 || requestParam.items[0].registerStatus == "pending")
+                if(result?.items == null || result.items.Length == 0 || result.items[0].registerStatus == "pending")
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
-                    ++queryOptions.reCount;
-                    yield return StaticCoroutine.StartCoroutine(Poll());
+                    ++pollCount;
+                    yield return Poll();
                 }
                 else
                 {
-                    successCallback(requestParam.items[0]);
+                    successCallback(result.items[0]);
                 }
             }
         }
 
         public IEnumerator GetRecoverStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
+            var pollCount = 0;
+            
             yield return Poll();
             
             IEnumerator Poll()
             {
-                if(queryOptions.reCount > queryOptions.maxCount)
+                if(pollCount > queryOptions.maxCount)
                 {
                     errorCallback("timeout");
                     yield break;
@@ -172,21 +192,21 @@ namespace Portkey.DID
             
                 yield return Get("/api/app/search/accountrecoverindex", new { filter = $"_id:{sessionId}" }, (ArrayWrapper<RecoverStatusResult> ret) =>
                 {
-                    StaticCoroutine.StartCoroutine(IsRepollNeeded(ret));
+                    StaticCoroutine.StartCoroutine(RepollIfNeeded(ret));
                 }, errorCallback);
             }
             
-            IEnumerator IsRepollNeeded(ArrayWrapper<RecoverStatusResult> requestParam)
+            IEnumerator RepollIfNeeded(ArrayWrapper<RecoverStatusResult> result)
             {
-                if(requestParam?.items == null || requestParam.items.Length == 0 || requestParam.items[0].recoveryStatus == "pending")
+                if(result?.items == null || result.items.Length == 0 || result.items[0].recoveryStatus == "pending")
                 {
                     yield return new WaitForSeconds(queryOptions.interval);
-                    ++queryOptions.reCount;
-                    yield return StaticCoroutine.StartCoroutine(Poll());
+                    ++pollCount;
+                    yield return Poll();
                 }
                 else
                 {
-                    successCallback(requestParam.items[0]);
+                    successCallback(result.items[0]);
                 }
             }
         }

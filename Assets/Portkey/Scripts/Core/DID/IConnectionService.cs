@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace Portkey.Core
 {
-    public interface IConnectService
+    public interface IConnectionService
     {
         IEnumerator GetConnectToken(RequestTokenConfig config, SuccessCallback<ConnectToken> successCallback, ErrorCallback errorCallback);
     }

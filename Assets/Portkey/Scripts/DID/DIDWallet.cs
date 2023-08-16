@@ -14,7 +14,11 @@ using System.Threading.Tasks;
 
 namespace Portkey.DID
 {
-    public class DIDWallet<T> : IDIDWallet where T : AccountBase
+    /// <summary>
+    /// DID Wallet class. Still WIP. Will be implemented in another branch.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class DIDWallet : IDIDWallet
     {
         private const string DEFAULT_KEY_NAME = "portkey_sdk_did_wallet";
         
@@ -38,22 +42,22 @@ namespace Portkey.DID
         }
         
         private IPortkeySocialService _socialService;
-        private T _managementAccount;
+        private WalletBase _managementAccount;
         private IStorageSuite<string> _storageSuite;
-        private IAccountProvider<T> _accountProvider;
-        private IConnectService _connectService;
         private IContractProvider _contractProvider;
         private IEncryption _encryption;
-
+        private IWalletProvider _walletProvider;
+        private IConnectionService _connectionService;
+        
         private AccountInfo _accountInfo = new AccountInfo();
         private Dictionary<string, CAInfo> _caInfoMap = new Dictionary<string, CAInfo>();
 
-        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IAccountProvider<T> accountProvider, IConnectService connectService, IContractProvider contractProvider, IEncryption encryption)
+        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, Core.IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IEncryption encryption)
         {
             _socialService = socialService;
             _storageSuite = storageSuite;
-            _accountProvider = accountProvider;
-            _connectService = connectService;
+            _walletProvider = walletProvider;
+            _connectionService = connectionService;
             _contractProvider = contractProvider;
             _encryption = encryption;
         }
@@ -65,7 +69,7 @@ namespace Portkey.DID
                 return;
             }
             
-            _managementAccount = _accountProvider.CreateAccount();
+            _managementAccount = _walletProvider.CreateAccount();
         }
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
@@ -434,18 +438,21 @@ namespace Portkey.DID
 
         public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
         {
-            if(_connectService == null)
+            if(_connectionService == null)
             {
-                throw new Exception("ConnectService is not initialized.");
+                errorCallback("ConnectService is not initialized.");
+                yield break;
             }
             if(_managementAccount == null)
             {
-                throw new Exception("Management Account is not initialized.");
+                errorCallback("Management Account is not initialized.");
+                yield break;
             }
             var caHash = _caInfoMap[chainId]?.caHash;
             if(caHash == null)
             {
-                throw new Exception($"CA Hash on Chain ID: ({chainId}) does not exists.");
+                errorCallback($"CA Hash on Chain ID: ({chainId}) does not exists.");
+                yield break;
             }
 
             var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
@@ -463,7 +470,7 @@ namespace Portkey.DID
                 chain_id = chainId
             };
             
-            yield return _connectService.GetConnectToken(requestTokenConfig, (token) =>
+            yield return _connectionService.GetConnectToken(requestTokenConfig, (token) =>
             {
                 if(token == null)
                 {
@@ -471,7 +478,7 @@ namespace Portkey.DID
                     return;
                 }
                 
-                _socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
+                StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
                 {
                     if(caHolderInfo == null)
                     {
@@ -484,7 +491,7 @@ namespace Portkey.DID
                         _accountInfo.Nickname = caHolderInfo.nickName;
                     }
                     successCallback(caHolderInfo);
-                }, errorCallback);
+                }, errorCallback));
             }, errorCallback);
         }
 

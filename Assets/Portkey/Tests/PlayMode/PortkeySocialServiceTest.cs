@@ -84,7 +84,6 @@ namespace Portkey.Test
             var options = new QueryOptions
             {
                 interval = 1,
-                reCount = 0,
                 maxCount = 20
             };
             
@@ -109,8 +108,7 @@ namespace Portkey.Test
             var options = new QueryOptions
             {
                 interval = 1,
-                reCount = 1,
-                maxCount = 0
+                maxCount = -1
             };
             
             yield return _portkeySocialService.GetRegisterStatus("id_mock", options, (result) =>
@@ -134,7 +132,6 @@ namespace Portkey.Test
             var options = new QueryOptions
             {
                 interval = 1,
-                reCount = 0,
                 maxCount = 20
             };
             yield return _portkeySocialService.GetRecoverStatus("id_mock", options, (result) =>
@@ -158,8 +155,7 @@ namespace Portkey.Test
             var options = new QueryOptions
             {
                 interval = 1,
-                reCount = 1,
-                maxCount = 0
+                maxCount = -1
             };
             yield return _portkeySocialService.GetRecoverStatus("id_mock", options, (result) =>
             {

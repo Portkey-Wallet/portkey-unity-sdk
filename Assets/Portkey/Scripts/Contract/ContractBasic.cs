@@ -30,13 +30,13 @@ namespace Portkey.Contract
             ContractAddress = contractAddress ?? throw new ArgumentException("Contract address cannot be null.");
         }
         
-        public async Task<T> CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param) where T : IMessage<T>, new()
+        public async Task<T> CallTransactionAsync<T>(KeyPair keyPair, string methodName, IMessage param) where T : IMessage<T>, new()
         {
             try
             {
-                var transaction = await _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param);
+                var transaction = await _chain.GenerateTransactionAsync(keyPair.Address, ContractAddress, methodName, param);
                 
-                var txWithSign = _chain.SignTransaction(wallet.PrivateKey, transaction);
+                var txWithSign = _chain.SignTransaction(keyPair.PrivateKey, transaction);
 
                 var result = await _chain.ExecuteTransactionAsync(new ExecuteTransactionDto
                 {

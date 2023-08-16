@@ -37,7 +37,10 @@ namespace Portkey.Core
         public string[] verifierAddresses;
     }
     
-    public interface IDIDAccountMethods
+    /// <summary>
+    /// Interface for the calling of Portkey DID Backend API.
+    /// </summary>
+    public interface IDIDAccountApi
     {
         /// <summary>
         /// For logging in with scan.
@@ -54,5 +57,15 @@ namespace Portkey.Core
         IEnumerator GetHolderInfo(GetHolderInfoByManagerParams param, SuccessCallback<CaHolderWithGuardian> successCallback, ErrorCallback errorCallback);
         IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback);
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// For adding a manager account to the DID.
+        /// </summary>
+        /// <param name="editManagerParams">Parameters for adding manager account.</param>
+        IEnumerator AddManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// For removing a manager account to the DID.
+        /// </summary>
+        /// <param name="editManagerParams">Parameters for removing manager account.</param>
+        IEnumerator RemoveManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
     }
 }

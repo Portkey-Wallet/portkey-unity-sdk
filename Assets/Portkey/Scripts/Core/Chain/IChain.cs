@@ -1,9 +1,8 @@
 #nullable enable
-using System.Threading.Tasks;
-using AElf.Client;
-using AElf.Client.Dto;
+using System.Collections;
 using AElf.Types;
 using Google.Protobuf;
+using Portkey.Chain.Dto;
 
 namespace Portkey.Core
 {
@@ -13,6 +12,7 @@ namespace Portkey.Core
     public interface IChain
     {
         string ChainId { get; }
+        IEnumerator GetChainStatus(SuccessCallback<ChainStatusDto> successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// GenerateTransactionAsync is a method that can be used to generate a transaction for a method contract call.
         /// </summary>
@@ -21,23 +21,16 @@ namespace Portkey.Core
         /// <param name="methodName">Name of the method to call from the contract.</param>
         /// <param name="input">Parameter input corresponding to the method called from the contract.</param>
         /// <returns>Transaction data corresponding to this transaction.</returns>
-        Task<Transaction> GenerateTransactionAsync(string? from, string? to, string methodName, IMessage input);
-        /// <summary>
-        /// Sign transaction with private key for a given transaction data.
-        /// </summary>
-        /// <param name="privateKeyHex">Private key related to the user's wallet in hexadecimal.</param>
-        /// <param name="transaction">Transaction data to sign.</param>
-        /// <returns>Signed transaction data.</returns>
-        Transaction SignTransaction(string? privateKeyHex, Transaction transaction);
+        IEnumerator GenerateTransactionAsync(string? from, string? to, string methodName, IMessage input, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// Execute the transaction on the blockchain.
         /// </summary>
         /// <param name="input">Contains the transaction in byte array in hexadecimal.</param>
         /// <returns>The result of the transaction in byte array in hexadecimal.</returns>
-        Task<string> ExecuteTransactionAsync(ExecuteTransactionDto input);
+        IEnumerator ExecuteTransactionAsync(ExecuteTransactionDto input, SuccessCallback<string> successCallback, ErrorCallback errorCallback);
 
-        Task<BlockDto?> GetBlockByHeightAsync(long blockHeight, bool includeTransactions = false);
-        Task<SendTransactionOutput?> SendTransactionAsync(SendTransactionInput input);
-        Task<TransactionResultDto?> GetTransactionResultAsync(string transactionId);
+        IEnumerator GetBlockByHeightAsync(long blockHeight, SuccessCallback<BlockDto> successCallback, ErrorCallback errorCallback, bool includeTransactions = false);
+        IEnumerator SendTransactionAsync(SendTransactionInput input, SuccessCallback<SendTransactionOutput> successCallback, ErrorCallback errorCallback);
+        IEnumerator GetTransactionResultAsync(string transactionId, SuccessCallback<TransactionResultDto> successCallback, ErrorCallback errorCallback);
     }
 }

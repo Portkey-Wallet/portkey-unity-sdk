@@ -6,8 +6,14 @@ namespace Portkey.Chain
 {
     public class AElfChainProvider : IChainProvider
     {
-        private Dictionary<string, IChain> _chains = new Dictionary<string, IChain>();
+        private readonly Dictionary<string, IChain> _chains = new Dictionary<string, IChain>();
         private Dictionary<string, string> _chainUrls = null;
+        private readonly IHttp _http;
+        
+        public AElfChainProvider(IHttp http)
+        {
+            _http = http;
+        }
         
         public IChain GetChain(string chainId)
         {
@@ -25,7 +31,7 @@ namespace Portkey.Chain
             {
                 throw new System.ArgumentException($"ChainInfo for chainId {chainId} is not found");
             }
-            var newChain = new AElfChain(chainId, chainUrl);
+            var newChain = new AElfChain(chainId, chainUrl, _http);
             _chains[chainId] = newChain;
 
             return newChain;

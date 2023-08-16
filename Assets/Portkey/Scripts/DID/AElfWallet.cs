@@ -1,5 +1,5 @@
+using System.Text;
 using AElf;
-using AElf.Cryptography;
 using AElf.Types;
 using Google.Protobuf;
 using Portkey.Core;
@@ -14,16 +14,25 @@ namespace Portkey.DID
         public override Transaction SignTransaction(Transaction transaction)
         {
             var byteArray = transaction.GetHash().ToByteArray();
-            var numArray = CryptoHelper.SignWithPrivateKey(ByteArrayHelper.HexStringToByteArray(PrivateKey), byteArray);
-            transaction.Signature = ByteString.CopyFrom(numArray);
+            var signature = Sign(byteArray);
+
+            transaction.Signature = ByteString.CopyFrom(signature);
             return transaction;
         }
 
         public override byte[] Sign(string data)
         {
-            var byteData = data.GetBytes();
-            var privy = ByteArrayHelper.HexStringToByteArray(PrivateKey);
-            return CryptoHelper.SignWithPrivateKey(privy, byteData);
+            var privateKeyBytes = ByteArrayHelper.HexStringToByteArray(PrivateKey);
+            var signature = Sign(Encoding.UTF8.GetBytes(data));
+
+            return signature;
+        }
+        
+        private byte[] Sign(byte[] byteArray)
+        {
+            var privateKeyBytes = ByteArrayHelper.HexStringToByteArray(PrivateKey);
+            var signature = BIP39Wallet.BIP39Wallet.Wallet.Sign(privateKeyBytes, byteArray);
+            return signature;
         }
 
         public AElfWallet(KeyPair keyPair) : base(keyPair)

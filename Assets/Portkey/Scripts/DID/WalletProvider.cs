@@ -1,45 +1,42 @@
-using BIP39Wallet;
+using NBitcoin;
 using Portkey.Core;
 using KeyPair = Portkey.Core.KeyPair;
 
 namespace Portkey.DID
 {
-    public class WalletProvider : Core.IWalletProvider
+    public class WalletProvider : IWalletProvider
     {
         private string _mnemonic = null;
         
         public WalletBase GetAccountFromPrivateKey(string privateKey)
         {
-            var wallet = new Wallet();
-            var newWallet = wallet.GetWalletByPrivateKey(privateKey);
+            var newWallet = BIP39Wallet.BIP39Wallet.Wallet.GetWalletByPrivateKey(privateKey);
             
-            var keyPair = GetKeyPair(newWallet);
+            // change to our own wrapper class
+            var blockchainWallet = GetBlockchainWallet(newWallet);
             
-            return new AElfWallet(keyPair);
+            return new AElfWallet(blockchainWallet);
         }
 
         public WalletBase CreateAccount()
         {
-            var wallet = new Wallet();
-
             var newWallet = _mnemonic switch
             {
-                null => wallet.CreateWallet(128, Language.English, null),
-                _ => wallet.GetWalletByMnemonic(_mnemonic)
+                null => BIP39Wallet.BIP39Wallet.Wallet.CreateWallet(128, Language.English, null),
+                _ => BIP39Wallet.BIP39Wallet.Wallet.GetWalletByMnemonic(_mnemonic)
             };
             _mnemonic = newWallet.Mnemonic;
-            
-            var keyPair = GetKeyPair(newWallet);
 
-            return new AElfWallet(keyPair);
+            // change to our own wrapper class
+            var blockchainWallet = GetBlockchainWallet(newWallet);
+            
+            return new AElfWallet(blockchainWallet);
         }
 
-        private static KeyPair GetKeyPair(Wallet.BlockchainWallet newWallet)
+        private static KeyPair GetBlockchainWallet(BIP39Wallet.BIP39Wallet.Wallet.BlockchainWallet newWallet)
         {
-            // change to our own wrapper class
-            var blockchainWallet = new KeyPair(newWallet.Address, newWallet.PrivateKey,
-                newWallet.PublicKey);
-            return blockchainWallet;
+            var keyPair = new KeyPair(newWallet.Address, newWallet.PrivateKey, newWallet.PublicKey);
+            return keyPair;
         }
     }
 }

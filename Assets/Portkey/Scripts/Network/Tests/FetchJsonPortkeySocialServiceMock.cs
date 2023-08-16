@@ -12,7 +12,7 @@ namespace Portkey.Network
         private int _registerStatusCallTimes = 0;
         private int _recoverStatusCallTimes = 0;
         
-        public override IEnumerator Get(JsonRequestData data, IHttp.successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Get<T>(FieldFormRequestData<T> data, IHttp.SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             var subUrl = data.Url.Replace("https://test.mock", "");
             switch (subUrl)
@@ -126,7 +126,7 @@ namespace Portkey.Network
             }
         }
 
-        public override IEnumerator Post(JsonRequestData data, IHttp.successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Post(JsonRequestData data, IHttp.SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             var subUrl = data.Url.Replace("https://test.mock", "");
             switch (subUrl)
@@ -168,7 +168,7 @@ namespace Portkey.Network
             }
         }
 
-        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();
         }

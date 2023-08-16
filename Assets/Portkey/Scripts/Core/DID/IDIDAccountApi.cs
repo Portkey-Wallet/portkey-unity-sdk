@@ -55,17 +55,21 @@ namespace Portkey.Core
         IEnumerator GetRegisterStatus(string chainId, string sessionId, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback);
         IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback);
         IEnumerator GetHolderInfo(GetHolderInfoByManagerParams param, SuccessCallback<CaHolderWithGuardian> successCallback, ErrorCallback errorCallback);
+        IEnumerator GetHolderInfoByContract(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback);
         IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback);
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
+        void Reset();
+        WalletBase GetWallet();
+        bool IsLoggedIn();
         /// <summary>
         /// For adding a manager account to the DID.
         /// </summary>
         /// <param name="editManagerParams">Parameters for adding manager account.</param>
-        IEnumerator AddManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
+        IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// For removing a manager account to the DID.
         /// </summary>
         /// <param name="editManagerParams">Parameters for removing manager account.</param>
-        IEnumerator RemoveManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback, ErrorCallback errorCallback);
+        IEnumerator RemoveManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
     }
 }

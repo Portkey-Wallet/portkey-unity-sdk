@@ -178,10 +178,7 @@ namespace Portkey.Test
             {
                 Assert.AreEqual(response.caAddress, "caAddress_mock");
                 Assert.AreEqual(response.caHash, "caHash_mock");
-            }, error =>
-            {
-                Assert.Fail(error);
-            });
+            }, Assert.Fail);
         }
 
         [UnityTest]
@@ -208,10 +205,7 @@ namespace Portkey.Test
                 Assert.AreEqual(result.Status.caAddress, "caAddress_mock");
                 Assert.AreEqual(result.Status.caHash, "caHash_mock");
                 Assert.AreEqual(result.SessionId, "sessionId_mock");
-            }, error =>
-            {
-                Assert.Fail(error);
-            });
+            }, Assert.Fail);
         }
         
         [UnityTest]
@@ -244,10 +238,7 @@ namespace Portkey.Test
 
                     Assert.AreEqual(error, "Account already logged in.");
                 }));
-            }, error =>
-            {
-                Assert.Fail(error);
-            });
+            }, Assert.Fail);
         }
         
         [UnityTest]
@@ -265,10 +256,7 @@ namespace Portkey.Test
             {
                 Assert.AreEqual(response.caAddress, "caAddress_mock");
                 Assert.AreEqual(response.caHash, "caHash_mock");
-            }, error =>
-            {
-                Assert.Fail(error);
-            });
+            }, Assert.Fail);
         }
         
         [UnityTest]
@@ -297,10 +285,7 @@ namespace Portkey.Test
                 Assert.AreEqual(result.Status.caAddress, "caAddress_mock");
                 Assert.AreEqual(result.Status.caHash, "caHash_mock");
                 Assert.AreEqual(result.SessionId, "sessionId_mock");
-            }, error =>
-            {
-                Assert.Fail(error);
-            });
+            }, Assert.Fail);
         }
         
         [UnityTest]
@@ -334,10 +319,7 @@ namespace Portkey.Test
 
                     Assert.AreEqual(error, "Account already logged in.");
                 }));
-            }, error =>
-            {
-                Assert.Fail(error);
-            });
+            }, Assert.Fail);
         }
         
         /// <summary>
@@ -451,10 +433,7 @@ namespace Portkey.Test
                 Assert.AreEqual(privateKey, KeyPair.PrivateKey);
                 Assert.AreEqual("guardianIdentifier_mock", info.accountInfo.LoginAccount);
                 Assert.AreEqual("caAddress_mock", info.caInfo["chainId_mock"].caAddress);
-            }, error =>
-            {
-                Assert.Fail(error);
-            });
+            }, Assert.Fail);
         }
     }
 }

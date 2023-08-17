@@ -116,18 +116,28 @@ namespace Portkey.UI
                 caHash = _walletInfo.caInfo.caHash,
                 chainId = chainId
             };
-            StartCoroutine(did.GetHolderInfoByContract(getHolderInfoParam, (holderInfo) =>
+            StartCoroutine(PollHolderInfo(index, tokenContract, token, getHolderInfoParam));
+        }
+
+        private IEnumerator PollHolderInfo(int index, IContract tokenContract, DefaultToken token, GetHolderInfoParams holderInfoParams)
+        {
+            while (!_isSignOut || !_chainIdToCaAddress.ContainsKey(holderInfoParams.chainId))
             {
-                if (holderInfo == null || holderInfo.guardianList == null ||
-                    holderInfo.guardianList.guardians == null)
+                yield return did.GetHolderInfoByContract(holderInfoParams, (holderInfo) =>
                 {
-                    return;
-                }
+                    if (holderInfo == null || holderInfo.guardianList == null ||
+                        holderInfo.guardianList.guardians == null)
+                    {
+                        return;
+                    }
 
-                _chainIdToCaAddress[chainId] = holderInfo.caAddress;
+                    _chainIdToCaAddress[holderInfoParams.chainId] = holderInfo.caAddress;
 
-                StartCoroutine(PollTokenBalance(index, tokenContract, token));
-            }, OnError));
+                    StartCoroutine(PollTokenBalance(index, tokenContract, token));
+                }, error => { });
+
+                yield return new WaitForSeconds(5);
+            }
         }
 
         private IEnumerator PollTokenBalance(int index, IContract tokenContract, DefaultToken token)

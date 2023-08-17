@@ -7,15 +7,27 @@ namespace Portkey.DID
     public class WalletProvider : IWalletProvider
     {
         private string _mnemonic = null;
+        private readonly IEncryption _encryption;
         
+        public WalletProvider(IEncryption encryption)
+        {
+            _encryption = encryption;
+        }
+
+        public IWallet GetAccountFromEncryptedPrivateKey(byte[] encryptedPrivateKey, string password)
+        {
+            var privateKey = _encryption.Decrypt(encryptedPrivateKey, password);
+            return GetAccountFromPrivateKey(privateKey);
+        }
+
         public IWallet GetAccountFromPrivateKey(string privateKey)
         {
             var newWallet = BIP39Wallet.BIP39Wallet.Wallet.GetWalletByPrivateKey(privateKey);
             
             // change to our own wrapper class
-            var blockchainWallet = GetBlockchainWallet(newWallet);
+            var keyPair = GetKeyPair(newWallet);
             
-            return new AElfWallet(blockchainWallet);
+            return new AElfWallet(keyPair, _encryption);
         }
 
         public IWallet CreateAccount()
@@ -26,14 +38,14 @@ namespace Portkey.DID
                 _ => BIP39Wallet.BIP39Wallet.Wallet.GetWalletByMnemonic(_mnemonic)
             };
             _mnemonic = newWallet.Mnemonic;
-
-            // change to our own wrapper class
-            var blockchainWallet = GetBlockchainWallet(newWallet);
             
-            return new AElfWallet(blockchainWallet);
+            // change to our own wrapper class
+            var keyPair = GetKeyPair(newWallet);
+
+            return new AElfWallet(keyPair, _encryption);
         }
 
-        private static KeyPair GetBlockchainWallet(BIP39Wallet.BIP39Wallet.Wallet.BlockchainWallet newWallet)
+        private static KeyPair GetKeyPair(BIP39Wallet.BIP39Wallet.Wallet.BlockchainWallet newWallet)
         {
             var keyPair = new KeyPair(newWallet.Address, newWallet.PrivateKey, newWallet.PublicKey);
             return keyPair;

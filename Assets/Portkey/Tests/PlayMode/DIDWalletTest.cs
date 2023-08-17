@@ -55,11 +55,11 @@ namespace Portkey.Test
             contractMock.Setup(contract => contract.CallTransactionAsync<T>(It.IsAny<IWallet>(),
                     It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<T>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback<T>(value => { });
+                .Callback((IWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new T()));
             contractMock.Setup(contract => contract.SendTransactionAsync(It.IsAny<IWallet>(),
                     It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<IContract.TransactionInfoDto>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback<IContract.TransactionInfoDto>(value => { });
+                .Callback((IWallet wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new IContract.TransactionInfoDto()));
             return contractMock;
         }
 

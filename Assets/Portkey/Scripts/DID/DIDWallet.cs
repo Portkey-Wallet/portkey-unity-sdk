@@ -90,7 +90,7 @@ namespace Portkey.DID
         private byte[] EncryptManagementAccount(string password)
         {
             if (_managementAccount == null) throw new NullReferenceException("Management Account does not exist!");
-            return _encryption.Encrypt(_managementAccount.PrivateKey, password);
+            return _managementAccount.Encrypt(password);
         }
 
         public IDIDWallet Load(string password, string keyName = DEFAULT_KEY_NAME)

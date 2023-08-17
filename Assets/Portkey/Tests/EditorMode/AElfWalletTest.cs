@@ -1,5 +1,4 @@
 using System.Linq;
-using AElf.Client.Extensions;
 using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
@@ -7,6 +6,8 @@ using NUnit.Framework;
 using Portkey.Core;
 using Portkey.DID;
 using Portkey.Encryption;
+using Portkey.Utilities;
+using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.Test
 {

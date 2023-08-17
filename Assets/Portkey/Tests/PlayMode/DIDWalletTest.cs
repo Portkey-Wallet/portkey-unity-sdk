@@ -22,10 +22,11 @@ namespace Portkey.Test
 {
     public class DIDWalletTest
     {
-        private IStorageSuite<string> storageSuite = new NonPersistentStorageMock<string>("");
-        private IConnectionService connectService = new ConnectionService<RequestHttp>("", new RequestHttp());
+        private IStorageSuite<string> _storageSuite = new NonPersistentStorageMock<string>("");
+        private IConnectionService _connectionService = new ConnectionService<RequestHttp>("", new RequestHttp());
+        private static readonly IEncryption Encryption = new AESEncryption();
 
-        private static readonly KeyPair Wallet = 
+        private static readonly KeyPair KeyPair = 
             new KeyPair("Q9GTUEz6tJVXdFTTxPhg8MZwWQ4LoHpPSPExRsPb2tBxdruqb",
                             "b1eae0819f3af0189283342c79adcac9028b251da52056e1e5b2ba79a8b4ccf1",
                             "0473eeb8965c3ebabc388055b7a2a8b8f9f4ea0e546055b7207a23a921e9642c5f68a4f0d9e66efba116d3adc018e8bc5eea5f6600b60168ac73e5db4b6cea693a");
@@ -34,7 +35,7 @@ namespace Portkey.Test
         {
             var accountProviderMock = new Mock<IWalletProvider>();
             accountProviderMock.Setup(provider => provider.CreateAccount())
-                .Returns(new AElfWallet(Wallet));
+                .Returns(new AElfWallet(KeyPair, Encryption));
             return accountProviderMock;
         }
         
@@ -51,11 +52,11 @@ namespace Portkey.Test
         private static Mock<IContract> GetContractMock<T>() where T : IMessage<T>, new()
         {
             var contractMock = new Mock<IContract>();
-            contractMock.Setup(contract => contract.CallTransactionAsync<T>(It.IsAny<WalletBase>(),
+            contractMock.Setup(contract => contract.CallTransactionAsync<T>(It.IsAny<IWallet>(),
                     It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<T>>(),
                     It.IsAny<ErrorCallback>()))
                 .Callback<T>(value => { });
-            contractMock.Setup(contract => contract.SendTransactionAsync(It.IsAny<WalletBase>(),
+            contractMock.Setup(contract => contract.SendTransactionAsync(It.IsAny<IWallet>(),
                     It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<IContract.TransactionInfoDto>>(),
                     It.IsAny<ErrorCallback>()))
                 .Callback<IContract.TransactionInfoDto>(value => { });
@@ -152,7 +153,7 @@ namespace Portkey.Test
                         {
                             new Manager
                             {
-                                address = Wallet.Address,
+                                address = KeyPair.Address,
                             }
                         }
                     });
@@ -171,7 +172,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryptionMock = GetEncryptionMock();
 
-            var didWallet = new DIDWallet(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
             
             yield return didWallet.GetRegisterStatus("AELF_mock", "sessionId_mock", (response) =>
             {
@@ -192,7 +193,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryptionMock = GetEncryptionMock();
             
-            var didWallet = new DIDWallet(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
             var registerParam = new RegisterParams
             {
                 type = AccountType.Google,
@@ -222,7 +223,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryptionMock = GetEncryptionMock();
             
-            var didWallet = new DIDWallet(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
             var registerParam = new RegisterParams
             {
                 type = AccountType.Google,
@@ -258,7 +259,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryptionMock = GetEncryptionMock();
             
-            var didWallet = new DIDWallet(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
             
             yield return didWallet.GetLoginStatus("AELF_mock", "sessionId_mock", (response) =>
             {
@@ -279,7 +280,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryptionMock = GetEncryptionMock();
             
-            var didWallet = new DIDWallet(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -311,7 +312,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryptionMock = GetEncryptionMock();
             
-            var didWallet = new DIDWallet(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -392,7 +393,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryptionMock = GetEncryptionMock();
             
-            var didWallet = new DIDWallet(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
 
             var done = false;
             yield return didWallet.GetVerifierServers("AELF", (result) =>
@@ -400,7 +401,7 @@ namespace Portkey.Test
                 done = true;
                 accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
                 contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
-                contractMock.Verify(contract => contract.CallTransactionAsync<GetVerifierServersOutput>(It.IsAny<WalletBase>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
+                contractMock.Verify(contract => contract.CallTransactionAsync<GetVerifierServersOutput>(It.IsAny<IWallet>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
                     It.IsAny<ErrorCallback>()), Times.Once());
                 Assert.AreNotEqual(null, result);
             }, error =>
@@ -428,7 +429,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryption = new AESEncryption();
             
-            var didWallet = new DIDWallet(socialServiceMock.Object, storageSuite, accountProviderMock.Object, connectService, contractProviderMock.Object, encryption);
+            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryption);
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -441,13 +442,13 @@ namespace Portkey.Test
             {
                 didWallet.Save(PASSWORD, KEY);
 
-                var cipherText = storageSuite.GetItem(KEY);
+                var cipherText = _storageSuite.GetItem(KEY);
                 var cipherTextByte = Convert.FromBase64String(cipherText);
                 var data = encryption.Decrypt(cipherTextByte, PASSWORD);
                 var info = JsonConvert.DeserializeObject<DIDWallet.DIDInfo>(data);
                 var privateKey = encryption.Decrypt(Convert.FromBase64String(info.aesPrivateKey), PASSWORD);
                 
-                Assert.AreEqual(privateKey, Wallet.PrivateKey);
+                Assert.AreEqual(privateKey, KeyPair.PrivateKey);
                 Assert.AreEqual("guardianIdentifier_mock", info.accountInfo.LoginAccount);
                 Assert.AreEqual("caAddress_mock", info.caInfo["chainId_mock"].caAddress);
             }, error =>

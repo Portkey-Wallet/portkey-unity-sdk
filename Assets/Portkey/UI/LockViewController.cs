@@ -20,7 +20,7 @@ public class LockViewController : MonoBehaviour
     
     private void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus && did.IsLoggedIn() && setPinViewController.CurrentPIN != "" && !isBiometricPromptOpened)
+        if (pauseStatus && did.IsLoggedIn() && setPinViewController.IsLoginCompleted && !isBiometricPromptOpened)
         {
             ResetPIN();
             DisplayLock(true);

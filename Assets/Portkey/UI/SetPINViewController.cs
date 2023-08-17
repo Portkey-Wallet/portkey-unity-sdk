@@ -34,7 +34,6 @@ namespace Portkey.UI
         private VerifierItem _verifierItem = null;
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
-        private IPortkeySocialService _portkeySocialService;
         private GameObject previousView = null;
         private State _currentState = State.ENTER_PIN;
         private List<string> _stateToPIN = new List<string>
@@ -67,17 +66,18 @@ namespace Portkey.UI
             get => _stateToPIN[(int)_currentState];
             set => _stateToPIN[(int)_currentState] = value;
         }
+        
+        public bool IsLoginCompleted
+        {
+            get;
+            set;
+        } = false;
 
         public bool UseBiometric
         {
             get;
             private set;
         } = false;
-
-        private void Start()
-        {
-            _portkeySocialService = did.PortkeySocialService;
-        }
 
         private void OnEnable()
         {
@@ -225,6 +225,7 @@ namespace Portkey.UI
         {
             walletView.WalletInfo = walletInfo;
             walletView.gameObject.SetActive(true);
+            IsLoginCompleted = true;
             ShowLoading(false);
             CloseView();
         }
@@ -392,6 +393,7 @@ namespace Portkey.UI
             ChangeState(State.ENTER_PIN);
             errorMessage.text = "";
             UseBiometric = false;
+            IsLoginCompleted = false;
             
             confirmBackView.SetActive(false);
         }

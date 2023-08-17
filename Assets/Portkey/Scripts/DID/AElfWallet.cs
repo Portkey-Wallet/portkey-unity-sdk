@@ -3,6 +3,7 @@ using AElf.Cryptography;
 using AElf.Types;
 using Google.Protobuf;
 using Portkey.Core;
+using KeyPair = Portkey.Core.KeyPair;
 
 namespace Portkey.DID
 {
@@ -12,7 +13,17 @@ namespace Portkey.DID
     public class AElfWallet : IWallet
     {
         private readonly KeyPair _keyPair;
+        private IEncryption _encryption;
+        
+        public string Address => _keyPair.Address;
+        public string PublicKey => _keyPair.PublicKey;
 
+        public AElfWallet(KeyPair keyPair, IEncryption encryption)
+        {
+            _keyPair = keyPair;
+            _encryption = encryption;
+        }
+        
         public Transaction SignTransaction(Transaction transaction)
         {
             var byteArray = transaction.GetHash().ToByteArray();
@@ -28,12 +39,9 @@ namespace Portkey.DID
             return CryptoHelper.SignWithPrivateKey(privy, byteData);
         }
 
-        public AElfWallet(KeyPair keyPair)
+        public byte[] Encrypt(string password)
         {
-            _keyPair = keyPair;
+            return _encryption.Encrypt(_keyPair.PrivateKey, password);
         }
-
-        public string Address => _keyPair.Address;
-        public string PublicKey => _keyPair.PublicKey;
     }
 }

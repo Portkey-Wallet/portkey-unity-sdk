@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Portkey.Core;
 using Portkey.DID;
+using Portkey.Encryption;
 
 namespace Portkey.Test
 {
@@ -12,10 +13,14 @@ namespace Portkey.Test
         
         private const string ANOTHER_PRIVATE_KEY = "03bd0cea9730bcfc8045248fd7f4841ea19315995c44801a3dfede0ca872f808";
 
+        private const string PASSWORD = "password";
+        
+        private IEncryption _encryption = new AESEncryption();
+
         [Test]
         public void CreateTest()
         {
-            IWalletProvider walletProvider = new WalletProvider();
+            IWalletProvider walletProvider = new WalletProvider(_encryption);
             var account1 = walletProvider.CreateAccount();
             var account2 = walletProvider.CreateAccount();
             
@@ -25,7 +30,7 @@ namespace Portkey.Test
         [Test]
         public void GetAccountFromPrivateKeyTest()
         {
-            IWalletProvider walletProvider = new WalletProvider();
+            IWalletProvider walletProvider = new WalletProvider(_encryption);
             var account = walletProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
             
             Assert.AreEqual(ADDRESS, account.Address);
@@ -33,9 +38,21 @@ namespace Portkey.Test
         }
         
         [Test]
+        public void GetAccountFromEncryptedPrivateKeyTest()
+        {
+            IWalletProvider walletProvider = new WalletProvider(_encryption);
+            var account = walletProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
+            var encryptedPrivateKey = account.Encrypt(PASSWORD);
+            var accountFromEncryptedPrivateKey = walletProvider.GetAccountFromEncryptedPrivateKey(encryptedPrivateKey, PASSWORD);
+            
+            Assert.AreEqual(account.Address, accountFromEncryptedPrivateKey.Address);
+            Assert.AreEqual(account.PublicKey, accountFromEncryptedPrivateKey.PublicKey);
+        }
+        
+        [Test]
         public void GetAccountFromPrivateKeyFailTest()
         {
-            IWalletProvider walletProvider = new WalletProvider();
+            IWalletProvider walletProvider = new WalletProvider(_encryption);
             var account = walletProvider.GetAccountFromPrivateKey(ANOTHER_PRIVATE_KEY);
             
             Assert.AreNotEqual(PUBLIC_KEY, account.PublicKey);

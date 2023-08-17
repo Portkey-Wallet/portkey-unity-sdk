@@ -2,6 +2,7 @@ namespace Portkey.Core
 {
     public interface IWalletProvider
     {
+        public IWallet GetAccountFromEncryptedPrivateKey(byte[] encryptedPrivateKey, string password);
         public IWallet GetAccountFromPrivateKey(string privateKey);
         public IWallet CreateAccount();
     }

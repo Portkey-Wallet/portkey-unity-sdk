@@ -4,10 +4,22 @@ using KeyPair = Portkey.Core.KeyPair;
 
 namespace Portkey.DID
 {
-    public class WalletProvider : Core.IWalletProvider
+    public class WalletProvider : IWalletProvider
     {
         private string _mnemonic = null;
+        private readonly IEncryption _encryption;
         
+        public WalletProvider(IEncryption encryption)
+        {
+            _encryption = encryption;
+        }
+
+        public IWallet GetAccountFromEncryptedPrivateKey(byte[] encryptedPrivateKey, string password)
+        {
+            var privateKey = _encryption.Decrypt(encryptedPrivateKey, password);
+            return GetAccountFromPrivateKey(privateKey);
+        }
+
         public IWallet GetAccountFromPrivateKey(string privateKey)
         {
             var wallet = new Wallet();
@@ -15,7 +27,7 @@ namespace Portkey.DID
             
             var keyPair = GetKeyPair(newWallet);
             
-            return new AElfWallet(keyPair);
+            return new AElfWallet(keyPair, _encryption);
         }
 
         public IWallet CreateAccount()
@@ -31,7 +43,7 @@ namespace Portkey.DID
             
             var keyPair = GetKeyPair(newWallet);
 
-            return new AElfWallet(keyPair);
+            return new AElfWallet(keyPair, _encryption);
         }
 
         private static KeyPair GetKeyPair(Wallet.BlockchainWallet newWallet)

@@ -1,3 +1,4 @@
+using System.Collections;
 using Portkey.Core;
 using Portkey.DID;
 using Portkey.UI;
@@ -109,7 +110,7 @@ public class LockViewController : MonoBehaviour
         
         if(PIN == setPinViewController.CurrentPIN)
         {
-            DisplayLock(false);
+            StartCoroutine(WaitAndDisplayLock(0.5f, false));
         }
         else
         {
@@ -117,6 +118,12 @@ public class LockViewController : MonoBehaviour
             pinProgress.SetPINProgress(0);
         }
         PIN = "";
+    }
+    
+    private IEnumerator WaitAndDisplayLock(float seconds, bool display)
+    {
+        yield return new WaitForSeconds(seconds);
+        DisplayLock(display);
     }
     
     public void OnClickBackspace()

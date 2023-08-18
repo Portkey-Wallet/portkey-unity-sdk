@@ -6,6 +6,7 @@ using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
@@ -401,7 +402,80 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        private IHolderInfo ConvertToHolderInfo(GetHolderInfoOutput result)
+        /**
+         * Propagate value field to parent object.
+         * E.g. "caHash": {
+         *          "value": "ZQ1DxqCEbRZgLv5Q7SpUQYc7avn6DCFoosmanaGMQDE="
+         *      },
+         * will be converted into
+         *      "caHash": "ZQ1DxqCEbRZgLv5Q7SpUQYc7avn6DCFoosmanaGMQDE="
+         */
+        private static string JsonPropagateValueToParent(string jsonInput)
+        {
+            void PropagateValueToParent(JToken jToken)
+            {
+                switch (jToken)
+                {
+                    case JArray jArray:
+                        jArray.ToList().ForEach(PropagateValueToParent);
+                        break;
+                    case JObject jObject:
+                        if(jObject.Count == 1 && jObject.TryGetValue("value", out var value))
+                        {
+                            if(jObject.Parent is JProperty parent)
+                            {
+                                parent.First?.Replace(value);
+                            }
+                            break;
+                        }
+                        
+                        //TODO: see how we can implement this through our customized JsonFormatter
+                        foreach (var (key, token) in jObject)
+                        {
+                            if(key == "type" && token?.Type == JTokenType.String)
+                            {
+                                switch (token.Value<string>())
+                                {
+                                    case "GUARDIAN_TYPE_OF_GOOGLE":
+                                        token.Replace("Google");
+                                        break;
+                                    case "GUARDIAN_TYPE_OF_APPLE":
+                                        token.Replace("Apple");
+                                        break;
+                                    case "GUARDIAN_TYPE_OF_PHONE":
+                                        token.Replace("Phone");
+                                        break;
+                                    case "GUARDIAN_TYPE_OF_EMAIL":
+                                        token.Replace("Email");
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException();
+                                }
+                            }
+                            PropagateValueToParent(token);
+                        }
+                        break;
+                }
+            }
+
+            JToken jToken = JObject.Parse(jsonInput);
+            PropagateValueToParent(jToken);
+            return jToken.ToString();
+        }
+
+        private static IHolderInfo ConvertToHolderInfo(GetHolderInfoOutput result)
+        {
+            //TODO: Implement customized Json formatter to handle Address and Hash
+            /*var jsonResult = JsonFormatter.Default.Format(result);
+            var convertedOutput = JsonPropagateValueToParent(jsonResult);
+            var holderInfo = JsonConvert.DeserializeObject<IHolderInfo>(convertedOutput);*/
+            
+            var holderInfo = ComplexConvertToHolderInfo(result);
+            
+            return holderInfo;
+        }
+        
+        private static IHolderInfo ComplexConvertToHolderInfo(GetHolderInfoOutput result)
         {
             var newGuardianList = new Core.GuardianList
             {

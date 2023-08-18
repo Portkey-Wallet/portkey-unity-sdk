@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Portkey.Core;
@@ -320,7 +321,7 @@ namespace Portkey.UI
             // user has entered a PIN, now we change state to confirm PIN
             if (_currentState == State.ENTER_PIN)
             {
-                ChangeState(State.CONFIRM_PIN);
+                StartCoroutine(WaitAndChangeState(0.5f, State.CONFIRM_PIN));
             }
             else
             {
@@ -336,6 +337,12 @@ namespace Portkey.UI
                     pinProgress.SetPINProgress(0);
                 }
             }
+        }
+
+        private IEnumerator WaitAndChangeState(float seconds, State state)
+        {
+            yield return new WaitForSeconds(seconds);
+            ChangeState(state);
         }
 
         private void ChangeState(State state)

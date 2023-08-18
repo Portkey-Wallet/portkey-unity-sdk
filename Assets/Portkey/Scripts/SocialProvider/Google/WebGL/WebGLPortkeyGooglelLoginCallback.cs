@@ -40,14 +40,7 @@ namespace Portkey.SocialProvider
 
         public void OnFailure(string error)
         {
-            try
-            {
-                SocialLogin.HandleError("Login Cancelled!");
-            }
-            catch (Exception e)
-            {
-                Debugger.LogException(e);
-            }
+            SocialLogin.HandleError("Login Cancelled!");
             Destroy(gameObject);
         }
     }

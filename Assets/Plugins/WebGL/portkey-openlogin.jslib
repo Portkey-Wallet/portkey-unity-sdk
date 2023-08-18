@@ -1,7 +1,7 @@
 
 mergeInto(LibraryManager.library, {
 
-  Listen: function () {
+  OpenURL: function (url) {
   
     const onMessage = (event) => {
       const type = event.data.type;
@@ -23,6 +23,18 @@ mergeInto(LibraryManager.library, {
     };
   
     window.addEventListener('message', onMessage);
+    const windowOpener = window.open(UTF8ToString(url));
+    
+    const timer = setInterval(() => {
+      if (windowOpener != null && windowOpener.closed) {
+          clearInterval(timer);
+          
+          window.unityInstance.SendMessage('WebGLPortkeyGoogleLoginCallback', 'OnFailure', 'Login window closed.');
+  
+          window.removeEventListener('message', onMessage);
+          timer = null;
+      }
+    }, 1600);
   },
 
 });

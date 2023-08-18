@@ -15,6 +15,11 @@ namespace Portkey.SocialProvider
             _url = config.GoogleWebGLLoginUrl;
             _redirectUri = config.GoogleWebGLRedirectUri;
         }
+        
+#if UNITY_WEBGL
+        [DllImport("__Internal")]
+        private static extern void OpenURL(string url);
+#endif
 
         protected override void OnAuthenticate()
         {
@@ -26,23 +31,18 @@ namespace Portkey.SocialProvider
             SetupAuthenticationCallback();
 
             Debugger.Log("Authenticating for WebGL");
-            Application.OpenURL($"{_url}{loginUri}{loginType}?clientId={ClientId}&redirectUri={_redirectUri}");
-        }
-        
+            var url = $"{_url}{loginUri}{loginType}?clientId={ClientId}&redirectUri={_redirectUri}";
+            //Application.OpenURL($"{_url}{loginUri}{loginType}?clientId={ClientId}&redirectUri={_redirectUri}");
 #if UNITY_WEBGL
-        [DllImport("__Internal")]
-        private static extern void Listen();
+            OpenURL(url);
 #endif
-        
+        }
+
         private void SetupAuthenticationCallback()
         {
             var gameObject = new GameObject("WebGLPortkeyGoogleLoginCallback");
             var callbackComponent = gameObject.AddComponent<WebGLPortkeyGooglelLoginCallback>();
             callbackComponent.SocialLogin = this;
-            
-#if UNITY_WEBGL
-            Listen();
-#endif
         }
     }
 }

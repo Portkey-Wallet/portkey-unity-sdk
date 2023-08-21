@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using Portkey.Core;
-using Portkey.Utilities;
+using Portkey.SocialProvider;
 using UnityEngine;
 
 namespace Portkey.Biometric
@@ -14,24 +13,24 @@ namespace Portkey.Biometric
             public string message = null;
         }
         
-        private IBiometric.SuccessCallback _onSuccess = null;
-        private ErrorCallback _onError = null;
+#if UNITY_IOS
+        [DllImport ("__Internal")]
+        private static extern void BiometricAuthenticate ();
+#endif
         
         public void Authenticate(IBiometric.BiometricPromptInfo info, IBiometric.SuccessCallback onSuccess, ErrorCallback onError)
         {
-            _onSuccess = onSuccess;
-            _onError = onError;
-            
-            StaticCoroutine.StartCoroutine(HandleBiometricOutput());
+            SetupAuthenticationCallback(onSuccess, onError);
+
+            BiometricAuthenticate();
         }
         
-        private IEnumerator HandleBiometricOutput()
+        private static void SetupAuthenticationCallback(IBiometric.SuccessCallback onSuccess, ErrorCallback onError)
         {
-            while (true)
-            {
-                
-                yield return null;
-            }
+            var gameObject = new GameObject("IOSPortkeyBiometricCallback");
+            var callbackComponent = gameObject.AddComponent<IOSPortkeyBiometricCallback>();
+            callbackComponent.SuccessCallback = onSuccess;
+            callbackComponent.ErrorCallback = onError;
         }
     }
 }

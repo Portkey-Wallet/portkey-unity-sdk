@@ -46,14 +46,13 @@ namespace Portkey.DID
         }
         
         private IPortkeySocialService _socialService;
-        private IWallet _managementWallet;
         private IStorageSuite<string> _storageSuite;
         private IWalletProvider _walletProvider;
         private IConnectionService _connectionService;
         private IContractProvider _contractProvider;
         private IEncryption _encryption;
 
-        private IWallet _managementAccount;
+        private IWallet _managementWallet;
         protected DIDWalletData _data = new DIDWalletData();
 
         public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IEncryption encryption)
@@ -89,8 +88,8 @@ namespace Portkey.DID
         
         private byte[] EncryptManagementAccount(string password)
         {
-            if (_managementAccount == null) throw new NullReferenceException("Management Account does not exist!");
-            return _managementAccount.Encrypt(password);
+            if (_managementWallet == null) throw new NullReferenceException("Management Account does not exist!");
+            return _managementWallet.Encrypt(password);
         }
 
         public IDIDWallet Load(string password, string keyName = DEFAULT_KEY_NAME)
@@ -108,7 +107,7 @@ namespace Portkey.DID
             }
             _data = JsonConvert.DeserializeObject<DIDWalletData>(data);
             var privateKey = _encryption.Decrypt(Convert.FromBase64String(_data.aesPrivateKey), password);
-            _managementAccount = _walletProvider.GetAccountFromPrivateKey(privateKey);
+            _managementWallet = _walletProvider.CreateFromPrivateKey(privateKey);
 
             return this;
         }
@@ -142,7 +141,7 @@ namespace Portkey.DID
             
             var context = new Context
             {
-                clientId = _managementAccount.Address,
+                clientId = _managementWallet.Address,
                 requestId = Guid.NewGuid().ToString()
             };
 
@@ -150,7 +149,7 @@ namespace Portkey.DID
             {
                 chainId = param.chainId,
                 loginGuardianIdentifier = param.loginGuardianIdentifier,
-                manager = _managementAccount.Address,
+                manager = _managementWallet.Address,
                 guardiansApproved = param.guardiansApprovedList,
                 extraData = param.extraData,
                 context = context
@@ -183,7 +182,7 @@ namespace Portkey.DID
                         };
                         StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
                         {
-                            var isCurrentAccountAManager = info.managerInfos.Any(manager => manager.address == _managementAccount.Address);
+                            var isCurrentAccountAManager = info.managerInfos.Any(manager => manager.address == _managementWallet.Address);
                             if (isCurrentAccountAManager)
                             {
                                 UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
@@ -203,7 +202,7 @@ namespace Portkey.DID
         
         private bool IsFirstTimeRecoverPassed(string chainId, RecoverStatusResult response)
         {
-            return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
+            return response!= null && response.IsStatusPass() && _managementWallet?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
         }
         
         public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
@@ -227,7 +226,7 @@ namespace Portkey.DID
             {
                 param.managerInfo = new ManagerInfo
                 {
-                    Address = _managementAccount.Address.ToAddress(),
+                    Address = _managementWallet.Address.ToAddress(),
                     ExtraData = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds().ToString()
                 };
             }
@@ -247,10 +246,10 @@ namespace Portkey.DID
             }
             
             InitializeManagementAccount();
-            param.manager = _managementAccount.Address;
+            param.manager = _managementWallet.Address;
             param.context = new Context
             {
-                clientId = _managementAccount.Address,
+                clientId = _managementWallet.Address,
                 requestId = Guid.NewGuid().ToString()
             };
             
@@ -281,7 +280,7 @@ namespace Portkey.DID
                         };
                         StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
                         {
-                            var isCurrentAccountAManager = info.managerInfos.Any(manager => manager.address == _managementAccount.Address);
+                            var isCurrentAccountAManager = info.managerInfos.Any(manager => manager.address == _managementWallet.Address);
                             if (isCurrentAccountAManager)
                             {
                                 UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
@@ -318,7 +317,7 @@ namespace Portkey.DID
 
         private bool IsFirstTimeRegisterPassed(string chainId, RegisterStatusResult response)
         {
-            return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
+            return response!= null && response.IsStatusPass() && _managementWallet?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
         }
 
         public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
@@ -339,9 +338,9 @@ namespace Portkey.DID
             var manager = param.manager;
             
             // If manager is not specified, use the management account.
-            if(manager == null && _managementAccount != null)
+            if(manager == null && _managementWallet != null)
             {
-                manager = _managementAccount.Address;
+                manager = _managementWallet.Address;
             }
             if (manager == null)
             {
@@ -357,7 +356,7 @@ namespace Portkey.DID
             yield return _socialService.GetHolderInfoByManager(caHolderInfoByManagerParams, (result) =>
             {
                 var info = result.caHolders[0];
-                if (info != null && manager == _managementAccount?.Address &&
+                if (info != null && manager == _managementWallet?.Address &&
                     info.holderManagerInfo.caAddress != null && info.holderManagerInfo.caHash != null)
                 {
                     UpdateCAInfo(param.chainId, info.holderManagerInfo.caHash, info.holderManagerInfo.caAddress);
@@ -389,7 +388,7 @@ namespace Portkey.DID
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                StaticCoroutine.StartCoroutine(contract.CallTransactionAsync<GetHolderInfoOutput>(_managementAccount, "GetHolderInfo", holderInfoInput, result =>
+                StaticCoroutine.StartCoroutine(contract.CallTransactionAsync<GetHolderInfoOutput>(_managementWallet, "GetHolderInfo", holderInfoInput, result =>
                 {
                     var holderInfo = ConvertToHolderInfo(result);
                     UpdateCAInfo(param.chainId, holderInfo.caHash, holderInfo.caAddress);
@@ -529,7 +528,7 @@ namespace Portkey.DID
         }
         
         private IEnumerator GetVerifierServersAsync(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback) {
-            yield return contract.CallTransactionAsync<GetVerifierServersOutput>(_managementAccount, "GetVerifierServers", new Empty(), result =>
+            yield return contract.CallTransactionAsync<GetVerifierServersOutput>(_managementWallet, "GetVerifierServers", new Empty(), result =>
             {
                 var verifierItems = ConvertToVerifierItems(result);
                 successCallback(verifierItems);
@@ -568,7 +567,7 @@ namespace Portkey.DID
             {
                 throw new Exception("ConnectService is not initialized.");
             }
-            if(_managementAccount == null)
+            if(_managementWallet == null)
             {
                 throw new Exception("Management Account is not initialized.");
             }
@@ -621,12 +620,12 @@ namespace Portkey.DID
         public void Reset()
         {
             _data.Clear();
-            _managementAccount = null;
+            _managementWallet = null;
         }
 
         public IWallet GetWallet()
         {
-            return _managementAccount;
+            return _managementWallet;
         }
 
         public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
@@ -645,7 +644,7 @@ namespace Portkey.DID
                     CaHash = Hash.LoadFromHex(editManagerParams.caHash)
                 };
                 
-                StaticCoroutine.StartCoroutine(contract.SendTransactionAsync(_managementAccount, "AddManagerInfo", addManagerInfoInput, result =>
+                StaticCoroutine.StartCoroutine(contract.SendTransactionAsync(_managementWallet, "AddManagerInfo", addManagerInfoInput, result =>
                 {
                     successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
                 }, errorCallback));
@@ -655,7 +654,7 @@ namespace Portkey.DID
         public IEnumerator RemoveManager(EditManagerParams param, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
-            if(_managementAccount == null)
+            if(_managementWallet == null)
             {
                 errorCallback("Management Account does not exist.");
                 yield break;
@@ -667,7 +666,7 @@ namespace Portkey.DID
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                StaticCoroutine.StartCoroutine(contract.SendTransactionAsync(_managementAccount, "RemoveManagerInfo", removeManagerInfoInput, result =>
+                StaticCoroutine.StartCoroutine(contract.SendTransactionAsync(_managementWallet, "RemoveManagerInfo", removeManagerInfoInput, result =>
                 {
                     if (IsCurrentAccount(param))
                     {
@@ -681,7 +680,7 @@ namespace Portkey.DID
 
         private bool IsCurrentAccount(EditManagerParams param)
         {
-            return param.managerInfo?.Address.ToString() == _managementAccount.Address && _data.caInfoMap[param.chainId].caHash == param.caHash;
+            return param.managerInfo?.Address.ToString() == _managementWallet.Address && _data.caInfoMap[param.chainId].caHash == param.caHash;
         }
 
         public bool IsLoggedIn()

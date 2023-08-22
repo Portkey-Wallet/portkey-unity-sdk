@@ -56,7 +56,7 @@ namespace Portkey.Test
         private static Mock<IWalletProvider> GetAccountProviderMock()
         {
             var accountProviderMock = new Mock<IWalletProvider>();
-            accountProviderMock.Setup(provider => provider.CreateAccount())
+            accountProviderMock.Setup(provider => provider.Create())
                 .Returns(new AElfWallet(KeyPair, Encryption));
             return accountProviderMock;
         }
@@ -221,7 +221,7 @@ namespace Portkey.Test
             
             yield return didWallet.Register(registerParam, (result) =>
             {
-                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                accountProviderMock.Verify(provider => provider.Create(), Times.Once());
                 socialServiceMock.Verify(service => service.Register(It.IsAny<RegisterParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 socialServiceMock.Verify(service => service.GetRegisterStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RegisterStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 Assert.AreEqual(result.Status.caAddress, "caAddress_mock");
@@ -254,7 +254,7 @@ namespace Portkey.Test
                     Assert.Fail("Should not be here");
                 }, error =>
                 {
-                    accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                    accountProviderMock.Verify(provider => provider.Create(), Times.Once());
                     socialServiceMock.Verify(service => service.Register(It.IsAny<RegisterParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
                     socialServiceMock.Verify(service => service.GetRegisterStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RegisterStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
 
@@ -301,7 +301,7 @@ namespace Portkey.Test
             
             yield return didWallet.Login(accountLoginParams, (result) =>
             {
-                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                accountProviderMock.Verify(provider => provider.Create(), Times.Once());
                 socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 Assert.AreEqual(result.Status.caAddress, "caAddress_mock");
@@ -335,7 +335,7 @@ namespace Portkey.Test
                     Assert.Fail("Should not be here");
                 }, error =>
                 {
-                    accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                    accountProviderMock.Verify(provider => provider.Create(), Times.Once());
                     socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
                     socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
 
@@ -403,7 +403,7 @@ namespace Portkey.Test
             yield return didWallet.GetVerifierServers("AELF", (result) =>
             {
                 done = true;
-                accountProviderMock.Verify(provider => provider.CreateAccount(), Times.Once());
+                accountProviderMock.Verify(provider => provider.Create(), Times.Once());
                 contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 contractMock.Verify(contract => contract.CallTransactionAsync<GetVerifierServersOutput>(It.IsAny<IWallet>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
                     It.IsAny<ErrorCallback>()), Times.Once());

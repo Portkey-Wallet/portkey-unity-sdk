@@ -21,7 +21,7 @@ namespace Portkey.DID
         }
         
         private IPortkeySocialService _socialService;
-        private IWallet _managementAccount;
+        private IWallet _managementWallet;
         private IStorageSuite<string> _storageSuite;
         private Core.IWalletProvider _walletProvider;
         private IConnectionService _connectionService;
@@ -53,12 +53,12 @@ namespace Portkey.DID
         
         public void InitializeAccount()
         {
-            if (_managementAccount != null)
+            if (_managementWallet != null)
             {
                 return;
             }
             
-            _managementAccount = _walletProvider.CreateAccount();
+            _managementWallet = _walletProvider.Create();
         }
 
         public bool Save(string password, string keyName)
@@ -131,7 +131,7 @@ namespace Portkey.DID
                 errorCallback("ConnectService is not initialized.");
                 yield break;
             }
-            if(_managementAccount == null)
+            if(_managementWallet == null)
             {
                 errorCallback("Management Account is not initialized.");
                 yield break;
@@ -144,8 +144,8 @@ namespace Portkey.DID
             }
 
             var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
-            var signature = BitConverter.ToString(_managementAccount.Sign($"{_managementAccount.Address}-{timestamp}"));
-            var publicKey = _managementAccount.PublicKey;
+            var signature = BitConverter.ToString(_managementWallet.Sign($"{_managementWallet.Address}-{timestamp}"));
+            var publicKey = _managementWallet.PublicKey;
             var requestTokenConfig = new RequestTokenConfig
             {
                 grant_type = "signature",
@@ -186,7 +186,7 @@ namespace Portkey.DID
         public IEnumerator AddManager(EditManagerParams editManagerParams, IHttp.successCallback successCallback,
             ErrorCallback errorCallback)
         {
-            if (_managementAccount == null)
+            if (_managementWallet == null)
             {
                 throw new Exception("Manager Account does not exist.");
             }

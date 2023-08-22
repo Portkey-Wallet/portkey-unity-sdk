@@ -14,13 +14,13 @@ namespace Portkey.DID
             _encryption = encryption;
         }
 
-        public IWallet GetAccountFromEncryptedPrivateKey(byte[] encryptedPrivateKey, string password)
+        public IWallet CreateFromEncryptedPrivateKey(byte[] encryptedPrivateKey, string password)
         {
             var privateKey = _encryption.Decrypt(encryptedPrivateKey, password);
-            return GetAccountFromPrivateKey(privateKey);
+            return CreateFromPrivateKey(privateKey);
         }
 
-        public IWallet GetAccountFromPrivateKey(string privateKey)
+        public IWallet CreateFromPrivateKey(string privateKey)
         {
             var wallet = new Wallet();
             var newWallet = wallet.GetWalletByPrivateKey(privateKey);
@@ -30,7 +30,7 @@ namespace Portkey.DID
             return new AElfWallet(keyPair, _encryption);
         }
 
-        public IWallet CreateAccount()
+        public IWallet Create()
         {
             var wallet = new Wallet();
 

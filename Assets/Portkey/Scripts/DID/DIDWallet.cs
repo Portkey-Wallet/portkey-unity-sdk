@@ -46,6 +46,7 @@ namespace Portkey.DID
         }
         
         private IPortkeySocialService _socialService;
+        private IWallet _managementWallet;
         private IStorageSuite<string> _storageSuite;
         private IWalletProvider _walletProvider;
         private IConnectionService _connectionService;
@@ -67,12 +68,12 @@ namespace Portkey.DID
 
         public void InitializeManagementAccount()
         {
-            if (_managementAccount != null)
+            if (_managementWallet != null)
             {
                 return;
             }
             
-            _managementAccount = _walletProvider.CreateAccount();
+            _managementWallet = _walletProvider.Create();
         }
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
@@ -207,7 +208,7 @@ namespace Portkey.DID
         
         public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {
-            if (_managementAccount == null)
+            if(_managementWallet == null)
             {
                 errorCallback("ManagerAccount does not exist!");
                 yield break;
@@ -578,8 +579,8 @@ namespace Portkey.DID
             }
 
             var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
-            var signature = BitConverter.ToString(_managementAccount.Sign($"{_managementAccount.Address}-{timestamp}"));
-            var publicKey = _managementAccount.PublicKey;
+            var signature = BitConverter.ToString(_managementWallet.Sign($"{_managementWallet.Address}-{timestamp}"));
+            var publicKey = _managementWallet.PublicKey;
             var requestTokenConfig = new RequestTokenConfig
             {
                 grant_type = "signature",
@@ -600,7 +601,7 @@ namespace Portkey.DID
                     return;
                 }
                 
-                _socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
+                StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
                 {
                     if(caHolderInfo == null)
                     {
@@ -613,7 +614,7 @@ namespace Portkey.DID
                         _data.accountInfo.Nickname = caHolderInfo.nickName;
                     }
                     successCallback(caHolderInfo);
-                }, errorCallback);
+                }, errorCallback));
             }, errorCallback);
         }
 
@@ -631,7 +632,7 @@ namespace Portkey.DID
         public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
-            if (_managementAccount == null)
+            if (_managementWallet == null)
             {
                 throw new Exception("Manager Account does not exist.");
             }

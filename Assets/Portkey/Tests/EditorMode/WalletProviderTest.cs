@@ -21,8 +21,8 @@ namespace Portkey.Test
         public void CreateTest()
         {
             IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account1 = walletProvider.CreateAccount();
-            var account2 = walletProvider.CreateAccount();
+            var account1 = walletProvider.Create();
+            var account2 = walletProvider.Create();
             
             Assert.AreEqual(account1.PublicKey, account2.PublicKey);
         }
@@ -31,7 +31,7 @@ namespace Portkey.Test
         public void GetAccountFromPrivateKeyTest()
         {
             IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account = walletProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
+            var account = walletProvider.CreateFromPrivateKey(PRIVATE_KEY);
             
             Assert.AreEqual(ADDRESS, account.Address);
             Assert.AreEqual(PUBLIC_KEY, account.PublicKey);
@@ -41,9 +41,9 @@ namespace Portkey.Test
         public void GetAccountFromEncryptedPrivateKeyTest()
         {
             IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account = walletProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
+            var account = walletProvider.CreateFromPrivateKey(PRIVATE_KEY);
             var encryptedPrivateKey = account.Encrypt(PASSWORD);
-            var accountFromEncryptedPrivateKey = walletProvider.GetAccountFromEncryptedPrivateKey(encryptedPrivateKey, PASSWORD);
+            var accountFromEncryptedPrivateKey = walletProvider.CreateFromEncryptedPrivateKey(encryptedPrivateKey, PASSWORD);
             
             Assert.AreEqual(account.Address, accountFromEncryptedPrivateKey.Address);
             Assert.AreEqual(account.PublicKey, accountFromEncryptedPrivateKey.PublicKey);
@@ -53,7 +53,7 @@ namespace Portkey.Test
         public void GetAccountFromPrivateKeyFailTest()
         {
             IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account = walletProvider.GetAccountFromPrivateKey(ANOTHER_PRIVATE_KEY);
+            var account = walletProvider.CreateFromPrivateKey(ANOTHER_PRIVATE_KEY);
             
             Assert.AreNotEqual(PUBLIC_KEY, account.PublicKey);
         }

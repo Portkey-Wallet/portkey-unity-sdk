@@ -388,7 +388,7 @@ namespace Portkey.DID
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                StaticCoroutine.StartCoroutine(contract.CallTransactionAsync<GetHolderInfoOutput>(_managementWallet, "GetHolderInfo", holderInfoInput, result =>
+                StaticCoroutine.StartCoroutine(contract.CallAsync<GetHolderInfoOutput>(_managementWallet, "GetHolderInfo", holderInfoInput, result =>
                 {
                     var holderInfo = ConvertToHolderInfo(result);
                     UpdateCAInfo(param.chainId, holderInfo.caHash, holderInfo.caAddress);
@@ -528,7 +528,7 @@ namespace Portkey.DID
         }
         
         private IEnumerator GetVerifierServersAsync(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback) {
-            yield return contract.CallTransactionAsync<GetVerifierServersOutput>(_managementWallet, "GetVerifierServers", new Empty(), result =>
+            yield return contract.CallAsync<GetVerifierServersOutput>(_managementWallet, "GetVerifierServers", new Empty(), result =>
             {
                 var verifierItems = ConvertToVerifierItems(result);
                 successCallback(verifierItems);
@@ -644,7 +644,7 @@ namespace Portkey.DID
                     CaHash = Hash.LoadFromHex(editManagerParams.caHash)
                 };
                 
-                StaticCoroutine.StartCoroutine(contract.SendTransactionAsync(_managementWallet, "AddManagerInfo", addManagerInfoInput, result =>
+                StaticCoroutine.StartCoroutine(contract.SendAsync(_managementWallet, "AddManagerInfo", addManagerInfoInput, result =>
                 {
                     successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
                 }, errorCallback));
@@ -666,7 +666,7 @@ namespace Portkey.DID
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                StaticCoroutine.StartCoroutine(contract.SendTransactionAsync(_managementWallet, "RemoveManagerInfo", removeManagerInfoInput, result =>
+                StaticCoroutine.StartCoroutine(contract.SendAsync(_managementWallet, "RemoveManagerInfo", removeManagerInfoInput, result =>
                 {
                     if (IsCurrentAccount(param))
                     {

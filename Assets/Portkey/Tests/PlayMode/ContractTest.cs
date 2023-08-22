@@ -95,7 +95,7 @@ namespace Portkey.Test
             var walletMock = GetWalletMock();
             IContract contract = new ContractBasic(chainMock.Object, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            yield return contract.CallTransactionAsync<GetVerifierServersOutput>(walletMock.Object, "GetVerifierServers", new Empty(),
+            yield return contract.CallAsync<GetVerifierServersOutput>(walletMock.Object, "GetVerifierServers", new Empty(),
                 result =>
                 {
                     Assert.AreEqual("594ebf395cdba58b0e725d71eb3c1a17d57662b0667a92f770f341d4e794b76b", result.VerifierServers[0].Id.ToHex());
@@ -131,7 +131,7 @@ namespace Portkey.Test
 
             IContract contract = new ContractBasic(chainMock.Object, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            yield return contract.CallTransactionAsync<GetVerifierServersOutput>(Wallet, "GetVerifierServers", new Empty(),
+            yield return contract.CallAsync<GetVerifierServersOutput>(Wallet, "GetVerifierServers", new Empty(),
                 result =>
                 {
                     done = true;
@@ -170,7 +170,7 @@ namespace Portkey.Test
                 CaHash = Hash.LoadFromHex("594ebf395cdba58b0e725d71eb3c1a17d57662b0667a92f770f341d4e794b76b")
             };
             
-            yield return contract.SendTransactionAsync(Wallet, "AddManagerInfo", input, result =>
+            yield return contract.SendAsync(Wallet, "AddManagerInfo", input, result =>
             {
                 done = true;
                 Assert.AreEqual(TRANSACTION_ID, result.transactionResult.TransactionId);

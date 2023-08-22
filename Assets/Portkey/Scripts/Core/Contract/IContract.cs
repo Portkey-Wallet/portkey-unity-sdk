@@ -36,6 +36,6 @@ namespace Portkey.Core
         /// <param name="methodName">Name of the method to call from the contract.</param>
         /// <param name="param">Parameters for calling the method from the contract.</param>
         /// <returns>Result information of the transaction.</returns>
-        IEnumerator SendTransactionAsync(IWallet wallet, string methodName, IMessage param, SuccessCallback<TransactionInfoDto> successCallback, ErrorCallback errorCallback);
+        IEnumerator SendAsync(IWallet wallet, string methodName, IMessage param, SuccessCallback<TransactionInfoDto> successCallback, ErrorCallback errorCallback);
     }
 }

@@ -52,7 +52,7 @@ namespace Portkey.Contract
             }, errorCallback);
         }
 
-        public IEnumerator SendTransactionAsync(IWallet wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
+        public IEnumerator SendAsync(IWallet wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
         {
             yield return _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param, transaction =>
             {

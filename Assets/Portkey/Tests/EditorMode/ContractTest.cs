@@ -79,7 +79,7 @@ namespace Portkey.Test
             IChain aelfChainMock = new AElfChainMock();
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_keyPair, "GetVerifierServers", new Empty()));
+            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallAsync<GetVerifierServersOutput>(_keyPair, "GetVerifierServers", new Empty()));
         
             Assert.AreEqual("594ebf395cdba58b0e725d71eb3c1a17d57662b0667a92f770f341d4e794b76b", result.VerifierServers[0].Id.ToHex());
         }
@@ -98,7 +98,7 @@ namespace Portkey.Test
             IChain aelfChainMock = new AElfChainMock((() => throw new Exception(EXCEPION_MESSAGE)));
             IContract contract = new ContractBasic(aelfChainMock, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallTransactionAsync<GetVerifierServersOutput>(_keyPair, "GetVerifierServers", new Empty()));
+            var result = UnityTestUtilities.RunAsyncMethodToSync(() => contract.CallAsync<GetVerifierServersOutput>(_keyPair, "GetVerifierServers", new Empty()));
         
             Assert.AreEqual(0, result.VerifierServers.Count);
         }

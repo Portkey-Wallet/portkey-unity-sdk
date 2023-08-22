@@ -13,7 +13,7 @@ namespace Portkey.DID
     public class AElfWallet : IWallet
     {
         private readonly KeyPair _keyPair;
-        private IEncryption _encryption;
+        private readonly IEncryption _encryption;
         
         public string Address => _keyPair.Address;
         public string PublicKey => _keyPair.PublicKey;

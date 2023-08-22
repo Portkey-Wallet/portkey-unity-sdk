@@ -22,6 +22,28 @@ namespace Portkey.Test
 {
     public class DIDWalletTest
     {
+        public class DIDWalletMock : DIDWallet
+        {
+            public Dictionary<string, CAInfo> GetCAInfoMap()
+            {
+                return _data.caInfoMap;
+            }
+            
+            public string GetLoginAccount()
+            {
+                return _data.accountInfo.LoginAccount;
+            }
+            
+            public string GetEncryptedPrivateKey()
+            {
+                return _data.aesPrivateKey;
+            }
+
+            public DIDWalletMock(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IEncryption encryption) : base(socialService, storageSuite, walletProvider, connectionService, contractProvider, encryption)
+            {
+            }
+        }
+        
         private IStorageSuite<string> _storageSuite = new NonPersistentStorageMock<string>("");
         private IConnectionService _connectionService = new ConnectionService<RequestHttp>("", new RequestHttp());
         private static readonly IEncryption Encryption = new AESEncryption();
@@ -411,7 +433,7 @@ namespace Portkey.Test
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryption = new AESEncryption();
             
-            var didWallet = new DIDWallet(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryption);
+            var didWallet = new DIDWalletMock(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryption);
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -422,17 +444,18 @@ namespace Portkey.Test
             
             yield return didWallet.Login(accountLoginParams, (result) =>
             {
+                var actualLoginAccount = didWallet.GetLoginAccount();
+                var actualCaInfoMap = didWallet.GetCAInfoMap();
                 didWallet.Save(PASSWORD, KEY);
-
-                var cipherText = _storageSuite.GetItem(KEY);
-                var cipherTextByte = Convert.FromBase64String(cipherText);
-                var data = encryption.Decrypt(cipherTextByte, PASSWORD);
-                var info = JsonConvert.DeserializeObject<DIDWallet.DIDInfo>(data);
-                var privateKey = encryption.Decrypt(Convert.FromBase64String(info.aesPrivateKey), PASSWORD);
+                didWallet.Load(PASSWORD, KEY);
+                var afterLoginAccount = didWallet.GetLoginAccount();
+                var afterCaInfoMap = didWallet.GetCAInfoMap();
+                var afterEncryptedPrivateKey = didWallet.GetEncryptedPrivateKey();
+                var afterPrivateKey = encryption.Decrypt(Convert.FromBase64String(afterEncryptedPrivateKey), PASSWORD);
                 
-                Assert.AreEqual(privateKey, KeyPair.PrivateKey);
-                Assert.AreEqual("guardianIdentifier_mock", info.accountInfo.LoginAccount);
-                Assert.AreEqual("caAddress_mock", info.caInfo["chainId_mock"].caAddress);
+                Assert.AreEqual(afterPrivateKey, KeyPair.PrivateKey);
+                Assert.AreEqual(actualLoginAccount, afterLoginAccount);
+                Assert.AreEqual(actualCaInfoMap["chainId_mock"].caAddress, afterCaInfoMap["chainId_mock"].caAddress);
             }, Assert.Fail);
         }
     }

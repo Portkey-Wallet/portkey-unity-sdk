@@ -3,14 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AElf.Types;
-using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
-using UnityEngine;
 using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.DID
@@ -23,7 +20,7 @@ namespace Portkey.DID
     {
         private const string DEFAULT_KEY_NAME = "portkey_sdk_did_wallet";
         
-        public class AccountInfo
+        protected class AccountInfo
         {
             public string LoginAccount { get; set; } = null;
             public string Nickname { get; set; } = null;
@@ -35,23 +32,28 @@ namespace Portkey.DID
         }
         
         // data struct used for saving state of this DID Wallet to storage
-        public class DIDInfo
+        protected class DIDWalletData
         {
             public string aesPrivateKey;
-            public Dictionary<string, CAInfo> caInfo;
-            public AccountInfo accountInfo;
+            public Dictionary<string, CAInfo> caInfoMap = new Dictionary<string, CAInfo>();
+            public AccountInfo accountInfo = new AccountInfo();
+
+            public void Clear()
+            {
+                caInfoMap.Clear();
+                accountInfo = new AccountInfo();
+            }
         }
         
         private IPortkeySocialService _socialService;
-        private IWallet _managementAccount;
         private IStorageSuite<string> _storageSuite;
         private IWalletProvider _walletProvider;
         private IConnectionService _connectionService;
         private IContractProvider _contractProvider;
         private IEncryption _encryption;
 
-        private AccountInfo _accountInfo = new AccountInfo();
-        private Dictionary<string, CAInfo> _caInfoMap = new Dictionary<string, CAInfo>();
+        private IWallet _managementAccount;
+        protected DIDWalletData _data = new DIDWalletData();
 
         public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IEncryption encryption)
         {
@@ -76,12 +78,8 @@ namespace Portkey.DID
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
         {
             var encryptedPrivateKey = EncryptManagementAccount(password);
-            var data = JsonConvert.SerializeObject(new DIDInfo
-            {
-                aesPrivateKey = Convert.ToBase64String(encryptedPrivateKey),
-                caInfo = _caInfoMap,
-                accountInfo = _accountInfo
-            });
+            _data.aesPrivateKey = Convert.ToBase64String(encryptedPrivateKey);
+            var data = JsonConvert.SerializeObject(_data);
             var encryptedData = _encryption.Encrypt(data, password);
             var encryptedDataStr = Convert.ToBase64String(encryptedData);
             _storageSuite.SetItem(keyName, encryptedDataStr);
@@ -107,11 +105,9 @@ namespace Portkey.DID
             {
                 throw new Exception("Wrong password.");
             }
-            var info = JsonConvert.DeserializeObject<DIDInfo>(data);
-            var privateKey = _encryption.Decrypt(Convert.FromBase64String(info.aesPrivateKey), password);
+            _data = JsonConvert.DeserializeObject<DIDWalletData>(data);
+            var privateKey = _encryption.Decrypt(Convert.FromBase64String(_data.aesPrivateKey), password);
             _managementAccount = _walletProvider.GetAccountFromPrivateKey(privateKey);
-            _caInfoMap = info.caInfo??new Dictionary<string, CAInfo>();
-            _accountInfo = info.accountInfo??new AccountInfo();
 
             return this;
         }
@@ -120,7 +116,7 @@ namespace Portkey.DID
         {
             InitializeManagementAccount();
 
-            if (!_accountInfo.IsLoggedIn())
+            if (!_data.accountInfo.IsLoggedIn())
             {
                 errorCallback("Account not logged in.");
                 yield break;
@@ -137,7 +133,7 @@ namespace Portkey.DID
         {
             InitializeManagementAccount();
 
-            if (_accountInfo.IsLoggedIn())
+            if (_data.accountInfo.IsLoggedIn())
             {
                 errorCallback("Account already logged in.");
                 yield break;
@@ -206,7 +202,7 @@ namespace Portkey.DID
         
         private bool IsFirstTimeRecoverPassed(string chainId, RecoverStatusResult response)
         {
-            return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_caInfoMap.ContainsKey(chainId);
+            return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
         }
         
         public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
@@ -216,7 +212,7 @@ namespace Portkey.DID
                 errorCallback("ManagerAccount does not exist!");
                 yield break;
             }
-            if(param.caHash == null && _caInfoMap.TryGetValue(param.chainId, out var caInfo))
+            if(param.caHash == null && _data.caInfoMap.TryGetValue(param.chainId, out var caInfo))
             {
                 param.caHash = caInfo.caHash;
                 Debugger.Log($"CAHash: {param.caHash}");
@@ -243,7 +239,7 @@ namespace Portkey.DID
 
         public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
         {
-            if(_accountInfo.IsLoggedIn())
+            if(_data.accountInfo.IsLoggedIn())
             {
                 errorCallback("Account already logged in.");
                 yield break;
@@ -304,7 +300,7 @@ namespace Portkey.DID
 
         private void UpdateAccountInfo(string guardianIdentifier)
         {
-            _accountInfo = new AccountInfo
+            _data.accountInfo = new AccountInfo
             {
                 LoginAccount = guardianIdentifier
             };
@@ -312,7 +308,7 @@ namespace Portkey.DID
         
         private void UpdateCAInfo(string chainId, string caHash, string caAddress)
         {
-            _caInfoMap[chainId] = new CAInfo
+            _data.caInfoMap[chainId] = new CAInfo
             {
                 caHash = caHash,
                 caAddress = caAddress
@@ -321,7 +317,7 @@ namespace Portkey.DID
 
         private bool IsFirstTimeRegisterPassed(string chainId, RegisterStatusResult response)
         {
-            return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_caInfoMap.ContainsKey(chainId);
+            return response!= null && response.IsStatusPass() && _managementAccount?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
         }
 
         public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
@@ -365,7 +361,7 @@ namespace Portkey.DID
                 {
                     UpdateCAInfo(param.chainId, info.holderManagerInfo.caHash, info.holderManagerInfo.caAddress);
                     var loginAccount = info.loginGuardianInfo[0]?.loginGuardian?.identifierHash;
-                    if (!_accountInfo.IsLoggedIn() && loginAccount != null)
+                    if (!_data.accountInfo.IsLoggedIn() && loginAccount != null)
                     {
                         UpdateAccountInfo(loginAccount);
                     }
@@ -519,7 +515,7 @@ namespace Portkey.DID
 
         private bool IsLoginAccountTheRequestedGuardian(GetHolderInfoParams param, IHolderInfo holderInfo)
         {
-            return holderInfo != null && param.guardianIdentifier == _accountInfo?.LoginAccount;
+            return holderInfo != null && param.guardianIdentifier == _data.accountInfo?.LoginAccount;
         }
 
         public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
@@ -575,7 +571,7 @@ namespace Portkey.DID
             {
                 throw new Exception("Management Account is not initialized.");
             }
-            var caHash = _caInfoMap[chainId]?.caHash;
+            var caHash = _data.caInfoMap[chainId]?.caHash;
             if(caHash == null)
             {
                 throw new Exception($"CA Hash on Chain ID: ({chainId}) does not exists.");
@@ -614,7 +610,7 @@ namespace Portkey.DID
 
                     if (caHolderInfo.nickName != null)
                     {
-                        _accountInfo.Nickname = caHolderInfo.nickName;
+                        _data.accountInfo.Nickname = caHolderInfo.nickName;
                     }
                     successCallback(caHolderInfo);
                 }, errorCallback);
@@ -623,7 +619,7 @@ namespace Portkey.DID
 
         public void Reset()
         {
-            ClearDIDWallet();
+            _data.Clear();
             _managementAccount = null;
         }
 
@@ -674,7 +670,7 @@ namespace Portkey.DID
                 {
                     if (IsCurrentAccount(param))
                     {
-                        ClearDIDWallet();
+                        _data.Clear();
                     }
                 
                     successCallback(result.transactionResult.Status == "MINED");
@@ -684,18 +680,12 @@ namespace Portkey.DID
 
         private bool IsCurrentAccount(EditManagerParams param)
         {
-            return param.managerInfo?.Address.ToString() == _managementAccount.Address && _caInfoMap[param.chainId].caHash == param.caHash;
-        }
-
-        private void ClearDIDWallet()
-        {
-            _caInfoMap.Clear();
-            _accountInfo = new AccountInfo();
+            return param.managerInfo?.Address.ToString() == _managementAccount.Address && _data.caInfoMap[param.chainId].caHash == param.caHash;
         }
 
         public bool IsLoggedIn()
         {
-            return _caInfoMap.Count > 0 && _accountInfo.IsLoggedIn();
+            return _data.caInfoMap.Count > 0 && _data.accountInfo.IsLoggedIn();
         }
     }
 }

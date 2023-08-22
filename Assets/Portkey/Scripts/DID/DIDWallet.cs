@@ -65,7 +65,7 @@ namespace Portkey.DID
             _encryption = encryption;
         }
 
-        public void InitializeManagementAccount()
+        private void InitializeManagementAccount()
         {
             if (_managementWallet != null)
             {

@@ -104,13 +104,26 @@ namespace Portkey.UI
 
             var verifierType = _userGuardianStatus.guardianItem.verifier.name;
             DisplayVerifierIcon(verifierType);
+
+            var guardian = _userGuardianStatus.guardianItem.guardian;
+            var guardianText = GetGuardianText(guardian.type, guardian);
+
+            account.text = guardianText.AccountText;
+            detail.text = guardianText.DetailsText;   
             
-            account.text = _userGuardianStatus.guardianItem.guardian.firstName;
-            detail.text = _userGuardianStatus.guardianItem.guardian.thirdPartyEmail;
             loginAccount.SetActive(_userGuardianStatus.guardianItem.guardian.isLoginGuardian);
             
             DisplayVerificationStatus(_userGuardianStatus.status);
         }
+        
+        private static IGuardianText GetGuardianText(AccountType type, Guardian guardian) => type switch
+        {
+            AccountType.Apple  => new AppleGuardianText(guardian),
+            AccountType.Google => new GoogleGuardianText(guardian),
+            AccountType.Phone  => new AppleGuardianText(guardian),
+            AccountType.Email  => new AppleGuardianText(guardian),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), $"Not expected AccountType value: {type}"),
+        };
 
         private void DisplayVerificationStatus(VerifierStatus status)
         {

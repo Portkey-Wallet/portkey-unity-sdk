@@ -122,7 +122,7 @@ namespace Portkey.UI
         private void CheckAccessTokenExpired()
         {
             var verifier = _verifierItem;
-            var socialVerifier = did.GetSocialVerifier(AccountType.Google);
+            var socialVerifier = did.GetSocialVerifier(_guardianIdentifierInfo.accountType);
 
             var param = new VerifyAccessTokenParam
             {

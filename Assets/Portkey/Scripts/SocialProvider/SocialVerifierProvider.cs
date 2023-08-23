@@ -18,23 +18,28 @@ namespace Portkey.SocialProvider
         
         public ISocialVerifier GetSocialVerifier(AccountType type)
         {
-            switch (type)
+            if (_socialVerifiers.TryGetValue(type, out var socialVerifier))
             {
-                case AccountType.Google:
-                    if (_socialVerifiers.TryGetValue(type, out var google))
-                    {
-                        return google;
-                    }
-                    google = new GoogleVerifier(_socialProvider.GetSocialLogin(AccountType.Google), _portkeySocialService);
-                    _socialVerifiers.Add(type, google);
-                    return google;
-                case AccountType.Email:
-                case AccountType.Phone:
-                case AccountType.Apple:
-                    throw new NotImplementedException($"{type.ToString()} not yet implemented");
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                return socialVerifier;
             }
+            
+            socialVerifier = CreateSocialVerifier(type);
+            _socialVerifiers.Add(type, socialVerifier);
+            
+            return socialVerifier;
+        }
+
+        private ISocialVerifier CreateSocialVerifier(AccountType type)
+        {
+            ISocialVerifier socialVerifier = type switch
+            {
+                AccountType.Google => new GoogleVerifier(_socialProvider.GetSocialLogin(AccountType.Google), _portkeySocialService),
+                AccountType.Email => throw new NotImplementedException("Email not implemented yet"),
+                AccountType.Phone => throw new NotImplementedException("Phone not implemented yet"),
+                AccountType.Apple => new AppleVerifier(_socialProvider.GetSocialLogin(AccountType.Apple), _portkeySocialService),
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+            return socialVerifier;
         }
     }
 }

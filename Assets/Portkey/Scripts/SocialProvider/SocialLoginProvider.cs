@@ -55,7 +55,7 @@ namespace Portkey.SocialProvider
         private ISocialLogin GetAppleLoginByPlatform()
         {
 #if UNITY_EDITOR || UNITY_STANDALONE
-            throw new NotImplementedException("Platform not supported");
+            return new PCAppleLogin(_config, _request);
 #elif UNITY_IOS
             throw new NotImplementedException("Platform not supported");
 #elif UNITY_ANDROID

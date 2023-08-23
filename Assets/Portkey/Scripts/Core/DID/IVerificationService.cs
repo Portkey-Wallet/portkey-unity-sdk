@@ -76,7 +76,7 @@ namespace Portkey.Core
     [Serializable]
     public class VerifyAppleTokenParams
     {
-        public string identityToken;
+        public string accessToken;
         public string verifierId;
         public string chainId;
     }

@@ -57,7 +57,7 @@ namespace Portkey.SocialProvider
 #if UNITY_EDITOR || UNITY_STANDALONE
             return new PCAppleLogin(_config, _request);
 #elif UNITY_IOS
-            throw new NotImplementedException("Platform not supported");
+            return new IOSAppleLogin(_config, _request);
 #elif UNITY_ANDROID
             return new AndroidAppleLogin(_config, _request);
 #elif UNITY_WEBGL

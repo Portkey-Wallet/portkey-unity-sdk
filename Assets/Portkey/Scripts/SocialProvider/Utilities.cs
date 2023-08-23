@@ -15,6 +15,12 @@ namespace Portkey.SocialProvider
             var hash = GetSHA256Hash(codeVerifier);
             return Base64URLRemovePadding(hash);
         }
+        
+        public static byte[] DecodeBase64(string base64Data)
+        {
+            base64Data = base64Data.Replace('-', '+').Replace('_', '/').PadRight(4*((base64Data.Length+3)/4), '=');
+            return Convert.FromBase64String(base64Data);
+        }
 
         private static byte[] GetSHA256Hash(string text)
         {

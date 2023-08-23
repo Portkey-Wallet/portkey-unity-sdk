@@ -2,6 +2,7 @@
 {
     public class SocialLoginInfo
     {
+        public bool isExpired;
         public string access_token;
         public AccountType accountType;
         public SocialInfo socialInfo;

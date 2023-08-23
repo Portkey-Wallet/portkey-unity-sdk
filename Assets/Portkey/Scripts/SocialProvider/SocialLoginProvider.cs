@@ -33,7 +33,7 @@ namespace Portkey.SocialProvider
             AccountType.Google => GetGoogleLoginByPlatform(),
             AccountType.Email => null,
             AccountType.Phone => null,
-            AccountType.Apple => null,
+            AccountType.Apple => GetAppleLoginByPlatform(),
             _ => throw new ArgumentOutOfRangeException(nameof(type), $"Not expected account type: {type}")
         };
 
@@ -47,6 +47,21 @@ namespace Portkey.SocialProvider
             return new AndroidGoogleLogin(_config, _request);
 #elif UNITY_WEBGL
             return new WebGLGoogleLogin(_config, _request);
+#else
+            throw new NotImplementedException("Platform not supported");
+#endif
+        }
+        
+        private ISocialLogin GetAppleLoginByPlatform()
+        {
+#if UNITY_EDITOR || UNITY_STANDALONE
+            throw new NotImplementedException("Platform not supported");
+#elif UNITY_IOS
+            throw new NotImplementedException("Platform not supported");
+#elif UNITY_ANDROID
+            return new AndroidAppleLogin(_config, _request);
+#elif UNITY_WEBGL
+            throw new NotImplementedException("Platform not supported");
 #else
             throw new NotImplementedException("Platform not supported");
 #endif

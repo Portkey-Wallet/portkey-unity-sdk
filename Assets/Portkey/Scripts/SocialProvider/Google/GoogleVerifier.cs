@@ -28,9 +28,9 @@ namespace Portkey.SocialProvider
             
             startLoadCallback(true);
             // check if login access token is expired
-            _socialLogin.RequestSocialInfo(param.accessToken, (socialInfo) =>
+            _socialLogin.RequestSocialInfo(param.accessToken, (socialLoginInfo) =>
             {
-                if(socialInfo == null)
+                if(socialLoginInfo.isExpired)
                 {
                     startLoadCallback(false);
                     //login expired, need to re-login

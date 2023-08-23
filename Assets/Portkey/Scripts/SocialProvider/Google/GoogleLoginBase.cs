@@ -55,6 +55,7 @@ namespace Portkey.SocialProvider
 
                 var socialLoginInfo = new SocialLoginInfo
                 {
+                    isExpired = socialInfo == null,
                     access_token = accessToken,
                     accountType = AccountType.Google,
                     socialInfo = socialInfo

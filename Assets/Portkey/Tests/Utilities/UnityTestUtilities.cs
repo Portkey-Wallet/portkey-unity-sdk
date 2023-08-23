@@ -1,6 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Portkey.Core;
+using UnityEditor;
+using UnityEngine;
 
 [assembly: InternalsVisibleTo("EditorMode"),
            InternalsVisibleTo("PlayMode")]
@@ -33,6 +36,22 @@ namespace Portkey.Test
         public static void RunAsyncMethodToSync(Func<Task> asyncFunc)
         {
             Task.Run(async () => await asyncFunc()).GetAwaiter().GetResult();
+        }
+        
+        public static PortkeyConfig GetPortkeyConfig(string name)
+        {
+            var guids = AssetDatabase.FindAssets($"t:{nameof(PortkeyConfig)} {name}");
+            switch (guids.Length)
+            {
+                case 0:
+                    Debug.LogError($"No {nameof(PortkeyConfig)} found!");
+                    break;
+                case > 0:
+                    Debug.LogWarning($"More than one {nameof(PortkeyConfig)} found, taking first one");
+                    break;
+            }
+
+            return (PortkeyConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(PortkeyConfig));
         }
     }
 }

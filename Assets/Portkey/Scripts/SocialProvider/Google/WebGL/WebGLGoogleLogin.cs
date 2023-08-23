@@ -32,7 +32,6 @@ namespace Portkey.SocialProvider
 
             Debugger.Log("Authenticating for WebGL");
             var url = $"{_url}{loginUri}{loginType}?clientId={ClientId}&redirectUri={_redirectUri}";
-            //Application.OpenURL($"{_url}{loginUri}{loginType}?clientId={ClientId}&redirectUri={_redirectUri}");
 #if UNITY_WEBGL
             OpenURL(url);
 #endif

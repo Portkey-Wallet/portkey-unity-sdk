@@ -79,9 +79,9 @@
          * "subspecs" (optional)
            Subspecs to include for the pod.
      -->
-    <iosPod name="GoogleSignIn" minTargetSdk="6.0" addToAllTargets="true">
+    <iosPod name="GoogleSignIn" minTargetSdk="6.0" addToAllTargets="true" bitcodeEnabled="true">
     </iosPod>
-    <iosPod name="BiometricAuthentication" minTargetSdk="6.0" addToAllTargets="true" version="3.1.3">
+    <iosPod name="BiometricAuthentication" minTargetSdk="6.0" addToAllTargets="true" version="3.1.3" bitcodeEnabled="true">
     </iosPod>
   </iosPods>
 </dependencies>

@@ -42,7 +42,7 @@ namespace Portkey.Editor
         private static void UpdateRunpathSearchPaths(PBXProject proj, string targetGuid)
         {
             proj.SetBuildProperty(targetGuid, "LD_RUNPATH_SEARCH_PATHS",
-                "$(inherited) @executable_path/Frameworks /usr/lib/swift");
+                "$(inherited) /usr/lib/swift @executable_path/Frameworks");
         }
 
         private static void UpdateXcodePlist(string path)

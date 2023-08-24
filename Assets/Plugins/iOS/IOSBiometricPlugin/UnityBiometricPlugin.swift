@@ -16,27 +16,40 @@ import BiometricAuthentication
             BioMetricAuthenticator.authenticateWithBioMetrics(reason: "Biometric Authentication") { (result) in
                 
                 switch result {
-                    case .success( _):
-
-                        print("Authentication successful.")
-                        UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "OnSuccess", message: "Authentication successful.")
-
-                    case .failure(let error):
-
-                        switch error {
-
+                case .success( _):
+                    
+                    print("Authentication successful.")
+                    UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "OnSuccess", message: "Authentication successful.")
+                    
+                case .failure(let error):
+                    
+                    switch error {
+                        
                         // do nothing on canceled by system or user
-                        case .canceledBySystem, .canceledByUser:
-                            UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "OnFailure", message: "Cancelled")
-                            break
-
+                    case .canceledBySystem, .canceledByUser:
+                        UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "OnFailure", message: "Cancelled")
+                        break
+                        
                         // show error for any other reason
-                        default:
-                            print(error.message())
-                            UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "OnFailure", message: error.message())
-                        }
+                    default:
+                        print(error.message())
+                        UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "OnFailure", message: error.message())
                     }
+                }
             }
+        }
+        else {
+            UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "OnSuccess", message: "Cannot Authenticate")
+        }
+    }
+    
+    @objc public static func CanAuthenticate() {
+    
+        if BioMetricAuthenticator.canAuthenticate() {
+            UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "CanAuthenticate", message: "true")
+        }
+        else {
+            UnityFramework.getInstance().sendMessageToGO(withName: "IOSPortkeyBiometricCallback", functionName: "CanAuthenticate", message: "false")
         }
     }
 }

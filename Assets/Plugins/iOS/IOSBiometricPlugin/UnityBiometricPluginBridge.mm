@@ -13,4 +13,9 @@ extern "C" {
         // You can access Swift classes directly here.
         [UnityBiometricPlugin Authenticate];
     }
+
+    void BiometricCanAuthenticate() {
+        // You can access Swift classes directly here.
+        [UnityBiometricPlugin CanAuthenticate];
+    }
 }

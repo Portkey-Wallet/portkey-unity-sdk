@@ -6,14 +6,15 @@ namespace Portkey.SocialProvider
     public class IOSPortkeyBiometricCallback : MonoBehaviour, IPortkeyBiometricCallback
     {
         private readonly string CANCELLED = "Cancelled";
-        
-        public IBiometric.SuccessCallback SuccessCallback { get; set; }
-        public ErrorCallback ErrorCallback { get; set; }
+
+        public IBiometric.SuccessCallback SuccessCallback { get; set; } = null;
+        public IBiometric.SuccessCallback CanAuthenticateCallback { get; set; } = null;
+        public ErrorCallback ErrorCallback { get; set; } = null;
 
         public void OnSuccess(string data)
         {
             Debugger.Log($"IOSPortkeyBiometricCallback Success: {data}");
-            SuccessCallback?.Invoke(true);
+            SuccessCallback?.Invoke(data != "Cannot Authenticate");
             Destroy(gameObject);
         }
 
@@ -24,6 +25,12 @@ namespace Portkey.SocialProvider
                 Debugger.LogError($"IOSPortkeyBiometricCallback Error: {error}");
                 ErrorCallback?.Invoke(error);
             }
+            Destroy(gameObject);
+        }
+
+        public void CanAuthenticate(string data)
+        {
+            CanAuthenticateCallback?.Invoke(data == "true");
             Destroy(gameObject);
         }
     }

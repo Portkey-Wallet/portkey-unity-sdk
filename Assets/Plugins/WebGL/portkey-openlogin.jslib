@@ -7,12 +7,12 @@ mergeInto(LibraryManager.library, {
       const type = event.data.type;
       switch (type) {
         case 'PortkeySocialLoginOnSuccess':
-          window.unityInstance.SendMessage('WebGLPortkeyGoogleLoginCallback', 'OnSuccess', JSON.stringify(event.data.data));
+          window.unityInstance.SendMessage('WebGLPortkeyLoginCallback', 'OnSuccess', JSON.stringify(event.data.data));
 
           console.log(event.data.data);
           break;
         case 'PortkeySocialLoginOnFailure':
-          window.unityInstance.SendMessage('WebGLPortkeyGoogleLoginCallback', 'OnFailure', JSON.stringify(event.data.error));
+          window.unityInstance.SendMessage('WebGLPortkeyLoginCallback', 'OnFailure', JSON.stringify(event.data.error));
 
           console.log(event.data.error);
           break;
@@ -29,7 +29,7 @@ mergeInto(LibraryManager.library, {
       if (windowOpener != null && windowOpener.closed) {
           clearInterval(timer);
           
-          window.unityInstance.SendMessage('WebGLPortkeyGoogleLoginCallback', 'OnFailure', 'Login window closed.');
+          window.unityInstance.SendMessage('WebGLPortkeyLoginCallback', 'OnFailure', 'Login window closed.');
   
           window.removeEventListener('message', onMessage);
           timer = null;

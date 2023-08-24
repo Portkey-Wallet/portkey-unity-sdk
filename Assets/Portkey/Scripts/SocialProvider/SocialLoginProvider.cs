@@ -61,7 +61,7 @@ namespace Portkey.SocialProvider
 #elif UNITY_ANDROID
             return new AndroidAppleLogin(_config, _request);
 #elif UNITY_WEBGL
-            throw new NotImplementedException("Platform not supported");
+            return new WebGLAppleLogin(_config, _request);
 #else
             throw new NotImplementedException("Platform not supported");
 #endif

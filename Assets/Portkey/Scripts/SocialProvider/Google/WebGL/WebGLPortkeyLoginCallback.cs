@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Portkey.SocialProvider
 {
-    public class WebGLPortkeyGooglelLoginCallback : MonoBehaviour, IPortkeySocialLoginCallback
+    public class WebGLPortkeyLoginCallback : MonoBehaviour, IPortkeySocialLoginCallback
     {
         private class WebGLPortkeySocialLoginData
         {

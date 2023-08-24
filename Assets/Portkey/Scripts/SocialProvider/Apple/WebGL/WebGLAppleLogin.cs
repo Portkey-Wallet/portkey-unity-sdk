@@ -4,16 +4,13 @@ using UnityEngine;
 
 namespace Portkey.SocialProvider
 {
-    public class WebGLGoogleLogin : GoogleLoginBase
+    public class WebGLAppleLogin : AppleLoginBase
     {
-        private string _redirectUri;
         private string _url;
         
-        public WebGLGoogleLogin(PortkeyConfig config, IHttp request) : base(request)
+        public WebGLAppleLogin(PortkeyConfig config, IHttp request) : base(request)
         {
-            ClientId = config.GoogleWebGLClientId;
             _url = config.GoogleWebGLLoginUrl;
-            _redirectUri = config.GoogleWebGLRedirectUri;
         }
         
 #if UNITY_WEBGL
@@ -24,14 +21,14 @@ namespace Portkey.SocialProvider
         protected override void OnAuthenticate()
         {
             const string loginUri = "social-login/";
-            const string loginType = "Google";
+            const string loginType = "Apple";
 
             _startLoadCallback?.Invoke(true);
 
             SetupAuthenticationCallback();
 
             Debugger.Log("Authenticating for WebGL");
-            var url = $"{_url}{loginUri}{loginType}?clientId={ClientId}&redirectUri={_redirectUri}";
+            var url = $"{_url}{loginUri}{loginType}";
 #if UNITY_WEBGL
             OpenURL(url);
 #endif

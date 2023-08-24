@@ -29,6 +29,7 @@ namespace Portkey.UI
         [SerializeField] private TextMeshProUGUI errorMessage;
         [SerializeField] private DID.DID did;
         [SerializeField] private WalletViewController walletView;
+        [SerializeField] private BiometricViewController biometricView;
         [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private GameObject confirmBackView;
 
@@ -77,7 +78,7 @@ namespace Portkey.UI
         public bool UseBiometric
         {
             get;
-            private set;
+            set;
         } = false;
 
         private void OnEnable()
@@ -87,36 +88,7 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            var biometricAvailable = InitializeBiometric(CheckAccessTokenExpired);
-
-            if (!biometricAvailable)
-            {
-                CheckAccessTokenExpired();   
-            }
-        }
-
-        private bool InitializeBiometric(Action onBiometricAuthenticated = null)
-        {
-            var biometric = did.GetBiometric();
-            if (biometric == null)
-            {
-                return false;
-            }
-
-            var promptInfo = new IBiometric.BiometricPromptInfo
-            {
-                title = "Enable Biometric",
-                subtitle = "Enable biometric to protect your account",
-                description = "You may choose to enable authenticating with your biometric or skip this step.",
-                negativeButtonText = "Skip"
-            };
-            biometric.Authenticate(promptInfo, pass =>
-            {
-                UseBiometric = pass;
-                onBiometricAuthenticated?.Invoke();
-            }, OnError);
-
-            return true;
+            CheckAccessTokenExpired();
         }
 
         private void CheckAccessTokenExpired()
@@ -199,7 +171,7 @@ namespace Portkey.UI
                 
                 var walletInfo = CreateDIDWalletInfo(result.Status, result.SessionId, AddManagerType.Recovery);
                 // logged in, open wallet view and close PIN view
-                OpenWalletView(walletInfo);
+                OpenNextView(walletInfo);
             }, OnError));
         }
 
@@ -222,11 +194,41 @@ namespace Portkey.UI
             return walletInfo;
         }
 
+        private void OpenNextView(DIDWalletInfo walletInfo)
+        {
+            var biometric = did.GetBiometric();
+            if (biometric == null)
+            {
+                OpenWalletView(walletInfo);
+                return;
+            }
+            biometric.CanAuthenticate(canAuth =>
+            {
+                if (canAuth)
+                {
+                    //change to biometric view
+                    OpenBiometricView(walletInfo);
+                }
+                else
+                {
+                    OpenWalletView(walletInfo);
+                }
+            });
+        }
+
         private void OpenWalletView(DIDWalletInfo walletInfo)
         {
             walletView.WalletInfo = walletInfo;
             walletView.gameObject.SetActive(true);
             IsLoginCompleted = true;
+            ShowLoading(false);
+            CloseView();
+        }
+        
+        private void OpenBiometricView(DIDWalletInfo walletInfo)
+        {
+            biometricView.WalletInfo = walletInfo;
+            biometricView.gameObject.SetActive(true);
             ShowLoading(false);
             CloseView();
         }
@@ -267,7 +269,7 @@ namespace Portkey.UI
 
                 var walletInfo = CreateDIDWalletInfo(result.Status, result.SessionId, AddManagerType.Register);
                 // logged in, open wallet view and close PIN view
-                OpenWalletView(walletInfo);
+                OpenNextView(walletInfo);
             }, OnError));
         }
 

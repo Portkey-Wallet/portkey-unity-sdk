@@ -129,53 +129,57 @@ namespace Portkey.DID
             };
             yield return _socialService.Recovery(recoveryParam, (result) =>
             {
-                StaticCoroutine.StartCoroutine(GetLoginStatus(param.chainId, result.sessionId,
-                    (status) =>
-                    {
-                        successCallback(new LoginResult(status, result.sessionId));
-                    }, errorCallback));
+                StaticCoroutine.StartCoroutine(GetLoginStatus(param.chainId, result.sessionId, (status) =>
+                {
+                    successCallback(new LoginResult(status, result.sessionId));
+                }, errorCallback));
             }, errorCallback);
         }
 
         protected IEnumerator GetLoginStatus(string chainId, string sessionId, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
             return _socialService.GetRecoverStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
+            {
+                if(status == null)
                 {
-                    if(status == null)
+                    errorCallback("Failed to get register status.");
+                    return;
+                }
+                if(IsFirstTimeRecoverPassed(chainId, status))
+                {
+                    var holderInfoParams = new GetHolderInfoParams
                     {
-                        errorCallback("Failed to get register status.");
-                        return;
-                    }
-                    if(IsFirstTimeRecoverPassed(chainId, status))
+                        chainId = chainId,
+                        caHash = status.caHash
+                    };
+                    StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
                     {
-                        var holderInfoParams = new GetHolderInfoParams
+                        var isCurrentAccountManager = info.managerInfos.Any(manager => manager.address == _managementWallet.Address);
+                        if (isCurrentAccountManager)
                         {
-                            chainId = chainId,
-                            caHash = status.caHash
-                        };
-                        StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
-                        {
-                            var isCurrentAccountAManager = info.managerInfos.Any(manager => manager.address == _managementWallet.Address);
-                            if (isCurrentAccountAManager)
-                            {
-                                UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
-                                UpdateCAInfo(chainId, status.caHash, status.caAddress);
-                            }
+                            UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
+                            UpdateCAInfo(chainId, status.caHash, status.caAddress);
+                        }
 
-                            successCallback(status);
-                        }, errorCallback));
-                    }
-                    else
-                    {
                         successCallback(status);
-                    }
-                },
-                errorCallback);
+                    }, errorCallback));
+                }
+                else
+                {
+                    successCallback(status);
+                }
+            },
+            errorCallback);
         }
         
         private bool IsFirstTimeRecoverPassed(string chainId, RecoverStatusResult response)
         {
-            return response!= null && response.IsStatusPass() && _managementWallet?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
+            return response!= null && response.IsStatusPass() && IsCAInfoEmpty(chainId);
+        }
+        
+        private bool IsCAInfoEmpty(string chainId)
+        {
+            return _managementWallet?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
         }
         
         public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
@@ -246,8 +250,8 @@ namespace Portkey.DID
                         };
                         StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
                         {
-                            var isCurrentAccountAManager = info.managerInfos.Any(manager => manager.address == _managementWallet.Address);
-                            if (isCurrentAccountAManager)
+                            var isCurrentAccountManager = info.managerInfos.Any(manager => manager.address == _managementWallet.Address);
+                            if (isCurrentAccountManager)
                             {
                                 UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
                                 UpdateCAInfo(chainId, status.caHash, status.caAddress);
@@ -283,7 +287,7 @@ namespace Portkey.DID
 
         private bool IsFirstTimeRegisterPassed(string chainId, RegisterStatusResult response)
         {
-            return response!= null && response.IsStatusPass() && _managementWallet?.Address != null && !_data.caInfoMap.ContainsKey(chainId);
+            return response!= null && response.IsStatusPass() && IsCAInfoEmpty(chainId);
         }
 
         public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
@@ -489,11 +493,11 @@ namespace Portkey.DID
             InitializeManagementWallet();
             yield return _contractProvider.GetContract(chainId,  (contract) =>
             {
-                StaticCoroutine.StartCoroutine(GetVerifierServersAsync(contract, successCallback, errorCallback));
+                StaticCoroutine.StartCoroutine(GetVerifierServersByContract(contract, successCallback, errorCallback));
             }, errorCallback);
         }
         
-        private IEnumerator GetVerifierServersAsync(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback) {
+        private IEnumerator GetVerifierServersByContract(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback) {
             yield return contract.CallAsync<GetVerifierServersOutput>(_managementWallet, "GetVerifierServers", new Empty(), result =>
             {
                 var verifierItems = ConvertToVerifierItems(result);

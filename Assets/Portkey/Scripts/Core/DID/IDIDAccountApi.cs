@@ -38,12 +38,12 @@ namespace Portkey.Core
     }
     
     /// <summary>
-    /// Interface for the calling of Portkey DID Backend API.
+    /// Interface for the calling of DID Account methods.
     /// </summary>
     public interface IDIDAccountApi
     {
         /// <summary>
-        /// For logging in with scan.
+        /// For logging in with QR scan.
         /// </summary>
         /// <param name="param">Provides chain ID, caHash and manager info.</param>
         /// <returns>True if able to login, false otherwise.</returns>

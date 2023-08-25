@@ -16,6 +16,7 @@ namespace Portkey.Biometric
 #if UNITY_IOS
         [DllImport ("__Internal")]
         private static extern void BiometricAuthenticate ();
+        [DllImport ("__Internal")]
         private static extern void BiometricCanAuthenticate ();
 #endif
         

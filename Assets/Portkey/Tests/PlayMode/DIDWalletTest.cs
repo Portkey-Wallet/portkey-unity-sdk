@@ -31,7 +31,7 @@ namespace Portkey.Test
             
             public string GetLoginAccount()
             {
-                return _data.accountInfo.LoginAccount;
+                return _data.SocialInfo.LoginAccount;
             }
             
             public string GetEncryptedPrivateKey()

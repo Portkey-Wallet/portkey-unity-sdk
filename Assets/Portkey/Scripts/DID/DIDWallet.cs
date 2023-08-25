@@ -12,39 +12,10 @@ using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.DID
 {
-    /// <summary>
-    /// DID Wallet class. Still WIP. Will be implemented in another branch.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class DIDWallet : IDIDAccountApi, IAccountRepository
     {
         private const string DEFAULT_KEY_NAME = "portkey_sdk_did_wallet";
-        
-        protected class AccountInfo
-        {
-            public string LoginAccount { get; set; } = null;
-            public string Nickname { get; set; } = null;
-            
-            public bool IsLoggedIn()
-            {
-                return LoginAccount != null;
-            }
-        }
-        
-        // data struct used for saving state of this DID Wallet to storage
-        protected class DIDWalletData
-        {
-            public string aesPrivateKey;
-            public Dictionary<string, CAInfo> caInfoMap = new Dictionary<string, CAInfo>();
-            public AccountInfo accountInfo = new AccountInfo();
 
-            public void Clear()
-            {
-                caInfoMap.Clear();
-                accountInfo = new AccountInfo();
-            }
-        }
-        
         private IPortkeySocialService _socialService;
         private IStorageSuite<string> _storageSuite;
         private IWalletProvider _walletProvider;
@@ -53,7 +24,7 @@ namespace Portkey.DID
         private IEncryption _encryption;
 
         private IWallet _managementWallet;
-        protected DIDWalletData _data = new DIDWalletData();
+        protected AccountDetails _data = new AccountDetails();
 
         public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IEncryption encryption)
         {
@@ -108,7 +79,7 @@ namespace Portkey.DID
 
             try
             {
-                _data = JsonConvert.DeserializeObject<DIDWalletData>(data);
+                _data = JsonConvert.DeserializeObject<AccountDetails>(data);
             }
             catch (Exception e)
             {
@@ -124,7 +95,7 @@ namespace Portkey.DID
         {
             InitializeManagementAccount();
 
-            if (!_data.accountInfo.IsLoggedIn())
+            if (!_data.SocialInfo.IsLoggedIn())
             {
                 errorCallback("Account not logged in.");
                 yield break;
@@ -141,7 +112,7 @@ namespace Portkey.DID
         {
             InitializeManagementAccount();
 
-            if (_data.accountInfo.IsLoggedIn())
+            if (_data.SocialInfo.IsLoggedIn())
             {
                 errorCallback("Account already logged in.");
                 yield break;
@@ -247,7 +218,7 @@ namespace Portkey.DID
 
         public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
         {
-            if(_data.accountInfo.IsLoggedIn())
+            if(_data.SocialInfo.IsLoggedIn())
             {
                 errorCallback("Account already logged in.");
                 yield break;
@@ -308,7 +279,7 @@ namespace Portkey.DID
 
         private void UpdateAccountInfo(string guardianIdentifier)
         {
-            _data.accountInfo = new AccountInfo
+            _data.SocialInfo = new SocialInfo
             {
                 LoginAccount = guardianIdentifier
             };
@@ -369,7 +340,7 @@ namespace Portkey.DID
                 {
                     UpdateCAInfo(param.chainId, info.holderManagerInfo.caHash, info.holderManagerInfo.caAddress);
                     var loginAccount = info.loginGuardianInfo[0]?.loginGuardian?.identifierHash;
-                    if (!_data.accountInfo.IsLoggedIn() && loginAccount != null)
+                    if (!_data.SocialInfo.IsLoggedIn() && loginAccount != null)
                     {
                         UpdateAccountInfo(loginAccount);
                     }
@@ -523,7 +494,7 @@ namespace Portkey.DID
 
         private bool IsLoginAccountTheRequestedGuardian(GetHolderInfoParams param, IHolderInfo holderInfo)
         {
-            return holderInfo != null && param.guardianIdentifier == _data.accountInfo?.LoginAccount;
+            return holderInfo != null && param.guardianIdentifier == _data.SocialInfo?.LoginAccount;
         }
 
         public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
@@ -618,7 +589,7 @@ namespace Portkey.DID
 
                     if (caHolderInfo.nickName != null)
                     {
-                        _data.accountInfo.Nickname = caHolderInfo.nickName;
+                        _data.SocialInfo.Nickname = caHolderInfo.nickName;
                     }
                     successCallback(caHolderInfo);
                 }, errorCallback));
@@ -693,7 +664,7 @@ namespace Portkey.DID
 
         public bool IsLoggedIn()
         {
-            return _data.caInfoMap.Count > 0 && _data.accountInfo.IsLoggedIn();
+            return _data.caInfoMap.Count > 0 && _data.SocialInfo.IsLoggedIn();
         }
     }
 }

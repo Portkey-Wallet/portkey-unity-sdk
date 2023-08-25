@@ -17,13 +17,13 @@ namespace Portkey.Core
     {
         public string aesPrivateKey = null;
         public Dictionary<string, CAInfo> caInfoMap = new Dictionary<string, CAInfo>();
-        public SocialInfo SocialInfo = new SocialInfo();
+        public SocialInfo socialInfo = new SocialInfo();
 
         public void Clear()
         {
             aesPrivateKey = null;
             caInfoMap.Clear();
-            SocialInfo = new SocialInfo();
+            socialInfo = new SocialInfo();
         }
     }
 }

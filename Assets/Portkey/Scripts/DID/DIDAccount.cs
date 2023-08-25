@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using AElf.Types;
 using Newtonsoft.Json;
@@ -12,21 +11,21 @@ using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.DID
 {
-    public class DIDWallet : IDIDAccountApi, IAccountRepository
+    public class DIDAccount : IDIDAccountApi, IAccountRepository
     {
         private const string DEFAULT_KEY_NAME = "portkey_sdk_did_wallet";
 
-        private IPortkeySocialService _socialService;
-        private IStorageSuite<string> _storageSuite;
-        private IWalletProvider _walletProvider;
-        private IConnectionService _connectionService;
-        private IContractProvider _contractProvider;
-        private IEncryption _encryption;
+        private readonly IPortkeySocialService _socialService;
+        private readonly IStorageSuite<string> _storageSuite;
+        private readonly IWalletProvider _walletProvider;
+        private readonly IConnectionService _connectionService;
+        private readonly IContractProvider _contractProvider;
+        private readonly IEncryption _encryption;
 
         private IWallet _managementWallet;
         protected AccountDetails _data = new AccountDetails();
 
-        public DIDWallet(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IEncryption encryption)
+        public DIDAccount(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IEncryption encryption)
         {
             _socialService = socialService;
             _storageSuite = storageSuite;
@@ -36,7 +35,7 @@ namespace Portkey.DID
             _encryption = encryption;
         }
 
-        private void InitializeManagementAccount()
+        private void InitializeManagementWallet()
         {
             if (_managementWallet != null)
             {
@@ -48,16 +47,15 @@ namespace Portkey.DID
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
         {
-            var encryptedPrivateKey = EncryptManagementAccount(password);
+            var encryptedPrivateKey = EncryptManagementWallet(password);
             _data.aesPrivateKey = Convert.ToBase64String(encryptedPrivateKey);
             var data = JsonConvert.SerializeObject(_data);
             var encryptedData = _encryption.Encrypt(data, password);
-            var encryptedDataStr = Convert.ToBase64String(encryptedData);
-            _storageSuite.SetItem(keyName, encryptedDataStr);
+            _storageSuite.SetItem(keyName, Convert.ToBase64String(encryptedData));
             return true;
         }
         
-        private byte[] EncryptManagementAccount(string password)
+        private byte[] EncryptManagementWallet(string password)
         {
             if (_managementWallet == null) throw new NullReferenceException("Management Account does not exist!");
             return _managementWallet.Encrypt(password);
@@ -93,9 +91,9 @@ namespace Portkey.DID
 
         public IEnumerator Login(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {
-            InitializeManagementAccount();
+            InitializeManagementWallet();
 
-            if (!_data.SocialInfo.IsLoggedIn())
+            if (!_data.socialInfo.IsLoggedIn())
             {
                 errorCallback("Account not logged in.");
                 yield break;
@@ -110,13 +108,9 @@ namespace Portkey.DID
 
         public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
         {
-            InitializeManagementAccount();
-
-            if (_data.SocialInfo.IsLoggedIn())
-            {
-                errorCallback("Account already logged in.");
-                yield break;
-            }
+            Reset();
+            
+            InitializeManagementWallet();
             
             var context = new Context
             {
@@ -143,7 +137,7 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        public IEnumerator GetLoginStatus(string chainId, string sessionId, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
+        protected IEnumerator GetLoginStatus(string chainId, string sessionId, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
             return _socialService.GetRecoverStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
                 {
@@ -188,7 +182,7 @@ namespace Portkey.DID
         {
             if(_managementWallet == null)
             {
-                errorCallback("ManagerAccount does not exist!");
+                errorCallback("ManagerWallet does not exist!");
                 yield break;
             }
             if(param.caHash == null && _data.caInfoMap.TryGetValue(param.chainId, out var caInfo))
@@ -201,14 +195,11 @@ namespace Portkey.DID
                 errorCallback("CAHash does not exist!");
                 yield break;
             }
-            if (param.managerInfo == null)
+            param.managerInfo ??= new ManagerInfo
             {
-                param.managerInfo = new ManagerInfo
-                {
-                    Address = _managementWallet.Address.ToAddress(),
-                    ExtraData = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds().ToString()
-                };
-            }
+                Address = _managementWallet.Address.ToAddress(),
+                ExtraData = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds().ToString()
+            };
             Debugger.Log("Removing Manager...");
             yield return RemoveManager(param, result =>
             {
@@ -218,13 +209,9 @@ namespace Portkey.DID
 
         public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
         {
-            if(_data.SocialInfo.IsLoggedIn())
-            {
-                errorCallback("Account already logged in.");
-                yield break;
-            }
+            Reset();
             
-            InitializeManagementAccount();
+            InitializeManagementWallet();
             param.manager = _managementWallet.Address;
             param.context = new Context
             {
@@ -241,7 +228,7 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        public IEnumerator GetRegisterStatus(string chainId, string sessionId, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
+        protected IEnumerator GetRegisterStatus(string chainId, string sessionId, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
             return _socialService.GetRegisterStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
                 {
@@ -279,7 +266,7 @@ namespace Portkey.DID
 
         private void UpdateAccountInfo(string guardianIdentifier)
         {
-            _data.SocialInfo = new SocialInfo
+            _data.socialInfo = new SocialInfo
             {
                 LoginAccount = guardianIdentifier
             };
@@ -316,7 +303,7 @@ namespace Portkey.DID
         {
             var manager = param.manager;
             
-            // If manager is not specified, use the management account.
+            // If manager is not specified, use the management wallet.
             if(manager == null && _managementWallet != null)
             {
                 manager = _managementWallet.Address;
@@ -340,7 +327,7 @@ namespace Portkey.DID
                 {
                     UpdateCAInfo(param.chainId, info.holderManagerInfo.caHash, info.holderManagerInfo.caAddress);
                     var loginAccount = info.loginGuardianInfo[0]?.loginGuardian?.identifierHash;
-                    if (!_data.SocialInfo.IsLoggedIn() && loginAccount != null)
+                    if (!_data.socialInfo.IsLoggedIn() && loginAccount != null)
                     {
                         UpdateAccountInfo(loginAccount);
                     }
@@ -494,12 +481,12 @@ namespace Portkey.DID
 
         private bool IsLoginAccountTheRequestedGuardian(GetHolderInfoParams param, IHolderInfo holderInfo)
         {
-            return holderInfo != null && param.guardianIdentifier == _data.SocialInfo?.LoginAccount;
+            return holderInfo != null && param.guardianIdentifier == _data.socialInfo?.LoginAccount;
         }
 
         public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
         {
-            InitializeManagementAccount();
+            InitializeManagementWallet();
             yield return _contractProvider.GetContract(chainId,  (contract) =>
             {
                 StaticCoroutine.StartCoroutine(GetVerifierServersAsync(contract, successCallback, errorCallback));
@@ -589,25 +576,25 @@ namespace Portkey.DID
 
                     if (caHolderInfo.nickName != null)
                     {
-                        _data.SocialInfo.Nickname = caHolderInfo.nickName;
+                        _data.socialInfo.Nickname = caHolderInfo.nickName;
                     }
                     successCallback(caHolderInfo);
                 }, errorCallback));
             }, errorCallback);
         }
 
-        public void Reset()
+        private void Reset()
         {
             _data.Clear();
             _managementWallet = null;
         }
 
-        public IWallet GetWallet()
+        public IWallet GetManagementWallet()
         {
             return _managementWallet;
         }
 
-        public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
+        private IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
             if (_managementWallet == null)
@@ -630,7 +617,7 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        public IEnumerator RemoveManager(EditManagerParams param, SuccessCallback<bool> successCallback,
+        private IEnumerator RemoveManager(EditManagerParams param, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
             if(_managementWallet == null)
@@ -649,7 +636,7 @@ namespace Portkey.DID
                 {
                     if (IsCurrentAccount(param))
                     {
-                        _data.Clear();
+                        Reset();
                     }
                 
                     successCallback(result.transactionResult.Status == "MINED");
@@ -664,7 +651,7 @@ namespace Portkey.DID
 
         public bool IsLoggedIn()
         {
-            return _data.caInfoMap.Count > 0 && _data.SocialInfo.IsLoggedIn();
+            return _data.caInfoMap.Count > 0 && _data.socialInfo.IsLoggedIn();
         }
     }
 }

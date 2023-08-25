@@ -115,8 +115,7 @@ namespace Portkey.DID
                 Debugger.LogException(e);
                 return false;
             }
-            var privateKey = _encryption.Decrypt(Convert.FromBase64String(_data.aesPrivateKey), password);
-            _managementWallet = _walletProvider.CreateFromPrivateKey(privateKey);
+            _managementWallet = _walletProvider.CreateFromEncryptedPrivateKey(Convert.FromBase64String(_data.aesPrivateKey), password);
 
             return true;
         }

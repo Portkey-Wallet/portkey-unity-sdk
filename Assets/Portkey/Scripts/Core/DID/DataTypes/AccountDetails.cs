@@ -7,7 +7,7 @@ namespace Portkey.Core
         public string LoginAccount { get; set; } = null;
         public string Nickname { get; set; } = null;
             
-        public bool IsLoggedIn()
+        public bool Exists()
         {
             return LoginAccount != null;
         }

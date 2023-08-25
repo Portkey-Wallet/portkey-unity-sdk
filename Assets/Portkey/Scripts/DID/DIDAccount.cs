@@ -93,7 +93,7 @@ namespace Portkey.DID
         {
             InitializeManagementWallet();
 
-            if (!_data.socialInfo.IsLoggedIn())
+            if (!_data.socialInfo.Exists())
             {
                 errorCallback("Account not logged in.");
                 yield break;
@@ -327,7 +327,7 @@ namespace Portkey.DID
                 {
                     UpdateCAInfo(param.chainId, info.holderManagerInfo.caHash, info.holderManagerInfo.caAddress);
                     var loginAccount = info.loginGuardianInfo[0]?.loginGuardian?.identifierHash;
-                    if (!_data.socialInfo.IsLoggedIn() && loginAccount != null)
+                    if (!_data.socialInfo.Exists() && loginAccount != null)
                     {
                         UpdateAccountInfo(loginAccount);
                     }
@@ -582,16 +582,21 @@ namespace Portkey.DID
                 }, errorCallback));
             }, errorCallback);
         }
+        
+        public IWallet GetManagementWallet()
+        {
+            return _managementWallet;
+        }
+        
+        public bool IsLoggedIn()
+        {
+            return _data.caInfoMap.Count > 0 && _data.socialInfo.Exists();
+        }
 
         private void Reset()
         {
             _data.Clear();
             _managementWallet = null;
-        }
-
-        public IWallet GetManagementWallet()
-        {
-            return _managementWallet;
         }
 
         private IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
@@ -647,11 +652,6 @@ namespace Portkey.DID
         private bool IsCurrentAccount(EditManagerParams param)
         {
             return param.managerInfo?.Address.ToString() == _managementWallet.Address && _data.caInfoMap[param.chainId].caHash == param.caHash;
-        }
-
-        public bool IsLoggedIn()
-        {
-            return _data.caInfoMap.Count > 0 && _data.socialInfo.IsLoggedIn();
         }
     }
 }

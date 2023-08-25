@@ -16,7 +16,7 @@ namespace Portkey.DID
     /// DID Wallet class. Still WIP. Will be implemented in another branch.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class DIDWallet : IDIDWallet
+    public class DIDWallet : IDIDAccountApi, IAccountRepository
     {
         private const string DEFAULT_KEY_NAME = "portkey_sdk_did_wallet";
         
@@ -92,7 +92,7 @@ namespace Portkey.DID
             return _managementWallet.Encrypt(password);
         }
 
-        public IDIDWallet Load(string password, string keyName = DEFAULT_KEY_NAME)
+        public bool Load(string password, string keyName = DEFAULT_KEY_NAME)
         {
             var encryptedDataStr = _storageSuite.GetItem(keyName);
             if (encryptedDataStr == null)
@@ -105,11 +105,20 @@ namespace Portkey.DID
             {
                 throw new Exception("Wrong password.");
             }
-            _data = JsonConvert.DeserializeObject<DIDWalletData>(data);
+
+            try
+            {
+                _data = JsonConvert.DeserializeObject<DIDWalletData>(data);
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+                return false;
+            }
             var privateKey = _encryption.Decrypt(Convert.FromBase64String(_data.aesPrivateKey), password);
             _managementWallet = _walletProvider.CreateFromPrivateKey(privateKey);
 
-            return this;
+            return true;
         }
 
         public IEnumerator Login(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)

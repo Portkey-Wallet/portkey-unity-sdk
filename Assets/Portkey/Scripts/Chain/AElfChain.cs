@@ -22,8 +22,8 @@ namespace Portkey.Chain
             public string RawTransaction;
         }
         
-        private string _baseUrl;
-        private IHttp _httpService;
+        private readonly string _baseUrl;
+        private readonly IHttp _httpService;
         
         public ChainInfo ChainInfo { get; }
         
@@ -34,9 +34,9 @@ namespace Portkey.Chain
             _httpService = httpService;
         }
         
-        private static string GetRequestUrl(string baseUrl, string relativeUrl)
+        private static string GetRequestUrl(string baseUrl, string relativeUri)
         {
-            return new Uri(new Uri(baseUrl + (baseUrl.EndsWith("/") ? "" : "/")), relativeUrl).ToString();
+            return new Uri(new Uri(baseUrl + (baseUrl.EndsWith("/") ? "" : "/")), relativeUri).ToString();
         }
         
         private static void AssertValidAddress(params string[] addresses)

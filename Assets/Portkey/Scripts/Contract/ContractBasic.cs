@@ -19,7 +19,7 @@ namespace Portkey.Contract
         
         private readonly IChain _chain;
         public string ContractAddress { get; protected set; }
-        public string ChainId => _chain.ChainId;
+        public string ChainId => _chain.ChainInfo.chainId;
 
         /// <summary>
         /// Constructor for ContractBasic to initialize the contract address and its respective chain.
@@ -77,7 +77,7 @@ namespace Portkey.Contract
                     {
                         StaticCoroutine.StartCoroutine(PollTransactionResultAsync(result.TransactionId, transactionResult =>
                         {
-                            Debugger.Log($"{methodName} on chain: {_chain.ChainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
+                            Debugger.Log($"{methodName} on chain: {_chain.ChainInfo.chainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
 
                             var txnInfoDto = new IContract.TransactionInfoDto
                             {

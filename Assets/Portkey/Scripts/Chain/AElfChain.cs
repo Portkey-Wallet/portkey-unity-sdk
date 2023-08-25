@@ -24,12 +24,13 @@ namespace Portkey.Chain
         
         private string _baseUrl;
         private IHttp _httpService;
-        public string ChainId { get; private set; }
         
-        public AElfChain(string chainId, string rpcUrl, IHttp httpService)
+        public ChainInfo ChainInfo { get; }
+        
+        public AElfChain(ChainInfo chainInfo, IHttp httpService)
         {
-            _baseUrl = rpcUrl;
-            ChainId = chainId;
+            _baseUrl = chainInfo.endPoint;
+            ChainInfo = chainInfo;
             _httpService = httpService;
         }
         
@@ -67,7 +68,7 @@ namespace Portkey.Chain
                 throw new InvalidDataException("Invalid transaction id format.");
             }
         }
-        
+
         public IEnumerator GetChainStatus(SuccessCallback<ChainStatusDto> successCallback, ErrorCallback errorCallback)
         {
             var data = new FieldFormRequestData<Empty>

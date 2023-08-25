@@ -11,7 +11,7 @@ namespace Portkey.Core
     /// </summary>
     public interface IChain
     {
-        string ChainId { get; }
+        ChainInfo ChainInfo { get; }
         IEnumerator GetChainStatus(SuccessCallback<ChainStatusDto> successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// GenerateTransactionAsync is a method that can be used to generate a transaction for a method contract call.

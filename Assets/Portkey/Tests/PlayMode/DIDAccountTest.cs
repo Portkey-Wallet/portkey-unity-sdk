@@ -2,10 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using AElf;
+using BIP39Wallet;
 using Google.Protobuf;
 using Moq;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 using Portkey.Chain.Dto;
 using Portkey.Contracts.CA;
@@ -64,11 +63,12 @@ namespace Portkey.Test
         private IConnectionService _connectionService = new ConnectionService<RequestHttp>("", new RequestHttp());
         private static readonly IEncryption Encryption = new AESEncryption();
 
-        private static readonly KeyPair KeyPair = 
-            new KeyPair("Q9GTUEz6tJVXdFTTxPhg8MZwWQ4LoHpPSPExRsPb2tBxdruqb",
+        private static readonly KeyPair KeyPair =
+            new KeyPair(PrivateKey.Parse("b1eae0819f3af0189283342c79adcac9028b251da52056e1e5b2ba79a8b4ccf1"));
+            /*new KeyPair("Q9GTUEz6tJVXdFTTxPhg8MZwWQ4LoHpPSPExRsPb2tBxdruqb",
                             "b1eae0819f3af0189283342c79adcac9028b251da52056e1e5b2ba79a8b4ccf1",
                             "0473eeb8965c3ebabc388055b7a2a8b8f9f4ea0e546055b7207a23a921e9642c5f68a4f0d9e66efba116d3adc018e8bc5eea5f6600b60168ac73e5db4b6cea693a");
-
+*/
         private static Mock<IWalletProvider> GetAccountProviderMock()
         {
             var accountProviderMock = new Mock<IWalletProvider>();

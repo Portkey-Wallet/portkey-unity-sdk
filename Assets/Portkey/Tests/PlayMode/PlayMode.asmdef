@@ -16,7 +16,8 @@
         "Google.Protobuf.dll",
         "AElf.Types.dll",
         "Moq.dll",
-        "Newtonsoft.Json.dll"
+        "Newtonsoft.Json.dll",
+        "BIP39Wallet.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

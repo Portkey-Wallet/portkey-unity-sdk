@@ -35,7 +35,6 @@ namespace Portkey.DID
 
         public byte[] Sign(string data)
         {
-            var privateKeyBytes = ByteArrayHelper.HexStringToByteArray(_keyPair.PrivateKey);
             var signature = Sign(Encoding.UTF8.GetBytes(data));
 
             return signature;
@@ -43,14 +42,13 @@ namespace Portkey.DID
         
         private byte[] Sign(byte[] byteArray)
         {
-            var privateKeyBytes = ByteArrayHelper.HexStringToByteArray(_keyPair.PrivateKey);
-            var signature = BIP39Wallet.BIP39Wallet.Wallet.Sign(privateKeyBytes, byteArray);
+            var signature = _keyPair.PrivateKey.Sign(byteArray);
             return signature;
         }
 
         public byte[] Encrypt(string password)
         {
-            return _encryption.Encrypt(_keyPair.PrivateKey, password);
+            return _encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
         }
     }
 }

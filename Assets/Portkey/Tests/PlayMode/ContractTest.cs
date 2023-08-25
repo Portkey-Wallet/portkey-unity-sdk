@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using AElf.Types;
+using BIP39Wallet;
 using Google.Protobuf;
 using Moq;
 using NUnit.Framework;
@@ -21,9 +22,11 @@ namespace Portkey.Test
     /// </summary>
     public class ContractTest
     {
-        private static readonly KeyPair KeyPair = new KeyPair("TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T",
+        private static readonly KeyPair KeyPair = new KeyPair(PrivateKey.Parse("83829798ac92d428ed13b29fe60ace1a7a10e7a347bdc9f23a85615339068f1c"));
+        /*new KeyPair("TrmPcaqbqmbrztv6iJuN4zeuDmQxvjF5ujbvDDQo9Q1B4ye2T",
                                                                         "83829798ac92d428ed13b29fe60ace1a7a10e7a347bdc9f23a85615339068f1c",
                                                                         "045ab0516fda4eeb504ad8d7ce8a2a24e5af6004afa9ff3ee26f2c697e334be48c31597e1905711a6aa749fc475787000b5d6260bcf0d457f23c60aa60bb6c8602");
+        */
         private static readonly AElfWallet Wallet = new AElfWallet(KeyPair, new AESEncryption());
         
         private static Mock<IChainProvider> GetChainProviderMock(Mock<IChain> chainMock)

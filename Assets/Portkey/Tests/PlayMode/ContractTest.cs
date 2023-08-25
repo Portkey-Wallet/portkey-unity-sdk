@@ -29,11 +29,9 @@ namespace Portkey.Test
         private static Mock<IChainProvider> GetChainProviderMock(Mock<IChain> chainMock)
         {
             var chainProviderMock = new Mock<IChainProvider>();
-            chainProviderMock.Setup(provider => provider.GetChain(It.IsAny<string>()))
-                .Returns((string chainId, SuccessCallback<IContract> successCallback, ErrorCallback errorCallback) =>
-                {
-                    return chainMock.Object;
-                });
+            chainProviderMock.Setup(provider => provider.GetChain(It.IsAny<string>(), It.IsAny<SuccessCallback<IChain>>(), It.IsAny<ErrorCallback>()))
+                .Callback((string chainId, SuccessCallback<IChain> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(chainMock.Object))
+                .Returns((string chainId, SuccessCallback<IChain> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
             return chainProviderMock;
         }
         
@@ -70,6 +68,7 @@ namespace Portkey.Test
             chainMock.Setup(chain => chain.GetTransactionResultAsync(It.IsAny<string>(),
                     It.IsAny<SuccessCallback<TransactionResultDto>>(), It.IsAny<ErrorCallback>()))
                 .Callback((string transactionId, SuccessCallback<TransactionResultDto> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new TransactionResultDto()));
+            chainMock.Setup(chain => chain.ChainInfo).Returns(new ChainInfo { chainId = "chainId_mock" });
             return chainMock;
         }
 

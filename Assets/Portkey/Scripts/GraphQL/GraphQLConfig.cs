@@ -57,7 +57,6 @@ namespace Portkey.GraphQL
                 JsonData = JsonConvert.SerializeObject(new{query})
             };
             
-            var jsonData = JsonConvert.SerializeObject(new{query});
             return request.Post(jsonRequestData, 
                 (response) =>
                                 {

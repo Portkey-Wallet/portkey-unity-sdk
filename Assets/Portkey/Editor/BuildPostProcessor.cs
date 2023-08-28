@@ -22,7 +22,6 @@ namespace Portkey.Editor
                 return;
             }
             
-            UpdateBuildSettingsForAppleLogin(buildTarget, path);
             UpdateXcodePlist(path);
             UpdateXcodeBuildSettings(path);
         }
@@ -90,24 +89,6 @@ namespace Portkey.Editor
             var schemesArray = schemesElement.AsArray();
             schemesArray.AddString(portkeyConfig.GoogleIOSDotReverseClientId);
         }
-
-        private static void UpdateBuildSettingsForAppleLogin(BuildTarget buildTarget, string path)
-        {
-            if (buildTarget != BuildTarget.iOS)
-            {
-                return;
-            }
-
-            var projectPath = PBXProject.GetPBXProjectPath(path);
-        
-            // Adds entitlement depending on the Unity version used
-            var project = new PBXProject();
-            project.ReadFromString(System.IO.File.ReadAllText(projectPath));
-            var manager = new ProjectCapabilityManager(projectPath, "Entitlements.entitlements", null, project.GetUnityMainTargetGuid());
-            manager.AddSignInWithApple();
-            manager.WriteToFile();
-        }
-
 #endif
     }
 }

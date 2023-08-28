@@ -89,7 +89,7 @@ public class LockViewController : MonoBehaviour
     private void DisplayLock(bool display)
     {
         body.SetActive(display);
-        biometricButton.gameObject.SetActive(display && did.GetBiometric() != null);
+        biometricButton.gameObject.SetActive(display && did.GetBiometric() != null && setPinViewController.UseBiometric);
     }
     
     public void OnClickNumber(int number)

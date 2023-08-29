@@ -49,6 +49,11 @@ namespace Portkey.DID
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
         }
         
+        /// <summary>
+        /// Get the chain object with a specified chain ID.
+        /// </summary>
+        /// <param name="chainId">The chain ID related to the chain to get.</param>
+        /// <returns>Chain object related to the specified chain ID.</returns>
         public IChain GetChain(string chainId) => _chainProvider.GetChain(chainId);
 
         public int GetApprovalCount(int length)

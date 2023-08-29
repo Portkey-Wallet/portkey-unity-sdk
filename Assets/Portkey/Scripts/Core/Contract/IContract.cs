@@ -26,7 +26,8 @@ namespace Portkey.Core
         /// <param name="methodName">Name of the method to call from the contract.</param>
         /// <param name="param">Parameters for calling the method from the contract.</param>
         /// <typeparam name="T">Protobuf IMessage inherited classes corresponding to the called contract method.</typeparam>
-        /// <returns>Results in the form of IMessage.</returns>
+        /// <param name="successCallback">The callback function when user is successful in calling the method on the contract.</param>
+        /// <param name="errorCallback">The callback function when there is an error.</param>
         IEnumerator CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new();
 
         /// <summary>
@@ -35,7 +36,8 @@ namespace Portkey.Core
         /// <param name="wallet">EOA Wallet to sign the transaction with.</param>
         /// <param name="methodName">Name of the method to call from the contract.</param>
         /// <param name="param">Parameters for calling the method from the contract.</param>
-        /// <returns>Result information of the transaction.</returns>
+        /// <param name="successCallback">The callback function when user is successful in transaction for the method on the contract.</param>
+        /// <param name="errorCallback">The callback function when there is an error.</param>
         IEnumerator SendTransactionAsync(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<TransactionInfoDto> successCallback, ErrorCallback errorCallback);
     }
 }

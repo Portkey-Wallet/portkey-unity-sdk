@@ -12,6 +12,7 @@ namespace Portkey.Core
         /// <param name="query">The query to make in string.</param>
         /// <param name="successCallback">Callback function when post of query is successful.</param>
         /// <param name="errorCallback">Callback function when error occurs.</param>
+        /// <typeparam name="T">The GraphQL return query type.</typeparam>
         public IEnumerator Query<T>(string query, SuccessCallback<T> successCallback, ErrorCallback errorCallback);
         /// <summary>For making a GraphQL query.</summary>
         /// <param name="query">The query to make in GraphQLQuery.</param>

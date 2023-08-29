@@ -6,18 +6,19 @@ namespace Portkey.Core
     public interface IWallet
     {
         /// <summary>
-        /// For saving the Wallet.
+        /// For saving the Portkey DID Account.
         /// </summary>
-        /// <param name="password">Password to encrypt the wallet.</param>
-        /// <param name="keyName"></param>
+        /// <param name="password">Password to encrypt the account.</param>
+        /// <param name="keyName">The key to save or retrieve the saved data.</param>
         /// <returns>True if saving is successful, false otherwise.</returns>
         public bool Save(string password, string keyName);
         
         /// <summary>
-        /// For loading a Wallet.
+        /// For loading the Portkey DID Account.
         /// </summary>
-        /// <param name="password">Password to decrypt the wallet.</param>
-        /// <param name="keyName"></param>
+        /// <param name="password">Password to decrypt the account.</param>
+        /// <param name="keyName">The key to load and retrieve the saved data.</param>
+        /// <returns>An IWallet that contains the account details.</returns>
         public IWallet Load(string password, string keyName);
     }
 }

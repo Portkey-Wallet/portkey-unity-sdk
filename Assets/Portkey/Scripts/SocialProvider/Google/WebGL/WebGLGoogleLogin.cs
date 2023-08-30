@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Portkey.Core;
 using UnityEngine;
@@ -41,7 +42,26 @@ namespace Portkey.SocialProvider
         {
             var gameObject = new GameObject("WebGLPortkeyLoginCallback");
             var callbackComponent = gameObject.AddComponent<WebGLPortkeyLoginCallback>();
-            callbackComponent.SocialLogin = this;
+            callbackComponent.OnSuccessCallback = OnSuccess;
+            callbackComponent.OnFailureCallback = OnFailure;
+        }
+        
+        private void OnSuccess(string accessToken)
+        {
+            try
+            {
+                RequestSocialInfo(accessToken, null, null);
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+                HandleError("Error in logging in. Please try again.");
+            }
+        }
+        
+        private void OnFailure(string error)
+        {
+            HandleError("Login Cancelled!");
         }
     }
 }

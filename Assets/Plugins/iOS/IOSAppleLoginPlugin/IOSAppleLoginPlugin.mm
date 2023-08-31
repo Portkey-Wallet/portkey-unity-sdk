@@ -65,7 +65,8 @@ static IOSAppleLoginPlugin *_sharedInstance;
     webView = [[WKWebView alloc] initWithFrame:frame configuration:configuration];
     webView.navigationDelegate = self;
     webView.UIDelegate = self;
-    webView.opaque = NO;
+    webView.hidden = YES;
+    //webView.opaque = NO;
     //webView.backgroundColor = [UIColor clearColor];
     
     [mainView addSubview:webView];
@@ -83,7 +84,9 @@ static IOSAppleLoginPlugin *_sharedInstance;
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation
 {
-    webView.opaque = YES;
+    if ([webView.URL.scheme isEqual:_URL.scheme] && [webView.URL.host isEqual:_URL.host]) {
+        webView.hidden = NO;
+    }
 }
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(null_unspecified WKNavigation *)navigation withError:(nonnull NSError *)error

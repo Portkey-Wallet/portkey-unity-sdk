@@ -10,7 +10,8 @@ namespace Portkey.UI
         {
             _guardian = guardian;
         }
-        
+
+        public bool IsDisplayAccountTextOnly => false;
         public string AccountText => _guardian.firstName;
         public string DetailsText => _guardian.thirdPartyEmail;
     }

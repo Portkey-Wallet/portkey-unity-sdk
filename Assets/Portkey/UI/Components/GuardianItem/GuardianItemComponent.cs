@@ -109,8 +109,9 @@ namespace Portkey.UI
             var guardianText = GetGuardianText(guardian.type, guardian);
 
             account.text = guardianText.AccountText;
-            detail.text = guardianText.DetailsText;   
-            
+            detail.text = guardianText.DetailsText;
+            detail.gameObject.SetActive(!guardianText.IsDisplayAccountTextOnly);
+
             loginAccount.SetActive(_userGuardianStatus.guardianItem.guardian.isLoginGuardian);
             
             DisplayVerificationStatus(_userGuardianStatus.status);

@@ -4,14 +4,15 @@
 
 typedef void (*INT_CALLBACK)(int);
 
-@interface IOSAppleLoginPlugin: NSObject <UIAlertViewDelegate, WKNavigationDelegate>
+@interface IOSAppleLoginPlugin: NSObject <WKUIDelegate, WKNavigationDelegate>
 {
     INT_CALLBACK alertCallBack;
     NSDate *creationDate;
     INT_CALLBACK shareCallBack;
     UIPopoverController *popover;
     WKWebView *webView;
-    NSURL* redirectURI;
+    NSURL* _redirectURI;
+    NSURL* _URL;
 }
 @end
 
@@ -55,21 +56,63 @@ static IOSAppleLoginPlugin *_sharedInstance;
     UIView *mainView = UnityGetGLView();
     NSString *URL = [IOSAppleLoginPlugin createNSString:URL_in];
     NSString *strRedirectURL = [IOSAppleLoginPlugin createNSString:redirectURL_in];
-    redirectURI = [NSURL URLWithString:strRedirectURL];
+    _redirectURI = [NSURL URLWithString:strRedirectURL];
+    NSString *strURL = [IOSAppleLoginPlugin createNSString:URL_in];
+    _URL = [NSURL URLWithString:strURL];
     
     WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
     CGRect frame = mainView.frame;
     webView = [[WKWebView alloc] initWithFrame:frame configuration:configuration];
     webView.navigationDelegate = self;
+    webView.UIDelegate = self;
+    webView.opaque = NO;
+    //webView.backgroundColor = [UIColor clearColor];
     
+    [mainView addSubview:webView];
     NSURLRequest *nsrequest=[NSURLRequest requestWithURL:[NSURL URLWithString:URL]];
     [webView loadRequest:nsrequest];
-    [mainView addSubview:webView];
+}
+
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(null_unspecified WKNavigation *)navigation
+{
+    // if we are redirecting, we just hide the webview
+    if (![webView.URL.scheme isEqual:_URL.scheme] || ![webView.URL.host isEqual:_URL.host]) {
+        webView.hidden = YES;
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation
+{
+    webView.opaque = YES;
+}
+
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(null_unspecified WKNavigation *)navigation withError:(nonnull NSError *)error
+{
+    UnitySendMessage("IOSPortkeyAppleLoginCallback", "OnFailure", "Login Cancelled.");
+    [webView removeFromSuperview];
+}
+
+- (void)webView:(WKWebView *)webView didFailNavigation:(null_unspecified WKNavigation *)navigation withError:(nonnull NSError *)error
+{
+    UnitySendMessage("IOSPortkeyAppleLoginCallback", "OnFailure", "Login Cancelled.");
+    [webView removeFromSuperview];
+}
+
+- (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView
+{
+    UnitySendMessage("IOSPortkeyAppleLoginCallback", "OnFailure", "Login Cancelled.");
+    [webView removeFromSuperview];
+}
+
+- (void)webViewDidClose:(WKWebView *)webView
+{
+    UnitySendMessage("IOSPortkeyAppleLoginCallback", "OnFailure", "Login Cancelled.");
+    [webView removeFromSuperview];
 }
 
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(null_unspecified WKNavigation *)navigation
 {
-    if ([webView.URL.scheme isEqual:redirectURI.scheme] && [webView.URL.host isEqual:redirectURI.host] && [webView.URL.path isEqual:redirectURI.path]) {
+    if ([webView.URL.scheme isEqual:_redirectURI.scheme] && [webView.URL.host isEqual:_redirectURI.host] && [webView.URL.path isEqual:_redirectURI.path]) {
         NSString *urlString = webView.URL.absoluteString;
         NSURLComponents *components = [[NSURLComponents alloc] initWithString:urlString];
         bool found = false;

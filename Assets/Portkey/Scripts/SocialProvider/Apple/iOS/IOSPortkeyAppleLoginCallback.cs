@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Portkey.Core;
 using UnityEngine;
 
@@ -7,20 +8,36 @@ namespace Portkey.SocialProvider
     public class IOSPortkeyAppleLoginCallback : MonoBehaviour, IPortkeySocialLoginCallback
     {
         public ISocialLogin SocialLogin { get; set; }
+        private bool _isSuccess;
 
-        private void OnApplicationFocus(bool hasFocus)
+        private void Start()
         {
-            if (!hasFocus)
+            _isSuccess = false;
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            Debugger.Log($"IOSPortkeyAppleLoginOnApplicationPause isPaused: {pauseStatus}");
+
+            if(!pauseStatus)
             {
-                return;
+                StartCoroutine(WaitAndFail(1.5f));
             }
-            
-            //if we get back focus from apple login (webview or native prompt), we assume that login is cancelled
-            OnFailure("Login Cancelled!");
+        }
+
+        private IEnumerator WaitAndFail(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+
+            if (!_isSuccess)
+            {
+                OnFailure("Login Cancelled!");
+            }
         }
 
         public void OnSuccess(string data)
         {
+            _isSuccess = true;
             Debugger.Log($"IOSPortkeyAppleLoginOnSuccess {data}");
             try
             {

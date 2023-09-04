@@ -7,6 +7,11 @@ namespace Portkey.UI
     {
         [SerializeField] private TextMeshProUGUI detailsText = null;
         [SerializeField] private GuardianItemComponent guardianItem = null;
-        
+
+        private void Start()
+        {
+            guardianItem.InitializeUI();
+            guardianItem.SetEndOperation();
+        }
     }
 }

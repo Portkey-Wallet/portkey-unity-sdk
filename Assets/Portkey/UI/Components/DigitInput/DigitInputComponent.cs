@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,8 +9,6 @@ namespace Portkey.UI
     {
         [SerializeField] private TextMeshProUGUI inputField = null;
         [SerializeField] private Image outline = null;
-        
-        public string Text => inputField.text;
 
         public void SetText(string text)
         {

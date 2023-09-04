@@ -21,7 +21,7 @@ namespace Portkey.SocialProvider
 
             if(!pauseStatus)
             {
-                StartCoroutine(WaitAndFail(1.5f));
+                StartCoroutine(WaitAndFail(2.5f));
             }
         }
 

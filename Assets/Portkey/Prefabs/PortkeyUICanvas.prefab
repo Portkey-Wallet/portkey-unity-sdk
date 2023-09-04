@@ -15146,7 +15146,39 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1007693373740586008, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
       propertyPath: m_Name
-      value: ButtonWithBorderBlack
+      value: PhoneLogin
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2058989683410225390}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: SignIn
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Portkey.UI.SignInViewController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 4193014683080272107, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
       propertyPath: m_text
@@ -16364,7 +16396,35 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1007693373740586008, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
       propertyPath: m_Name
-      value: ButtonWithBorderBlack
+      value: EmailLogin
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2058989683410225390}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: SignIn
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Portkey.UI.SignInViewController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3086121523964393946, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 4193014683080272107, guid: 373d99e7e6734469cbd9fb75704dfaa0, type: 3}
       propertyPath: m_text

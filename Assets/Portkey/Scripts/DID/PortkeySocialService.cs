@@ -162,6 +162,20 @@ namespace Portkey.DID
             return Post("/api/app/account/verifyAppleToken", requestParams, successCallback, OnError(errorCallback));
         }
 
+        internal class GetVerifierServerParams
+        {
+            public string chainId;
+        }
+        
+        public IEnumerator GetVerifierServer(string chainId, SuccessCallback<VerifierServerResult> successCallback, ErrorCallback errorCallback)
+        {
+            var requestParam = new GetVerifierServerParams
+            {
+                chainId = chainId
+            };
+            return Post("/api/app/account/getVerifierServer", requestParam, successCallback, OnError(errorCallback));
+        }
+
         public IEnumerator GetRegisterStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
             var pollCount = 0;

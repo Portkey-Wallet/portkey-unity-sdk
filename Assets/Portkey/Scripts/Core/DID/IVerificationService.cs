@@ -17,7 +17,7 @@ namespace Portkey.Core
     [Serializable]
     public class SendVerificationCodeRequestParams
     {
-        public SendVerificationCodeParams @params;
+        public SendVerificationCodeParams body;
         public Dictionary<string, string> headers;
     }
 
@@ -87,6 +87,13 @@ namespace Portkey.Core
         public string userId;
     }
     
+    public class VerifierServerResult
+    {
+        public string id;
+        public string name;
+        public string imageUrl;
+    }
+
     /// <summary>
     /// Verification service interface for all verification services to implement.
     /// </summary>
@@ -97,7 +104,7 @@ namespace Portkey.Core
         public IEnumerator SendAppleUserExtraInfo(SendAppleUserExtraInfoParams requestParams, SuccessCallback<SendAppleUserExtraInfoResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator VerifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator VerifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
-        
+        public IEnumerator GetVerifierServer(string chainId, SuccessCallback<VerifierServerResult> successCallback, ErrorCallback errorCallback);
         // TODO: to confirm with Sally if captcha will be needed
         // public IEnumerator CheckGoogleRecaptcha(CheckGoogleRecaptchaParams requestParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
     }

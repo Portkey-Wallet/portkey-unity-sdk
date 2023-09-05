@@ -1,3 +1,4 @@
+using System;
 using Portkey.Utilities;
 using Portkey.Core;
 using UnityEngine;
@@ -39,9 +40,21 @@ namespace Portkey.UI
         public void SignIn(int type)
         {
             var accountType = (AccountType)type;
-            var socialLogin = did.GetSocialLogin(accountType);
-            
-            socialLogin.Authenticate(AuthCallback, OnStartLoading, OnError);
+
+            switch (accountType)
+            {
+                case AccountType.Apple:
+                case AccountType.Google:
+                    var socialLogin = did.GetSocialLogin(accountType);
+                    socialLogin.Authenticate(AuthCallback, OnStartLoading, OnError);
+                    break;
+                case AccountType.Email:
+                case AccountType.Phone:
+                    //TODO: open up window to key in phone number or email then call ValidateIdentifier
+                    break;
+                default:
+                    throw new ArgumentException("Not expected account type!");
+            }
         }
 
         private void OnStartLoading(bool show)
@@ -58,8 +71,8 @@ namespace Portkey.UI
         {
             Debugger.Log(
                 $"User: {info.socialInfo.name}\nAEmail: {info.socialInfo.email}\nAccess Code: ${info.access_token}");
-
-            ValidateIdentifier(info);
+            
+            ValidateIdentifier(info.socialInfo.sub, info.accountType, info.access_token);
         }
 
         private void OnError(string error)
@@ -69,12 +82,8 @@ namespace Portkey.UI
             errorView.ShowErrorText(error);
         }
 
-        private void ValidateIdentifier(SocialLoginInfo info)
+        private void ValidateIdentifier(string identifier, AccountType accountType, string token = "")
         {
-            var identifier = info.socialInfo.sub;
-            var accountType = info.accountType;
-            var token = info.access_token;
-
             if (string.IsNullOrEmpty(identifier))
             {
                 throw new System.ArgumentException("Identifier cannot be null or empty", nameof(identifier));

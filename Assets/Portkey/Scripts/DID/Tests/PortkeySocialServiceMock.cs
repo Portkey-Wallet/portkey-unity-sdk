@@ -35,6 +35,11 @@ namespace Portkey.Test
             throw new System.NotImplementedException();
         }
 
+        public IEnumerator GetVerifierServer(string chainId, SuccessCallback<VerifierServerResult> successCallback, ErrorCallback errorCallback)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public IEnumerator GetRegisterStatus(string sessionId, QueryOptions queryOptions, SuccessCallback<RegisterStatusResult> successCallback,
             ErrorCallback errorCallback)
         {

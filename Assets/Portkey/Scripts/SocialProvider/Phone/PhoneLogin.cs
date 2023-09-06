@@ -12,14 +12,9 @@ namespace Portkey.SocialProvider
         protected override AccountType AccountType => AccountType.Phone;
         protected override bool IsCorrectGuardianIdFormat(string id, out string errormessage)
         {
-            var result = IsValidPhoneNumber(id);
+            var result = LoginHelper.IsValidPhoneNumber(id);
             errormessage = result ? null : "Invalid phone number!";
             return result;
-        }
-        
-        private static bool IsValidPhoneNumber(string number)
-        {
-            return Regex.Match(number, @"^(\+[0-9]*)$").Success;
         }
     }
 }

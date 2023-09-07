@@ -57,14 +57,16 @@ namespace Portkey.UI
                 _ => throw new ArgumentException($"Invalid account type: {_guardianIdentifierInfo.accountType}")
             };
             
-            StartCoroutine(serviceLogin.VerifyCode(code, result => { OpenNextView(); }, OnError));
+            StartCoroutine(serviceLogin.VerifyCode(code, OpenNextView, OnError));
         }
 
-        private void OpenNextView()
+        private void OpenNextView(VerifyCodeResult result)
         {
             setPinViewController.VerifierItem = _verifierItem;
             setPinViewController.gameObject.SetActive(true);
             setPinViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
+            setPinViewController.VerifyCodeResult = result;
+            setPinViewController.Operation = SetPINViewController.OperationType.SIGN_UP;
             setPinViewController.SetPreviousView(signInViewController.gameObject);
         }
 

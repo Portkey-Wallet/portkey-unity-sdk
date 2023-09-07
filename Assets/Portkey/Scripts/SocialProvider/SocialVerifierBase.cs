@@ -44,21 +44,6 @@ namespace Portkey.SocialProvider
                 }
             }, errorCallback);
         }
-        
-        protected static VerificationDoc ProcessVerificationDoc(string verificationDoc, string verifierId)
-        {
-            var documentValue = verificationDoc.Split(',');
-            var verificationDocObj = new VerificationDoc
-            {
-                verifierId = verifierId,
-                type = documentValue[0],
-                identifierHash = documentValue[1],
-                verificationTime = documentValue[2],
-                verifierAddress = documentValue[3],
-                salt = documentValue[4]
-            };
-            return verificationDocObj;
-        }
 
         protected abstract void VerifyToken(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback);
     }

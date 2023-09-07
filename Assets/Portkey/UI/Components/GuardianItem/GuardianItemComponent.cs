@@ -193,17 +193,17 @@ namespace Portkey.UI
             ShowLoading(show, "Loading...");
         }
         
-        private void OnVerified(VerificationDoc verificationDoc, string accessToken, VerifyVerificationCodeResult verificationResult)
+        private void OnVerified(VerifyCodeResult result, string accessToken)
         {
-            if (verificationDoc.identifierHash != _userGuardianStatus.guardianItem.guardian.identifierHash)
+            if (result.verificationDoc.identifierHash != _userGuardianStatus.guardianItem.guardian.identifierHash)
             {
                 OnError("Account does not match your guardian.");
             }
             else
             {
                 _userGuardianStatus.status = VerifierStatus.Verified;
-                _userGuardianStatus.verificationDoc = verificationResult.verificationDoc;
-                _userGuardianStatus.signature = verificationResult.signature;
+                _userGuardianStatus.verificationDoc = result.verificationDoc.toString;
+                _userGuardianStatus.signature = result.signature;
                 _userGuardianStatus.guardianItem.accessToken = accessToken;
                 DisplayVerificationStatus(_userGuardianStatus.status);
             

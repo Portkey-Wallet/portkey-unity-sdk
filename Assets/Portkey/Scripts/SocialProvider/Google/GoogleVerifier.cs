@@ -22,9 +22,14 @@ namespace Portkey.SocialProvider
             };
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyGoogleToken(verifyGoogleParam, (verificationResult) =>
             {
-                var verificationDoc = ProcessVerificationDoc(verificationResult.verificationDoc, param.verifierId);
+                var verificationDoc = LoginHelper.ProcessVerificationDoc(verificationResult.verificationDoc, param.verifierId);
+                var verifyCodeResult = new VerifyCodeResult
+                {
+                    verificationDoc = verificationDoc,
+                    signature = verificationResult.signature
+                };
                 //TODO: set guardian list
-                successCallback(verificationDoc, param.accessToken, verificationResult);
+                successCallback(verifyCodeResult, param.accessToken);
             }, errorCallback));
         }
     }

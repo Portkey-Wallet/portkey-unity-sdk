@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Portkey.Core;
 
 namespace Portkey.SocialProvider
 {
@@ -26,6 +27,22 @@ namespace Portkey.SocialProvider
             {
                 return false;
             }
+        }
+        
+        public static VerificationDoc ProcessVerificationDoc(string verificationDoc, string verifierId)
+        {
+            var documentValue = verificationDoc.Split(',');
+            var verificationDocObj = new VerificationDoc
+            {
+                verifierId = verifierId,
+                type = documentValue[0],
+                identifierHash = documentValue[1],
+                verificationTime = documentValue[2],
+                verifierAddress = documentValue[3],
+                salt = documentValue[4],
+                toString = verificationDoc
+            };
+            return verificationDocObj;
         }
     }
 }

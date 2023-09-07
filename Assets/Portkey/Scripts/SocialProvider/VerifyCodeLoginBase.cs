@@ -50,7 +50,7 @@ namespace Portkey.SocialProvider
             }, errorCallback);
         }
 
-        public IEnumerator VerifyCode(string code, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyCode(string code, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback)
         {
             var verifyCodeParams = new VerifyVerificationCodeParams
             {
@@ -62,7 +62,14 @@ namespace Portkey.SocialProvider
             };
             yield return _portkeySocialService.VerifyVerificationCode(verifyCodeParams, (response) =>
             {
-                successCallback?.Invoke(response);
+                var verificationDoc = LoginHelper.ProcessVerificationDoc(response.verificationDoc, verifyCodeParams.verifierId);
+                var verifyCodeResult = new VerifyCodeResult
+                {
+                    verificationDoc = verificationDoc,
+                    signature = response.signature
+                };
+                
+                successCallback?.Invoke(verifyCodeResult);
             }, errorCallback);
         }
     }

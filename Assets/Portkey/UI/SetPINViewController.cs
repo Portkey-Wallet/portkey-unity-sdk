@@ -68,6 +68,8 @@ namespace Portkey.UI
             get => _stateToPIN[(int)_currentState];
             set => _stateToPIN[(int)_currentState] = value;
         }
+
+        public VerifyCodeResult VerifyCodeResult { get; set; } = null;
         
         public bool IsLoginCompleted
         {
@@ -88,7 +90,10 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            CheckAccessTokenExpired();
+            if (_guardianIdentifierInfo.accountType is AccountType.Apple or AccountType.Google)
+            {
+                CheckAccessTokenExpired();
+            }
         }
 
         private void CheckAccessTokenExpired()
@@ -117,20 +122,26 @@ namespace Portkey.UI
             }
         }
 
-        private void OnAuthenticated(VerificationDoc verifierDoc, string accessToken, VerifyVerificationCodeResult verificationResult)
+        private void OnAuthenticated(VerifyCodeResult result, string accessToken)
+        {
+            _guardianIdentifierInfo.token = accessToken;
+
+            SignIn(result.verificationDoc, result.signature);
+        }
+
+        private void SignIn(VerificationDoc verifierDoc, string signature)
         {
             if (_guardianIdentifierInfo.identifier == null)
             {
                 OnError("Account missing!");
                 return;
             }
-            _guardianIdentifierInfo.token = accessToken;
             
             did.Reset();
             
             if(Operation == OperationType.SIGN_UP)
             {
-                Register(verifierDoc.verifierId, verificationResult);
+                Register(verifierDoc.verifierId, verifierDoc.toString, signature);
             }
             else
             {
@@ -233,7 +244,7 @@ namespace Portkey.UI
             CloseView();
         }
 
-        private void Register(string verifierId, VerifyVerificationCodeResult verificationResult)
+        private void Register(string verifierId, string verificationDoc, string signature)
         {
             var extraData = "";
             try
@@ -254,8 +265,8 @@ namespace Portkey.UI
                 chainId = _guardianIdentifierInfo.chainId,
                 verifierId = verifierId,
                 extraData = extraData,
-                verificationDoc = verificationResult.verificationDoc,
-                signature = verificationResult.signature
+                verificationDoc = verificationDoc,
+                signature = signature
             };
             StartCoroutine(did.Register(param, result =>
             {

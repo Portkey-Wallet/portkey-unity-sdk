@@ -8,7 +8,7 @@ namespace Portkey.SocialProvider
         {
         }
 
-        protected override AccountType AccountType => AccountType.Email;
+        public override AccountType AccountType => AccountType.Email;
         protected override bool IsCorrectGuardianIdFormat(string id, out string errormessage)
         {
             var result = LoginHelper.IsValidEmail(id);

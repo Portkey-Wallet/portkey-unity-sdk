@@ -1,6 +1,4 @@
-using Portkey.Core;
-
-namespace Portkey.UI
+namespace Portkey.Core
 {
     public class GuardianIdentifierInfo
     {

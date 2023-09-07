@@ -14,7 +14,7 @@ namespace Portkey.SocialProvider
         private IPortkeySocialService _portkeySocialService;
         private VerificationCodeSession _verifierCodeSession = new VerificationCodeSession();
         
-        protected abstract AccountType AccountType { get; }
+        public abstract AccountType AccountType { get; }
         
         public VerifyCodeLoginBase(IPortkeySocialService portkeySocialService)
         {

@@ -9,7 +9,7 @@ namespace Portkey.SocialProvider
         {
         }
 
-        protected override AccountType AccountType => AccountType.Phone;
+        public override AccountType AccountType => AccountType.Phone;
         protected override bool IsCorrectGuardianIdFormat(string id, out string errormessage)
         {
             var result = LoginHelper.IsValidPhoneNumber(id);

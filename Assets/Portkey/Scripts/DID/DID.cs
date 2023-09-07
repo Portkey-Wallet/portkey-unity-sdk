@@ -29,6 +29,7 @@ namespace Portkey.DID
         private IEncryption _encryption;
         private ISocialVerifierProvider _socialVerifierProvider;
         private IBiometricProvider _biometricProvider;
+        private IAuthService _authService;
         
         private DIDWallet<WalletAccount> _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
@@ -45,9 +46,11 @@ namespace Portkey.DID
             _caContractProvider = new CAContractProvider(_portkeySocialService, _chainProvider);
             _encryption = new AESEncryption();
             _biometricProvider = new BiometricProvider();
-            
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
+            _authService = new AuthService(_portkeySocialService, _didWallet);
         }
+        
+        public IAuthService AuthService => _authService;
         
         /// <summary>
         /// Get the chain object with a specified chain ID.

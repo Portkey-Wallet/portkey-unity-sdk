@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using Portkey.Core;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Portkey.UI
 {
@@ -13,9 +10,10 @@ namespace Portkey.UI
         [SerializeField] private SignInViewController signInViewController;
         [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private ErrorViewController errorView;
+        [SerializeField] private PromptViewController promptViewController;
         
         private GuardianIdentifierInfo _guardianIdentifierInfo;
-        
+
         public void OnClickClose()
         {
             CloseView();
@@ -35,11 +33,24 @@ namespace Portkey.UI
         private void OnGetVerifierServers(VerifierItem[] verifierServerList)
         {
             ShowLoading(false);
-            
-            setPinViewController.VerifierItem = verifierServerList[0];
-            setPinViewController.gameObject.SetActive(true);
-            setPinViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
-            setPinViewController.SetPreviousView(signInViewController.gameObject);
+
+            if (_guardianIdentifierInfo.accountType is AccountType.Apple or AccountType.Google)
+            {
+                setPinViewController.VerifierItem = verifierServerList[0];
+                setPinViewController.gameObject.SetActive(true);
+                setPinViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
+                setPinViewController.SetPreviousView(signInViewController.gameObject);
+            }
+            else
+            {
+                var verifierServer = verifierServerList[0];
+                var type = _guardianIdentifierInfo.accountType == AccountType.Email? "email address" : "phone number";
+                var description = $"{verifierServer.name} will send a verification code to {_guardianIdentifierInfo.identifier} to verify your {type}.";
+                promptViewController.ShowDescriptionText(description);
+                promptViewController.VerifierItem = verifierServer;
+                promptViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
+            }
+
             CloseView();
         }
         

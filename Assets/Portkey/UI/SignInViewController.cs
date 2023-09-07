@@ -19,6 +19,8 @@ namespace Portkey.UI
         [FormerlySerializedAs("guardianApprovalView")] [SerializeField] private GuardiansApprovalViewController guardianApprovalViewController;
         [SerializeField] private ErrorViewController errorView;
         [SerializeField] private LoadingViewController loadingView;
+        [SerializeField] private EmailLoginViewController emailLoginViewController;
+        [SerializeField] private PhoneLoginViewController phoneLoginViewController;
         
         private State _state = State.Login;
         private IPortkeySocialService _portkeySocialService;
@@ -49,8 +51,14 @@ namespace Portkey.UI
                     socialLogin.Authenticate(AuthCallback, OnStartLoading, OnError);
                     break;
                 case AccountType.Email:
+                    emailLoginViewController.DID = did;
+                    emailLoginViewController.PreviousView = gameObject;
+                    emailLoginViewController.gameObject.SetActive(true);
+                    break;
                 case AccountType.Phone:
                     //TODO: open up window to key in phone number or email then call ValidateIdentifier
+                    phoneLoginViewController.PreviousView = gameObject;
+                    phoneLoginViewController.gameObject.SetActive(true);
                     break;
                 default:
                     throw new ArgumentException("Not expected account type!");
@@ -72,7 +80,7 @@ namespace Portkey.UI
             Debugger.Log(
                 $"User: {info.socialInfo.name}\nAEmail: {info.socialInfo.email}\nAccess Code: ${info.access_token}");
             
-            ValidateIdentifier(info.socialInfo.sub, info.accountType, info.access_token);
+            did.AuthService.HasGuardian(info.socialInfo.sub, info.accountType, info.access_token, CheckSignUpOrLogin, OnError);
         }
 
         private void OnError(string error)
@@ -80,83 +88,6 @@ namespace Portkey.UI
             Debugger.LogError(error);
             ShowLoading(false);
             errorView.ShowErrorText(error);
-        }
-
-        private void ValidateIdentifier(string identifier, AccountType accountType, string token = "")
-        {
-            if (string.IsNullOrEmpty(identifier))
-            {
-                throw new System.ArgumentException("Identifier cannot be null or empty", nameof(identifier));
-            }
-
-            var param = new GetRegisterInfoParams
-            {
-                loginGuardianIdentifier = identifier
-            };
-            StartCoroutine(_portkeySocialService.GetRegisterInfo(param, (result) =>
-            {
-                var getHolderInfoParam = new GetHolderInfoParams
-                {
-                    guardianIdentifier = identifier,
-                    chainId = result.originChainId
-                };
-                StartCoroutine(did.GetHolderInfo(getHolderInfoParam, (holderInfo) =>
-                {
-                    if (holderInfo == null || holderInfo.guardianList == null ||
-                        holderInfo.guardianList.guardians == null)
-                    {
-                        CheckChainInfo(identifier, accountType, token, false);
-                        return;
-                    }
-                    
-                    var isLoginGuardian = holderInfo.guardianList.guardians.Length > 0;
-                    CheckChainInfo(identifier, accountType, token, isLoginGuardian);
-                }, (error) =>
-                { 
-                    CheckChainInfo(identifier, accountType, token, false);
-                }));
-            }, (error) =>
-            {
-                if (error.Contains(IPortkeySocialService.UNREGISTERED_CODE))
-                {
-                    CheckChainInfo(identifier, accountType, token, false);
-                }
-                else
-                {
-                    OnError(error);
-                }
-            }));
-        }
-
-        private void CheckChainInfo(string identifier, AccountType accountType, string token, bool isLoginGuardian)
-        {
-            var input = new GuardianIdentifierInfo
-            {
-                identifier = identifier,
-                accountType = accountType,
-                token = token,
-                isLoginGuardian = isLoginGuardian,
-                chainId = "AELF"
-            };
-
-            CheckChainInfo(input);
-        }
-        
-        private void CheckChainInfo(GuardianIdentifierInfo guardianInfo)
-        {
-            var registerParam = new GetRegisterInfoParams
-            {
-                loginGuardianIdentifier = guardianInfo.identifier.RemoveAllWhiteSpaces()
-            };
-            StartCoroutine(_portkeySocialService.GetRegisterInfo(registerParam, info =>
-            {
-                guardianInfo.chainId = info.originChainId;
-                //TODO: change chain UI if needed
-                CheckSignUpOrLogin(guardianInfo);
-            }, (error) =>
-            {
-                CheckSignUpOrLogin(guardianInfo);
-            }));
         }
 
         private void CheckSignUpOrLogin(GuardianIdentifierInfo info)

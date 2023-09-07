@@ -2,6 +2,7 @@ using System;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Portkey.UI
 {
@@ -18,15 +19,17 @@ namespace Portkey.UI
         [SerializeField] private TextMeshProUGUI detailsText = null;
         [SerializeField] private GuardianDisplayComponent guardianDisplay = null;
         [SerializeField] private DigitSequenceInputComponent digitSequenceInput = null;
-
+        [SerializeField] private TimedButtonComponent resendButton = null;
+        
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private VerifierItem _verifierItem = null;
-        
+
         private void Start()
         {
             digitSequenceInput.OnComplete = VerifyCode;
+            resendButton.OnClick += SendVerificationCode;
         }
-        
+
         public void Initialize(GuardianIdentifierInfo info, VerifierItem verifierItem)
         {
             _guardianIdentifierInfo = info;
@@ -50,18 +53,45 @@ namespace Portkey.UI
                 return;
             }
             
-            IVerifyCodeLogin serviceLogin = _guardianIdentifierInfo.accountType switch
+            ShowLoading(true, "Loading...");
+
+            var serviceLogin = GetVerifyCodeLogin(_guardianIdentifierInfo.accountType);
+            StartCoroutine(serviceLogin.VerifyCode(code, OpenNextView, OnError));
+        }
+        
+        private void SendVerificationCode()
+        {
+            ShowLoading(true, "Loading...");
+            
+            var serviceLogin = GetVerifyCodeLogin(_guardianIdentifierInfo.accountType);
+
+            var param = new SendCodeParams
+            {
+                guardianId = _guardianIdentifierInfo?.identifier,
+                verifierId = _verifierItem?.id,
+                chainId = _guardianIdentifierInfo?.chainId
+            };
+            StartCoroutine(serviceLogin.SendCode(param, result => { ShowLoading(false); }, error =>
+            {
+                resendButton.Activate();
+                OnError(error);
+            }));
+        }
+
+        private IVerifyCodeLogin GetVerifyCodeLogin(AccountType accountType)
+        {
+            return accountType switch
             {
                 AccountType.Email => did.AuthService.Email,
                 AccountType.Phone => did.AuthService.Phone,
-                _ => throw new ArgumentException($"Invalid account type: {_guardianIdentifierInfo.accountType}")
+                _ => throw new ArgumentException($"Invalid account type: {accountType}")
             };
-            
-            StartCoroutine(serviceLogin.VerifyCode(code, OpenNextView, OnError));
         }
 
         private void OpenNextView(VerifyCodeResult result)
         {
+            ShowLoading(false);
+            
             setPinViewController.VerifierItem = _verifierItem;
             setPinViewController.gameObject.SetActive(true);
             setPinViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
@@ -80,6 +110,11 @@ namespace Portkey.UI
             ShowLoading(false);
             errorView.ShowErrorText(error);
             Debugger.LogError(error);
+        }
+        
+        public void OnClickClose()
+        {
+            gameObject.SetActive(false);
         }
     }
 }

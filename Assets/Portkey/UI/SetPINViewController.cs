@@ -90,9 +90,16 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            if (_guardianIdentifierInfo.accountType is AccountType.Apple or AccountType.Google)
+            switch (_guardianIdentifierInfo.accountType)
             {
-                CheckAccessTokenExpired();
+                case AccountType.Apple or AccountType.Google:
+                    CheckAccessTokenExpired();
+                    break;
+                case AccountType.Email or AccountType.Phone:
+                    SignIn(VerifyCodeResult);
+                    break;
+                default:
+                    throw new ArgumentException($"Invalid account type: {_guardianIdentifierInfo.accountType}");
             }
         }
 
@@ -126,11 +133,14 @@ namespace Portkey.UI
         {
             _guardianIdentifierInfo.token = accessToken;
 
-            SignIn(result.verificationDoc, result.signature);
+            SignIn(result);
         }
 
-        private void SignIn(VerificationDoc verifierDoc, string signature)
+        private void SignIn(VerifyCodeResult result)
         {
+            var verifierDoc = result.verificationDoc;
+            var signature = result.signature;
+            
             if (_guardianIdentifierInfo.identifier == null)
             {
                 OnError("Account missing!");

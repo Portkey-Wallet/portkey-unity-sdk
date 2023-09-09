@@ -39,6 +39,7 @@ namespace Portkey.UI
         private DID.DID _did = null;
         private LoadingViewController _loadingView = null;
         private ErrorViewController _errorView = null;
+        private Action _onSendVerificationCode = null;
         
         public VerifierStatus VerifierStatus => _userGuardianStatus.status;
 
@@ -97,8 +98,10 @@ namespace Portkey.UI
             _onUserGuardianStatusChanged = onUserGuardianStatusChanged;
         }
 
-        public void InitializeUI()
+        public void InitializeUI(Action onSendVerificationCode)
         {
+            _onSendVerificationCode = onSendVerificationCode;
+            
             var guardianType = _userGuardianStatus.guardianItem.guardian.type;
             DisplayGuardianIcon(guardianType);
 
@@ -176,7 +179,7 @@ namespace Portkey.UI
                 }
                 
                 var socialVerifier = _did.GetSocialVerifier(loginType);
-
+                
                 var param = new VerifyAccessTokenParam
                 {
                     verifierId = _userGuardianStatus.guardianItem.verifier?.id,
@@ -186,13 +189,47 @@ namespace Portkey.UI
                 
                 socialVerifier.AuthenticateIfAccessTokenExpired(param, OnVerified, OnStartLoading, OnError);
             }
+            else
+            {
+                SendVerificationCode();
+            }
         }
         
+        private void SendVerificationCode()
+        {
+            ShowLoading(true, "Loading...");
+
+            var accountType = _userGuardianStatus?.guardianItem?.guardian?.type;
+            IVerifyCodeLogin serviceLogin = accountType switch
+            {
+                AccountType.Email => _did.AuthService.Email,
+                AccountType.Phone => _did.AuthService.Phone,
+                _ => throw new ArgumentException($"Invalid account type: {accountType}")
+            };
+
+            var param = new SendCodeParams
+            {
+                guardianId = _userGuardianStatus?.guardianItem?.guardian?.guardianIdentifier,
+                verifierId = _userGuardianStatus?.guardianItem?.verifier?.id,
+                chainId = _guardianIdentifierInfo?.chainId
+            };
+            StartCoroutine(serviceLogin.SendCode(param, result =>
+            {
+                ShowLoading(false);
+                _onSendVerificationCode?.Invoke();
+            }, OnError));
+        }
+
         private void OnStartLoading(bool show)
         {
             ShowLoading(show, "Loading...");
         }
-        
+
+        public void OnVerified(VerifyCodeResult result)
+        {
+            OnVerified(result, "");
+        }
+
         private void OnVerified(VerifyCodeResult result, string accessToken)
         {
             if (result.verificationDoc.identifierHash != _userGuardianStatus.guardianItem.guardian.identifierHash)

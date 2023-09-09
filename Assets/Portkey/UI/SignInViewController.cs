@@ -57,6 +57,7 @@ namespace Portkey.UI
                     break;
                 case AccountType.Phone:
                     //TODO: open up window to key in phone number or email then call ValidateIdentifier
+                    phoneLoginViewController.DID = did;
                     phoneLoginViewController.PreviousView = gameObject;
                     phoneLoginViewController.gameObject.SetActive(true);
                     break;

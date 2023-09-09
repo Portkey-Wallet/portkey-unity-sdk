@@ -43,7 +43,7 @@ namespace Portkey.DID
                 Url = GetFullApiUrl(url),
                 JsonData = JsonConvert.SerializeObject(requestParams),
             };
-            
+
             return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback), errorCallback);
         }
         
@@ -139,7 +139,7 @@ namespace Portkey.DID
         
         public IEnumerator GetVerificationCode(SendVerificationCodeRequestParams requestParams, SuccessCallback<SendVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
-            return Post("/api/app/account/sendVerificationRequest", requestParams, successCallback, OnError(errorCallback));
+            return Post("/api/app/account/sendVerificationRequest", requestParams.body, successCallback, OnError(errorCallback));
         }
 
         public IEnumerator VerifyVerificationCode(VerifyVerificationCodeParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)

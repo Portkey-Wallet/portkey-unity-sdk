@@ -16,6 +16,7 @@ namespace Portkey.UI
         [SerializeField] private SignInViewController signInViewController;
         [SerializeField] private ErrorViewController errorView;
         [SerializeField] private LoadingViewController loadingView;
+        [SerializeField] private VerifyCodeViewController verifyCodeViewController;
         [SerializeField] private GameObject infoDialog;
 
         [Header("Guardian Item List")] [SerializeField]
@@ -267,17 +268,30 @@ namespace Portkey.UI
             {
                 var guardianItem = Instantiate(guardianItemPrefab, guardianItemList.transform)
                     .GetComponent<GuardianItemComponent>();
-                if (guardianItem != null)
+                if (guardianItem == null)
                 {
-                    guardianItem.SetDID(did);
-                    guardianItem.SetUserGuardianStatus(userGuardianStatus, OnUserGuardianStatusChanged);
-                    guardianItem.SetGuardianIdentifierInfo(_guardianIdentifierInfo);
-                    guardianItem.ErrorView = errorView;
-                    guardianItem.LoadingView = loadingView;
-                    guardianItem.InitializeUI();
-
-                    _guardianItemComponents.Add(guardianItem);
+                    continue;
                 }
+                
+                guardianItem.SetDID(did);
+                guardianItem.SetUserGuardianStatus(userGuardianStatus, OnUserGuardianStatusChanged);
+                guardianItem.SetGuardianIdentifierInfo(_guardianIdentifierInfo);
+                guardianItem.ErrorView = errorView;
+                guardianItem.LoadingView = loadingView;
+                guardianItem.InitializeUI(() =>
+                {
+                    var guardian = userGuardianStatus.guardianItem.guardian;
+                    var arg = new VerifyCodeViewArg
+                    {
+                        accountType = guardian.type,
+                        guardianIdentifier = guardian.guardianIdentifier,
+                        chainId = _guardianIdentifierInfo.chainId
+                    };
+                    verifyCodeViewController.Initialize(arg, userGuardianStatus.guardianItem.verifier, guardianItem.OnVerified);
+                    verifyCodeViewController.OpenView();
+                });
+
+                _guardianItemComponents.Add(guardianItem);
             }
         }
 

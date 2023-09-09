@@ -1,5 +1,6 @@
 using System.Collections;
 using Portkey.Core;
+using Portkey.Utilities;
 
 namespace Portkey.SocialProvider
 {
@@ -15,8 +16,8 @@ namespace Portkey.SocialProvider
         private VerificationCodeSession _verifierCodeSession = new VerificationCodeSession();
         
         public abstract AccountType AccountType { get; }
-        
-        public VerifyCodeLoginBase(IPortkeySocialService portkeySocialService)
+
+        protected VerifyCodeLoginBase(IPortkeySocialService portkeySocialService)
         {
             _portkeySocialService = portkeySocialService;
         }
@@ -35,10 +36,10 @@ namespace Portkey.SocialProvider
             {
                 body = new SendVerificationCodeParams
                 {
-                    guardianIdentifier = param.guardianId,
+                    guardianIdentifier = param.guardianId.RemoveAllWhiteSpaces(),
                     verifierId = param.verifierId,
                     chainId = param.chainId,
-                    type = AccountType
+                    type = AccountType.ToString()
                 }
             };
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>

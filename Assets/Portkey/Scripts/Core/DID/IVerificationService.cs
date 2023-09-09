@@ -7,7 +7,7 @@ namespace Portkey.Core
     [Serializable]
     public class SendVerificationCodeParams
     {
-        public AccountType type;
+        public string type;
         public string guardianIdentifier;
         public string verifierId;
         public string chainId;

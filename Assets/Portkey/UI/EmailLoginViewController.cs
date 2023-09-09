@@ -8,31 +8,27 @@ namespace Portkey.UI
 {
     public class EmailLoginViewController : MonoBehaviour
     {
-        private readonly string TITLE = "Login with Email";
-        
         [Header("Views")]
-        [SerializeField] private GuardiansApprovalViewController guardianApprovalViewController;
-        [SerializeField] private UnregisteredViewController unregisteredView;
-        [SerializeField] private ErrorViewController errorView;
-        [SerializeField] private LoadingViewController loadingView;
+        [SerializeField] protected GuardiansApprovalViewController guardianApprovalViewController;
+        [SerializeField] protected UnregisteredViewController unregisteredView;
+        [SerializeField] protected ErrorViewController errorView;
+        [SerializeField] protected LoadingViewController loadingView;
         
         [Header("UI Elements")]
-        [SerializeField] private TextMeshProUGUI title;
-        [SerializeField] private TMP_InputField inputField;
-        [SerializeField] private Button loginButton;
-        [SerializeField] private TextMeshProUGUI errorText;
+        [SerializeField] protected TMP_InputField inputField;
+        [SerializeField] protected Button loginButton;
+        [SerializeField] protected TextMeshProUGUI errorText;
         
         public GameObject PreviousView { get; set; }
         public DID.DID DID { get; set; }
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             ResetView();
         }
 
-        private void ResetView()
+        protected void ResetView()
         {
-            title.text = TITLE;
             inputField.text = "";
             errorText.text = "";
             loginButton.interactable = false;
@@ -47,7 +43,7 @@ namespace Portkey.UI
 
         public void OnClickLogin()
         {
-            OnStartLoading(true);
+            StartLoading();
             DID.AuthService.HasGuardian(inputField.text, AccountType.Email, "", CheckSignUpOrLogin, OnError);
         }
         
@@ -56,25 +52,25 @@ namespace Portkey.UI
             loadingView.DisplayLoading(show, text);
         }
         
-        private void OnStartLoading(bool show)
+        protected void StartLoading()
         {
-            ShowLoading(show, "Checking account on the chain...");
+            ShowLoading(true, "Checking account on the chain...");
         }
         
-        private void OnError(string error)
+        protected void OnError(string error)
         {
             Debugger.LogError(error);
             ShowLoading(false);
             errorView.ShowErrorText(error);
         }
         
-        private void CheckSignUpOrLogin(GuardianIdentifierInfo info)
+        protected void CheckSignUpOrLogin(GuardianIdentifierInfo info)
         {
             ShowLoading(false);
             
             switch (info.isLoginGuardian)
             {
-                case true:
+                case false:
                     unregisteredView.gameObject.SetActive(true);
                     unregisteredView.SetGuardianIdentifierInfo(info);
                     break;

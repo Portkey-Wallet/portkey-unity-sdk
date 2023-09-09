@@ -2,10 +2,17 @@ using System;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Portkey.UI
 {
+    public class VerifyCodeViewArg
+    {
+        public VerifierItem verifierItem;
+        public string chainId;
+        public string guardianIdentifier;
+        public AccountType accountType;
+    }
+    
     public class VerifyCodeViewController : MonoBehaviour
     {
         [Header("Views")]
@@ -21,8 +28,9 @@ namespace Portkey.UI
         [SerializeField] private DigitSequenceInputComponent digitSequenceInput = null;
         [SerializeField] private TimedButtonComponent resendButton = null;
         
-        private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private VerifierItem _verifierItem = null;
+        private VerifyCodeViewArg _verifyCodeViewArg = null;
+        private Action<VerifyCodeResult> _onComplete = null;
 
         private void Start()
         {
@@ -30,13 +38,14 @@ namespace Portkey.UI
             resendButton.OnClick += SendVerificationCode;
         }
 
-        public void Initialize(GuardianIdentifierInfo info, VerifierItem verifierItem)
+        public void Initialize(VerifyCodeViewArg arg, VerifierItem verifierItem, Action<VerifyCodeResult> onComplete)
         {
-            _guardianIdentifierInfo = info;
+            _verifyCodeViewArg = arg;
             _verifierItem = verifierItem;
+            _onComplete = onComplete;
             
-            guardianDisplay.Initialize(info, verifierItem);
-            detailsText.text = $"A 6-digit verification code has been sent to {info.identifier}. Please enter the code within 10 minutes.";
+            guardianDisplay.Initialize(_verifyCodeViewArg.guardianIdentifier, _verifyCodeViewArg.accountType, verifierItem);
+            detailsText.text = $"A 6-digit verification code has been sent to {_verifyCodeViewArg.guardianIdentifier}. Please enter the code within 10 minutes.";
         }
 
         public void OpenView()
@@ -55,21 +64,26 @@ namespace Portkey.UI
             
             ShowLoading(true, "Loading...");
 
-            var serviceLogin = GetVerifyCodeLogin(_guardianIdentifierInfo.accountType);
-            StartCoroutine(serviceLogin.VerifyCode(code, OpenNextView, OnError));
+            var serviceLogin = GetVerifyCodeLogin(_verifyCodeViewArg.accountType);
+            StartCoroutine(serviceLogin.VerifyCode(code, result =>
+            {
+                ShowLoading(false);
+                _onComplete?.Invoke(result);
+                CloseView();
+            }, OnError));
         }
         
         private void SendVerificationCode()
         {
             ShowLoading(true, "Loading...");
             
-            var serviceLogin = GetVerifyCodeLogin(_guardianIdentifierInfo.accountType);
+            var serviceLogin = GetVerifyCodeLogin(_verifyCodeViewArg.accountType);
 
             var param = new SendCodeParams
             {
-                guardianId = _guardianIdentifierInfo?.identifier,
+                guardianId = _verifyCodeViewArg?.guardianIdentifier,
                 verifierId = _verifierItem?.id,
-                chainId = _guardianIdentifierInfo?.chainId
+                chainId = _verifyCodeViewArg?.chainId
             };
             StartCoroutine(serviceLogin.SendCode(param, result => { ShowLoading(false); }, error =>
             {
@@ -88,18 +102,6 @@ namespace Portkey.UI
             };
         }
 
-        private void OpenNextView(VerifyCodeResult result)
-        {
-            ShowLoading(false);
-            
-            setPinViewController.VerifierItem = _verifierItem;
-            setPinViewController.gameObject.SetActive(true);
-            setPinViewController.GuardianIdentifierInfo = _guardianIdentifierInfo;
-            setPinViewController.VerifyCodeResult = result;
-            setPinViewController.Operation = SetPINViewController.OperationType.SIGN_UP;
-            setPinViewController.SetPreviousView(signInViewController.gameObject);
-        }
-
         private void ShowLoading(bool show, string text = "")
         {
             loadingView.DisplayLoading(show, text);
@@ -113,6 +115,11 @@ namespace Portkey.UI
         }
         
         public void OnClickClose()
+        {
+            CloseView();
+        }
+
+        public void CloseView()
         {
             gameObject.SetActive(false);
         }

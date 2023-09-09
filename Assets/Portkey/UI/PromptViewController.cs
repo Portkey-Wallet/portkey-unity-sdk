@@ -10,6 +10,8 @@ namespace Portkey.UI
         [SerializeField] private DID.DID did;
         [SerializeField] private VerifyCodeViewController verifyCodeViewController;
         [SerializeField] private LoadingViewController loadingView;
+        [SerializeField] private SetPINViewController setPinViewController = null;
+        [SerializeField] private SignInViewController signInViewController = null;
         [SerializeField] private ErrorViewController errorView = null;
         [SerializeField] private TextMeshProUGUI descriptionText;
         
@@ -50,13 +52,30 @@ namespace Portkey.UI
                 chainId = GuardianIdentifierInfo?.chainId
             };
             StartCoroutine(serviceLogin.SendCode(param, result => { OpenNextView(); }, OnError));
+            
+            OnClickClose();
         }
 
         private void OpenNextView()
         {
             ShowLoading(false);
             gameObject.SetActive(false);
-            verifyCodeViewController.Initialize(GuardianIdentifierInfo, VerifierItem);
+            
+            var arg = new VerifyCodeViewArg
+            {
+                accountType = GuardianIdentifierInfo.accountType,
+                guardianIdentifier = GuardianIdentifierInfo.identifier,
+                chainId = GuardianIdentifierInfo.chainId
+            };
+            verifyCodeViewController.Initialize(arg, VerifierItem, result =>
+            {
+                setPinViewController.VerifierItem = VerifierItem;
+                setPinViewController.gameObject.SetActive(true);
+                setPinViewController.GuardianIdentifierInfo = GuardianIdentifierInfo;
+                setPinViewController.VerifyCodeResult = result;
+                setPinViewController.Operation = SetPINViewController.OperationType.SIGN_UP;
+                setPinViewController.SetPreviousView(signInViewController.gameObject);
+            });
             verifyCodeViewController.OpenView();
         }
 

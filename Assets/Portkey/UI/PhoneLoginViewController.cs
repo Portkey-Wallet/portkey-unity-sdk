@@ -1,63 +1,44 @@
+using Portkey.Core;
 using Portkey.SocialProvider;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Portkey.UI
 {
-    public class PhoneLoginViewController : MonoBehaviour
+    public class PhoneLoginViewController : EmailLoginViewController
     {
-        private readonly string TITLE = "Login with Phone";
+        [SerializeField] private CountryCodeButtonComponent countryCodeButtonComponent;
+        public static IPhoneCountryCodeResult PhoneCountryCodeResult { get; set; } = null;
+        public delegate void OnGetCountryCode (IPhoneCountryCodeResult result);
+        public static event OnGetCountryCode OnGetCountryCodeEventHandler;
+        public string PhoneNumber => countryCodeButtonComponent.CountryCode + inputField.text;
         
-        [SerializeField] private TextMeshProUGUI title;
-        [SerializeField] private TMP_InputField inputField;
-        [SerializeField] private Button loginButton;
-        [SerializeField] private TextMeshProUGUI errorText;
+        private new void OnEnable()
+        {
+            base.OnEnable();
+            StartCoroutine(DID.PortkeySocialService.GetPhoneCountryCodeWithLocal(result =>
+            {
+                PhoneCountryCodeResult = result;
+                countryCodeButtonComponent.SetCountryCodeText($"+{result.locateData.code}");
+            }, OnError));
+        }
         
-        public GameObject PreviousView { get; set; }
-
-        private void OnEnable()
+        public new void OnValueChanged()
         {
-            ResetView();
-        }
-
-        private void ResetView()
-        {
-            title.text = TITLE;
-            inputField.text = "";
-            errorText.text = "";
-            loginButton.interactable = false;
-        }
-
-        public void OnClickBack()
-        {
-            ResetView();
-            CloseView();
-            PreviousView.SetActive(true);
-        }
-
-        public void OnValueChanged()
-        {
-            var value = inputField.text;
-            if (LoginHelper.IsValidPhoneNumber(value))
+            if (LoginHelper.IsValidPhoneNumber(PhoneNumber))
             {
                 loginButton.interactable = true;
                 errorText.text = "";
                 return;
             }
             
-            errorText.text = string.IsNullOrEmpty(value) ? "" : "Invalid phone number.";
+            errorText.text = string.IsNullOrEmpty(PhoneNumber) ? "" : "Invalid phone number.";
             loginButton.interactable = false;
         }
         
-        public void OnClickClose()
+        public new void OnClickLogin()
         {
-            CloseView();
-        }
-        
-        private void CloseView()
-        {
-            gameObject.SetActive(false);
+            StartLoading();
+            DID.AuthService.HasGuardian(PhoneNumber, AccountType.Phone, "", CheckSignUpOrLogin, OnError);
         }
     }
 }

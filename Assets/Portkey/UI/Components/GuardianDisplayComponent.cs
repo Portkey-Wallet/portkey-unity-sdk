@@ -27,28 +27,18 @@ namespace Portkey.UI
         [SerializeField] private GuardianIcon[] guardianIcons = null;
         [SerializeField] private TextMeshProUGUI account = null;
 
-        private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private Dictionary<string, GameObject> _verifierIconMap = null;
         private Dictionary<AccountType, GameObject> _guardianIconMap = null;
-
-        private VerifierItem VerifierItem { get; set; }
         
-        public void Initialize(GuardianIdentifierInfo info, VerifierItem verifierItem)
+        public void Initialize(string guardianIdentifier, AccountType accountType, VerifierItem verifierItem)
         {
-            VerifierItem = verifierItem;
-            _guardianIdentifierInfo = info;
-            InitializeUI();
-        }
-
-        private void InitializeUI()
-        {
-            var guardianType = _guardianIdentifierInfo.accountType;
+            var guardianType = accountType;
             DisplayGuardianIcon(guardianType);
 
-            var verifierType = VerifierItem.name;
+            var verifierType = verifierItem.name;
             DisplayVerifierIcon(verifierType);
 
-            account.text = _guardianIdentifierInfo.identifier;
+            account.text = guardianIdentifier;
         }
 
         private void DisplayGuardianIcon(AccountType guardianType)

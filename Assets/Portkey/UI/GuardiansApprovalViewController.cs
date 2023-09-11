@@ -285,7 +285,8 @@ namespace Portkey.UI
                     {
                         accountType = guardian.type,
                         guardianIdentifier = guardian.guardianIdentifier,
-                        chainId = _guardianIdentifierInfo.chainId
+                        chainId = _guardianIdentifierInfo.chainId,
+                        operationType = OperationTypeEnum.communityRecovery
                     };
                     verifyCodeViewController.Initialize(arg, userGuardianStatus.guardianItem.verifier, guardianItem.OnVerified);
                     verifyCodeViewController.OpenView();

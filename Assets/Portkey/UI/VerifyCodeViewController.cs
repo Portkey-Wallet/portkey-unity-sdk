@@ -11,6 +11,7 @@ namespace Portkey.UI
         public string chainId;
         public string guardianIdentifier;
         public AccountType accountType;
+        public OperationTypeEnum operationType;
     }
     
     public class VerifyCodeViewController : MonoBehaviour
@@ -76,14 +77,20 @@ namespace Portkey.UI
         private void SendVerificationCode()
         {
             ShowLoading(true, "Loading...");
-            
+
+            if (_verifyCodeViewArg == null)
+            {
+                throw new ArgumentException("VerifyCodeViewArg is null");
+            }
+
             var serviceLogin = GetVerifyCodeLogin(_verifyCodeViewArg.accountType);
 
             var param = new SendCodeParams
             {
-                guardianId = _verifyCodeViewArg?.guardianIdentifier,
+                guardianId = _verifyCodeViewArg.guardianIdentifier,
                 verifierId = _verifierItem?.id,
-                chainId = _verifyCodeViewArg?.chainId
+                chainId = _verifyCodeViewArg.chainId,
+                operationType = _verifyCodeViewArg.operationType
             };
             StartCoroutine(serviceLogin.SendCode(param, result => { ShowLoading(false); }, error =>
             {

@@ -39,7 +39,8 @@ namespace Portkey.SocialProvider
                     guardianIdentifier = param.guardianId.RemoveAllWhiteSpaces(),
                     verifierId = param.verifierId,
                     chainId = param.chainId,
-                    type = AccountType.ToString()
+                    type = AccountType.ToString(),
+                    operationType = (int)param.operationType
                 }
             };
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>

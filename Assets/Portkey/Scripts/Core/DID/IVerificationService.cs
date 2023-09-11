@@ -11,7 +11,7 @@ namespace Portkey.Core
         public string guardianIdentifier;
         public string verifierId;
         public string chainId;
-        public RecaptchaType operationType;
+        public int operationType;
     }
 
     [Serializable]

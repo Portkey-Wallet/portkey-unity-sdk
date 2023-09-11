@@ -49,7 +49,8 @@ namespace Portkey.UI
             {
                 guardianId = GuardianIdentifierInfo?.identifier,
                 verifierId = VerifierItem?.id,
-                chainId = GuardianIdentifierInfo?.chainId
+                chainId = GuardianIdentifierInfo?.chainId,
+                operationType = OperationTypeEnum.register
             };
             StartCoroutine(serviceLogin.SendCode(param, result => { OpenNextView(); }, OnError));
             
@@ -65,7 +66,8 @@ namespace Portkey.UI
             {
                 accountType = GuardianIdentifierInfo.accountType,
                 guardianIdentifier = GuardianIdentifierInfo.identifier,
-                chainId = GuardianIdentifierInfo.chainId
+                chainId = GuardianIdentifierInfo.chainId,
+                operationType = OperationTypeEnum.register
             };
             verifyCodeViewController.Initialize(arg, VerifierItem, result =>
             {

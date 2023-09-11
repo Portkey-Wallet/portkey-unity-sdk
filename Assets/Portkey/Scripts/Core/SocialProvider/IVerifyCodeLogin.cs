@@ -7,6 +7,7 @@ namespace Portkey.Core
         public string guardianId;
         public string verifierId;
         public string chainId;
+        public OperationTypeEnum operationType;
     }
     
     public interface IVerifyCodeLogin

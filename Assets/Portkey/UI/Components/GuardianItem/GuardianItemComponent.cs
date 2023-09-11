@@ -211,7 +211,8 @@ namespace Portkey.UI
             {
                 guardianId = _userGuardianStatus?.guardianItem?.guardian?.guardianIdentifier,
                 verifierId = _userGuardianStatus?.guardianItem?.verifier?.id,
-                chainId = _guardianIdentifierInfo?.chainId
+                chainId = _guardianIdentifierInfo?.chainId,
+                operationType = OperationTypeEnum.communityRecovery
             };
             StartCoroutine(serviceLogin.SendCode(param, result =>
             {

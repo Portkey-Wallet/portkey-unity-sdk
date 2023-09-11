@@ -124,8 +124,8 @@ namespace Portkey.UI
         {
             AccountType.Apple  => new AppleGuardianText(guardian),
             AccountType.Google => new GoogleGuardianText(guardian),
-            AccountType.Phone  => new AppleGuardianText(guardian),
-            AccountType.Email  => new AppleGuardianText(guardian),
+            AccountType.Phone  => new PhoneGuardianText(guardian),
+            AccountType.Email  => new EmailGuardianText(guardian),
             _ => throw new ArgumentOutOfRangeException(nameof(guardian.type), $"Not expected AccountType value: {guardian.type}"),
         };
 

@@ -53,12 +53,11 @@ namespace Portkey.UI
                 operationType = OperationTypeEnum.register
             };
             StartCoroutine(serviceLogin.SendCode(param, result => { OpenNextView(); }, OnError));
-            
-            OnClickClose();
         }
 
         private void OpenNextView()
         {
+            OnClickClose();
             ShowLoading(false);
             gameObject.SetActive(false);
             

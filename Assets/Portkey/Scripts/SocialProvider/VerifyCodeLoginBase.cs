@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Portkey.Core;
 using Portkey.Utilities;
 
@@ -41,6 +42,10 @@ namespace Portkey.SocialProvider
                     chainId = param.chainId,
                     type = AccountType.ToString(),
                     operationType = (int)param.operationType
+                },
+                headers = new Dictionary<string, string>
+                {
+                    {"version", "1.3.5"}
                 }
             };
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>

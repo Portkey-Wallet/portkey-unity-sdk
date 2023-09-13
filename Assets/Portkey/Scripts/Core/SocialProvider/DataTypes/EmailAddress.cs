@@ -4,11 +4,11 @@ namespace Portkey.Core
     {
         public new string ToString { get; private set; }
         
-        private static EmailAddress Parse(string emailAddress)
+        public static EmailAddress Parse(string emailAddress)
         {
             if (!IsValidEmail(emailAddress))
             {
-                throw new System.Exception("Invalid email address");
+                throw new System.Exception($"Invalid email address: {emailAddress}");
             }
             
             return new EmailAddress

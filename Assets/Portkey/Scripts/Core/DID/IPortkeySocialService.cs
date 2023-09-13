@@ -19,7 +19,7 @@ namespace Portkey.Core
     }
 
     [Serializable]
-    public class GuardiansApproved
+    public class ApprovedGuardian
     {
         public AccountType type;
         public string identifier = null;
@@ -53,7 +53,7 @@ namespace Portkey.Core
     {
         public string loginGuardianIdentifier = null;
         public string manager = null;
-        public GuardiansApproved[] guardiansApproved = null;
+        public ApprovedGuardian[] guardiansApproved = null;
         public string extraData = null;
         public string chainId = null;
         public Context context = null;

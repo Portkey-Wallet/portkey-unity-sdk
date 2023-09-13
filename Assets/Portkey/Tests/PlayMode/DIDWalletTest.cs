@@ -284,7 +284,7 @@ namespace Portkey.Test
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
-                guardiansApprovedList = new GuardiansApproved[] { new GuardiansApproved() },
+                guardiansApprovedList = new ApprovedGuardian[] { new ApprovedGuardian() },
                 chainId = "chainId_mock",
                 extraData = "extraData_mock"
             };
@@ -316,7 +316,7 @@ namespace Portkey.Test
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
-                guardiansApprovedList = new GuardiansApproved[] { new GuardiansApproved() },
+                guardiansApprovedList = new ApprovedGuardian[] { new ApprovedGuardian() },
                 chainId = "chainId_mock",
                 extraData = "extraData_mock"
             };
@@ -433,7 +433,7 @@ namespace Portkey.Test
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
-                guardiansApprovedList = new GuardiansApproved[] { new GuardiansApproved() },
+                guardiansApprovedList = new ApprovedGuardian[] { new ApprovedGuardian() },
                 chainId = "chainId_mock",
                 extraData = "extraData_mock"
             };

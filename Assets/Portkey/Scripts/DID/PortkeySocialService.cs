@@ -133,7 +133,7 @@ namespace Portkey.DID
         {
             return (error) =>
             {
-                errorCallback(error.message);
+                errorCallback?.Invoke(error.message);
             };
         }
         

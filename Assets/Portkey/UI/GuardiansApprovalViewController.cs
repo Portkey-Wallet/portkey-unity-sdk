@@ -46,7 +46,7 @@ namespace Portkey.UI
 
         private GuardianIdentifierInfo _guardianIdentifierInfo;
         private List<UserGuardianStatus> _guardianStatusList = new List<UserGuardianStatus>();
-        private List<GuardiansApproved> _approvedGuardians = new List<GuardiansApproved>();
+        private List<ApprovedGuardian> _approvedGuardians = new List<ApprovedGuardian>();
         private List<GuardianItemComponent> _guardianItemComponents = new List<GuardianItemComponent>();
         private float _timeElapsed = 0.0f;
         private bool _startTimer = false;
@@ -250,7 +250,7 @@ namespace Portkey.UI
         }
 
         private static UserGuardianStatus UpdateStatusIfApproved(string key, UserGuardianStatus newGuardianStatus,
-            IReadOnlyDictionary<string, GuardiansApproved> approvedMap)
+            IReadOnlyDictionary<string, ApprovedGuardian> approvedMap)
         {
             if (approvedMap.TryGetValue(key, out var approvedGuardian))
             {
@@ -369,7 +369,7 @@ namespace Portkey.UI
                 _guardianStatusList.Where(status => status.signature != null && status.verificationDoc != null);
             foreach (var status in verifiedStatusList)
             {
-                var guardiansApproved = new GuardiansApproved
+                var guardiansApproved = new ApprovedGuardian
                 {
                     type = status.guardianItem.guardian.type,
                     identifier = status.guardianItem.identifier ?? status.guardianItem.guardian.identifierHash ?? "",
@@ -424,7 +424,7 @@ namespace Portkey.UI
         public void ResetView()
         {
             _guardianStatusList = new List<UserGuardianStatus>();
-            _approvedGuardians = new List<GuardiansApproved>();
+            _approvedGuardians = new List<ApprovedGuardian>();
 
             ClearGuardianItems();
 

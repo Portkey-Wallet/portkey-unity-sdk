@@ -35,7 +35,7 @@ namespace Portkey.UI
 
         private VerifierItem _verifierItem = null;
         private GuardianIdentifierInfo _guardianIdentifierInfo = null;
-        private List<GuardiansApproved> _guardiansApprovedList = new List<GuardiansApproved>();
+        private List<ApprovedGuardian> _guardiansApprovedList = new List<ApprovedGuardian>();
         private GameObject previousView = null;
         private State _currentState = State.ENTER_PIN;
         private List<string> _stateToPIN = new List<string>
@@ -53,7 +53,7 @@ namespace Portkey.UI
         {
             set => _verifierItem = value;
         }
-        public List<GuardiansApproved> GuardiansApprovedList
+        public List<ApprovedGuardian> GuardiansApprovedList
         {
             set => _guardiansApprovedList = value;
         }

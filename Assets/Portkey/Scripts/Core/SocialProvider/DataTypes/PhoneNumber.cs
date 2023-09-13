@@ -6,11 +6,11 @@ namespace Portkey.Core
     {
         public new string ToString { get; private set; }
         
-        private static PhoneNumber Parse(string phoneNumber)
+        public static PhoneNumber Parse(string phoneNumber)
         {
             if (!IsValidPhoneNumber(phoneNumber))
             {
-                throw new System.Exception("Invalid phone number");
+                throw new System.Exception($"Invalid phone number: {phoneNumber}");
             }
             
             return new PhoneNumber

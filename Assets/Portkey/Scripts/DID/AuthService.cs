@@ -36,7 +36,7 @@ namespace Portkey.DID
             _verifierService = new VerifierService(_did, _portkeySocialService);
             AppleCredentialProvider = new AppleCredentialProvider(_socialLoginProvider);
             GoogleCredentialProvider = new GoogleCredentialProvider(_socialLoginProvider);
-            PhoneCredentialProvider = new PhoneCredentialProvider();
+            PhoneCredentialProvider = new PhoneCredentialProvider(_portkeySocialService);
             EmailCredentialProvider = new EmailCredentialProvider();
 
             Email = new EmailLogin(_portkeySocialService);

@@ -1,5 +1,6 @@
 using System.Collections;
 using Portkey.Core;
+using Portkey.Utilities;
 
 namespace Portkey.SocialProvider
 {
@@ -11,13 +12,21 @@ namespace Portkey.SocialProvider
             _portkeySocialService = portkeySocialService;
         }
         
-        public IEnumerator SendVerificationCode (SendCodeParams param, SuccessCallback<string> successCallback, ErrorCallback errorCallback)
-        {
-            yield return _portkeySocialService.SendCode(param, successCallback, errorCallback);
-        }
-        
         public PhoneCredential Get(PhoneNumber phoneNumber, string verificationCode)
         {
+            // TODO: implement sending verification code and waiting for input before constructing PhoneCredential
+            /*
+            StaticCoroutine.StartCoroutine(Phone.SendCode(param, ret =>
+            {
+                OnSendVerificationCode?.Invoke();
+
+                StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
+                {
+                    var phoneCredential = PhoneCredentialProvider.Get(PhoneNumber.Parse(param.guardianId), code);
+                    successCallback(phoneCredential);
+                }));
+            }, OnError));
+            */
             return new PhoneCredential(phoneNumber, verificationCode);
         }
     }

@@ -10,21 +10,20 @@ namespace Portkey.DID
 {
     public class AuthService : IAuthService
     {
-        private IPortkeySocialService _portkeySocialService;
-        private DIDWallet<WalletAccount> _did;
-        private ISocialProvider _socialLoginProvider;
-        private ISocialVerifierProvider _socialVerifierProvider;
-        private VerifierService _verifierService;
+        private readonly IPortkeySocialService _portkeySocialService;
+        private readonly DIDWallet<WalletAccount> _did;
+        private readonly ISocialProvider _socialLoginProvider;
+        private readonly ISocialVerifierProvider _socialVerifierProvider;
+        private readonly VerifierService _verifierService;
         private string _verificationCode = null;
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }
         public PhoneCredentialProvider PhoneCredentialProvider { get; private set; }
         public EmailCredentialProvider EmailCredentialProvider { get; private set; }
+        public IAuthMessage Message { get; private set; }
         public EmailLogin Email { get; private set; }
         public PhoneLogin Phone { get; private set; }
-        public ErrorCallback OnError { get; set; } = null;
-        public Action OnSendVerificationCode { get; set; } = null;
 
         public AuthService(IPortkeySocialService portkeySocialService, DIDWallet<WalletAccount> did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider)
         {
@@ -34,15 +33,20 @@ namespace Portkey.DID
             _socialVerifierProvider = socialVerifierProvider;
             
             _verifierService = new VerifierService(_did, _portkeySocialService);
-            AppleCredentialProvider = new AppleCredentialProvider(_socialLoginProvider);
-            GoogleCredentialProvider = new GoogleCredentialProvider(_socialLoginProvider);
-            PhoneCredentialProvider = new PhoneCredentialProvider(_portkeySocialService);
-            EmailCredentialProvider = new EmailCredentialProvider();
-
+            Message = new AuthMessage();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
-            
-            OnError = ErrorCallback;
+            AppleCredentialProvider = new AppleCredentialProvider(_socialLoginProvider);
+            GoogleCredentialProvider = new GoogleCredentialProvider(_socialLoginProvider);
+            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
+            EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
+
+            Message.OnInputVerificationCodeEvent += OnInputVerificationCode;
+        }
+        
+        private void OnInputVerificationCode(string verificationCode)
+        {
+            _verificationCode = verificationCode;
         }
 
         private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<GuardianNew>> successCallback, ErrorCallback errorCallback)
@@ -122,11 +126,6 @@ namespace Portkey.DID
                 successCallback(new List<GuardianNew>());
             }
         }
-        
-        private void ErrorCallback(string error)
-        {
-            Debugger.LogError(error);
-        }
 
         private static GuardianNew CreateGuardian(string guardianId, Guardian guardianDto, string chainId, VerifierItem verifier)
         {
@@ -147,17 +146,17 @@ namespace Portkey.DID
 
         public IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(credential.SocialInfo.sub, successCallback, OnError);
+            yield return GetGuardians(credential.SocialInfo.sub, successCallback, Message.Error);
         }
 
         public IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(phoneNumber.String, successCallback, OnError);
+            yield return GetGuardians(phoneNumber.String, successCallback, Message.Error);
         }
 
         public IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(emailAddress.String, successCallback, OnError);
+            yield return GetGuardians(emailAddress.String, successCallback, Message.Error);
         }
 
         public void Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
@@ -171,7 +170,7 @@ namespace Portkey.DID
             {
                 if (!IsCredentialMatchGuardian(credential, guardian))
                 {
-                    OnError?.Invoke("Account does not match your guardian.");
+                    Message.Error("Account does not match your guardian.");
                     return;
                 }
 
@@ -181,13 +180,13 @@ namespace Portkey.DID
                         SocialVerifyAndApproveGuardian(credential, guardian);
                         break;
                     case AccountType.Email:
-                        EmailVerifyAndApproveGuardian(credential, guardian);
+                        EmailVerifyAndApproveGuardian((EmailCredential)credential, guardian);
                         break;
                     case AccountType.Phone:
-                        PhoneVerifyAndApproveGuardian(credential, guardian);
+                        PhoneVerifyAndApproveGuardian((PhoneCredential)credential, guardian);
                         break;
                     default:
-                        OnError?.Invoke($"Unsupported account type: {guardian.accountType}.");
+                        Message.Error($"Unsupported account type: {guardian.accountType}.");
                         break;
                 }
                 return;
@@ -199,12 +198,12 @@ namespace Portkey.DID
                 {
                     if (!IsCredentialMatchGuardian(appleCredential, guardian))
                     {
-                        OnError?.Invoke("Account does not match your guardian.");
+                        Message.Error("Account does not match your guardian.");
                         return;
                     }
 
                     SocialVerifyAndApproveGuardian(appleCredential, guardian);
-                }, OnError);
+                }, Message.Error);
             }
             else if (guardian.accountType == AccountType.Google)
             {
@@ -212,59 +211,45 @@ namespace Portkey.DID
                 {
                     if (!IsCredentialMatchGuardian(googleCredential, guardian))
                     {
-                        OnError?.Invoke("Account does not match your guardian.");
+                        Message.Error("Account does not match your guardian.");
                         return;
                     }
 
                     SocialVerifyAndApproveGuardian(googleCredential, guardian);
-                }, OnError);
+                }, Message.Error);
             }
             else if (guardian.accountType == AccountType.Email)
             {
-                var param = new SendCodeParams
-                {
-                    guardianId = guardian.id,
-                    verifierId = guardian.verifier.id,
-                    chainId = guardian.chainId,
-                    operationType = OperationTypeEnum.communityRecovery
-                };
-                SendCodeForEmailAndWaitForInput(param, emailCredential =>
+                StaticCoroutine.StartCoroutine(EmailCredentialProvider.Get(EmailAddress.Parse(guardian.id), emailCredential =>
                 {
                     if (!IsCredentialMatchGuardian(emailCredential, guardian))
                     {
-                        OnError?.Invoke("Account does not match your guardian.");
+                        Message.Error("Account does not match your guardian.");
                         return;
                     }
                     
                     EmailVerifyAndApproveGuardian(emailCredential, guardian);
-                });
+                }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery));
             }
             else if (guardian.accountType == AccountType.Phone)
             {
-                var param = new SendCodeParams
-                {
-                    guardianId = guardian.id,
-                    verifierId = guardian.verifier.id,
-                    chainId = guardian.chainId,
-                    operationType = OperationTypeEnum.communityRecovery
-                };
-                SendCodeForPhoneAndWaitForInput(param, phoneCredential =>
+                StaticCoroutine.StartCoroutine(PhoneCredentialProvider.Get(PhoneNumber.Parse(guardian.id), phoneCredential =>
                 {
                     if (!IsCredentialMatchGuardian(phoneCredential, guardian))
                     {
-                        OnError?.Invoke("Account does not match your guardian.");
+                        Message.Error("Account does not match your guardian.");
                         return;
                     }
                     
                     PhoneVerifyAndApproveGuardian(phoneCredential, guardian);
-                });
+                }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery));
             }
             else
             {
-                OnError?.Invoke($"Unsupported account type: {guardian.accountType}");
+                Message.Error($"Unsupported account type: {guardian.accountType}");
             }
 
-            void EmailVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
+            void EmailVerifyAndApproveGuardian(EmailCredential cred, GuardianNew guard)
             {
                 VerifyEmailCredential(cred, verifiedCredential =>
                 {
@@ -272,7 +257,7 @@ namespace Portkey.DID
                 });
             }
             
-            void PhoneVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
+            void PhoneVerifyAndApproveGuardian(PhoneCredential cred, GuardianNew guard)
             {
                 VerifyPhoneCredential(cred, verifiedCredential =>
                 {
@@ -300,34 +285,6 @@ namespace Portkey.DID
             }
         }
 
-        private void SendCodeForEmailAndWaitForInput(SendCodeParams param, SuccessCallback<EmailCredential> successCallback)
-        {
-            StaticCoroutine.StartCoroutine(Email.SendCode(param, ret =>
-            {
-                OnSendVerificationCode?.Invoke();
-
-                StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
-                {
-                    var emailCredential = EmailCredentialProvider.Get(EmailAddress.Parse(param.guardianId), code);
-                    successCallback(emailCredential);
-                }));
-            }, OnError));
-        }
-
-        private void SendCodeForPhoneAndWaitForInput(SendCodeParams param, SuccessCallback<PhoneCredential> successCallback)
-        {
-            StaticCoroutine.StartCoroutine(Phone.SendCode(param, ret =>
-            {
-                OnSendVerificationCode?.Invoke();
-
-                StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
-                {
-                    var phoneCredential = PhoneCredentialProvider.Get(PhoneNumber.Parse(param.guardianId), code);
-                    successCallback(phoneCredential);
-                }));
-            }, OnError));
-        }
-
         private IEnumerator WaitForInputCode(Action<string> onComplete)
         {
             while (_verificationCode == null)
@@ -339,20 +296,17 @@ namespace Portkey.DID
             _verificationCode = null;
         }
 
-        private void VerifyPhoneCredential(ICredential credential, SuccessCallback<VerifiedCredential> successCallback)
+        private void VerifyPhoneCredential(PhoneCredential credential, SuccessCallback<VerifiedCredential> successCallback)
         {
-            StaticCoroutine.StartCoroutine(Phone.VerifyCode(credential.SignInToken, result =>
-            {
-                successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
-            }, OnError));
+            StaticCoroutine.StartCoroutine(PhoneCredentialProvider.Verify(credential, successCallback));
         }
         
-        private void VerifyEmailCredential(ICredential credential, SuccessCallback<VerifiedCredential> successCallback)
+        private void VerifyEmailCredential(EmailCredential credential, SuccessCallback<VerifiedCredential> successCallback)
         {
-            StaticCoroutine.StartCoroutine(Email.VerifyCode(credential.SignInToken, result =>
+            StaticCoroutine.StartCoroutine(Email.VerifyCode(credential, result =>
             {
                 successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
-            }, OnError));
+            }, Message.Error));
         }
 
         private void VerifySocialCredential(ICredential credential, string chainId, string verifierId, SuccessCallback<VerifiedCredential> successCallback)
@@ -367,7 +321,7 @@ namespace Portkey.DID
             socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
             {
                 successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
-            }, null, OnError);
+            }, null, Message.Error);
         }
 
         private static ApprovedGuardian CreateApprovedGuardian(GuardianNew guardian, VerifiedCredential verifiedCredential)
@@ -384,89 +338,64 @@ namespace Portkey.DID
 
         public IEnumerator SignUp(string chainId, PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            yield return PhoneCredentialProvider.Get(phoneNumber, phoneCredential =>
             {
-                var sendCodeParam = new SendCodeParams
+                VerifyPhoneCredential(phoneCredential, verifiedCredential =>
                 {
-                    guardianId = phoneNumber.String,
-                    verifierId = verifierServer.id,
-                    chainId = chainId,
-                    operationType = OperationTypeEnum.register
-                };
-                SendCodeForPhoneAndWaitForInput(sendCodeParam, phoneCredential =>
-                {
-                    VerifyPhoneCredential(phoneCredential, verifiedCredential =>
-                    {
-                        SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
-                    });
+                    StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
                 });
-            }, OnError);
+            }, chainId);
         }
 
         public IEnumerator SignUp(string chainId, EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            yield return EmailCredentialProvider.Get(emailAddress, emailCredential =>
             {
-                var sendCodeParam = new SendCodeParams
+                VerifyEmailCredential(emailCredential, verifiedCredential =>
                 {
-                    guardianId = emailAddress.String,
-                    verifierId = verifierServer.id,
-                    chainId = chainId,
-                    operationType = OperationTypeEnum.register
-                };
-                SendCodeForEmailAndWaitForInput(sendCodeParam, emailCredential =>
-                {
-                    VerifyEmailCredential(emailCredential, verifiedCredential =>
-                    {
-                        SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
-                    });
+                    StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
                 });
-            }, OnError);
+            }, chainId);
         }
         
         public IEnumerator SignUp(string chainId, VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
         {
             yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
             {
-                SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
-            }, OnError);
-        }
-
-        private void SignUp(string chainId, VerifiedCredential verifiedCredential, string verifierId, SuccessCallback<DIDWalletInfo> successCallback)
-        {
-            var extraData = "";
-            try
-            {
-                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
-            }
-            catch (Exception e)
-            {
-                OnError(e.Message);
-                return;
-            }
-
-            var param = new RegisterParams
-            {
-                type = AccountType.Email,
-                loginGuardianIdentifier = verifiedCredential.SocialInfo.sub.RemoveAllWhiteSpaces(),
-                chainId = chainId,
-                verifierId = verifierId,
-                extraData = extraData,
-                verificationDoc = verifiedCredential.VerificationDoc.toString,
-                signature = verifiedCredential.Signature
-            };
-            StaticCoroutine.StartCoroutine(_did.Register(param, registerResult =>
-            {
-                if (IsCAValid(registerResult.Status))
+                var extraData = "";
+                try
                 {
-                    OnError("Register failed! Missing caAddress or caHash.");
+                    extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
+                }
+                catch (Exception e)
+                {
+                    Message.Error(e.Message);
                     return;
                 }
 
-                var walletInfo = CreateDIDWalletInfo(chainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
-                    registerResult.SessionId, AddManagerType.Register);
-                successCallback(walletInfo);
-            }, OnError));
+                var param = new RegisterParams
+                {
+                    type = AccountType.Email,
+                    loginGuardianIdentifier = verifiedCredential.SocialInfo.sub.RemoveAllWhiteSpaces(),
+                    chainId = chainId,
+                    verifierId = verifiedCredential.VerificationDoc.verifierId,
+                    extraData = extraData,
+                    verificationDoc = verifiedCredential.VerificationDoc.toString,
+                    signature = verifiedCredential.Signature
+                };
+                StaticCoroutine.StartCoroutine(_did.Register(param, registerResult =>
+                {
+                    if (IsCAValid(registerResult.Status))
+                    {
+                        Message.Error("Register failed! Missing caAddress or caHash.");
+                        return;
+                    }
+
+                    var walletInfo = CreateDIDWalletInfo(chainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
+                        registerResult.SessionId, AddManagerType.Register);
+                    successCallback(walletInfo);
+                }, Message.Error));
+            }, Message.Error);
         }
 
         public IEnumerator SignUp(string chainId, ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
@@ -476,27 +405,27 @@ namespace Portkey.DID
                 switch (credential.AccountType)
                 {
                     case AccountType.Phone:
-                        VerifyPhoneCredential(credential, verifiedCredential =>
+                        VerifyPhoneCredential((PhoneCredential)credential, verifiedCredential =>
                         {
-                            SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
+                            StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
                         });
                         break;
                     case AccountType.Email:
-                        VerifyEmailCredential(credential, verifiedCredential =>
+                        VerifyEmailCredential((EmailCredential)credential, verifiedCredential =>
                         {
-                            SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
+                            StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
                         });
                         break;
                     case AccountType.Apple or AccountType.Google:
                         VerifySocialCredential(credential, chainId, verifierServer.id, verifiedCredential =>
                         {
-                            SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
+                            StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
                         });
                         break;
                     default:
                         throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
                 }
-            }, OnError);
+            }, Message.Error);
         }
 
         public IEnumerator Login(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback)
@@ -508,7 +437,7 @@ namespace Portkey.DID
             }
             catch (Exception e)
             {
-                OnError?.Invoke(e.Message);
+                Message.Error(e.Message);
                 yield break;
             }
             
@@ -523,13 +452,13 @@ namespace Portkey.DID
             {
                 if(IsCAValid(result.Status))
                 {
-                    OnError?.Invoke("Login failed! Missing caAddress or caHash.");
+                    Message.Error("Login failed! Missing caAddress or caHash.");
                     return;
                 }
                 
                 var walletInfo = CreateDIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery);
                 successCallback(walletInfo);
-            }, OnError));
+            }, Message.Error));
         }
         
         private DIDWalletInfo CreateDIDWalletInfo(string chainId, string guardianId, AccountType accountType, CAInfo caInfo, string sessionId, AddManagerType type)
@@ -563,11 +492,6 @@ namespace Portkey.DID
                 deviceInfo = JsonConvert.SerializeObject(deviceInfo)
             };
             return JsonConvert.SerializeObject(extraData);
-        }
-
-        public void SendVerificationCode(string verificationCode)
-        {
-            _verificationCode = verificationCode;
         }
     }
 }

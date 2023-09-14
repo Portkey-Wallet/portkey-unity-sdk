@@ -5,16 +5,10 @@ using Portkey.Utilities;
 
 namespace Portkey.SocialProvider
 {
-    internal class VerificationCodeSession
-    {
-        public string verifierSessionId = null;
-        public SendCodeParams sendCodeParams = null;
-    }
-    
     public abstract class VerifyCodeLoginBase : IVerifyCodeLogin
     {
         private IPortkeySocialService _portkeySocialService;
-        private VerificationCodeSession _verifierCodeSession = new VerificationCodeSession();
+        private string _verifierSessionId = null;
         
         public abstract AccountType AccountType { get; }
 
@@ -50,22 +44,21 @@ namespace Portkey.SocialProvider
             };
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>
             {
-                _verifierCodeSession.verifierSessionId = response.verifierSessionId;
-                _verifierCodeSession.sendCodeParams = param;
+                _verifierSessionId = response.verifierSessionId;
                 
                 successCallback?.Invoke(param.guardianId);
             }, errorCallback);
         }
 
-        public IEnumerator VerifyCode(string code, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyCode(ICodeCredential credential, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback)
         {
             var verifyCodeParams = new VerifyVerificationCodeParams
             {
-                verifierSessionId = _verifierCodeSession.verifierSessionId,
-                verificationCode = code,
-                guardianIdentifier = _verifierCodeSession.sendCodeParams.guardianId,
-                verifierId = _verifierCodeSession.sendCodeParams.verifierId,
-                chainId = _verifierCodeSession.sendCodeParams.chainId
+                verifierSessionId = _verifierSessionId,
+                verificationCode = credential.SignInToken,
+                guardianIdentifier = credential.SocialInfo.sub,
+                verifierId = credential.VerifierId,
+                chainId = credential.ChainId
             };
             yield return _portkeySocialService.VerifyVerificationCode(verifyCodeParams, (response) =>
             {

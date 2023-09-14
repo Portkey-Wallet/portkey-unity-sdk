@@ -44,6 +44,7 @@ namespace Portkey.UI
         public void OnClickLogin()
         {
             StartLoading();
+            //DID.AuthService.GetGuardians(EmailAddress.Parse(inputField.text), CheckSignUpOrLogin, OnError);
             DID.AuthService.HasGuardian(inputField.text, AccountType.Email, "", CheckSignUpOrLogin, OnError);
         }
         

@@ -1,33 +1,22 @@
 using System.Collections;
 using Portkey.Core;
-using Portkey.Utilities;
 
 namespace Portkey.SocialProvider
 {
-    public class PhoneCredentialProvider
+    public class PhoneCredentialProvider : CodeCredentialProviderBase<PhoneCredential>
     {
-        private IPortkeySocialService _portkeySocialService;
-        public PhoneCredentialProvider(IPortkeySocialService portkeySocialService)
+        public PhoneCredentialProvider(IVerifyCodeLogin phoneLogin, IAuthMessage message, IVerifierService verifierService) : base(phoneLogin, message, verifierService)
         {
-            _portkeySocialService = portkeySocialService;
         }
         
-        public PhoneCredential Get(PhoneNumber phoneNumber, string verificationCode)
+        public IEnumerator Get(PhoneNumber phoneNumber, SuccessCallback<PhoneCredential> successCallback, string chainId = "AELF", string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
-            // TODO: implement sending verification code and waiting for input before constructing PhoneCredential
-            /*
-            StaticCoroutine.StartCoroutine(Phone.SendCode(param, ret =>
-            {
-                OnSendVerificationCode?.Invoke();
+            yield return GetCredential(phoneNumber.String, successCallback, chainId, verifierId, operationType);
+        }
 
-                StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
-                {
-                    var phoneCredential = PhoneCredentialProvider.Get(PhoneNumber.Parse(param.guardianId), code);
-                    successCallback(phoneCredential);
-                }));
-            }, OnError));
-            */
-            return new PhoneCredential(phoneNumber, verificationCode);
+        protected override PhoneCredential CreateCredential(string guardianId, string verifierId, string chainId, string code)
+        {
+            return new PhoneCredential(PhoneNumber.Parse(guardianId), code, chainId, verifierId);
         }
     }
 }

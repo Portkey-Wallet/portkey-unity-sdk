@@ -10,9 +10,9 @@ namespace Portkey.Core
         GoogleCredentialProvider GoogleCredentialProvider { get; }
         PhoneCredentialProvider PhoneCredentialProvider { get; }
         EmailCredentialProvider EmailCredentialProvider { get; }
+        IAuthMessage Message { get; }
         EmailLogin Email { get; }
         PhoneLogin Phone { get; }
-        ErrorCallback OnError { get; set; }
         IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<GuardianNew>> successCallback);
         IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback);
         IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback);
@@ -22,6 +22,5 @@ namespace Portkey.Core
         IEnumerator SignUp(string chainId, ICredential credential, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator SignUp(string chainId, VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator Login(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback);
-        void SendVerificationCode(string verificationCode);
     }
 }

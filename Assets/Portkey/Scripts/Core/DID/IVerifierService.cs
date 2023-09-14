@@ -7,5 +7,6 @@ namespace Portkey.Core
         bool IsInitialized(string chainId);
         VerifierItem GetVerifier(string chainId, string verifierId);
         IEnumerator Initialize(string chainId, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
+        IEnumerator GetVerifierServer(string chainId, SuccessCallback<VerifierServerResult> successCallback, ErrorCallback errorCallback);
     }
 }

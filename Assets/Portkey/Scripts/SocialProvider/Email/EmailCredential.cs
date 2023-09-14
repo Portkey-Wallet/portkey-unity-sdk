@@ -8,7 +8,7 @@ namespace Portkey.SocialProvider
         {
             SocialInfo = new SocialInfo
             {
-                sub = emailAddress.ToString
+                sub = emailAddress.GetString
             };
             SignInToken = verificationCode;
         }

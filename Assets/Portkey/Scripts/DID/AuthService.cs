@@ -152,12 +152,12 @@ namespace Portkey.DID
 
         public IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(phoneNumber.ToString, successCallback, OnError);
+            yield return GetGuardians(phoneNumber.GetString, successCallback, OnError);
         }
 
         public IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(emailAddress.ToString, successCallback, OnError);
+            yield return GetGuardians(emailAddress.GetString, successCallback, OnError);
         }
 
         public void Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
@@ -173,8 +173,23 @@ namespace Portkey.DID
                 {
                     OnError?.Invoke("Account does not match your guardian.");
                 }
-                
-                VerifySocialCredential(credential, guardian, successCallback);
+
+                if (guardian.accountType is AccountType.Apple or AccountType.Google)
+                {
+                    VerifySocialCredential(credential, guardian, successCallback);
+                }
+                else if (guardian.accountType == AccountType.Email)
+                {
+                    EmailVerifyAndApproveGuardian(credential, guardian);
+                }
+                else if (guardian.accountType == AccountType.Phone)
+                {
+                    PhoneVerifyAndApproveGuardian(credential, guardian);
+                }
+                else
+                {
+                    OnError?.Invoke("Unsupported account type.");
+                }
                 return;
             }
             
@@ -213,7 +228,7 @@ namespace Portkey.DID
                 };
                 SendCodeForEmailAndWaitForInput(param, emailCredential =>
                 {
-                    VerifyEmailCredential(emailCredential, guardian, successCallback);
+                    EmailVerifyAndApproveGuardian(emailCredential, guardian);
                 });
             }
             else if (guardian.accountType == AccountType.Phone)
@@ -227,12 +242,34 @@ namespace Portkey.DID
                 };
                 SendCodeForPhoneAndWaitForInput(param, phoneCredential =>
                 {
-                    VerifyPhoneCredential(phoneCredential, guardian, successCallback);
+                    PhoneVerifyAndApproveGuardian(phoneCredential, guardian);
                 });
             }
             else
             {
                 OnError?.Invoke($"Unsupported account type: {guardian.accountType}");
+            }
+
+            void EmailVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
+            {
+                VerifyEmailCredential(cred, result =>
+                {
+                    ReturnApprovedGuardian(guard, result);
+                });
+            }
+            
+            void PhoneVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
+            {
+                VerifyPhoneCredential(cred, result =>
+                {
+                    ReturnApprovedGuardian(guard, result);
+                });
+            }
+            
+            void ReturnApprovedGuardian(GuardianNew guard, VerifyCodeResult result)
+            {
+                var approvedGuardian = CreateApprovedGuardian(guard, result);
+                successCallback(approvedGuardian);
             }
         }
 
@@ -275,21 +312,19 @@ namespace Portkey.DID
             _verificationCode = null;
         }
 
-        private void VerifyPhoneCredential(ICredential credential, GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback)
+        private void VerifyPhoneCredential(ICredential credential, SuccessCallback<VerifyCodeResult> successCallback)
         {
             StaticCoroutine.StartCoroutine(Phone.VerifyCode(credential.SignInToken, result =>
             {
-                var approvedGuardian = CreateApprovedGuardian(guardian, result);
-                successCallback(approvedGuardian);
+                successCallback?.Invoke(result);
             }, OnError));
         }
         
-        private void VerifyEmailCredential(ICredential credential, GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback)
+        private void VerifyEmailCredential(ICredential credential, SuccessCallback<VerifyCodeResult> successCallback)
         {
             StaticCoroutine.StartCoroutine(Email.VerifyCode(credential.SignInToken, result =>
             {
-                var approvedGuardian = CreateApprovedGuardian(guardian, result);
-                successCallback(approvedGuardian);
+                successCallback?.Invoke(result);
             }, OnError));
         }
 
@@ -321,30 +356,87 @@ namespace Portkey.DID
             };
         }
 
-        public IEnumerator Signup(string chainId, PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator SignUp(string chainId, PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return Signup(chainId, phoneNumber.ToString, AccountType.Phone, successCallback);
-        }
-
-        public IEnumerator Signup(string chainId, EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback)
-        {
-            var param = new SendCodeParams
+            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
             {
-                guardianId = emailAddress.ToString,
-                verifierId = guardian.verifier.id,
-                chainId = chainId,
-                operationType = OperationTypeEnum.register
-            };
-            SendCodeForEmailAndWaitForInput(param, emailCredential =>
-            {
-                StaticCoroutine.StartCoroutine(Email.VerifyCode(emailCredential.SignInToken, result =>
+                var sendCodeParam = new SendCodeParams
                 {
-                    
-                }, OnError));
-            });
+                    guardianId = phoneNumber.GetString,
+                    verifierId = verifierServer.id,
+                    chainId = chainId,
+                    operationType = OperationTypeEnum.register
+                };
+                SendCodeForPhoneAndWaitForInput(sendCodeParam, phoneCredential =>
+                {
+                    VerifyPhoneCredential(phoneCredential, result =>
+                    {
+                        SignUp(chainId, sendCodeParam.guardianId, verifierServer.id, result, successCallback);
+                    });
+                });
+            }, OnError);
         }
 
-        public IEnumerator Signup(string chainId, ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator SignUp(string chainId, EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            {
+                var sendCodeParam = new SendCodeParams
+                {
+                    guardianId = emailAddress.GetString,
+                    verifierId = verifierServer.id,
+                    chainId = chainId,
+                    operationType = OperationTypeEnum.register
+                };
+                SendCodeForEmailAndWaitForInput(sendCodeParam, emailCredential =>
+                {
+                    VerifyEmailCredential(emailCredential, result =>
+                    {
+                        SignUp(chainId, sendCodeParam.guardianId, verifierServer.id, result, successCallback);
+                    });
+                });
+            }, OnError);
+        }
+
+        private void SignUp(string chainId, string guardianId,
+            string verifierId, VerifyCodeResult result, SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            var extraData = "";
+            try
+            {
+                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
+            }
+            catch (Exception e)
+            {
+                OnError(e.Message);
+                return;
+            }
+
+            var param = new RegisterParams
+            {
+                type = AccountType.Email,
+                loginGuardianIdentifier = guardianId.RemoveAllWhiteSpaces(),
+                chainId = chainId,
+                verifierId = verifierId,
+                extraData = extraData,
+                verificationDoc = result.verificationDoc.toString,
+                signature = result.signature
+            };
+            StaticCoroutine.StartCoroutine(_did.Register(param, registerResult =>
+            {
+                if (IsCAValid(registerResult.Status))
+                {
+                    OnError("Register failed! Missing caAddress or caHash.");
+                    return;
+                }
+
+                var walletInfo = CreateDIDWalletInfo(chainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
+                    registerResult.SessionId, AddManagerType.Register);
+                successCallback(walletInfo);
+            }, OnError));
+        }
+
+        public IEnumerator SignUp(string chainId, ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
         {
             yield return Signup(chainId, credential.SocialInfo.sub, credential.AccountType, successCallback);
         }
@@ -377,23 +469,23 @@ namespace Portkey.DID
                     return;
                 }
                 
-                var walletInfo = CreateDIDWalletInfo(loginGuardian, result.Status, result.SessionId, AddManagerType.Recovery);
+                var walletInfo = CreateDIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery);
                 successCallback(walletInfo);
             }, OnError));
         }
         
-        private DIDWalletInfo CreateDIDWalletInfo(GuardianNew guardian, CAInfo caInfo, string sessionId, AddManagerType type)
+        private DIDWalletInfo CreateDIDWalletInfo(string chainId, string guardianId, AccountType accountType, CAInfo caInfo, string sessionId, AddManagerType type)
         {
             var walletInfo = new DIDWalletInfo
             {
                 caInfo = caInfo,
-                chainId = guardian.chainId,
+                chainId = chainId,
                 wallet = _did.GetWallet(),
                 managerInfo = new ManagerInfoType
                 {
                     managerUniqueId = sessionId,
-                    guardianIdentifier = guardian.id,
-                    accountType = guardian.accountType,
+                    guardianIdentifier = guardianId,
+                    accountType = accountType,
                     type = type
                 }
             };

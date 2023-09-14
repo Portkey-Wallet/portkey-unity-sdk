@@ -77,5 +77,19 @@ namespace Portkey.DID
                 successCallback(true);
             }, errorCallback);
         }
+
+        public IEnumerator GetVerifierServer(string chainId, SuccessCallback<VerifierServerResult> successCallback, ErrorCallback errorCallback)
+        {
+            yield return _portkeySocialService.GetVerifierServer(chainId, result =>
+            {
+                if (result == null)
+                {
+                    errorCallback("Network Error!");
+                    return;
+                }
+                
+                successCallback(result);
+            }, errorCallback);
+        }
     }
 }

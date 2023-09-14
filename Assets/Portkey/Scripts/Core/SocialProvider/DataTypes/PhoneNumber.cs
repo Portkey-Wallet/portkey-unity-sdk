@@ -4,7 +4,7 @@ namespace Portkey.Core
 {
     public class PhoneNumber
     {
-        public string GetString { get; private set; }
+        public string String { get; private set; }
         
         public static PhoneNumber Parse(string phoneNumber)
         {
@@ -15,7 +15,7 @@ namespace Portkey.Core
             
             return new PhoneNumber
             {
-                GetString = phoneNumber
+                String = phoneNumber
             };
         }
         

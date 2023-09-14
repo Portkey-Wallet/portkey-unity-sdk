@@ -152,12 +152,12 @@ namespace Portkey.DID
 
         public IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(phoneNumber.GetString, successCallback, OnError);
+            yield return GetGuardians(phoneNumber.String, successCallback, OnError);
         }
 
         public IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(emailAddress.GetString, successCallback, OnError);
+            yield return GetGuardians(emailAddress.String, successCallback, OnError);
         }
 
         public void Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
@@ -169,26 +169,26 @@ namespace Portkey.DID
 
             if (credential != null)
             {
-                if (credential.SocialInfo.sub != guardian.id)
+                if (!IsCredentialMatchGuardian(credential, guardian))
                 {
                     OnError?.Invoke("Account does not match your guardian.");
+                    return;
                 }
 
-                if (guardian.accountType is AccountType.Apple or AccountType.Google)
+                switch (guardian.accountType)
                 {
-                    VerifySocialCredential(credential, guardian, successCallback);
-                }
-                else if (guardian.accountType == AccountType.Email)
-                {
-                    EmailVerifyAndApproveGuardian(credential, guardian);
-                }
-                else if (guardian.accountType == AccountType.Phone)
-                {
-                    PhoneVerifyAndApproveGuardian(credential, guardian);
-                }
-                else
-                {
-                    OnError?.Invoke("Unsupported account type.");
+                    case AccountType.Apple or AccountType.Google:
+                        SocialVerifyAndApproveGuardian(credential, guardian);
+                        break;
+                    case AccountType.Email:
+                        EmailVerifyAndApproveGuardian(credential, guardian);
+                        break;
+                    case AccountType.Phone:
+                        PhoneVerifyAndApproveGuardian(credential, guardian);
+                        break;
+                    default:
+                        OnError?.Invoke($"Unsupported account type: {guardian.accountType}.");
+                        break;
                 }
                 return;
             }
@@ -197,24 +197,26 @@ namespace Portkey.DID
             {
                 AppleCredentialProvider.Get(appleCredential =>
                 {
-                    if (appleCredential.SocialInfo.sub != guardian.id)
+                    if (!IsCredentialMatchGuardian(appleCredential, guardian))
                     {
                         OnError?.Invoke("Account does not match your guardian.");
+                        return;
                     }
 
-                    VerifySocialCredential(appleCredential, guardian, successCallback);
+                    SocialVerifyAndApproveGuardian(appleCredential, guardian);
                 }, OnError);
             }
             else if (guardian.accountType == AccountType.Google)
             {
                 GoogleCredentialProvider.Get(googleCredential =>
                 {
-                    if (googleCredential.SocialInfo.sub != guardian.id)
+                    if (!IsCredentialMatchGuardian(googleCredential, guardian))
                     {
                         OnError?.Invoke("Account does not match your guardian.");
+                        return;
                     }
 
-                    VerifySocialCredential(googleCredential, guardian, successCallback);
+                    SocialVerifyAndApproveGuardian(googleCredential, guardian);
                 }, OnError);
             }
             else if (guardian.accountType == AccountType.Email)
@@ -228,6 +230,12 @@ namespace Portkey.DID
                 };
                 SendCodeForEmailAndWaitForInput(param, emailCredential =>
                 {
+                    if (!IsCredentialMatchGuardian(emailCredential, guardian))
+                    {
+                        OnError?.Invoke("Account does not match your guardian.");
+                        return;
+                    }
+                    
                     EmailVerifyAndApproveGuardian(emailCredential, guardian);
                 });
             }
@@ -242,6 +250,12 @@ namespace Portkey.DID
                 };
                 SendCodeForPhoneAndWaitForInput(param, phoneCredential =>
                 {
+                    if (!IsCredentialMatchGuardian(phoneCredential, guardian))
+                    {
+                        OnError?.Invoke("Account does not match your guardian.");
+                        return;
+                    }
+                    
                     PhoneVerifyAndApproveGuardian(phoneCredential, guardian);
                 });
             }
@@ -266,10 +280,23 @@ namespace Portkey.DID
                 });
             }
             
+            void SocialVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
+            {
+                VerifySocialCredential(cred, guard.chainId, result =>
+                {
+                    ReturnApprovedGuardian(guard, result);
+                });
+            }
+            
             void ReturnApprovedGuardian(GuardianNew guard, VerifyCodeResult result)
             {
                 var approvedGuardian = CreateApprovedGuardian(guard, result);
                 successCallback(approvedGuardian);
+            }
+
+            bool IsCredentialMatchGuardian(ICredential cred, GuardianNew guard)
+            {
+                return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
             }
         }
 
@@ -328,19 +355,18 @@ namespace Portkey.DID
             }, OnError));
         }
 
-        private void VerifySocialCredential(ICredential credential, GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback)
+        private void VerifySocialCredential(ICredential credential, string chainId, SuccessCallback<VerifyCodeResult> successCallback)
         {
             var socialVerifier = _socialVerifierProvider.GetSocialVerifier(credential.AccountType);
             var param = new VerifyAccessTokenParam
             {
-                verifierId = guardian.verifier.id,
+                verifierId = credential.SocialInfo.sub,
                 accessToken = credential.SignInToken,
-                chainId = guardian.chainId
+                chainId = chainId
             };
             socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
             {
-                var approvedGuardian = CreateApprovedGuardian(guardian, result);
-                successCallback(approvedGuardian);
+                successCallback(result);
             }, null, OnError);
         }
 
@@ -362,7 +388,7 @@ namespace Portkey.DID
             {
                 var sendCodeParam = new SendCodeParams
                 {
-                    guardianId = phoneNumber.GetString,
+                    guardianId = phoneNumber.String,
                     verifierId = verifierServer.id,
                     chainId = chainId,
                     operationType = OperationTypeEnum.register
@@ -383,7 +409,7 @@ namespace Portkey.DID
             {
                 var sendCodeParam = new SendCodeParams
                 {
-                    guardianId = emailAddress.GetString,
+                    guardianId = emailAddress.String,
                     verifierId = verifierServer.id,
                     chainId = chainId,
                     operationType = OperationTypeEnum.register
@@ -438,7 +464,32 @@ namespace Portkey.DID
 
         public IEnumerator SignUp(string chainId, ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return Signup(chainId, credential.SocialInfo.sub, credential.AccountType, successCallback);
+            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            {
+                switch (credential.AccountType)
+                {
+                    case AccountType.Phone:
+                        VerifyPhoneCredential(credential, result =>
+                        {
+                            SignUp(chainId, credential.SocialInfo.sub, verifierServer.id, result, successCallback);
+                        });
+                        break;
+                    case AccountType.Email:
+                        VerifyEmailCredential(credential, result =>
+                        {
+                            SignUp(chainId, credential.SocialInfo.sub, verifierServer.id, result, successCallback);
+                        });
+                        break;
+                    case AccountType.Apple or AccountType.Google:
+                        VerifySocialCredential(credential, chainId, result =>
+                        {
+                            SignUp(chainId, credential.SocialInfo.sub, verifierServer.id, result, successCallback);
+                        });
+                        break;
+                    default:
+                        throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
+                }
+            }, OnError);
         }
 
         public IEnumerator Login(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback)

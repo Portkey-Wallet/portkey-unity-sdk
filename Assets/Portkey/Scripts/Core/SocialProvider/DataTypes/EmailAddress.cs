@@ -2,7 +2,7 @@ namespace Portkey.Core
 {
     public class EmailAddress
     {
-        public string GetString { get; private set; }
+        public string String { get; private set; }
         
         public static EmailAddress Parse(string emailAddress)
         {
@@ -13,7 +13,7 @@ namespace Portkey.Core
             
             return new EmailAddress
             {
-                GetString = emailAddress
+                String = emailAddress
             };
         }
         

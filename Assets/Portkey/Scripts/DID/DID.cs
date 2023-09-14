@@ -47,7 +47,7 @@ namespace Portkey.DID
             _encryption = new AESEncryption();
             _biometricProvider = new BiometricProvider();
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
-            _authService = new AuthService(_portkeySocialService, _didWallet);
+            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider);
         }
         
         public IAuthService AuthService => _authService;

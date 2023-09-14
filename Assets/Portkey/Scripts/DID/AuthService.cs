@@ -266,31 +266,31 @@ namespace Portkey.DID
 
             void EmailVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
             {
-                VerifyEmailCredential(cred, result =>
+                VerifyEmailCredential(cred, verifiedCredential =>
                 {
-                    ReturnApprovedGuardian(guard, result);
+                    ReturnApprovedGuardian(guard, verifiedCredential);
                 });
             }
             
             void PhoneVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
             {
-                VerifyPhoneCredential(cred, result =>
+                VerifyPhoneCredential(cred, verifiedCredential =>
                 {
-                    ReturnApprovedGuardian(guard, result);
+                    ReturnApprovedGuardian(guard, verifiedCredential);
                 });
             }
             
             void SocialVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
             {
-                VerifySocialCredential(cred, guard.chainId, result =>
+                VerifySocialCredential(cred, guard.chainId, guard.verifier.id, verifiedCredential =>
                 {
-                    ReturnApprovedGuardian(guard, result);
+                    ReturnApprovedGuardian(guard, verifiedCredential);
                 });
             }
             
-            void ReturnApprovedGuardian(GuardianNew guard, VerifyCodeResult result)
+            void ReturnApprovedGuardian(GuardianNew guard, VerifiedCredential verifiedCredential)
             {
-                var approvedGuardian = CreateApprovedGuardian(guard, result);
+                var approvedGuardian = CreateApprovedGuardian(guard, verifiedCredential);
                 successCallback(approvedGuardian);
             }
 
@@ -339,46 +339,46 @@ namespace Portkey.DID
             _verificationCode = null;
         }
 
-        private void VerifyPhoneCredential(ICredential credential, SuccessCallback<VerifyCodeResult> successCallback)
+        private void VerifyPhoneCredential(ICredential credential, SuccessCallback<VerifiedCredential> successCallback)
         {
             StaticCoroutine.StartCoroutine(Phone.VerifyCode(credential.SignInToken, result =>
             {
-                successCallback?.Invoke(result);
+                successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
             }, OnError));
         }
         
-        private void VerifyEmailCredential(ICredential credential, SuccessCallback<VerifyCodeResult> successCallback)
+        private void VerifyEmailCredential(ICredential credential, SuccessCallback<VerifiedCredential> successCallback)
         {
             StaticCoroutine.StartCoroutine(Email.VerifyCode(credential.SignInToken, result =>
             {
-                successCallback?.Invoke(result);
+                successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
             }, OnError));
         }
 
-        private void VerifySocialCredential(ICredential credential, string chainId, SuccessCallback<VerifyCodeResult> successCallback)
+        private void VerifySocialCredential(ICredential credential, string chainId, string verifierId, SuccessCallback<VerifiedCredential> successCallback)
         {
             var socialVerifier = _socialVerifierProvider.GetSocialVerifier(credential.AccountType);
             var param = new VerifyAccessTokenParam
             {
-                verifierId = credential.SocialInfo.sub,
+                verifierId = verifierId,
                 accessToken = credential.SignInToken,
                 chainId = chainId
             };
             socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
             {
-                successCallback(result);
+                successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
             }, null, OnError);
         }
 
-        private static ApprovedGuardian CreateApprovedGuardian(GuardianNew guardian, VerifyCodeResult result)
+        private static ApprovedGuardian CreateApprovedGuardian(GuardianNew guardian, VerifiedCredential verifiedCredential)
         {
             return new ApprovedGuardian
             {
                 type = guardian.accountType,
                 verifierId = guardian.verifier.id,
                 identifier = guardian.id,
-                verificationDoc = result.verificationDoc.toString,
-                signature = result.signature
+                verificationDoc = verifiedCredential.VerificationDoc.toString,
+                signature = verifiedCredential.Signature
             };
         }
 
@@ -395,9 +395,9 @@ namespace Portkey.DID
                 };
                 SendCodeForPhoneAndWaitForInput(sendCodeParam, phoneCredential =>
                 {
-                    VerifyPhoneCredential(phoneCredential, result =>
+                    VerifyPhoneCredential(phoneCredential, verifiedCredential =>
                     {
-                        SignUp(chainId, sendCodeParam.guardianId, verifierServer.id, result, successCallback);
+                        SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
                     });
                 });
             }, OnError);
@@ -416,16 +416,23 @@ namespace Portkey.DID
                 };
                 SendCodeForEmailAndWaitForInput(sendCodeParam, emailCredential =>
                 {
-                    VerifyEmailCredential(emailCredential, result =>
+                    VerifyEmailCredential(emailCredential, verifiedCredential =>
                     {
-                        SignUp(chainId, sendCodeParam.guardianId, verifierServer.id, result, successCallback);
+                        SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
                     });
                 });
             }, OnError);
         }
+        
+        public IEnumerator SignUp(string chainId, VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            {
+                SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
+            }, OnError);
+        }
 
-        private void SignUp(string chainId, string guardianId,
-            string verifierId, VerifyCodeResult result, SuccessCallback<DIDWalletInfo> successCallback)
+        private void SignUp(string chainId, VerifiedCredential verifiedCredential, string verifierId, SuccessCallback<DIDWalletInfo> successCallback)
         {
             var extraData = "";
             try
@@ -441,12 +448,12 @@ namespace Portkey.DID
             var param = new RegisterParams
             {
                 type = AccountType.Email,
-                loginGuardianIdentifier = guardianId.RemoveAllWhiteSpaces(),
+                loginGuardianIdentifier = verifiedCredential.SocialInfo.sub.RemoveAllWhiteSpaces(),
                 chainId = chainId,
                 verifierId = verifierId,
                 extraData = extraData,
-                verificationDoc = result.verificationDoc.toString,
-                signature = result.signature
+                verificationDoc = verifiedCredential.VerificationDoc.toString,
+                signature = verifiedCredential.Signature
             };
             StaticCoroutine.StartCoroutine(_did.Register(param, registerResult =>
             {
@@ -469,21 +476,21 @@ namespace Portkey.DID
                 switch (credential.AccountType)
                 {
                     case AccountType.Phone:
-                        VerifyPhoneCredential(credential, result =>
+                        VerifyPhoneCredential(credential, verifiedCredential =>
                         {
-                            SignUp(chainId, credential.SocialInfo.sub, verifierServer.id, result, successCallback);
+                            SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
                         });
                         break;
                     case AccountType.Email:
-                        VerifyEmailCredential(credential, result =>
+                        VerifyEmailCredential(credential, verifiedCredential =>
                         {
-                            SignUp(chainId, credential.SocialInfo.sub, verifierServer.id, result, successCallback);
+                            SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
                         });
                         break;
                     case AccountType.Apple or AccountType.Google:
-                        VerifySocialCredential(credential, chainId, result =>
+                        VerifySocialCredential(credential, chainId, verifierServer.id, verifiedCredential =>
                         {
-                            SignUp(chainId, credential.SocialInfo.sub, verifierServer.id, result, successCallback);
+                            SignUp(chainId, verifiedCredential, verifierServer.id, successCallback);
                         });
                         break;
                     default:

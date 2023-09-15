@@ -303,10 +303,7 @@ namespace Portkey.DID
         
         private void VerifyEmailCredential(EmailCredential credential, SuccessCallback<VerifiedCredential> successCallback)
         {
-            StaticCoroutine.StartCoroutine(Email.VerifyCode(credential, result =>
-            {
-                successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
-            }, Message.Error));
+            StaticCoroutine.StartCoroutine(EmailCredentialProvider.Verify(credential, successCallback));
         }
 
         private void VerifySocialCredential(ICredential credential, string chainId, string verifierId, SuccessCallback<VerifiedCredential> successCallback)

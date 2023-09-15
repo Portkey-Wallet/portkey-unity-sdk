@@ -397,32 +397,32 @@ namespace Portkey.DID
 
         public IEnumerator SignUp(string chainId, ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            switch (credential.AccountType)
             {
-                switch (credential.AccountType)
-                {
-                    case AccountType.Phone:
-                        VerifyPhoneCredential((PhoneCredential)credential, verifiedCredential =>
-                        {
-                            StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
-                        });
-                        break;
-                    case AccountType.Email:
-                        VerifyEmailCredential((EmailCredential)credential, verifiedCredential =>
-                        {
-                            StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
-                        });
-                        break;
-                    case AccountType.Apple or AccountType.Google:
+                case AccountType.Email:
+                    VerifyEmailCredential((EmailCredential)credential, verifiedCredential =>
+                    {
+                        StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
+                    });
+                    break;
+                case AccountType.Phone:
+                    VerifyPhoneCredential((PhoneCredential)credential, verifiedCredential =>
+                    {
+                        StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
+                    });
+                    break;
+                case AccountType.Apple or AccountType.Google:
+                    yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+                    {
                         VerifySocialCredential(credential, chainId, verifierServer.id, verifiedCredential =>
                         {
                             StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
                         });
-                        break;
-                    default:
-                        throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
-                }
-            }, Message.Error);
+                    }, Message.Error);
+                    break;
+                default:
+                    throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
+            }
         }
 
         public IEnumerator Login(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback)

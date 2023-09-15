@@ -37,8 +37,8 @@ namespace Portkey.DID
             Message = new AuthMessage();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
-            AppleCredentialProvider = new AppleCredentialProvider(_socialLoginProvider);
-            GoogleCredentialProvider = new GoogleCredentialProvider(_socialLoginProvider);
+            AppleCredentialProvider = new AppleCredentialProvider(_socialLoginProvider, Message);
+            GoogleCredentialProvider = new GoogleCredentialProvider(_socialLoginProvider, Message);
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
             EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
 
@@ -199,7 +199,7 @@ namespace Portkey.DID
                     }
 
                     SocialVerifyAndApproveGuardian(appleCredential, guardian);
-                }, Message.Error);
+                });
             }
             else if (guardian.accountType == AccountType.Google)
             {
@@ -212,7 +212,7 @@ namespace Portkey.DID
                     }
 
                     SocialVerifyAndApproveGuardian(googleCredential, guardian);
-                }, Message.Error);
+                });
             }
             else if (guardian.accountType == AccountType.Email)
             {

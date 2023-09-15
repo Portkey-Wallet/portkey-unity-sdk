@@ -445,7 +445,16 @@ namespace Portkey.DID
                 successCallback(walletInfo);
             }, Message.Error));
         }
-        
+
+        public IEnumerator Logout(SuccessCallback<bool> successCallback)
+        {
+            var param = new EditManagerParams
+            {
+                chainId = Message.ChainId
+            };
+            yield return _did.Logout(param, successCallback, Message.Error);
+        }
+
         private DIDWalletInfo CreateDIDWalletInfo(string chainId, string guardianId, AccountType accountType, CAInfo caInfo, string sessionId, AddManagerType type)
         {
             var walletInfo = new DIDWalletInfo

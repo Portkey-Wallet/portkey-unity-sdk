@@ -247,6 +247,11 @@ namespace Portkey.DID
 
             void EmailVerifyAndApproveGuardian(EmailCredential cred, GuardianNew guard)
             {
+                if (!IsMatchingVerifier(cred, guard))
+                {
+                    Message.Error("Credential is verified differently from Guardian's definition.");
+                    return;
+                }
                 VerifyEmailCredential(cred, verifiedCredential =>
                 {
                     ReturnApprovedGuardian(guard, verifiedCredential);
@@ -255,6 +260,11 @@ namespace Portkey.DID
             
             void PhoneVerifyAndApproveGuardian(PhoneCredential cred, GuardianNew guard)
             {
+                if (!IsMatchingVerifier(cred, guard))
+                {
+                    Message.Error("Credential is verified differently from Guardian's definition.");
+                    return;
+                }
                 VerifyPhoneCredential(cred, verifiedCredential =>
                 {
                     ReturnApprovedGuardian(guard, verifiedCredential);
@@ -278,6 +288,11 @@ namespace Portkey.DID
             bool IsCredentialMatchGuardian(ICredential cred, GuardianNew guard)
             {
                 return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
+            }
+
+            bool IsMatchingVerifier(ICodeCredential cred, GuardianNew guard)
+            {
+                return cred.ChainId == guard.chainId && cred.VerifierId == guard.verifier.id;
             }
         }
 

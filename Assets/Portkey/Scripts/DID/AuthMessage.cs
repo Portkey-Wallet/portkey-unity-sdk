@@ -4,6 +4,7 @@ namespace Portkey.DID
 {
     public class AuthMessage : IAuthMessage
     {
+        public string ChainId { get; set; }
         public event IAuthMessage.OnCancelVerificationCodeInputHandler OnCancelVerificationCodeInputEvent;
         public event IAuthMessage.OnInputVerificationCodeHandler OnInputVerificationCodeEvent;
         public event IAuthMessage.OnPendingVerificationCodeInputHandler OnPendingVerificationCodeInputEvent;

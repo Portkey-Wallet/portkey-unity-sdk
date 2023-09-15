@@ -17,10 +17,10 @@ namespace Portkey.Core
         IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback);
         IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback);
         void Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null);
-        IEnumerator SignUp(string chainId, PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback);
-        IEnumerator SignUp(string chainId, EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback);
-        IEnumerator SignUp(string chainId, ICredential credential, SuccessCallback<DIDWalletInfo> successCallback);
-        IEnumerator SignUp(string chainId, VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback);
+        IEnumerator SignUp(PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback);
+        IEnumerator SignUp(EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback);
+        IEnumerator SignUp(ICredential credential, SuccessCallback<DIDWalletInfo> successCallback);
+        IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator Login(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback);
     }
 }

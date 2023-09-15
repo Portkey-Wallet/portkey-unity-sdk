@@ -2,6 +2,7 @@ namespace Portkey.Core
 {
     public interface IAuthMessage
     {
+        string ChainId { get; set; }
         delegate void OnCancelVerificationCodeInputHandler();
         delegate void OnInputVerificationCodeHandler(string code);
         delegate void OnPendingVerificationCodeInputHandler();

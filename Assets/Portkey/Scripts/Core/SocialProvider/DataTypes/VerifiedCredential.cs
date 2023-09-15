@@ -8,12 +8,22 @@ namespace Portkey.Core
         public string SignInToken => _credential.SignInToken;
         public VerificationDoc VerificationDoc { get; private set; }
         public string Signature { get; private set; }
+        public string ChainId { get; private set; }
 
-        public VerifiedCredential(ICredential credential, VerificationDoc verificationDoc, string signature)
+        public VerifiedCredential(ICredential credential, string chainId, VerificationDoc verificationDoc, string signature)
         {
             _credential = credential;
             VerificationDoc = verificationDoc;
             Signature = signature;
+            ChainId = chainId;
+        }
+        
+        public VerifiedCredential(ICodeCredential credential, VerificationDoc verificationDoc, string signature)
+        {
+            _credential = credential;
+            VerificationDoc = verificationDoc;
+            Signature = signature;
+            ChainId = credential.ChainId;
         }
     }
 }

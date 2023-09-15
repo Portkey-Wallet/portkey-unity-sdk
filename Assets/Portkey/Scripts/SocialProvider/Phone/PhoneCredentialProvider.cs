@@ -9,8 +9,9 @@ namespace Portkey.SocialProvider
         {
         }
         
-        public IEnumerator Get(PhoneNumber phoneNumber, SuccessCallback<PhoneCredential> successCallback, string chainId = "AELF", string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
+        public IEnumerator Get(PhoneNumber phoneNumber, SuccessCallback<PhoneCredential> successCallback, string chainId = null, string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
+            chainId ??= _message.ChainId;
             yield return GetCredential(phoneNumber.String, successCallback, chainId, verifierId, operationType);
         }
 

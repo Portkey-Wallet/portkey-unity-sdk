@@ -10,6 +10,8 @@ namespace Portkey.DID
 {
     public class AuthService : IAuthService
     {
+        private string DEFAULT_CHAIN_ID = "AELF";
+        
         private readonly IPortkeySocialService _portkeySocialService;
         private readonly DIDWallet<WalletAccount> _did;
         private readonly ISocialProvider _socialLoginProvider;
@@ -42,6 +44,7 @@ namespace Portkey.DID
             EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
 
             Message.OnInputVerificationCodeEvent += OnInputVerificationCode;
+            Message.ChainId = DEFAULT_CHAIN_ID;
         }
         
         private void OnInputVerificationCode(string verificationCode)
@@ -317,7 +320,7 @@ namespace Portkey.DID
             };
             socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
             {
-                successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
+                successCallback?.Invoke(new VerifiedCredential(credential, chainId, result.verificationDoc, result.signature));
             }, null, Message.Error);
         }
 
@@ -333,31 +336,31 @@ namespace Portkey.DID
             };
         }
 
-        public IEnumerator SignUp(string chainId, PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator SignUp(PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback)
         {
             yield return PhoneCredentialProvider.Get(phoneNumber, phoneCredential =>
             {
                 VerifyPhoneCredential(phoneCredential, verifiedCredential =>
                 {
-                    StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
+                    StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                 });
-            }, chainId);
+            }, Message.ChainId);
         }
 
-        public IEnumerator SignUp(string chainId, EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator SignUp(EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback)
         {
             yield return EmailCredentialProvider.Get(emailAddress, emailCredential =>
             {
                 VerifyEmailCredential(emailCredential, verifiedCredential =>
                 {
-                    StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
+                    StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                 });
-            }, chainId);
+            }, Message.ChainId);
         }
         
-        public IEnumerator SignUp(string chainId, VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            yield return _verifierService.GetVerifierServer(verifiedCredential.ChainId, verifierServer =>
             {
                 var extraData = "";
                 try
@@ -374,7 +377,7 @@ namespace Portkey.DID
                 {
                     type = AccountType.Email,
                     loginGuardianIdentifier = verifiedCredential.SocialInfo.sub.RemoveAllWhiteSpaces(),
-                    chainId = chainId,
+                    chainId = verifiedCredential.ChainId,
                     verifierId = verifiedCredential.VerificationDoc.verifierId,
                     extraData = extraData,
                     verificationDoc = verifiedCredential.VerificationDoc.toString,
@@ -388,35 +391,38 @@ namespace Portkey.DID
                         return;
                     }
 
-                    var walletInfo = CreateDIDWalletInfo(chainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
+                    var walletInfo = CreateDIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
                         registerResult.SessionId, AddManagerType.Register);
                     successCallback(walletInfo);
                 }, Message.Error));
             }, Message.Error);
         }
 
-        public IEnumerator SignUp(string chainId, ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator SignUp(ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
         {
             switch (credential.AccountType)
             {
                 case AccountType.Email:
-                    VerifyEmailCredential((EmailCredential)credential, verifiedCredential =>
+                    var emailCredential = (EmailCredential)credential;
+                    VerifyEmailCredential(emailCredential, verifiedCredential =>
                     {
-                        StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
+                        StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                     });
                     break;
                 case AccountType.Phone:
-                    VerifyPhoneCredential((PhoneCredential)credential, verifiedCredential =>
+                    var phoneCredential = (PhoneCredential)credential;
+                    VerifyPhoneCredential(phoneCredential, verifiedCredential =>
                     {
-                        StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
+                        StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                     });
                     break;
                 case AccountType.Apple or AccountType.Google:
+                    var chainId = Message.ChainId;
                     yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
                     {
                         VerifySocialCredential(credential, chainId, verifierServer.id, verifiedCredential =>
                         {
-                            StaticCoroutine.StartCoroutine(SignUp(chainId, verifiedCredential, successCallback));
+                            StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                         });
                     }, Message.Error);
                     break;

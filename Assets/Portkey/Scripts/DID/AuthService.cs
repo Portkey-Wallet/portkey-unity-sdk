@@ -17,7 +17,6 @@ namespace Portkey.DID
         private readonly ISocialProvider _socialLoginProvider;
         private readonly ISocialVerifierProvider _socialVerifierProvider;
         private readonly VerifierService _verifierService;
-        private string _verificationCode = null;
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }
@@ -43,13 +42,7 @@ namespace Portkey.DID
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
             EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
 
-            Message.OnInputVerificationCodeEvent += OnInputVerificationCode;
             Message.ChainId = DEFAULT_CHAIN_ID;
-        }
-        
-        private void OnInputVerificationCode(string verificationCode)
-        {
-            _verificationCode = verificationCode;
         }
 
         private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<GuardianNew>> successCallback, ErrorCallback errorCallback)
@@ -286,17 +279,6 @@ namespace Portkey.DID
             {
                 return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
             }
-        }
-
-        private IEnumerator WaitForInputCode(Action<string> onComplete)
-        {
-            while (_verificationCode == null)
-            {
-                yield return null;
-            }
-            
-            onComplete?.Invoke(_verificationCode);
-            _verificationCode = null;
         }
 
         private void VerifyPhoneCredential(PhoneCredential credential, SuccessCallback<VerifiedCredential> successCallback)

@@ -35,6 +35,12 @@ namespace Portkey.UI
             button.interactable = true;
         }
         
+        public void Deactivate()
+        {
+            _timer = maxInterval;
+            button.interactable = false;
+        }
+        
         private void Update()
         {
             if (_timer <= 0.0f)
@@ -50,7 +56,7 @@ namespace Portkey.UI
                 _timer = 0.0f;
             }
 
-            description.text = $"{Text} in ({(int)_timer})";
+            description.text = $"{Text} after {(int)_timer}s";
         }
     }
 }

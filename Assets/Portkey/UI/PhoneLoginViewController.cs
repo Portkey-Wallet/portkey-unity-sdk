@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Portkey.Core;
 using Portkey.SocialProvider;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace Portkey.UI
         public static IPhoneCountryCodeResult PhoneCountryCodeResult { get; set; } = null;
         public delegate void OnGetCountryCode (IPhoneCountryCodeResult result);
         public static event OnGetCountryCode OnGetCountryCodeEventHandler;
-        public string PhoneNumber => countryCodeButtonComponent.CountryCode + inputField.text;
+        private string InputPhoneNumber => countryCodeButtonComponent.CountryCode + inputField.text;
         
         private new void OnEnable()
         {
@@ -24,21 +25,53 @@ namespace Portkey.UI
         
         public new void OnValueChanged()
         {
-            if (LoginHelper.IsValidPhoneNumber(PhoneNumber))
+            if (LoginHelper.IsValidPhoneNumber(InputPhoneNumber))
             {
                 loginButton.interactable = true;
                 errorText.text = "";
                 return;
             }
             
-            errorText.text = string.IsNullOrEmpty(PhoneNumber) ? "" : "Invalid phone number.";
+            errorText.text = string.IsNullOrEmpty(InputPhoneNumber) ? "" : "Invalid phone number.";
             loginButton.interactable = false;
         }
         
-        public new void OnClickLogin()
+        public override void OnClickLogin()
         {
             StartLoading();
-            DID.AuthService.HasGuardian(PhoneNumber, AccountType.Phone, "", CheckSignUpOrLogin, OnError);
+
+            var phoneNumber = PhoneNumber.Parse(InputPhoneNumber);
+            DID.AuthService.GetGuardians(phoneNumber, guardians =>
+            {
+                CheckSignUpOrLogin(phoneNumber, guardians);
+            });
+        }
+        
+        private void CheckSignUpOrLogin(PhoneNumber phoneNumber, List<GuardianNew> guardians)
+        {
+            ShowLoading(false);
+            
+            switch (guardians.Count)
+            {
+                case 0:
+                    DID.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
+                    SignUpPrompt(() =>
+                    {
+                        ShowLoading(true, "Loading...");
+                        StartCoroutine(DID.AuthService.PhoneCredentialProvider.Get(phoneNumber, credential =>
+                        {
+                            verifyCodeViewController.VerifyCode(credential);
+                        }));
+                    }, () =>
+                    {
+                        DID.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
+                    });
+                    break;
+                default:
+                    //Change to Login View
+                    PrepareGuardiansApprovalView(info);
+                    break;
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Portkey.DID
         private readonly DIDWallet<WalletAccount> _did;
         private readonly ISocialProvider _socialLoginProvider;
         private readonly ISocialVerifierProvider _socialVerifierProvider;
-        private readonly VerifierService _verifierService;
+        private readonly IVerifierService _verifierService;
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }

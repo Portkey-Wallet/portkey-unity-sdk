@@ -30,13 +30,10 @@ namespace Portkey.UI
         private Dictionary<string, GameObject> _verifierIconMap = null;
         private Dictionary<AccountType, GameObject> _guardianIconMap = null;
         
-        public void Initialize(string guardianIdentifier, AccountType accountType, VerifierItem verifierItem)
+        public void Initialize(string guardianIdentifier, AccountType accountType, string verifierServerName)
         {
-            var guardianType = accountType;
-            DisplayGuardianIcon(guardianType);
-
-            var verifierType = verifierItem.name;
-            DisplayVerifierIcon(verifierType);
+            DisplayGuardianIcon(accountType);
+            DisplayVerifierIcon(verifierServerName);
 
             account.text = guardianIdentifier;
         }

@@ -15,6 +15,8 @@ namespace Portkey.SocialProvider
             yield return GetCredential(emailAddress.String, successCallback, chainId, verifierId, operationType);
         }
 
+        public override AccountType AccountType => AccountType.Email;
+
         protected override EmailCredential CreateCredential(string guardianId, string verifierId, string chainId, string code)
         {
             return new EmailCredential(EmailAddress.Parse(guardianId), code, chainId, verifierId);

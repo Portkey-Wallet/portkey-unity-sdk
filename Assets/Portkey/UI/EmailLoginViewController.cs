@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Portkey.Core;
 using Portkey.SocialProvider;
 using TMPro;
@@ -13,6 +15,7 @@ namespace Portkey.UI
         [SerializeField] protected UnregisteredViewController unregisteredView;
         [SerializeField] protected ErrorViewController errorView;
         [SerializeField] protected LoadingViewController loadingView;
+        [SerializeField] protected VerifyCodeViewController verifyCodeViewController;
         
         [Header("UI Elements")]
         [SerializeField] protected TMP_InputField inputField;
@@ -41,14 +44,18 @@ namespace Portkey.UI
             PreviousView.SetActive(true);
         }
 
-        public void OnClickLogin()
+        public virtual void OnClickLogin()
         {
             StartLoading();
-            //DID.AuthService.GetGuardians(EmailAddress.Parse(inputField.text), CheckSignUpOrLogin, OnError);
-            DID.AuthService.HasGuardian(inputField.text, AccountType.Email, "", CheckSignUpOrLogin, OnError);
+
+            var emailAddress = EmailAddress.Parse(inputField.text);
+            DID.AuthService.GetGuardians(emailAddress, guardians =>
+            {
+                CheckSignUpOrLogin(emailAddress, guardians);
+            });
         }
         
-        private void ShowLoading(bool show, string text = "")
+        protected void ShowLoading(bool show, string text = "")
         {
             loadingView.DisplayLoading(show, text);
         }
@@ -65,21 +72,59 @@ namespace Portkey.UI
             errorView.ShowErrorText(error);
         }
         
-        protected void CheckSignUpOrLogin(GuardianIdentifierInfo info)
+        private void CheckSignUpOrLogin(EmailAddress emailAddress, List<GuardianNew> guardians)
         {
             ShowLoading(false);
             
-            switch (info.isLoginGuardian)
+            switch (guardians.Count)
             {
-                case false:
-                    unregisteredView.gameObject.SetActive(true);
-                    unregisteredView.SetGuardianIdentifierInfo(info);
+                case 0:
+                    DID.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
+                    SignUpPrompt(() =>
+                    {
+                        ShowLoading(true, "Loading...");
+                        StartCoroutine(DID.AuthService.EmailCredentialProvider.Get(emailAddress, credential =>
+                        {
+                            verifyCodeViewController.VerifyCode(credential);
+                        }));
+                    }, () =>
+                    {
+                        DID.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
+                    });
                     break;
                 default:
                     //Change to Login View
                     PrepareGuardiansApprovalView(info);
                     break;
             }
+        }
+
+        protected void SignUpPrompt(Action onConfirm, Action onClose)
+        {
+            unregisteredView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
+        }
+
+        protected void OnVerifierServerSelected(string guardianId, AccountType accountType, string verifierServerName)
+        {
+            ShowLoading(false);
+            
+            var type = accountType == AccountType.Email? "email address" : "phone number";
+            var description = $"{verifierServerName} will send a verification code to {guardianId} to verify your {type}.";
+            unregisteredView.Initialize("", description, () =>
+            {
+                DID.AuthService.Message.ConfirmSendCode();
+                
+                verifyCodeViewController.Initialize(guardianId, accountType, verifierServerName, verifiedCredential =>
+                {
+                    /*
+                    setPinViewController.VerifierItem = verifierItem;
+                    setPinViewController.gameObject.SetActive(true);
+                    setPinViewController.GuardianIdentifierInfo = GuardianIdentifierInfo;
+                    setPinViewController.VerifyCodeResult = result;
+                    setPinViewController.Operation = SetPINViewController.OperationType.SIGN_UP;
+                    setPinViewController.SetPreviousView(signInViewController.gameObject);*/
+                });
+            }); 
         }
         
         private void PrepareGuardiansApprovalView(GuardianIdentifierInfo info)
@@ -115,6 +160,7 @@ namespace Portkey.UI
         
         private void CloseView()
         {
+            DID.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
             gameObject.SetActive(false);
         }
     }

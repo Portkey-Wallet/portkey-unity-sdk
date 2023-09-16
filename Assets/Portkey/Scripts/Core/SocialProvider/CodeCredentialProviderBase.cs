@@ -4,22 +4,24 @@ using Portkey.Utilities;
 
 namespace Portkey.Core
 {
-    public abstract class CodeCredentialProviderBase<T> where T : ICodeCredential
+    public abstract class CodeCredentialProviderBase<T> : ICodeCredentialProvider where T : ICodeCredential
     {
         protected readonly IAuthMessage _message;
         private readonly IVerifyCodeLogin _codeLogin;
         private readonly IVerifierService _verifierService;
         private string _verificationCode = null;
         private bool _cancel = false;
+        private bool _sendCodeConfirmation = false;
+        private SendCodeParams _sendCodeParams;
+        public bool EnableCodeSendConfirmationFlow { get; set; } = false;
+        
+        public abstract AccountType AccountType { get; }
         
         protected CodeCredentialProviderBase(IVerifyCodeLogin codeLogin, IAuthMessage message, IVerifierService verifierService)
         {
             _message = message;
             _codeLogin = codeLogin;
             _verifierService = verifierService;
-            
-            _message.OnInputVerificationCodeEvent += OnInputVerificationCode;
-            _message.OnCancelVerificationCodeInputEvent += OnCancelVerificationCodeInput;
         }
         
         private void OnInputVerificationCode(string code)
@@ -27,16 +29,34 @@ namespace Portkey.Core
             _verificationCode = code;
         }
         
-        private void OnCancelVerificationCodeInput()
+        private void OnCancelCodeVerification()
         {
             _cancel = true;
         }
         
-        public IEnumerator Verify(T credential, SuccessCallback<VerifiedCredential> successCallback)
+        private void OnConfirmSendCode()
         {
-            yield return _codeLogin.VerifyCode(credential, result =>
+            _sendCodeConfirmation = true;
+        }
+        
+        private void OnResendVerificationCode()
+        {
+            StaticCoroutine.StartCoroutine(_codeLogin.SendCode(_sendCodeParams, session =>
             {
-                successCallback?.Invoke(new VerifiedCredential(credential, result.verificationDoc, result.signature));
+                _message.ResendVerificationCodeComplete();
+            }, _message.Error));
+        }
+        
+        public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback)
+        {
+            if(credential is not ICodeCredential codeCredential)
+            {
+                throw new Exception("Invalid credential type!");
+            }
+            
+            yield return _codeLogin.VerifyCode(codeCredential, result =>
+            {
+                successCallback?.Invoke(new VerifiedCredential(codeCredential, result.verificationDoc, result.signature));
             }, _message.Error);
         }
         
@@ -44,7 +64,9 @@ namespace Portkey.Core
 
         protected IEnumerator GetCredential(string guardianId, SuccessCallback<T> successCallback, string chainId, string verifierId, OperationTypeEnum operationType)
         {
-            var param = new SendCodeParams
+            Initialize();
+            
+            _sendCodeParams = new SendCodeParams
             {
                 guardianId = guardianId,
                 chainId = chainId,
@@ -53,15 +75,28 @@ namespace Portkey.Core
             
             if (verifierId != null)
             {
-                param.verifierId = verifierId;
-                SendCode(param, successCallback);
+                _sendCodeParams.verifierId = verifierId;
+                SendCode(_sendCodeParams, successCallback);
                 yield break;
             }
 
             yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
             {
-                param.verifierId = verifierServer.id;
-                SendCode(param, successCallback);
+                _sendCodeParams.verifierId = verifierServer.id;
+
+                if (EnableCodeSendConfirmationFlow)
+                {
+                    _message.VerifierServerSelected(guardianId, AccountType, verifierServer.name);
+
+                    StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
+                    {
+                        SendCode(_sendCodeParams, successCallback);
+                    }));
+                }
+                else
+                {
+                    SendCode(_sendCodeParams, successCallback);
+                }
             }, _message.Error);
         }
         
@@ -79,6 +114,8 @@ namespace Portkey.Core
 
             StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
             {
+                CleanUp();
+                
                 var newCredential = CreateCredential(guardianId, code, chainId, verifierId);
                 successCallback(newCredential);
             }));
@@ -95,13 +132,48 @@ namespace Portkey.Core
             {
                 _cancel = false;
                 _verificationCode = null;
-                _message.Error("Verification code input cancelled!");
+                CleanUp();
                 yield break;
             }
 
             var ret = new string(_verificationCode);
             _verificationCode = null;
             onComplete?.Invoke(ret);
+        }
+        
+        private IEnumerator WaitForSendCodeConfirmation(Action onConfirm)
+        {
+            while (!_sendCodeConfirmation && !_cancel)
+            {
+                yield return null;
+            }
+            
+            _sendCodeConfirmation = false;
+            
+            if (_cancel)
+            {
+                _cancel = false;
+                CleanUp();
+                yield break;
+            }
+            
+            onConfirm?.Invoke();
+        }
+
+        private void Initialize()
+        {
+            _message.OnInputVerificationCodeEvent += OnInputVerificationCode;
+            _message.OnCancelCodeVerificationEvent += OnCancelCodeVerification;
+            _message.OnConfirmSendCodeEvent += OnConfirmSendCode;
+            _message.OnResendVerificationCodeEvent += OnResendVerificationCode;
+        }
+
+        private void CleanUp()
+        {
+            _message.OnInputVerificationCodeEvent -= OnInputVerificationCode;
+            _message.OnCancelCodeVerificationEvent -= OnCancelCodeVerification;
+            _message.OnConfirmSendCodeEvent -= OnConfirmSendCode;
+            _message.OnResendVerificationCodeEvent -= OnResendVerificationCode;
         }
     }
 }

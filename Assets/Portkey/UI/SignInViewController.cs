@@ -100,7 +100,7 @@ namespace Portkey.UI
                 case true when _state != State.Login:
                 case false when _state != State.Signup:
                     unregisteredView.gameObject.SetActive(true);
-                    unregisteredView.SetGuardianIdentifierInfo(info);
+                    unregisteredView.Initialize(info);
                     break;
                 default:
                     //Change to Login View

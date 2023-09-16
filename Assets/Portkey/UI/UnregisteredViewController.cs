@@ -63,7 +63,7 @@ namespace Portkey.UI
             CloseView();
         }
 
-        public void Initialize(string headerText, string descriptionText, Action onConfirm, Action onClose)
+        public void Initialize(string headerText, string descriptionText, Action onConfirm, Action onClose = null)
         {
             headerTextComponent.gameObject.SetActive(!string.IsNullOrEmpty(headerText));
             headerTextComponent.text = headerText;

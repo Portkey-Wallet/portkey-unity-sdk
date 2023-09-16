@@ -357,41 +357,40 @@ namespace Portkey.DID
         
         public IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _verifierService.GetVerifierServer(verifiedCredential.ChainId, verifierServer =>
+            _did.Reset();
+            
+            var extraData = "";
+            try
             {
-                var extraData = "";
-                try
+                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
+            }
+            catch (Exception e)
+            {
+                Message.Error(e.Message);
+                yield break;
+            }
+
+            var param = new RegisterParams
+            {
+                type = AccountType.Email,
+                loginGuardianIdentifier = verifiedCredential.SocialInfo.sub.RemoveAllWhiteSpaces(),
+                chainId = verifiedCredential.ChainId,
+                verifierId = verifiedCredential.VerificationDoc.verifierId,
+                extraData = extraData,
+                verificationDoc = verifiedCredential.VerificationDoc.toString,
+                signature = verifiedCredential.Signature
+            };
+            yield return _did.Register(param, registerResult =>
+            {
+                if (IsCAValid(registerResult.Status))
                 {
-                    extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
-                }
-                catch (Exception e)
-                {
-                    Message.Error(e.Message);
+                    Message.Error("Register failed! Missing caAddress or caHash.");
                     return;
                 }
 
-                var param = new RegisterParams
-                {
-                    type = AccountType.Email,
-                    loginGuardianIdentifier = verifiedCredential.SocialInfo.sub.RemoveAllWhiteSpaces(),
-                    chainId = verifiedCredential.ChainId,
-                    verifierId = verifiedCredential.VerificationDoc.verifierId,
-                    extraData = extraData,
-                    verificationDoc = verifiedCredential.VerificationDoc.toString,
-                    signature = verifiedCredential.Signature
-                };
-                StaticCoroutine.StartCoroutine(_did.Register(param, registerResult =>
-                {
-                    if (IsCAValid(registerResult.Status))
-                    {
-                        Message.Error("Register failed! Missing caAddress or caHash.");
-                        return;
-                    }
-
-                    var walletInfo = CreateDIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
-                        registerResult.SessionId, AddManagerType.Register);
-                    successCallback(walletInfo);
-                }, Message.Error));
+                var walletInfo = CreateDIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
+                    registerResult.SessionId, AddManagerType.Register);
+                successCallback(walletInfo);
             }, Message.Error);
         }
 
@@ -430,6 +429,8 @@ namespace Portkey.DID
 
         public IEnumerator Login(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback)
         {
+            _did.Reset();
+            
             var extraData = "";
             try
             {

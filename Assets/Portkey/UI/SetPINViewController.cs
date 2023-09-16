@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using Portkey.Core;
-using Portkey.Utilities;
 using TMPro;
 using UnityEngine;
 
@@ -33,43 +31,25 @@ namespace Portkey.UI
         [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private GameObject confirmBackView;
 
-        private VerifierItem _verifierItem = null;
-        private GuardianIdentifierInfo _guardianIdentifierInfo = null;
-        private List<ApprovedGuardian> _guardiansApprovedList = new List<ApprovedGuardian>();
-        private GameObject previousView = null;
+        private Action _onPinComplete = null;
+        private GameObject _previousView = null;
         private State _currentState = State.ENTER_PIN;
-        private List<string> _stateToPIN = new List<string>
+        private readonly List<string> _stateToPIN = new List<string>
         {
             "", 
             ""
         };
-        private List<string> _stateToHeader = new List<string>
+        private readonly List<string> _stateToHeader = new List<string>
         {
             "Enter pin to protect your device", 
             "Confirm Pin"
         };
-        
-        public VerifierItem VerifierItem
-        {
-            set => _verifierItem = value;
-        }
-        public List<ApprovedGuardian> GuardiansApprovedList
-        {
-            set => _guardiansApprovedList = value;
-        }
-        public GuardianIdentifierInfo GuardianIdentifierInfo
-        {
-            set => _guardianIdentifierInfo = value;
-        }
-        public OperationType Operation { get; set; } = OperationType.SIGN_UP;
 
         public string CurrentPIN
         {
             get => _stateToPIN[(int)_currentState];
             set => _stateToPIN[(int)_currentState] = value;
         }
-
-        public VerifyCodeResult VerifyCodeResult { get; set; } = null;
         
         public bool IsLoginCompleted
         {
@@ -83,6 +63,44 @@ namespace Portkey.UI
             set;
         } = false;
 
+        public void Initialize(ICredential credential)
+        {
+            //sign up using socials
+            _onPinComplete = () =>
+            {
+                ShowLoading(true, "Creating address on the chain...");
+                StartCoroutine(did.AuthService.SignUp(credential, OpenNextView));
+            };
+            OpenView();
+        }
+        
+        public void Initialize(VerifiedCredential verifiedCredential)
+        {
+            //sign up using phone or email
+            _onPinComplete = () =>
+            {
+                ShowLoading(true, "Creating address on the chain...");
+                StartCoroutine(did.AuthService.SignUp(verifiedCredential, OpenNextView));
+            };
+            OpenView();
+        }
+        
+        public void Initialize(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians)
+        {
+            //login
+            _onPinComplete = () =>
+            {
+                ShowLoading(true, "Initiating social recovery");
+                StartCoroutine(did.AuthService.Login(loginGuardian, approvedGuardians, OpenNextView));
+            };
+            OpenView();
+        }
+        
+        public void OpenView()
+        {
+            gameObject.SetActive(true);
+        }
+        
         private void OnEnable()
         {
             ResetToEnterPINState();
@@ -90,129 +108,7 @@ namespace Portkey.UI
 
         private void OnSetPINSuccess()
         {
-            switch (_guardianIdentifierInfo.accountType)
-            {
-                case AccountType.Apple or AccountType.Google:
-                    CheckAccessTokenExpired();
-                    break;
-                case AccountType.Email or AccountType.Phone:
-                    SignIn(VerifyCodeResult);
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid account type: {_guardianIdentifierInfo.accountType}");
-            }
-        }
-
-        private void CheckAccessTokenExpired()
-        {
-            var verifier = _verifierItem;
-            var socialVerifier = did.GetSocialVerifier(_guardianIdentifierInfo.accountType);
-
-            var param = new VerifyAccessTokenParam
-            {
-                verifierId = verifier.id,
-                accessToken = _guardianIdentifierInfo.token,
-                chainId = _guardianIdentifierInfo.chainId
-            };
-            socialVerifier.AuthenticateIfAccessTokenExpired(param, OnAuthenticated, OnStartLoading, OnError);
-        }
-        
-        private void OnStartLoading(bool show)
-        {
-            if (Operation == OperationType.SIGN_UP)
-            {
-                ShowLoading(show, "Creating address on the chain...");
-            }
-            else
-            {
-                ShowLoading(show, "Initiating social recovery");
-            }
-        }
-
-        private void OnAuthenticated(VerifyCodeResult result, string accessToken)
-        {
-            _guardianIdentifierInfo.token = accessToken;
-
-            SignIn(result);
-        }
-
-        private void SignIn(VerifyCodeResult result)
-        {
-            var verifierDoc = result.verificationDoc;
-            var signature = result.signature;
-            
-            if (_guardianIdentifierInfo.identifier == null)
-            {
-                OnError("Account missing!");
-                return;
-            }
-            
-            did.Reset();
-            
-            if(Operation == OperationType.SIGN_UP)
-            {
-                Register(verifierDoc.verifierId, verifierDoc.toString, signature);
-            }
-            else
-            {
-                Login();
-            }
-        }
-
-        private void Login()
-        {
-            var extraData = "";
-            try
-            {
-                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
-            }
-            catch (Exception e)
-            {
-                OnError(e.Message);
-                return;
-            }
-
-            var guardianIdentifier = _guardianIdentifierInfo.identifier.RemoveAllWhiteSpaces();
-            var param = new AccountLoginParams
-            {
-                loginGuardianIdentifier = guardianIdentifier,
-                guardiansApprovedList = _guardiansApprovedList.ToArray(),
-                chainId = _guardianIdentifierInfo.chainId,
-                extraData = extraData
-            };
-            StartCoroutine(did.Login(param, result =>
-            {
-                if(IsCAValid(result.Status))
-                {
-                    OnError("Login failed! Missing caAddress or caHash.");
-                    return;
-                }
-                
-                Debugger.Log("Login success!");
-                
-                var walletInfo = CreateDIDWalletInfo(result.Status, result.SessionId, AddManagerType.Recovery);
-                // logged in, open wallet view and close PIN view
-                OpenNextView(walletInfo);
-            }, OnError));
-        }
-
-        private DIDWalletInfo CreateDIDWalletInfo(CAInfo caInfo, string sessionId, AddManagerType type)
-        {
-            var walletInfo = new DIDWalletInfo
-            {
-                caInfo = caInfo,
-                pin = CurrentPIN,
-                chainId = _guardianIdentifierInfo.chainId,
-                wallet = did.GetWallet(),
-                managerInfo = new ManagerInfoType
-                {
-                    managerUniqueId = sessionId,
-                    guardianIdentifier = _guardianIdentifierInfo.identifier,
-                    accountType = _guardianIdentifierInfo.accountType,
-                    type = type
-                }
-            };
-            return walletInfo;
+            _onPinComplete?.Invoke();
         }
 
         private void OpenNextView(DIDWalletInfo walletInfo)
@@ -254,68 +150,6 @@ namespace Portkey.UI
             CloseView();
         }
 
-        private void Register(string verifierId, string verificationDoc, string signature)
-        {
-            var extraData = "";
-            try
-            {
-                extraData = EncodeExtraData(DeviceInfoType.GetDeviceInfo());
-            }
-            catch (Exception e)
-            {
-                OnError(e.Message);
-                return;
-            }
-
-            var guardianIdentifier = _guardianIdentifierInfo.identifier.RemoveAllWhiteSpaces();
-            var param = new RegisterParams
-            {
-                type = _guardianIdentifierInfo.accountType, 
-                loginGuardianIdentifier = guardianIdentifier,
-                chainId = _guardianIdentifierInfo.chainId,
-                verifierId = verifierId,
-                extraData = extraData,
-                verificationDoc = verificationDoc,
-                signature = signature
-            };
-            StartCoroutine(did.Register(param, result =>
-            {
-                if(IsCAValid(result.Status))
-                {
-                    OnError("Register failed! Missing caAddress or caHash.");
-                    return;
-                }
-                
-                Debugger.Log("Register success!");
-
-                var walletInfo = CreateDIDWalletInfo(result.Status, result.SessionId, AddManagerType.Register);
-                // logged in, open wallet view and close PIN view
-                OpenNextView(walletInfo);
-            }, OnError));
-        }
-
-        private static bool IsCAValid(CAInfo caInfo)
-        {
-            return caInfo.caAddress == null || caInfo.caHash == null;
-        }
-
-        private static string EncodeExtraData(DeviceInfoType deviceInfo)
-        {
-            var extraData = new ExtraData
-            {
-                transactionTime = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds().ToString(),
-                deviceInfo = JsonConvert.SerializeObject(deviceInfo)
-            };
-            return JsonConvert.SerializeObject(extraData);
-        }
-
-        private void OnError(string error)
-        {
-            ShowLoading(false);
-            Debugger.LogError(error);
-            errorView.ShowErrorText(error);
-        }
-        
         private void ShowLoading(bool show, string text = "")
         {
             loadingView.DisplayLoading(show, text);
@@ -409,11 +243,11 @@ namespace Portkey.UI
 
         public void OnClickConfirmBack()
         {
-            if (previousView == null)
+            if (_previousView == null)
             {
                 throw new Exception("No previous view set");
             }
-            previousView.SetActive(true);
+            _previousView.SetActive(true);
             CloseView();
         }
 
@@ -438,7 +272,7 @@ namespace Portkey.UI
 
         public void SetPreviousView(GameObject view)
         {
-            previousView = view;
+            _previousView = view;
         }
     }
 }

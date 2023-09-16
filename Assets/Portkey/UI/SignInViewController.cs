@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Portkey.Utilities;
 using Portkey.Core;
 using UnityEngine;
@@ -21,21 +22,18 @@ namespace Portkey.UI
         [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private EmailLoginViewController emailLoginViewController;
         [SerializeField] private PhoneLoginViewController phoneLoginViewController;
+        [SerializeField] private SetPINViewController setPinViewController;
         
         private State _state = State.Login;
-        private IPortkeySocialService _portkeySocialService;
         
         public void Start()
         {
-            _portkeySocialService = did.PortkeySocialService;
-
 #if UNITY_WEBGL
 
             if (Application.absoluteURL.Contains("access_token="))
             {
                 SignIn((int)AccountType.Google);
             }
-
 #endif
         }
         
@@ -46,9 +44,10 @@ namespace Portkey.UI
             switch (accountType)
             {
                 case AccountType.Apple:
+                    did.AuthService.AppleCredentialProvider.Get(AuthCallback);
+                    break;
                 case AccountType.Google:
-                    var socialLogin = did.GetSocialLogin(accountType);
-                    socialLogin.Authenticate(AuthCallback, OnStartLoading, OnError);
+                    did.AuthService.GoogleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Email:
                     emailLoginViewController.DID = did;
@@ -76,12 +75,12 @@ namespace Portkey.UI
             loadingView.DisplayLoading(show, text);
         }
 
-        private void AuthCallback(SocialLoginInfo info)
+        private void AuthCallback(ICredential credential)
         {
-            Debugger.Log(
-                $"User: {info.socialInfo.name}\nAEmail: {info.socialInfo.email}\nAccess Code: ${info.access_token}");
-            
-            did.AuthService.HasGuardian(info.socialInfo.sub, info.accountType, info.access_token, CheckSignUpOrLogin, OnError);
+            did.AuthService.GetGuardians(credential, guardians =>
+            {
+                CheckSignUpOrLogin(credential, guardians);
+            });
         }
 
         private void OnError(string error)
@@ -91,22 +90,29 @@ namespace Portkey.UI
             errorView.ShowErrorText(error);
         }
 
-        private void CheckSignUpOrLogin(GuardianIdentifierInfo info)
+        private void CheckSignUpOrLogin(ICredential credential, List<GuardianNew> guardians)
         {
             ShowLoading(false);
             
-            switch (info.isLoginGuardian)
+            switch (guardians.Count)
             {
-                case true when _state != State.Login:
-                case false when _state != State.Signup:
-                    unregisteredView.gameObject.SetActive(true);
-                    unregisteredView.Initialize(info);
+                case 0:
+                    SignUpPrompt(() =>
+                    {
+                        setPinViewController.Initialize(credential);
+                        setPinViewController.SetPreviousView(gameObject);
+                    });
                     break;
                 default:
                     //Change to Login View
                     PrepareGuardiansApprovalView(info);
                     break;
             }
+        }
+        
+        private void SignUpPrompt(Action onConfirm, Action onClose = null)
+        {
+            unregisteredView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
         }
 
         private void PrepareGuardiansApprovalView(GuardianIdentifierInfo info)

@@ -16,6 +16,7 @@ namespace Portkey.UI
         [SerializeField] protected ErrorViewController errorView;
         [SerializeField] protected LoadingViewController loadingView;
         [SerializeField] protected VerifyCodeViewController verifyCodeViewController;
+        [SerializeField] protected SetPINViewController setPinViewController;
         
         [Header("UI Elements")]
         [SerializeField] protected TMP_InputField inputField;
@@ -28,6 +29,7 @@ namespace Portkey.UI
         protected void OnEnable()
         {
             ResetView();
+            DID.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
         }
 
         protected void ResetView()
@@ -79,7 +81,6 @@ namespace Portkey.UI
             switch (guardians.Count)
             {
                 case 0:
-                    DID.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
                     SignUpPrompt(() =>
                     {
                         ShowLoading(true, "Loading...");
@@ -87,9 +88,6 @@ namespace Portkey.UI
                         {
                             verifyCodeViewController.VerifyCode(credential);
                         }));
-                    }, () =>
-                    {
-                        DID.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
                     });
                     break;
                 default:
@@ -99,7 +97,7 @@ namespace Portkey.UI
             }
         }
 
-        protected void SignUpPrompt(Action onConfirm, Action onClose)
+        protected void SignUpPrompt(Action onConfirm, Action onClose = null)
         {
             unregisteredView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
         }
@@ -116,13 +114,8 @@ namespace Portkey.UI
                 
                 verifyCodeViewController.Initialize(guardianId, accountType, verifierServerName, verifiedCredential =>
                 {
-                    /*
-                    setPinViewController.VerifierItem = verifierItem;
-                    setPinViewController.gameObject.SetActive(true);
-                    setPinViewController.GuardianIdentifierInfo = GuardianIdentifierInfo;
-                    setPinViewController.VerifyCodeResult = result;
-                    setPinViewController.Operation = SetPINViewController.OperationType.SIGN_UP;
-                    setPinViewController.SetPreviousView(signInViewController.gameObject);*/
+                    setPinViewController.Initialize(verifiedCredential);
+                    setPinViewController.SetPreviousView(PreviousView);
                 });
             }); 
         }

@@ -4,15 +4,15 @@ namespace Portkey.UI
 {
     public class PhoneGuardianText : IGuardianText
     {
-        private readonly Guardian _guardian;
+        private readonly GuardianNew _guardian;
         
-        public PhoneGuardianText(Guardian guardian)
+        public PhoneGuardianText(GuardianNew guardian)
         {
             _guardian = guardian;
         }
 
         public bool IsDisplayAccountTextOnly => true;
-        public string AccountText => _guardian.guardianIdentifier;
+        public string AccountText => _guardian.id;
 
         public string DetailsText => "";
     }

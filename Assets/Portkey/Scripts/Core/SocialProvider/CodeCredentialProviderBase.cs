@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Portkey.Utilities;
+using UnityEngine;
 
 namespace Portkey.Core
 {
@@ -10,7 +11,7 @@ namespace Portkey.Core
         private readonly IVerifyCodeLogin _codeLogin;
         private readonly IVerifierService _verifierService;
         private string _verificationCode = null;
-        private bool _cancel = false;
+        private Coroutine _coroutine = null;
         private bool _sendCodeConfirmation = false;
         private SendCodeParams _sendCodeParams;
         public bool EnableCodeSendConfirmationFlow { get; set; } = false;
@@ -31,7 +32,8 @@ namespace Portkey.Core
         
         private void OnCancelCodeVerification()
         {
-            _cancel = true;
+            StaticCoroutine.StopCoroutine(_coroutine);
+            CleanUp();
         }
         
         private void OnConfirmSendCode()
@@ -88,7 +90,7 @@ namespace Portkey.Core
                 {
                     _message.VerifierServerSelected(guardianId, AccountType, verifierServer.name);
 
-                    StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
+                    _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
                     {
                         SendCode(_sendCodeParams, successCallback);
                     }));
@@ -112,28 +114,20 @@ namespace Portkey.Core
         {
             _message.PendingVerificationCodeInput();
 
-            StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
+            _coroutine = StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
             {
                 CleanUp();
                 
-                var newCredential = CreateCredential(guardianId, code, chainId, verifierId);
+                var newCredential = CreateCredential(guardianId, verifierId, chainId, code);
                 successCallback(newCredential);
             }));
         }
 
         private IEnumerator WaitForInputCode(Action<string> onComplete)
         {
-            while (_verificationCode == null && !_cancel)
+            while (_verificationCode == null)
             {
                 yield return null;
-            }
-
-            if (_cancel)
-            {
-                _cancel = false;
-                _verificationCode = null;
-                CleanUp();
-                yield break;
             }
 
             var ret = new string(_verificationCode);
@@ -143,20 +137,12 @@ namespace Portkey.Core
         
         private IEnumerator WaitForSendCodeConfirmation(Action onConfirm)
         {
-            while (!_sendCodeConfirmation && !_cancel)
+            while (!_sendCodeConfirmation)
             {
                 yield return null;
             }
             
             _sendCodeConfirmation = false;
-            
-            if (_cancel)
-            {
-                _cancel = false;
-                CleanUp();
-                yield break;
-            }
-            
             onConfirm?.Invoke();
         }
 
@@ -170,6 +156,9 @@ namespace Portkey.Core
 
         private void CleanUp()
         {
+            _coroutine = null;
+            _verificationCode = null;
+            
             _message.OnInputVerificationCodeEvent -= OnInputVerificationCode;
             _message.OnCancelCodeVerificationEvent -= OnCancelCodeVerification;
             _message.OnConfirmSendCodeEvent -= OnConfirmSendCode;

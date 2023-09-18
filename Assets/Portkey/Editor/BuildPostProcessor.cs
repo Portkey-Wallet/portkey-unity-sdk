@@ -9,11 +9,10 @@ namespace Portkey.Editor
 {
     public class BuildPostProcessor
     {
+#if UNITY_IOS
         private static readonly string PORTKEYCONFIG_NAME = "PortkeyConfig";
-
         private static readonly string FACEID_USAGE_DESCRIPTION = "$(PRODUCT_NAME) wants to use TouchId or FaceID for authentication.";
 
-#if UNITY_IOS
         [PostProcessBuild]
         public static void PostProcessing(BuildTarget buildTarget, string path)
         {

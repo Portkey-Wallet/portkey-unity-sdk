@@ -9,12 +9,6 @@ namespace Portkey.UI
 {
     public class SignInViewController : MonoBehaviour
     {
-        private enum State
-        {
-            Login,
-            Signup
-        }
-        
         [SerializeField] private DID.DID did;
         [SerializeField] private UnregisteredViewController unregisteredView;
         [FormerlySerializedAs("guardianApprovalView")] [SerializeField] private GuardiansApprovalViewController guardianApprovalViewController;
@@ -23,20 +17,7 @@ namespace Portkey.UI
         [SerializeField] private EmailLoginViewController emailLoginViewController;
         [SerializeField] private PhoneLoginViewController phoneLoginViewController;
         [SerializeField] private SetPINViewController setPinViewController;
-        
-        private State _state = State.Login;
-        
-        public void Start()
-        {
-#if UNITY_WEBGL
 
-            if (Application.absoluteURL.Contains("access_token="))
-            {
-                SignIn((int)AccountType.Google);
-            }
-#endif
-        }
-        
         public void SignIn(int type)
         {
             var accountType = (AccountType)type;
@@ -50,15 +31,10 @@ namespace Portkey.UI
                     did.AuthService.GoogleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Email:
-                    emailLoginViewController.DID = did;
-                    emailLoginViewController.PreviousView = gameObject;
-                    emailLoginViewController.gameObject.SetActive(true);
+                    emailLoginViewController.Initialize(did, gameObject);
                     break;
                 case AccountType.Phone:
-                    //TODO: open up window to key in phone number or email then call ValidateIdentifier
-                    phoneLoginViewController.DID = did;
-                    phoneLoginViewController.PreviousView = gameObject;
-                    phoneLoginViewController.gameObject.SetActive(true);
+                    phoneLoginViewController.Initialize(did, gameObject);
                     break;
                 default:
                     throw new ArgumentException("Not expected account type!");
@@ -77,17 +53,10 @@ namespace Portkey.UI
 
         private void AuthCallback(ICredential credential)
         {
-            did.AuthService.GetGuardians(credential, guardians =>
+            StartCoroutine(did.AuthService.GetGuardians(credential, guardians =>
             {
                 CheckSignUpOrLogin(credential, guardians);
-            });
-        }
-
-        private void OnError(string error)
-        {
-            Debugger.LogError(error);
-            ShowLoading(false);
-            errorView.ShowErrorText(error);
+            }));
         }
 
         private void CheckSignUpOrLogin(ICredential credential, List<GuardianNew> guardians)
@@ -104,8 +73,8 @@ namespace Portkey.UI
                     });
                     break;
                 default:
-                    //Change to Login View
-                    PrepareGuardiansApprovalView(info);
+                    guardianApprovalViewController.Initialize(guardians, credential);
+                    CloseView();
                     break;
             }
         }
@@ -113,18 +82,6 @@ namespace Portkey.UI
         private void SignUpPrompt(Action onConfirm, Action onClose = null)
         {
             unregisteredView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
-        }
-
-        private void PrepareGuardiansApprovalView(GuardianIdentifierInfo info)
-        {
-            guardianApprovalViewController.SetGuardianIdentifierInfo(info);
-            guardianApprovalViewController.InitializeData(OpenGuardiansApprovalView, OnError);
-        }
-        
-        private void OpenGuardiansApprovalView()
-        {
-            guardianApprovalViewController.gameObject.SetActive(true);
-            CloseView();
         }
 
         public void OnClickClose()

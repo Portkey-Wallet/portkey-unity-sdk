@@ -17,9 +17,6 @@ namespace Portkey.UI
         [SerializeField] private GuardianDisplayComponent guardianDisplay = null;
         [SerializeField] private DigitSequenceInputComponent digitSequenceInput = null;
         [SerializeField] private TimedButtonComponent resendButton = null;
-        
-        private Action<VerifiedCredential> _onComplete = null;
-        private ICodeCredentialProvider _codeCredentialProvider = null;
 
         private void Start()
         {
@@ -27,27 +24,20 @@ namespace Portkey.UI
             resendButton.OnClick += SendVerificationCode;
         }
 
-        public void Initialize(string guardianId, AccountType accountType, string verifierServerName, Action<VerifiedCredential> onComplete)
+        public void Initialize(string guardianId, AccountType accountType, string verifierServerName)
         {
-            _onComplete = onComplete;
-
-            _codeCredentialProvider = GetCredentialProvider(accountType);
-
+            digitSequenceInput.Clear();
             guardianDisplay.Initialize(guardianId, accountType, verifierServerName);
             detailsText.text = $"A 6-digit verification code has been sent to {guardianId}. Please enter the code within 10 minutes.";
             resendButton.Deactivate();
             
             OpenView();
         }
-
-        private ICodeCredentialProvider GetCredentialProvider(AccountType accountType)
+        
+        public void Initialize(GuardianNew guardian, SuccessCallback<ApprovedGuardian> onSuccess)
         {
-            return accountType switch
-            {
-                AccountType.Email => did.AuthService.EmailCredentialProvider,
-                AccountType.Phone => did.AuthService.PhoneCredentialProvider,
-                _ => throw new ArgumentException("Invalid account type: " + accountType)
-            };
+            Initialize(guardian.id, guardian.accountType, guardian.verifier.name);
+            did.AuthService.Verify(guardian, onSuccess);
         }
 
         public void OpenView()
@@ -65,18 +55,6 @@ namespace Portkey.UI
             }
             
             did.AuthService.Message.InputVerificationCode(code);
-        }
-
-        public void VerifyCode(ICredential credential)
-        {
-            ShowLoading(true, "Loading...");
-
-            _codeCredentialProvider.Verify(credential, verifiedCredential =>
-            {
-                ShowLoading(false);
-                _onComplete?.Invoke(verifiedCredential);
-                CloseView();
-            });
         }
         
         private void SendVerificationCode()
@@ -105,6 +83,7 @@ namespace Portkey.UI
 
         public void CloseView()
         {
+            did.AuthService.Message.OnResendVerificationCodeCompleteEvent -= OnResendVerificationCodeComplete;
             did.AuthService.Message.CancelCodeVerification();
             gameObject.SetActive(false);
         }

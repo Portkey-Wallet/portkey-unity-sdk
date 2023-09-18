@@ -36,5 +36,18 @@ namespace Portkey.Utilities
         {
             return Runner.StartCoroutine(coroutine);
         }
+        
+        /// <summary>
+        /// Stops a running coroutine.
+        /// </summary>
+        /// <param name="coroutine">The coroutine to be stopped.</param>
+        public static void StopCoroutine(Coroutine coroutine)
+        {
+            if (coroutine == null)
+            {
+                return;
+            }
+            Runner.StopCoroutine(coroutine);
+        }
     }
 }

@@ -16,6 +16,8 @@ namespace Portkey.UI
         private new void OnEnable()
         {
             base.OnEnable();
+            
+            DID.AuthService.PhoneCredentialProvider.EnableCodeSendConfirmationFlow = true;
             StartCoroutine(DID.PortkeySocialService.GetPhoneCountryCodeWithLocal(result =>
             {
                 PhoneCountryCodeResult = result;
@@ -41,10 +43,10 @@ namespace Portkey.UI
             StartLoading();
 
             var phoneNumber = PhoneNumber.Parse(InputPhoneNumber);
-            DID.AuthService.GetGuardians(phoneNumber, guardians =>
+            StartCoroutine(DID.AuthService.GetGuardians(phoneNumber, guardians =>
             {
                 CheckSignUpOrLogin(phoneNumber, guardians);
-            });
+            }));
         }
         
         private void CheckSignUpOrLogin(PhoneNumber phoneNumber, List<GuardianNew> guardians)
@@ -60,7 +62,7 @@ namespace Portkey.UI
                         ShowLoading(true, "Loading...");
                         StartCoroutine(DID.AuthService.PhoneCredentialProvider.Get(phoneNumber, credential =>
                         {
-                            verifyCodeViewController.VerifyCode(credential);
+                            StartCoroutine(DID.AuthService.PhoneCredentialProvider.Verify(credential, OpenSetPINView));
                         }));
                     }, () =>
                     {
@@ -68,8 +70,8 @@ namespace Portkey.UI
                     });
                     break;
                 default:
-                    //Change to Login View
-                    PrepareGuardiansApprovalView(info);
+                    guardianApprovalViewController.Initialize(guardians);
+                    CloseView();
                     break;
             }
         }

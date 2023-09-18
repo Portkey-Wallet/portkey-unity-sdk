@@ -24,13 +24,13 @@ namespace Portkey.SocialProvider
                 return;
             }
             
-            startLoadCallback(true);
+            startLoadCallback?.Invoke(true);
             // check if login access token is expired
             _socialLogin.RequestSocialInfo(param.accessToken, (socialLoginInfo) =>
             {
                 if(socialLoginInfo.isExpired)
                 {
-                    startLoadCallback(false);
+                    startLoadCallback?.Invoke(false);
                     //login expired, need to re-login
                     _socialLogin.Authenticate((info) =>
                     {

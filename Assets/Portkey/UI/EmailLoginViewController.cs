@@ -23,13 +23,27 @@ namespace Portkey.UI
         [SerializeField] protected Button loginButton;
         [SerializeField] protected TextMeshProUGUI errorText;
         
-        public GameObject PreviousView { get; set; }
-        public DID.DID DID { get; set; }
+        protected GameObject PreviousView { get; set; }
+        protected DID.DID DID { get; set; }
 
         protected void OnEnable()
         {
             ResetView();
             DID.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
+            DID.AuthService.EmailCredentialProvider.EnableCodeSendConfirmationFlow = true;
+        }
+        
+        public void Initialize(DID.DID did, GameObject previousView)
+        {
+            DID = did;
+            PreviousView = previousView;
+
+            OpenView();
+        }
+        
+        public void OpenView()
+        {
+            gameObject.SetActive(true);
         }
 
         protected void ResetView()
@@ -51,10 +65,10 @@ namespace Portkey.UI
             StartLoading();
 
             var emailAddress = EmailAddress.Parse(inputField.text);
-            DID.AuthService.GetGuardians(emailAddress, guardians =>
+            StartCoroutine(DID.AuthService.GetGuardians(emailAddress, guardians =>
             {
                 CheckSignUpOrLogin(emailAddress, guardians);
-            });
+            }));
         }
         
         protected void ShowLoading(bool show, string text = "")
@@ -86,15 +100,23 @@ namespace Portkey.UI
                         ShowLoading(true, "Loading...");
                         StartCoroutine(DID.AuthService.EmailCredentialProvider.Get(emailAddress, credential =>
                         {
-                            verifyCodeViewController.VerifyCode(credential);
+                            StartCoroutine(DID.AuthService.EmailCredentialProvider.Verify(credential, OpenSetPINView));
                         }));
                     });
                     break;
                 default:
-                    //Change to Login View
-                    PrepareGuardiansApprovalView(info);
+                    guardianApprovalViewController.Initialize(guardians);
+                    CloseView();
                     break;
             }
+        }
+
+        protected void OpenSetPINView(VerifiedCredential verifiedCredential)
+        {
+            verifyCodeViewController.CloseView();
+            CloseView();
+            setPinViewController.Initialize(verifiedCredential);
+            setPinViewController.SetPreviousView(PreviousView);
         }
 
         protected void SignUpPrompt(Action onConfirm, Action onClose = null)
@@ -112,24 +134,8 @@ namespace Portkey.UI
             {
                 DID.AuthService.Message.ConfirmSendCode();
                 
-                verifyCodeViewController.Initialize(guardianId, accountType, verifierServerName, verifiedCredential =>
-                {
-                    setPinViewController.Initialize(verifiedCredential);
-                    setPinViewController.SetPreviousView(PreviousView);
-                });
+                verifyCodeViewController.Initialize(guardianId, accountType, verifierServerName);
             }); 
-        }
-        
-        private void PrepareGuardiansApprovalView(GuardianIdentifierInfo info)
-        {
-            guardianApprovalViewController.SetGuardianIdentifierInfo(info);
-            guardianApprovalViewController.InitializeData(OpenGuardiansApprovalView, OnError);
-        }
-        
-        private void OpenGuardiansApprovalView()
-        {
-            guardianApprovalViewController.gameObject.SetActive(true);
-            CloseView();
         }
 
         public void OnValueChanged()
@@ -151,7 +157,7 @@ namespace Portkey.UI
             CloseView();
         }
         
-        private void CloseView()
+        protected void CloseView()
         {
             DID.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
             gameObject.SetActive(false);

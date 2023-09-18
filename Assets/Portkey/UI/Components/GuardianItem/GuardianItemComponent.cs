@@ -22,7 +22,8 @@ namespace Portkey.UI
             public AccountType type;
             public GameObject icon;
         }
-        
+
+        [SerializeField] private VerifyCodeViewController _verifyCodeViewController = null;
         [SerializeField] private VerifierIcon[] verifierIcons = null;
         [SerializeField] private GuardianIcon[] guardianIcons = null;
         [SerializeField] private TextMeshProUGUI account = null;
@@ -32,19 +33,15 @@ namespace Portkey.UI
         [SerializeField] private GameObject loginAccount = null;
         [SerializeField] private GameObject expiredText = null;
 
-        private UserGuardianStatus _userGuardianStatus = null;
-        private GuardianIdentifierInfo _guardianIdentifierInfo = null;
         private Dictionary<string, GameObject> _verifierIconMap = null;
         private Dictionary<AccountType, GameObject> _guardianIconMap = null;
         private DID.DID _did = null;
         private LoadingViewController _loadingView = null;
         private ErrorViewController _errorView = null;
-        private Action _onSendVerificationCode = null;
-        
-        public VerifierStatus VerifierStatus => _userGuardianStatus.status;
-
-        public delegate void OnUserGuardianStatusChanged(UserGuardianStatus status);
-        private OnUserGuardianStatusChanged _onUserGuardianStatusChanged = null;
+        private SuccessCallback<ApprovedGuardian> _onApproved = null;
+        private GuardianNew _guardian = null;
+        private bool _approved = false;
+        private ICredential _credential = null;
         
         public LoadingViewController LoadingView
         {
@@ -55,11 +52,6 @@ namespace Portkey.UI
         {
             set => _errorView = value;
         }
-
-        public void SetDID(DID.DID did)
-        {
-            _did = did;
-        }
         
         private void ShowLoading(bool show, string text = "")
         {
@@ -68,10 +60,14 @@ namespace Portkey.UI
 
         public void SetExpired(bool expired)
         {
+            if (_approved)
+            {
+                return;
+            }
             expiredText.SetActive(expired);
             if (!expired)
             {
-                DisplayVerificationStatus(_userGuardianStatus.status);
+                DisplayVerificationStatus(_approved);
             }
             else
             {
@@ -82,57 +78,48 @@ namespace Portkey.UI
         
         public void SetEndOperation()
         {
+            if (_approved)
+            {
+                return;
+            }
             expiredText.SetActive(false);
             verifiedCheck.SetActive(false);
             verifyButton.SetActive(false);
         }
 
-        public void SetGuardianIdentifierInfo(GuardianIdentifierInfo info)
+        public void Initialize(GuardianNew guardian, ICredential credential, DID.DID did, VerifyCodeViewController verifyCodeViewController, SuccessCallback<ApprovedGuardian> onApproved)
         {
-            _guardianIdentifierInfo = info;
-        }
-
-        public void SetUserGuardianStatus(UserGuardianStatus status, OnUserGuardianStatusChanged onUserGuardianStatusChanged)
-        {
-            _userGuardianStatus = status;
-            _onUserGuardianStatusChanged = onUserGuardianStatusChanged;
-        }
-
-        public void InitializeUI(Action onSendVerificationCode)
-        {
-            _onSendVerificationCode = onSendVerificationCode;
+            _did = did;
+            _guardian = guardian;
+            _verifyCodeViewController = verifyCodeViewController;
+            _onApproved = onApproved;
+            _approved = false;
+            _credential = credential;
             
-            var guardianType = _userGuardianStatus.guardianItem.guardian.type;
-            DisplayGuardianIcon(guardianType);
-
-            var verifierType = _userGuardianStatus.guardianItem.verifier.name;
-            DisplayVerifierIcon(verifierType);
-
-            var guardian = _userGuardianStatus.guardianItem.guardian;
+            DisplayGuardianIcon(guardian.accountType); ;
+            DisplayVerifierIcon(guardian.verifier.name);
+            
             var guardianText = GetGuardianText(guardian);
-
             account.text = guardianText.AccountText;
             detail.text = guardianText.DetailsText;
             detail.gameObject.SetActive(!guardianText.IsDisplayAccountTextOnly);
 
-            loginAccount.SetActive(_userGuardianStatus.guardianItem.guardian.isLoginGuardian);
+            loginAccount.SetActive(guardian.isLoginGuardian);
             
-            DisplayVerificationStatus(_userGuardianStatus.status);
+            DisplayVerificationStatus(_approved);
         }
         
-        private static IGuardianText GetGuardianText(Guardian guardian) => guardian.type switch
+        private static IGuardianText GetGuardianText(GuardianNew guardian) => guardian.accountType switch
         {
             AccountType.Apple  => new AppleGuardianText(guardian),
             AccountType.Google => new GoogleGuardianText(guardian),
             AccountType.Phone  => new PhoneGuardianText(guardian),
             AccountType.Email  => new EmailGuardianText(guardian),
-            _ => throw new ArgumentOutOfRangeException(nameof(guardian.type), $"Not expected AccountType value: {guardian.type}"),
+            _ => throw new ArgumentOutOfRangeException(nameof(guardian.accountType), $"Not expected AccountType value: {guardian.accountType}"),
         };
 
-        private void DisplayVerificationStatus(VerifierStatus status)
+        private void DisplayVerificationStatus(bool verified)
         {
-            var verified = status == VerifierStatus.Verified;
-
             verifyButton.SetActive(!verified);
             verifiedCheck.SetActive(verified);
         }
@@ -161,94 +148,33 @@ namespace Portkey.UI
 
         public void OnClickVerify()
         {
-            var loginType = _userGuardianStatus.guardianItem.guardian.type;
-            // let's see if we need this when we implement email and phone, very likely we don't need this
-            if (loginType == AccountType.Google || loginType == AccountType.Apple)
+            if(_guardian.verifier.id == null)
             {
-                if (_userGuardianStatus.guardianItem.verifier?.id == null)
-                {
-                    OnError("Verifier id does not exist!");
-                    return;
-                }
+                OnError("Verifier id does not exist!");
+                return;
+            }
+            if(_guardian.id == null && _guardian.idHash == null)
+            {
+                OnError("Guardian Identifier does not exist!");
+                return;
+            }
 
-                var id = _userGuardianStatus.guardianItem.identifier ?? _userGuardianStatus.guardianItem.guardian.identifierHash;
-                if (id == null)
-                {
-                    OnError("Identifier does not exist!");
-                    return;
-                }
-                
-                var socialVerifier = _did.GetSocialVerifier(loginType);
-                
-                var param = new VerifyAccessTokenParam
-                {
-                    verifierId = _userGuardianStatus.guardianItem.verifier?.id,
-                    accessToken = _userGuardianStatus.guardianItem.accessToken,
-                    chainId = _guardianIdentifierInfo.chainId
-                };
-                
-                socialVerifier.AuthenticateIfAccessTokenExpired(param, OnVerified, OnStartLoading, OnError);
+            if (_guardian.accountType is AccountType.Apple or AccountType.Google)
+            {
+                _did.AuthService.Verify(_guardian, OnApproved, _credential);
             }
             else
             {
-                SendVerificationCode();
+                _verifyCodeViewController.Initialize(_guardian, OnApproved);
             }
         }
         
-        private void SendVerificationCode()
+        private void OnApproved(ApprovedGuardian approvedGuardian)
         {
-            ShowLoading(true, "Loading...");
-
-            var accountType = _userGuardianStatus?.guardianItem?.guardian?.type;
-            IVerifyCodeLogin serviceLogin = accountType switch
-            {
-                AccountType.Email => _did.AuthService.Email,
-                AccountType.Phone => _did.AuthService.Phone,
-                _ => throw new ArgumentException($"Invalid account type: {accountType}")
-            };
-
-            var param = new SendCodeParams
-            {
-                guardianId = _userGuardianStatus?.guardianItem?.guardian?.guardianIdentifier,
-                verifierId = _userGuardianStatus?.guardianItem?.verifier?.id,
-                chainId = _guardianIdentifierInfo?.chainId,
-                operationType = OperationTypeEnum.communityRecovery
-            };
-            StartCoroutine(serviceLogin.SendCode(param, result =>
-            {
-                ShowLoading(false);
-                _onSendVerificationCode?.Invoke();
-            }, OnError));
-        }
-
-        private void OnStartLoading(bool show)
-        {
-            ShowLoading(show, "Loading...");
-        }
-
-        public void OnVerified(VerifyCodeResult result)
-        {
-            OnVerified(result, "");
-        }
-
-        private void OnVerified(VerifyCodeResult result, string accessToken)
-        {
-            if (result.verificationDoc.identifierHash != _userGuardianStatus.guardianItem.guardian.identifierHash)
-            {
-                OnError("Account does not match your guardian.");
-            }
-            else
-            {
-                _userGuardianStatus.status = VerifierStatus.Verified;
-                _userGuardianStatus.verificationDoc = result.verificationDoc.toString;
-                _userGuardianStatus.signature = result.signature;
-                _userGuardianStatus.guardianItem.accessToken = accessToken;
-                DisplayVerificationStatus(_userGuardianStatus.status);
+            _approved = true;
+            DisplayVerificationStatus(_approved);
             
-                _onUserGuardianStatusChanged?.Invoke(_userGuardianStatus);   
-            }
-
-            ShowLoading(false);
+            _onApproved?.Invoke(approvedGuardian);
         }
 
         private void OnError(string error)

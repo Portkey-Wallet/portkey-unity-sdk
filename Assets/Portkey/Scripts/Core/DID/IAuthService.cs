@@ -11,8 +11,6 @@ namespace Portkey.Core
         PhoneCredentialProvider PhoneCredentialProvider { get; }
         EmailCredentialProvider EmailCredentialProvider { get; }
         IAuthMessage Message { get; }
-        EmailLogin Email { get; }
-        PhoneLogin Phone { get; }
         IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<GuardianNew>> successCallback);
         IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback);
         IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback);

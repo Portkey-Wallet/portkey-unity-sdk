@@ -1,4 +1,3 @@
-using System;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
@@ -30,8 +29,15 @@ namespace Portkey.UI
             guardianDisplay.Initialize(guardianId, accountType, verifierServerName);
             detailsText.text = $"A 6-digit verification code has been sent to {guardianId}. Please enter the code within 10 minutes.";
             resendButton.Deactivate();
+
+            did.AuthService.Message.OnErrorEvent += OnError;
             
             OpenView();
+        }
+
+        private void OnError(string error)
+        {
+            //StartCoroutine(DID.AuthService.EmailCredentialProvider.Verify(credential, OpenSetPINView));
         }
         
         public void Initialize(GuardianNew guardian, SuccessCallback<ApprovedGuardian> onSuccess)
@@ -83,6 +89,7 @@ namespace Portkey.UI
 
         public void CloseView()
         {
+            did.AuthService.Message.OnErrorEvent -= OnError;
             did.AuthService.Message.OnResendVerificationCodeCompleteEvent -= OnResendVerificationCodeComplete;
             did.AuthService.Message.CancelCodeVerification();
             gameObject.SetActive(false);

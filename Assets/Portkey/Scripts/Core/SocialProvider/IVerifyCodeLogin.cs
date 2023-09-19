@@ -13,6 +13,7 @@ namespace Portkey.Core
     public interface IVerifyCodeLogin
     {
         AccountType AccountType { get; }
+        string VerifierId { get; }
         IEnumerator SendCode(SendCodeParams param, SuccessCallback<string> successCallback, ErrorCallback errorCallback);
         IEnumerator VerifyCode(ICodeCredential credential, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback);
     }

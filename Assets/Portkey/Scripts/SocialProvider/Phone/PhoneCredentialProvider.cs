@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Portkey.Core;
 
@@ -13,6 +14,21 @@ namespace Portkey.SocialProvider
         {
             chainId ??= _message.ChainId;
             yield return GetCredential(phoneNumber.String, successCallback, chainId, verifierId, operationType);
+        }
+
+        // TODO: WIP
+        public ICredential Get(PhoneNumber phoneNumber, string verificationCode)
+        {
+            if(_codeLogin.VerifierId == null)
+            {
+                throw new Exception("Please call DID.AuthService.PhoneCredentialProvider.SendCode first!");
+            }
+            if(verificationCode == null)
+            {
+                throw new Exception("Please input verification code!");
+            }
+            
+            return new PhoneCredential(phoneNumber, verificationCode, _message.ChainId, _codeLogin.VerifierId);
         }
 
         public override AccountType AccountType => AccountType.Phone;

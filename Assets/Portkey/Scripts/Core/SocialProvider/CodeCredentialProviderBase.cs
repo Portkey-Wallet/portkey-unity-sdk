@@ -8,7 +8,7 @@ namespace Portkey.Core
     public abstract class CodeCredentialProviderBase<T> : ICodeCredentialProvider where T : ICodeCredential
     {
         protected readonly IAuthMessage _message;
-        private readonly IVerifyCodeLogin _codeLogin;
+        protected readonly IVerifyCodeLogin _codeLogin;
         private readonly IVerifierService _verifierService;
         private string _verificationCode = null;
         private Coroutine _coroutine = null;

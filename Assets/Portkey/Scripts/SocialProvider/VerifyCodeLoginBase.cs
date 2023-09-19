@@ -11,6 +11,7 @@ namespace Portkey.SocialProvider
         private string _verifierSessionId = null;
         
         public abstract AccountType AccountType { get; }
+        public string VerifierId { get; private set; } = null;
 
         protected VerifyCodeLoginBase(IPortkeySocialService portkeySocialService)
         {
@@ -45,6 +46,7 @@ namespace Portkey.SocialProvider
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>
             {
                 _verifierSessionId = response.verifierSessionId;
+                VerifierId = sendCodeParams.body.verifierId;
                 
                 successCallback?.Invoke(param.guardianId);
             }, errorCallback);

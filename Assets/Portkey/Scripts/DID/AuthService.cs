@@ -280,7 +280,7 @@ namespace Portkey.DID
             
             void SocialVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
             {
-                VerifySocialCredential(cred, guard.chainId, guard.verifier.id, verifiedCredential =>
+                VerifySocialCredential(cred, guard.chainId, guard.verifier.id, OperationTypeEnum.communityRecovery, verifiedCredential =>
                 {
                     ReturnApprovedGuardian(guard, verifiedCredential);
                 });
@@ -313,14 +313,15 @@ namespace Portkey.DID
             StaticCoroutine.StartCoroutine(EmailCredentialProvider.Verify(credential, successCallback));
         }
 
-        private void VerifySocialCredential(ICredential credential, string chainId, string verifierId, SuccessCallback<VerifiedCredential> successCallback)
+        private void VerifySocialCredential(ICredential credential, string chainId, string verifierId, OperationTypeEnum operationType, SuccessCallback<VerifiedCredential> successCallback)
         {
             var socialVerifier = _socialVerifierProvider.GetSocialVerifier(credential.AccountType);
             var param = new VerifyAccessTokenParam
             {
                 verifierId = verifierId,
                 accessToken = credential.SignInToken,
-                chainId = chainId
+                chainId = chainId,
+                operationType = (int)operationType
             };
             socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
             {
@@ -423,7 +424,7 @@ namespace Portkey.DID
                     var chainId = Message.ChainId;
                     yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
                     {
-                        VerifySocialCredential(credential, chainId, verifierServer.id, verifiedCredential =>
+                        VerifySocialCredential(credential, chainId, verifierServer.id, OperationTypeEnum.register, verifiedCredential =>
                         {
                             StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                         });

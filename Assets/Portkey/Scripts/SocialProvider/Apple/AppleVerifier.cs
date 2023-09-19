@@ -18,7 +18,8 @@ namespace Portkey.SocialProvider
             {
                 accessToken = param.accessToken,
                 chainId = param.chainId,
-                verifierId = param.verifierId
+                verifierId = param.verifierId,
+                operationType = param.operationType
             };
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyAppleToken(verifyAppleParam,
                 (verificationResult) =>

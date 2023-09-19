@@ -5,6 +5,7 @@ namespace Portkey.Core
         public string verifierId;
         public string accessToken;
         public string chainId;
+        public int operationType;
     }
 
     public delegate void AuthCallback(VerifyCodeResult verificationDoc, string accessToken);

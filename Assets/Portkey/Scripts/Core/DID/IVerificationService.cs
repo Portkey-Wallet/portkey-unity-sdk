@@ -71,6 +71,7 @@ namespace Portkey.Core
         public string accessToken;
         public string verifierId;
         public string chainId;
+        public int operationType;
     }
 
     [Serializable]
@@ -79,6 +80,7 @@ namespace Portkey.Core
         public string accessToken;
         public string verifierId;
         public string chainId;
+        public int operationType;
     }
     
     [Serializable]

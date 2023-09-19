@@ -343,7 +343,6 @@ namespace Portkey.DID
 
         public IEnumerator SignUp(PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            Message.Loading(true, "Loading...");
             yield return PhoneCredentialProvider.Get(phoneNumber, phoneCredential =>
             {
                 VerifyPhoneCredential(phoneCredential, verifiedCredential =>
@@ -355,7 +354,6 @@ namespace Portkey.DID
 
         public IEnumerator SignUp(EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            Message.Loading(true, "Loading...");
             yield return EmailCredentialProvider.Get(emailAddress, emailCredential =>
             {
                 VerifyEmailCredential(emailCredential, verifiedCredential =>
@@ -367,7 +365,6 @@ namespace Portkey.DID
         
         public IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            Message.Loading(true, "Loading...");
             _did.Reset();
             
             var extraData = "";
@@ -453,8 +450,6 @@ namespace Portkey.DID
                 OnError(e.Message);
                 yield break;
             }
-            
-            Message.Loading(true, "Loading...");
             
             var param = new AccountLoginParams
             {

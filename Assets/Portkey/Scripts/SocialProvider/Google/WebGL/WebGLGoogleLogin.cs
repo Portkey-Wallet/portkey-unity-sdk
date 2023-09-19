@@ -26,8 +26,6 @@ namespace Portkey.SocialProvider
             const string loginUri = "social-login/";
             const string loginType = "Google";
 
-            _startLoadCallback?.Invoke(true);
-
             SetupAuthenticationCallback();
 
             Debugger.Log("Authenticating for WebGL");

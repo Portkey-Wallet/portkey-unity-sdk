@@ -31,7 +31,6 @@ namespace Portkey.SocialProvider
         
         private void Authenticate()
         {
-            _startLoadCallback?.Invoke(true);
 #if UNITY_IOS
             SignIn();
 #endif

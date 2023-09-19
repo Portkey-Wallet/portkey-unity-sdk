@@ -36,27 +36,10 @@ namespace Portkey.UI
         private Dictionary<string, GameObject> _verifierIconMap = null;
         private Dictionary<AccountType, GameObject> _guardianIconMap = null;
         private DID.DID _did = null;
-        private LoadingViewController _loadingView = null;
-        private ErrorViewController _errorView = null;
         private SuccessCallback<ApprovedGuardian> _onApproved = null;
         private GuardianNew _guardian = null;
         private bool _approved = false;
         private ICredential _credential = null;
-        
-        public LoadingViewController LoadingView
-        {
-            set => _loadingView = value;
-        }
-        
-        public ErrorViewController ErrorView
-        {
-            set => _errorView = value;
-        }
-        
-        private void ShowLoading(bool show, string text = "")
-        {
-            _loadingView.DisplayLoading(show, text);
-        }
 
         public void SetExpired(bool expired)
         {
@@ -150,17 +133,18 @@ namespace Portkey.UI
         {
             if(_guardian.verifier.id == null)
             {
-                OnError("Verifier id does not exist!");
+                _did.AuthService.Message.Error("Verifier id does not exist!");
                 return;
             }
             if(_guardian.id == null && _guardian.idHash == null)
             {
-                OnError("Guardian Identifier does not exist!");
+                _did.AuthService.Message.Error("Guardian Identifier does not exist!");
                 return;
             }
 
             if (_guardian.accountType is AccountType.Apple or AccountType.Google)
             {
+                _did.AuthService.Message.Loading(true, "Loading...");
                 _did.AuthService.Verify(_guardian, OnApproved, _credential);
             }
             else
@@ -171,17 +155,12 @@ namespace Portkey.UI
         
         private void OnApproved(ApprovedGuardian approvedGuardian)
         {
+            _did.AuthService.Message.Loading(false);
+            
             _approved = true;
             DisplayVerificationStatus(_approved);
             
             _onApproved?.Invoke(approvedGuardian);
-        }
-
-        private void OnError(string error)
-        {
-            ShowLoading(false);
-            Debugger.LogError(error);
-            _errorView.ShowErrorText(error);
         }
     }
 }

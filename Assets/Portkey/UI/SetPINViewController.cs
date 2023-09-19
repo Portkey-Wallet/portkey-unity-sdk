@@ -68,7 +68,7 @@ namespace Portkey.UI
             //sign up using socials
             _onPinComplete = () =>
             {
-                ShowLoading(true, "Creating address on the chain...");
+                did.AuthService.Message.Loading(true, "Creating address on the chain...");
                 StartCoroutine(did.AuthService.SignUp(credential, OpenNextView));
             };
             OpenView();
@@ -79,7 +79,7 @@ namespace Portkey.UI
             //sign up using phone or email
             _onPinComplete = () =>
             {
-                ShowLoading(true, "Creating address on the chain...");
+                did.AuthService.Message.Loading(true, "Creating address on the chain...");
                 StartCoroutine(did.AuthService.SignUp(verifiedCredential, OpenNextView));
             };
             OpenView();
@@ -90,7 +90,7 @@ namespace Portkey.UI
             //login
             _onPinComplete = () =>
             {
-                ShowLoading(true, "Initiating social recovery");
+                did.AuthService.Message.Loading(true, "Initiating social recovery");
                 StartCoroutine(did.AuthService.Login(loginGuardian, approvedGuardians, OpenNextView));
             };
             OpenView();
@@ -138,7 +138,7 @@ namespace Portkey.UI
             walletView.WalletInfo = walletInfo;
             walletView.gameObject.SetActive(true);
             IsLoginCompleted = true;
-            ShowLoading(false);
+            did.AuthService.Message.Loading(false);
             CloseView();
         }
         
@@ -146,13 +146,8 @@ namespace Portkey.UI
         {
             biometricView.WalletInfo = walletInfo;
             biometricView.gameObject.SetActive(true);
-            ShowLoading(false);
+            did.AuthService.Message.Loading(false);
             CloseView();
-        }
-
-        private void ShowLoading(bool show, string text = "")
-        {
-            loadingView.DisplayLoading(show, text);
         }
 
         private void CloseView()

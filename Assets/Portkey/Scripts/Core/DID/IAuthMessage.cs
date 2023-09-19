@@ -7,7 +7,7 @@ namespace Portkey.Core
         delegate void OnPendingVerificationCodeInputHandler();
         delegate void OnResendVerificationCodeHandler();
         delegate void OnResendVerificationCodeCompleteHandler();
-        delegate void OnLoadingHandler(string message);
+        delegate void OnLoadingHandler(bool show, string message);
         delegate void OnErrorHandler(string error);
         delegate void OnChainIdChangedHandler(string chainId);
         delegate void OnVerifierServerSelectedHandler(string guardianId, AccountType accountType, string verifierServerName);
@@ -30,7 +30,7 @@ namespace Portkey.Core
         void PendingVerificationCodeInput();
         void ResendVerificationCode();
         void ResendVerificationCodeComplete();
-        void Loading(string message);
+        void Loading(bool show, string message = null);
         void Error(string error);
         void VerifierServerSelected(string guardianId, AccountType accountType, string verifierServerName);
         void ConfirmSendCode();

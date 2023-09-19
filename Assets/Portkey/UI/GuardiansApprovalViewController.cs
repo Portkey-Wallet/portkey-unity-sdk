@@ -11,8 +11,6 @@ namespace Portkey.UI
         [SerializeField] private DID.DID did;
         [SerializeField] private SetPINViewController setPINViewController;
         [SerializeField] private SignInViewController signInViewController;
-        [SerializeField] private ErrorViewController errorView;
-        [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private VerifyCodeViewController verifyCodeViewController;
         [SerializeField] private GameObject infoDialog;
 
@@ -178,8 +176,6 @@ namespace Portkey.UI
                     cred = _credential;
                 }
                 
-                guardianItem.ErrorView = errorView;
-                guardianItem.LoadingView = loadingView;
                 guardianItem.Initialize(guardian, cred, did, verifyCodeViewController, approvedGuardian =>
                 {
                     _approvedGuardians.Add(approvedGuardian);

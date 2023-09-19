@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Portkey.UI
@@ -12,6 +11,13 @@ namespace Portkey.UI
         private void Start()
         {
             _did.AuthService.Message.OnErrorEvent += _errorView.ShowErrorText;
+            _did.AuthService.Message.OnLoadingEvent += _loadingView.DisplayLoading;
+        }
+        
+        private void OnDestroy()
+        {
+            _did.AuthService.Message.OnErrorEvent -= _errorView.ShowErrorText;
+            _did.AuthService.Message.OnLoadingEvent -= _loadingView.DisplayLoading;
         }
     }
 }

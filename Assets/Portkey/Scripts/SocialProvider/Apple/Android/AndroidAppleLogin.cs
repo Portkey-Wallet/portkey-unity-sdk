@@ -74,7 +74,6 @@ namespace Portkey.SocialProvider
                     }
                     else
                     {
-                        _startLoadCallback?.Invoke(true);
                         RequestSocialInfo(output.message, null, null);
                     }
                     yield break;

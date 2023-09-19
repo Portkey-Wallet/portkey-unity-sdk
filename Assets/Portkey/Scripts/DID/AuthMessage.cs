@@ -55,9 +55,9 @@ namespace Portkey.DID
             OnResendVerificationCodeCompleteEvent?.Invoke();
         }
 
-        public void Loading(string message)
+        public void Loading(bool show, string message)
         {
-            OnLoadingEvent?.Invoke(message);
+            OnLoadingEvent?.Invoke(show, message);
         }
 
         public void Error(string error)

@@ -38,8 +38,6 @@ namespace Portkey.SocialProvider
         
         private void Authenticate()
         {
-            _startLoadCallback?.Invoke(true);
-
             Debugger.Log("Authenticating for Apple");
             var url = $"{APPLE_AUTH_API}?client_id={SERVICE_ID}&redirect_uri={APPLE_REGISTERED_REDIRECT_URI}&response_type=code%20id_token&state=origin%3Aweb&scope=name%20email&response_mode=form_post";
             

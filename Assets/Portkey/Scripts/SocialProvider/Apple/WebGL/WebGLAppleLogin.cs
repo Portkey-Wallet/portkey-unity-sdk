@@ -23,8 +23,6 @@ namespace Portkey.SocialProvider
             const string loginUri = "social-login/";
             const string loginType = "Apple";
 
-            _startLoadCallback?.Invoke(true);
-
             SetupAuthenticationCallback();
 
             Debugger.Log("Authenticating for WebGL");

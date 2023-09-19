@@ -25,9 +25,11 @@ namespace Portkey.UI
             switch (accountType)
             {
                 case AccountType.Apple:
+                    did.AuthService.Message.Loading(true, "Loading...");
                     did.AuthService.AppleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Google:
+                    did.AuthService.Message.Loading(true, "Loading...");
                     did.AuthService.GoogleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Email:
@@ -41,16 +43,6 @@ namespace Portkey.UI
             }
         }
 
-        private void OnStartLoading(bool show)
-        {
-            ShowLoading(show, "Checking account on the chain...");
-        }
-
-        private void ShowLoading(bool show, string text = "")
-        {
-            loadingView.DisplayLoading(show, text);
-        }
-
         private void AuthCallback(ICredential credential)
         {
             StartCoroutine(did.AuthService.GetGuardians(credential, guardians =>
@@ -61,7 +53,7 @@ namespace Portkey.UI
 
         private void CheckSignUpOrLogin(ICredential credential, List<GuardianNew> guardians)
         {
-            ShowLoading(false);
+            did.AuthService.Message.Loading(false);
             
             switch (guardians.Count)
             {

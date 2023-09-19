@@ -80,7 +80,6 @@ namespace Portkey.SocialProvider
                     }
                     else
                     {
-                        _startLoadCallback?.Invoke(true);
                         RequestAccessToken(output.message);
                     }
                     yield break;

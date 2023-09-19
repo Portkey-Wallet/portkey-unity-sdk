@@ -101,7 +101,6 @@ namespace Portkey.SocialProvider
             var codeChallenge = Utilities.GetCodeChallenge(_codeVerifier);
             var authorizationRequest = $"{AUTHORIZATION_ENDPOINT}?response_type=code&client_id={ClientId}&state={_state}&scope={Uri.EscapeDataString(ACCESS_SCOPE)}&redirect_uri={Uri.EscapeDataString(_redirectUri)}&code_challenge={codeChallenge}&code_challenge_method=S256";
 
-            _startLoadCallback?.Invoke(true);
             Application.OpenURL(authorizationRequest);
         }
 

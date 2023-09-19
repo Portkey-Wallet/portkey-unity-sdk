@@ -20,7 +20,7 @@ namespace Portkey.SocialProvider
             {
                 var appleCredential = new AppleCredential(info.access_token, info.socialInfo);
                 successCallback?.Invoke(appleCredential);
-            }, null, _authMessage.Error);
+            }, _authMessage.Error);
         }
     }
 }

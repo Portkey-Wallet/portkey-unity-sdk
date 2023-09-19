@@ -49,9 +49,9 @@ namespace Portkey.DID
         {
             if (string.IsNullOrEmpty(guardianId))
             {
-                throw new System.ArgumentException("Identifier cannot be null or empty", nameof(guardianId));
+                throw new ArgumentException("Identifier cannot be null or empty", nameof(guardianId));
             }
-
+            
             var param = new GetRegisterInfoParams
             {
                 loginGuardianIdentifier = guardianId
@@ -149,17 +149,17 @@ namespace Portkey.DID
 
         public IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(credential.SocialInfo.sub, successCallback, Message.Error);
+            yield return GetGuardians(credential.SocialInfo.sub, successCallback, OnError);
         }
 
         public IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(phoneNumber.String, successCallback, Message.Error);
+            yield return GetGuardians(phoneNumber.String, successCallback, OnError);
         }
 
         public IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback)
         {
-            yield return GetGuardians(emailAddress.String, successCallback, Message.Error);
+            yield return GetGuardians(emailAddress.String, successCallback, OnError);
         }
 
         public void Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
@@ -173,7 +173,7 @@ namespace Portkey.DID
             {
                 if (!IsCredentialMatchGuardian(credential, guardian))
                 {
-                    Message.Error("Account does not match your guardian.");
+                    OnError("Account does not match your guardian.");
                     return;
                 }
 
@@ -189,7 +189,7 @@ namespace Portkey.DID
                         PhoneVerifyAndApproveGuardian((PhoneCredential)credential, guardian);
                         break;
                     default:
-                        Message.Error($"Unsupported account type: {guardian.accountType}.");
+                        OnError($"Unsupported account type: {guardian.accountType}.");
                         break;
                 }
                 return;
@@ -201,7 +201,7 @@ namespace Portkey.DID
                 {
                     if (!IsCredentialMatchGuardian(appleCredential, guardian))
                     {
-                        Message.Error("Account does not match your guardian.");
+                        OnError("Account does not match your guardian.");
                         return;
                     }
 
@@ -214,7 +214,7 @@ namespace Portkey.DID
                 {
                     if (!IsCredentialMatchGuardian(googleCredential, guardian))
                     {
-                        Message.Error("Account does not match your guardian.");
+                        OnError("Account does not match your guardian.");
                         return;
                     }
 
@@ -227,7 +227,7 @@ namespace Portkey.DID
                 {
                     if (!IsCredentialMatchGuardian(emailCredential, guardian))
                     {
-                        Message.Error("Account does not match your guardian.");
+                        OnError("Account does not match your guardian.");
                         return;
                     }
                     
@@ -240,7 +240,7 @@ namespace Portkey.DID
                 {
                     if (!IsCredentialMatchGuardian(phoneCredential, guardian))
                     {
-                        Message.Error("Account does not match your guardian.");
+                        OnError("Account does not match your guardian.");
                         return;
                     }
                     
@@ -249,14 +249,14 @@ namespace Portkey.DID
             }
             else
             {
-                Message.Error($"Unsupported account type: {guardian.accountType}");
+                OnError($"Unsupported account type: {guardian.accountType}");
             }
 
             void EmailVerifyAndApproveGuardian(EmailCredential cred, GuardianNew guard)
             {
                 if (!IsMatchingVerifier(cred, guard))
                 {
-                    Message.Error("Credential is verified differently from Guardian's definition.");
+                    OnError("Credential is verified differently from Guardian's definition.");
                     return;
                 }
                 VerifyEmailCredential(cred, verifiedCredential =>
@@ -269,7 +269,7 @@ namespace Portkey.DID
             {
                 if (!IsMatchingVerifier(cred, guard))
                 {
-                    Message.Error("Credential is verified differently from Guardian's definition.");
+                    OnError("Credential is verified differently from Guardian's definition.");
                     return;
                 }
                 VerifyPhoneCredential(cred, verifiedCredential =>
@@ -326,7 +326,7 @@ namespace Portkey.DID
             socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
             {
                 successCallback?.Invoke(new VerifiedCredential(credential, chainId, result.verificationDoc, result.signature));
-            }, null, Message.Error);
+            }, OnError);
         }
 
         private static ApprovedGuardian CreateApprovedGuardian(GuardianNew guardian, VerifiedCredential verifiedCredential)
@@ -343,6 +343,7 @@ namespace Portkey.DID
 
         public IEnumerator SignUp(PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback)
         {
+            Message.Loading(true, "Loading...");
             yield return PhoneCredentialProvider.Get(phoneNumber, phoneCredential =>
             {
                 VerifyPhoneCredential(phoneCredential, verifiedCredential =>
@@ -354,6 +355,7 @@ namespace Portkey.DID
 
         public IEnumerator SignUp(EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback)
         {
+            Message.Loading(true, "Loading...");
             yield return EmailCredentialProvider.Get(emailAddress, emailCredential =>
             {
                 VerifyEmailCredential(emailCredential, verifiedCredential =>
@@ -365,6 +367,7 @@ namespace Portkey.DID
         
         public IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
         {
+            Message.Loading(true, "Loading...");
             _did.Reset();
             
             var extraData = "";
@@ -374,7 +377,7 @@ namespace Portkey.DID
             }
             catch (Exception e)
             {
-                Message.Error(e.Message);
+                OnError(e.Message);
                 yield break;
             }
 
@@ -392,14 +395,14 @@ namespace Portkey.DID
             {
                 if (IsCAValid(registerResult.Status))
                 {
-                    Message.Error("Register failed! Missing caAddress or caHash.");
+                    OnError("Register failed! Missing caAddress or caHash.");
                     return;
                 }
 
                 var walletInfo = CreateDIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
                     registerResult.SessionId, AddManagerType.Register);
                 successCallback(walletInfo);
-            }, Message.Error);
+            }, OnError);
         }
 
         public IEnumerator SignUp(ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
@@ -422,13 +425,14 @@ namespace Portkey.DID
                     break;
                 case AccountType.Apple or AccountType.Google:
                     var chainId = Message.ChainId;
+                    Message.Loading(true, "Assigning a verifier on-chain...");
                     yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
                     {
                         VerifySocialCredential(credential, chainId, verifierServer.id, OperationTypeEnum.register, verifiedCredential =>
                         {
                             StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                         });
-                    }, Message.Error);
+                    }, OnError);
                     break;
                 default:
                     throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
@@ -446,9 +450,11 @@ namespace Portkey.DID
             }
             catch (Exception e)
             {
-                Message.Error(e.Message);
+                OnError(e.Message);
                 yield break;
             }
+            
+            Message.Loading(true, "Loading...");
             
             var param = new AccountLoginParams
             {
@@ -461,13 +467,13 @@ namespace Portkey.DID
             {
                 if(IsCAValid(result.Status))
                 {
-                    Message.Error("Login failed! Missing caAddress or caHash.");
+                    OnError("Login failed! Missing caAddress or caHash.");
                     return;
                 }
                 
                 var walletInfo = CreateDIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery);
                 successCallback(walletInfo);
-            }, Message.Error));
+            }, OnError));
         }
 
         public IEnumerator Logout(SuccessCallback<bool> successCallback)
@@ -476,7 +482,7 @@ namespace Portkey.DID
             {
                 chainId = Message.ChainId
             };
-            yield return _did.Logout(param, successCallback, Message.Error);
+            yield return _did.Logout(param, successCallback, OnError);
         }
 
         private DIDWalletInfo CreateDIDWalletInfo(string chainId, string guardianId, AccountType accountType, CAInfo caInfo, string sessionId, AddManagerType type)
@@ -510,6 +516,12 @@ namespace Portkey.DID
                 deviceInfo = JsonConvert.SerializeObject(deviceInfo)
             };
             return JsonConvert.SerializeObject(extraData);
+        }
+
+        private void OnError(string error)
+        {
+            Message.Loading(false, "");
+            Message.Error(error);
         }
     }
 }

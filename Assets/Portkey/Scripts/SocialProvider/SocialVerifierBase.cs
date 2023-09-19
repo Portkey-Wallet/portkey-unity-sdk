@@ -11,8 +11,7 @@ namespace Portkey.SocialProvider
             _socialLogin = socialLogin;
         }
         
-        public void AuthenticateIfAccessTokenExpired(VerifyAccessTokenParam param, AuthCallback successCallback,
-            SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
+        public void AuthenticateIfAccessTokenExpired(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
         {
             if(param.accessToken == null)
             {
@@ -20,23 +19,21 @@ namespace Portkey.SocialProvider
                 {
                     param.accessToken = info.access_token;
                     VerifyToken(param, successCallback, errorCallback);
-                }, startLoadCallback, errorCallback);
+                }, errorCallback);
                 return;
             }
             
-            startLoadCallback?.Invoke(true);
             // check if login access token is expired
             _socialLogin.RequestSocialInfo(param.accessToken, (socialLoginInfo) =>
             {
                 if(socialLoginInfo.isExpired)
                 {
-                    startLoadCallback?.Invoke(false);
                     //login expired, need to re-login
                     _socialLogin.Authenticate((info) =>
                     {
                         param.accessToken = info.access_token;
                         VerifyToken(param, successCallback, errorCallback);
-                    }, startLoadCallback, errorCallback);
+                    }, errorCallback);
                 }
                 else
                 {

@@ -14,7 +14,6 @@ namespace Portkey.SocialProvider
 
         protected ISocialLogin.AuthCallback _successCallback;
         protected ErrorCallback _errorCallback;
-        protected SuccessCallback<bool> _startLoadCallback;
 
         protected IHttp _request;
         
@@ -25,11 +24,10 @@ namespace Portkey.SocialProvider
             _request = request;
         }
         
-        public void Authenticate(ISocialLogin.AuthCallback successCallback, SuccessCallback<bool> startLoadCallback, ErrorCallback errorCallback)
+        public void Authenticate(ISocialLogin.AuthCallback successCallback, ErrorCallback errorCallback)
         {
             _successCallback = successCallback;
             _errorCallback = errorCallback;
-            _startLoadCallback = startLoadCallback;
 
             OnAuthenticate();
         }

@@ -73,7 +73,7 @@ namespace Portkey.Core
     }
 
     [Serializable]
-    public class Guardian
+    public class GuardianDto
     {
         public string guardianIdentifier = null;
         public string identifierHash = null;
@@ -107,7 +107,7 @@ namespace Portkey.Core
     [Serializable]
     public class GuardianList
     {
-        public Guardian[] guardians = null;
+        public GuardianDto[] guardians = null;
     }
     
     [Serializable]

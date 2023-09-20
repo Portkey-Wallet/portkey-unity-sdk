@@ -15,7 +15,6 @@ using Portkey.Storage;
 using Portkey.Utilities;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Guardian = Portkey.Core.Guardian;
 using GuardianList = Portkey.Core.GuardianList;
 
 namespace Portkey.Test
@@ -141,9 +140,9 @@ namespace Portkey.Test
                         caAddress = "caAddress_mock",
                         caHash = "caHash_mock",
                         guardianList = new GuardianList {
-                            guardians = new Guardian[]
+                            guardians = new GuardianDto[]
                             {
-                                new Guardian
+                                new GuardianDto
                                 {
                                     guardianIdentifier = "guardianIdentifier_mock",
                                 }

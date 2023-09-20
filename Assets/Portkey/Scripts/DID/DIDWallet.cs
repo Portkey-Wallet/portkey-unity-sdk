@@ -399,12 +399,12 @@ namespace Portkey.DID
         {
             var newGuardianList = new Core.GuardianList
             {
-                guardians = new Core.Guardian[result.GuardianList.Guardians.Count]
+                guardians = new Core.GuardianDto[result.GuardianList.Guardians.Count]
             };
             for (var i = 0; i < result.GuardianList.Guardians.Count; ++i)
             {
                 var guardian = result.GuardianList.Guardians[i];
-                var newGuardian = new Core.Guardian
+                var newGuardian = new Core.GuardianDto
                 {
                     identifierHash = guardian.IdentifierHash.ToHex(),
                     isLoginGuardian = guardian.IsLoginGuardian,

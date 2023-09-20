@@ -80,7 +80,7 @@ namespace Portkey.DID
                     StaticCoroutine.StartCoroutine(_verifierService.Initialize(chainId, b =>
                     {
                         var guardianDtos = (holderInfo.guardianList == null)
-                            ? Array.Empty<Guardian>()
+                            ? Array.Empty<GuardianDto>()
                             : holderInfo.guardianList.guardians;
                     
                         var guardians = new List<GuardianNew>();
@@ -125,7 +125,7 @@ namespace Portkey.DID
             }
         }
 
-        private static GuardianNew CreateGuardian(string guardianId, Guardian guardianDto, string chainId, VerifierItem verifier)
+        private static GuardianNew CreateGuardian(string guardianId, GuardianDto guardianDto, string chainId, VerifierItem verifier)
         {
             return new GuardianNew
             {

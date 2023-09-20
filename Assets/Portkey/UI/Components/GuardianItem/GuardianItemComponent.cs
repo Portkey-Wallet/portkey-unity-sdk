@@ -37,7 +37,7 @@ namespace Portkey.UI
         private Dictionary<AccountType, GameObject> _guardianIconMap = null;
         private DID.DID _did = null;
         private SuccessCallback<ApprovedGuardian> _onApproved = null;
-        private GuardianNew _guardian = null;
+        private Guardian _guardian = null;
         private bool _approved = false;
         private ICredential _credential = null;
 
@@ -70,7 +70,7 @@ namespace Portkey.UI
             verifyButton.SetActive(false);
         }
 
-        public void Initialize(GuardianNew guardian, ICredential credential, DID.DID did, VerifyCodeViewController verifyCodeViewController, SuccessCallback<ApprovedGuardian> onApproved)
+        public void Initialize(Guardian guardian, ICredential credential, DID.DID did, VerifyCodeViewController verifyCodeViewController, SuccessCallback<ApprovedGuardian> onApproved)
         {
             _did = did;
             _guardian = guardian;
@@ -92,7 +92,7 @@ namespace Portkey.UI
             DisplayVerificationStatus(_approved);
         }
         
-        private static IGuardianText GetGuardianText(GuardianNew guardian) => guardian.accountType switch
+        private static IGuardianText GetGuardianText(Guardian guardian) => guardian.accountType switch
         {
             AccountType.Apple  => new AppleGuardianText(guardian),
             AccountType.Google => new GoogleGuardianText(guardian),

@@ -1,6 +1,6 @@
 namespace Portkey.Core
 {
-    public class GuardianNew
+    public class Guardian
     {
         public AccountType accountType;
         public string id;

@@ -47,7 +47,7 @@ namespace Portkey.DID
             Message.ChainId = DEFAULT_CHAIN_ID;
         }
 
-        private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<GuardianNew>> successCallback, ErrorCallback errorCallback)
+        private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<Guardian>> successCallback, ErrorCallback errorCallback)
         {
             if (string.IsNullOrEmpty(guardianId))
             {
@@ -83,7 +83,7 @@ namespace Portkey.DID
                             ? Array.Empty<GuardianDto>()
                             : holderInfo.guardianList.guardians;
                     
-                        var guardians = new List<GuardianNew>();
+                        var guardians = new List<Guardian>();
                         foreach (var guardianDto in guardianDtos)
                         {
                             var verifier = _verifierService.GetVerifier(chainId, guardianDto.verifierId);
@@ -121,13 +121,13 @@ namespace Portkey.DID
 
             void ReturnNoGuardian()
             {
-                successCallback(new List<GuardianNew>());
+                successCallback(new List<Guardian>());
             }
         }
 
-        private static GuardianNew CreateGuardian(string guardianId, GuardianDto guardianDto, string chainId, VerifierItem verifier)
+        private static Guardian CreateGuardian(string guardianId, GuardianDto guardianDto, string chainId, VerifierItem verifier)
         {
-            return new GuardianNew
+            return new Guardian
             {
                 accountType = guardianDto.type,
                 id = guardianDto.guardianIdentifier,
@@ -158,22 +158,22 @@ namespace Portkey.DID
             return (int) (_config.MinApprovals * totalGuardians / (float)_config.Denominator + 1);
         }
 
-        public IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<GuardianNew>> successCallback)
+        public IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<Guardian>> successCallback)
         {
             yield return GetGuardians(credential.SocialInfo.sub, successCallback, OnError);
         }
 
-        public IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback)
+        public IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<Guardian>> successCallback)
         {
             yield return GetGuardians(phoneNumber.String, successCallback, OnError);
         }
 
-        public IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback)
+        public IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<Guardian>> successCallback)
         {
             yield return GetGuardians(emailAddress.String, successCallback, OnError);
         }
 
-        public IEnumerator Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
+        public IEnumerator Verify(Guardian guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
         {
             // 1. Create ICredential based on guardian's accountType
             // 2. Get the token verifier based on ICredential's accountType
@@ -263,7 +263,7 @@ namespace Portkey.DID
                 OnError($"Unsupported account type: {guardian.accountType}");
             }
 
-            void EmailVerifyAndApproveGuardian(EmailCredential cred, GuardianNew guard)
+            void EmailVerifyAndApproveGuardian(EmailCredential cred, Guardian guard)
             {
                 if (!IsMatchingVerifier(cred, guard))
                 {
@@ -276,7 +276,7 @@ namespace Portkey.DID
                 });
             }
             
-            void PhoneVerifyAndApproveGuardian(PhoneCredential cred, GuardianNew guard)
+            void PhoneVerifyAndApproveGuardian(PhoneCredential cred, Guardian guard)
             {
                 if (!IsMatchingVerifier(cred, guard))
                 {
@@ -289,7 +289,7 @@ namespace Portkey.DID
                 });
             }
             
-            void SocialVerifyAndApproveGuardian(ICredential cred, GuardianNew guard)
+            void SocialVerifyAndApproveGuardian(ICredential cred, Guardian guard)
             {
                 VerifySocialCredential(cred, guard.chainId, guard.verifier.id, OperationTypeEnum.communityRecovery, verifiedCredential =>
                 {
@@ -297,18 +297,18 @@ namespace Portkey.DID
                 });
             }
             
-            void ReturnApprovedGuardian(GuardianNew guard, VerifiedCredential verifiedCredential)
+            void ReturnApprovedGuardian(Guardian guard, VerifiedCredential verifiedCredential)
             {
                 var approvedGuardian = CreateApprovedGuardian(guard, verifiedCredential);
                 successCallback(approvedGuardian);
             }
 
-            bool IsCredentialMatchGuardian(ICredential cred, GuardianNew guard)
+            bool IsCredentialMatchGuardian(ICredential cred, Guardian guard)
             {
                 return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
             }
 
-            bool IsMatchingVerifier(ICodeCredential cred, GuardianNew guard)
+            bool IsMatchingVerifier(ICodeCredential cred, Guardian guard)
             {
                 return cred.ChainId == guard.chainId && cred.VerifierId == guard.verifier.id;
             }
@@ -340,7 +340,7 @@ namespace Portkey.DID
             }, OnError);
         }
 
-        private static ApprovedGuardian CreateApprovedGuardian(GuardianNew guardian, VerifiedCredential verifiedCredential)
+        private static ApprovedGuardian CreateApprovedGuardian(Guardian guardian, VerifiedCredential verifiedCredential)
         {
             return new ApprovedGuardian
             {
@@ -448,7 +448,7 @@ namespace Portkey.DID
             }
         }
 
-        public IEnumerator Login(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator Login(Guardian loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback)
         {
             _did.Reset();
             

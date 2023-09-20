@@ -4,9 +4,9 @@ namespace Portkey.UI
 {
     public class AppleGuardianText : IGuardianText
     {
-        private readonly GuardianNew _guardian;
+        private readonly Guardian _guardian;
         
-        public AppleGuardianText(GuardianNew guardian)
+        public AppleGuardianText(Guardian guardian)
         {
             _guardian = guardian;
         }

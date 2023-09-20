@@ -50,7 +50,7 @@ namespace Portkey.UI
             }));
         }
         
-        private void CheckSignUpOrLogin(ICredential credential, List<GuardianNew> guardians)
+        private void CheckSignUpOrLogin(ICredential credential, List<Guardian> guardians)
         {
             did.AuthService.Message.Loading(false);
             

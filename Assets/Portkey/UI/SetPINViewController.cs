@@ -85,7 +85,7 @@ namespace Portkey.UI
             OpenView();
         }
         
-        public void Initialize(GuardianNew loginGuardian, List<ApprovedGuardian> approvedGuardians)
+        public void Initialize(Guardian loginGuardian, List<ApprovedGuardian> approvedGuardians)
         {
             //login
             _onPinComplete = () =>

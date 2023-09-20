@@ -44,7 +44,7 @@ namespace Portkey.UI
         private bool _startTimer = false;
         private bool _isUpdatedGuardianUIInfo = false;
         private ICredential _credential = null;
-        private List<GuardianNew> _guardians = new List<GuardianNew>();
+        private List<Guardian> _guardians = new List<Guardian>();
         private List<ApprovedGuardian> _approvedGuardians = new List<ApprovedGuardian>();
 
         private void Start()
@@ -52,7 +52,7 @@ namespace Portkey.UI
             _startTimer = true;
         }
 
-        public void Initialize(List<GuardianNew> guardians, ICredential credential = null)
+        public void Initialize(List<Guardian> guardians, ICredential credential = null)
         {
             _guardians = guardians;
             _credential = credential;
@@ -160,7 +160,7 @@ namespace Portkey.UI
             _guardianItemComponents = new List<GuardianItemComponent>();
         }
 
-        private void CreateGuardianItems(List<GuardianNew> guardians)
+        private void CreateGuardianItems(List<Guardian> guardians)
         {
             foreach (var guardian in guardians)
             {

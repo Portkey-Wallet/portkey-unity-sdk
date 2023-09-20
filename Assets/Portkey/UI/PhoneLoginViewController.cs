@@ -49,7 +49,7 @@ namespace Portkey.UI
             }));
         }
         
-        private void CheckSignUpOrLogin(PhoneNumber phoneNumber, List<GuardianNew> guardians)
+        private void CheckSignUpOrLogin(PhoneNumber phoneNumber, List<Guardian> guardians)
         {
             ShowLoading(false);
             

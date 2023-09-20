@@ -79,7 +79,7 @@ namespace Portkey.UI
             DID.AuthService.Message.Loading(true, "Checking account on the chain...");
         }
         
-        private void CheckSignUpOrLogin(EmailAddress emailAddress, List<GuardianNew> guardians)
+        private void CheckSignUpOrLogin(EmailAddress emailAddress, List<Guardian> guardians)
         {
             ShowLoading(false);
             

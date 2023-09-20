@@ -40,7 +40,7 @@ namespace Portkey.UI
             //StartCoroutine(DID.AuthService.EmailCredentialProvider.Verify(credential, OpenSetPINView));
         }
         
-        public void Initialize(GuardianNew guardian, SuccessCallback<ApprovedGuardian> onSuccess)
+        public void Initialize(Guardian guardian, SuccessCallback<ApprovedGuardian> onSuccess)
         {
             Initialize(guardian.id, guardian.accountType, guardian.verifier.name);
             StartCoroutine(did.AuthService.Verify(guardian, onSuccess));

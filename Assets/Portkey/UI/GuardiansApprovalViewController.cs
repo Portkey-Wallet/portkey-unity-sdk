@@ -61,7 +61,7 @@ namespace Portkey.UI
             did.AuthService.PhoneCredentialProvider.EnableCodeSendConfirmationFlow = false;
             
             expireText.text = "Expire after 1 hour.";
-            totalGuardiansText.text = $"/{did.GetApprovalCount(guardians.Count).ToString()}";
+            totalGuardiansText.text = $"/{did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count).ToString()}";
             completeButtonGameObject.gameObject.SetActive(true);
             infoDialog.SetActive(false);
 
@@ -96,7 +96,7 @@ namespace Portkey.UI
             UpdateTotalApprovedGuardiansText();
             UpdateGuardianProgressDial();
 
-            var isCompletedVerification = _approvedGuardians.Count >= did.GetApprovalCount(_guardians.Count);
+            var isCompletedVerification = _approvedGuardians.Count >= did.AuthService.GetRequiredApprovedGuardiansCount(_guardians.Count);
             SetSendButtonInteractable(isCompletedVerification);
 
             if (isCompletedVerification)
@@ -189,7 +189,7 @@ namespace Portkey.UI
         private void UpdateGuardianProgressDial()
         {
             var approvedCount = _approvedGuardians.Count;
-            var requiredCount = did.GetApprovalCount(_guardians.Count);
+            var requiredCount = did.AuthService.GetRequiredApprovedGuardiansCount(_guardians.Count);
 
             if (approvedCount == requiredCount)
             {

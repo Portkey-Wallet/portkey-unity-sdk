@@ -8,6 +8,16 @@ namespace Portkey.SocialProvider
     {
         public ISocialLogin SocialLogin { get; set; }
 
+        private void Start()
+        {
+            Debugger.LogError(gameObject.name + " created");
+        }
+
+        private void OnDestroy()
+        {
+            Debugger.LogError(gameObject.name + " destroyed");
+        }
+
         private void OnApplicationFocus(bool hasFocus)
         {
             if (!hasFocus)

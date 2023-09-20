@@ -145,7 +145,7 @@ namespace Portkey.UI
             if (_guardian.accountType is AccountType.Apple or AccountType.Google)
             {
                 _did.AuthService.Message.Loading(true, "Loading...");
-                _did.AuthService.Verify(_guardian, OnApproved, _credential);
+                StartCoroutine(_did.AuthService.Verify(_guardian, OnApproved, _credential));
             }
             else
             {

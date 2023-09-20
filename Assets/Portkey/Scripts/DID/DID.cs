@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Linq;
-using Newtonsoft.Json;
 using Portkey.Biometric;
 using Portkey.Chain;
 using Portkey.Contract;
@@ -47,7 +45,7 @@ namespace Portkey.DID
             _encryption = new AESEncryption();
             _biometricProvider = new BiometricProvider();
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
-            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider);
+            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
         }
         
         public IAuthService AuthService => _authService;
@@ -59,15 +57,6 @@ namespace Portkey.DID
         /// <returns>Chain object related to the specified chain ID.</returns>
         public IChain GetChain(string chainId) => _chainProvider.GetChain(chainId);
 
-        public int GetApprovalCount(int length)
-        {
-            if (length <= _config.MinApprovals)
-            {
-                return length;
-            }
-            return (int) (_config.MinApprovals * length / (float)_config.Denominator + 1);
-        }
-        
         public IBiometric GetBiometric()
         {
             return _biometricProvider.GetBiometric();

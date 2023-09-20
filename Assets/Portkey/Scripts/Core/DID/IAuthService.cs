@@ -11,10 +11,11 @@ namespace Portkey.Core
         PhoneCredentialProvider PhoneCredentialProvider { get; }
         EmailCredentialProvider EmailCredentialProvider { get; }
         IAuthMessage Message { get; }
+        int GetRequiredApprovedGuardiansCount(int totalGuardians);
         IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<GuardianNew>> successCallback);
         IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<GuardianNew>> successCallback);
         IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<GuardianNew>> successCallback);
-        void Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null);
+        IEnumerator Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null);
         IEnumerator SignUp(PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator SignUp(EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator SignUp(ICredential credential, SuccessCallback<DIDWalletInfo> successCallback);

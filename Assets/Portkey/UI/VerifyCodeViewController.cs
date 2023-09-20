@@ -43,7 +43,7 @@ namespace Portkey.UI
         public void Initialize(GuardianNew guardian, SuccessCallback<ApprovedGuardian> onSuccess)
         {
             Initialize(guardian.id, guardian.accountType, guardian.verifier.name);
-            did.AuthService.Verify(guardian, onSuccess);
+            StartCoroutine(did.AuthService.Verify(guardian, onSuccess));
         }
 
         public void OpenView()

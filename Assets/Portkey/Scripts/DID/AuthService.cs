@@ -17,6 +17,7 @@ namespace Portkey.DID
         private readonly ISocialProvider _socialLoginProvider;
         private readonly ISocialVerifierProvider _socialVerifierProvider;
         private readonly IVerifierService _verifierService;
+        private readonly PortkeyConfig _config;
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }
@@ -26,12 +27,13 @@ namespace Portkey.DID
         private EmailLogin Email { get; set; }
         private PhoneLogin Phone { get; set; }
 
-        public AuthService(IPortkeySocialService portkeySocialService, DIDWallet<WalletAccount> did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider)
+        public AuthService(IPortkeySocialService portkeySocialService, DIDWallet<WalletAccount> did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider, PortkeyConfig config)
         {
             _portkeySocialService = portkeySocialService;
             _did = did;
             _socialLoginProvider = socialLoginProvider;
             _socialVerifierProvider = socialVerifierProvider;
+            _config = config;
             
             _verifierService = new VerifierService(_did, _portkeySocialService);
             Message = new AuthMessage();
@@ -147,6 +149,15 @@ namespace Portkey.DID
             };
         }
 
+        public int GetRequiredApprovedGuardiansCount(int totalGuardians)
+        {
+            if (totalGuardians <= _config.MinApprovals)
+            {
+                return totalGuardians;
+            }
+            return (int) (_config.MinApprovals * totalGuardians / (float)_config.Denominator + 1);
+        }
+
         public IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<GuardianNew>> successCallback)
         {
             yield return GetGuardians(credential.SocialInfo.sub, successCallback, OnError);
@@ -162,7 +173,7 @@ namespace Portkey.DID
             yield return GetGuardians(emailAddress.String, successCallback, OnError);
         }
 
-        public void Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
+        public IEnumerator Verify(GuardianNew guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
         {
             // 1. Create ICredential based on guardian's accountType
             // 2. Get the token verifier based on ICredential's accountType
@@ -174,7 +185,7 @@ namespace Portkey.DID
                 if (!IsCredentialMatchGuardian(credential, guardian))
                 {
                     OnError("Account does not match your guardian.");
-                    return;
+                    yield break;
                 }
 
                 switch (guardian.accountType)
@@ -192,7 +203,7 @@ namespace Portkey.DID
                         OnError($"Unsupported account type: {guardian.accountType}.");
                         break;
                 }
-                return;
+                yield break;
             }
             
             if (guardian.accountType == AccountType.Apple)
@@ -223,7 +234,7 @@ namespace Portkey.DID
             }
             else if (guardian.accountType == AccountType.Email)
             {
-                StaticCoroutine.StartCoroutine(EmailCredentialProvider.Get(EmailAddress.Parse(guardian.id), emailCredential =>
+                yield return EmailCredentialProvider.Get(EmailAddress.Parse(guardian.id), emailCredential =>
                 {
                     if (!IsCredentialMatchGuardian(emailCredential, guardian))
                     {
@@ -232,11 +243,11 @@ namespace Portkey.DID
                     }
                     
                     EmailVerifyAndApproveGuardian(emailCredential, guardian);
-                }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery));
+                }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery);
             }
             else if (guardian.accountType == AccountType.Phone)
             {
-                StaticCoroutine.StartCoroutine(PhoneCredentialProvider.Get(PhoneNumber.Parse(guardian.id), phoneCredential =>
+                yield return PhoneCredentialProvider.Get(PhoneNumber.Parse(guardian.id), phoneCredential =>
                 {
                     if (!IsCredentialMatchGuardian(phoneCredential, guardian))
                     {
@@ -245,7 +256,7 @@ namespace Portkey.DID
                     }
                     
                     PhoneVerifyAndApproveGuardian(phoneCredential, guardian);
-                }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery));
+                }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery);
             }
             else
             {

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Portkey.Utilities;
 using Portkey.Core;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -50,7 +49,7 @@ namespace Portkey.UI
                 CheckSignUpOrLogin(credential, guardians);
             }));
         }
-
+        
         private void CheckSignUpOrLogin(ICredential credential, List<GuardianNew> guardians)
         {
             did.AuthService.Message.Loading(false);

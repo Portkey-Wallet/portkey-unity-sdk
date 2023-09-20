@@ -75,35 +75,115 @@ To use the Unity SDK in your project, follow these steps:
 6. Write your custom code to interact with the SDK's functionality.
 7. Build and run your Unity application or game to test the integration.
 
-## Examples (WIP)
-Check out the following code snippet to see an example of how to use the Unity SDK:
+## Examples
+
+### **Google Sign In Example**
+
+The following code snippet demonstrates how to use the Portkey Unity SDK to sign in with Google:
 
 ```csharp
-// Example code demonstrating the usage of Unity SDK
+using Portkey.DID;
 
-using UnityEngine;
-using YourNamespace;
-
-public class ExampleScript : MonoBehaviour
+public class GoogleLoginExample : MonoBehaviour
 {
-    private UnitySDK sdk;
+    [SerializeField] private DID _did;
 
-    private void Start()
+    public void SignInWithGoogle()
     {
-        // Initialize the SDK
-        sdk = new UnitySDK();
-        sdk.Init();
-    }
+        _did.AuthService.GoogleCredentialProvider.Get(credential => 
+        {
+            StartCoroutine(_did.AuthService.GetGuardians(credential, guardians =>
+            {
+                if(guardians.Count == 0)
+                {
+                    // No guardians, proceed to sign up
+                    StartCoroutine(_did.AuthService.SignUp(credential, didWalletInfo => 
+                    {
+                        // user has successfully signed up and his info can be found in didWalletInfo
+                    }));
+                }
+                else
+                {
+                    List<ApprovedGuardian> approvedGuardians = new List<ApprovedGuardian>();
+                    // Guardians exist, proceed to sign in
+                    for (int i = 0; i < _did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count); ++i)
+                    {
+                        StartCoroutine(_did.AuthService.Verify(guardians[i], approvedGuardian =>
+                        {
+                            approvedGuardians.Add(approvedGuardian);
+                        }));
+                    }
+                    
+                    while(approvedGuardians.Count < _did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count))
+                    {
+                        // wait for guardians to be approved
+                    }
 
-    private void Update()
-    {
-        // Perform SDK operations
-        sdk.DoSomething();
+                    // first element of the guardians array is the login guardian
+                    StartCoroutine(_did.AuthService.Login(guardians[0], approvedGuardians, didWalletInfo =>
+                    {
+                        // user is logged in and his info can be found in didWalletInfo
+                    }));
+                }
+            }));
+        });
     }
 }
 ```
 
-For more detailed examples and sample projects, refer to the [Examples](examples/) directory of this repository.
+### **Apple Sign In Example**
+
+The following code snippet demonstrates how to use the Portkey Unity SDK to sign in with Apple:
+
+```csharp
+using Portkey.DID;
+
+public class AppleLoginExample : MonoBehaviour
+{
+    [SerializeField] private DID _did;
+
+    public void SignInWithApple()
+    {
+        _did.AuthService.AppleCredentialProvider.Get(credential => 
+        {
+            StartCoroutine(_did.AuthService.GetGuardians(credential, guardians =>
+            {
+                if(guardians.Count == 0)
+                {
+                    // No guardians, proceed to sign up
+                    StartCoroutine(_did.AuthService.SignUp(credential, didWalletInfo => 
+                    {
+                        // user has successfully signed up and his info can be found in didWalletInfo
+                    }));
+                }
+                else
+                {
+                    List<ApprovedGuardian> approvedGuardians = new List<ApprovedGuardian>();
+                    // Guardians exist, proceed to sign in
+                    for (int i = 0; i < _did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count); ++i)
+                    {
+                        StartCoroutine(_did.AuthService.Verify(guardians[i], approvedGuardian =>
+                        {
+                            approvedGuardians.Add(approvedGuardian);
+                        }));
+                    }
+                    
+                    while(approvedGuardians.Count < _did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count))
+                    {
+                        // wait for guardians to be approved
+                    }
+
+                    // first element of the guardians array is the login guardian
+                    StartCoroutine(_did.AuthService.Login(guardians[0], approvedGuardians, didWalletInfo =>
+                    {
+                        // user is logged in and his info can be found in didWalletInfo
+                    }));
+                }
+            }));
+        });
+    }
+}
+```
 
 ## Contributing
 We welcome contributions to the Portkey Unity SDK! To contribute, please follow these guidelines:

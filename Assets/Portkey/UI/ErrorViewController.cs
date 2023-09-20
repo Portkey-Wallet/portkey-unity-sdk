@@ -1,3 +1,4 @@
+using Portkey.Core;
 using TMPro;
 using UnityEngine;
 
@@ -9,6 +10,11 @@ namespace Portkey.UI
         
         public void ShowErrorText(string error)
         {
+            if(error == null)
+            {
+                return;
+            }
+            Debugger.LogError(error);
             errorText.text = error;
             gameObject.SetActive(true);
         }

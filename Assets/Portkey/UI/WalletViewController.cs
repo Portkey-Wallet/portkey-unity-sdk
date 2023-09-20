@@ -33,8 +33,6 @@ namespace Portkey.UI
         
         [Header("View")]
         [SerializeField] private SignInViewController signInViewController;
-        [SerializeField] private ErrorViewController errorView;
-        [SerializeField] private LoadingViewController loadingView;
         [SerializeField] private SetPINViewController setPinViewController;
         [SerializeField] private GuardiansApprovalViewController guardiansApprovalViewController;
         [SerializeField] private LockViewController lockViewController;
@@ -183,19 +181,14 @@ namespace Portkey.UI
 
         public void OnClickSignOut()
         {
-            var param = new EditManagerParams
-            {
-                chainId = _walletInfo.chainId
-            };
+            did.AuthService.Message.Loading(true, "Signing out of Portkey...");
 
-            ShowLoading(true, "Signing out of Portkey...");
-            
-            StartCoroutine(did.Logout(param, OnSuccessLogout, OnError));
+            StartCoroutine(did.AuthService.Logout(OnSuccessLogout));
         }
         
         private void OnSuccessLogout(bool success)
         {
-            ShowLoading(false);
+            did.AuthService.Message.Loading(false);
             
             if (!success)
             {
@@ -224,20 +217,12 @@ namespace Portkey.UI
         
         private void OnError(string error)
         {
-            Debug.LogError(error);
-            errorView.ShowErrorText(error);
-            
-            ShowLoading(false);
+            did.AuthService.Message.Error(error);
         }
 
         private void CloseView()
         {
             gameObject.SetActive(false);
-        }
-        
-        private void ShowLoading(bool show, string text = "")
-        {
-            loadingView.DisplayLoading(show, text);
         }
     }
 }

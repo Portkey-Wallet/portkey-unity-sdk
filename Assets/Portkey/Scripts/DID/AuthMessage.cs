@@ -62,6 +62,7 @@ namespace Portkey.DID
 
         public void Error(string error)
         {
+            Loading(false, "");
             OnErrorEvent?.Invoke(error);
         }
 

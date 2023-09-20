@@ -13,8 +13,6 @@ namespace Portkey.UI
         [Header("Views")]
         [SerializeField] protected GuardiansApprovalViewController guardianApprovalViewController;
         [SerializeField] protected UnregisteredViewController unregisteredView;
-        [SerializeField] protected ErrorViewController errorView;
-        [SerializeField] protected LoadingViewController loadingView;
         [SerializeField] protected VerifyCodeViewController verifyCodeViewController;
         [SerializeField] protected SetPINViewController setPinViewController;
         
@@ -73,19 +71,12 @@ namespace Portkey.UI
         
         protected void ShowLoading(bool show, string text = "")
         {
-            loadingView.DisplayLoading(show, text);
+            DID.AuthService.Message.Loading(show, text);
         }
         
         protected void StartLoading()
         {
-            ShowLoading(true, "Checking account on the chain...");
-        }
-        
-        protected void OnError(string error)
-        {
-            Debugger.LogError(error);
-            ShowLoading(false);
-            errorView.ShowErrorText(error);
+            DID.AuthService.Message.Loading(true, "Checking account on the chain...");
         }
         
         private void CheckSignUpOrLogin(EmailAddress emailAddress, List<GuardianNew> guardians)

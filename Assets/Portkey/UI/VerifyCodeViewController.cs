@@ -65,7 +65,7 @@ namespace Portkey.UI
         
         private void SendVerificationCode()
         {
-            ShowLoading(true, "Loading...");
+            did.AuthService.Message.Loading(true, "Loading...");
 
             did.AuthService.Message.ResendVerificationCode();
             did.AuthService.Message.OnResendVerificationCodeCompleteEvent += OnResendVerificationCodeComplete;
@@ -74,12 +74,7 @@ namespace Portkey.UI
         private void OnResendVerificationCodeComplete()
         {
             did.AuthService.Message.OnResendVerificationCodeCompleteEvent -= OnResendVerificationCodeComplete;
-            ShowLoading(false);
-        }
-
-        private void ShowLoading(bool show, string text = "")
-        {
-            loadingView.DisplayLoading(show, text);
+            did.AuthService.Message.Loading(false);
         }
         
         public void OnClickClose()

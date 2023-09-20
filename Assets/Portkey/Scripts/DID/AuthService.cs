@@ -380,7 +380,7 @@ namespace Portkey.DID
 
             var param = new RegisterParams
             {
-                type = AccountType.Email,
+                type = verifiedCredential.AccountType,
                 loginGuardianIdentifier = verifiedCredential.SocialInfo.sub.RemoveAllWhiteSpaces(),
                 chainId = verifiedCredential.ChainId,
                 verifierId = verifiedCredential.VerificationDoc.verifierId,
@@ -427,6 +427,7 @@ namespace Portkey.DID
                     {
                         VerifySocialCredential(credential, chainId, verifierServer.id, OperationTypeEnum.register, verifiedCredential =>
                         {
+                            Message.Loading(true, "Creating address on the chain...");
                             StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                         });
                     }, OnError);
@@ -515,7 +516,6 @@ namespace Portkey.DID
 
         private void OnError(string error)
         {
-            Message.Loading(false, "");
             Message.Error(error);
         }
     }

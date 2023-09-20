@@ -22,7 +22,7 @@ namespace Portkey.UI
             {
                 PhoneCountryCodeResult = result;
                 countryCodeButtonComponent.SetCountryCodeText($"+{result.locateData.code}");
-            }, OnError));
+            }, DID.AuthService.Message.Error));
         }
         
         public new void OnValueChanged()

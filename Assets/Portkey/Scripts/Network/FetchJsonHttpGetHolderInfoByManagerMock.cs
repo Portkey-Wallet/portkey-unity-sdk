@@ -9,13 +9,14 @@ namespace Portkey.Network
     {
         [SerializeField] private string caHolderManagerInfoResponse;
         [SerializeField] private string loginGuardianInfoResponse;
-        public override IEnumerator Get(JsonRequestData data, IHttp.successCallback successCallback, ErrorCallback errorCallback)
+
+        public override IEnumerator Get<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
-            errorCallback("Should not be called!");
+            errorCallback(new ErrorMessage { message = "Should not be called!" });
             yield break;
         }
 
-        public override IEnumerator Post(JsonRequestData data, IHttp.successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator Post(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             if (data.JsonData.Contains("caHolderManagerInfo"))
             {
@@ -25,11 +26,10 @@ namespace Portkey.Network
             {
                 successCallback(loginGuardianInfoResponse);
             }
-
             yield break;
         }
 
-        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, successCallback successCallback, ErrorCallback errorCallback)
+        public override IEnumerator PostFieldForm<T>(FieldFormRequestData<T> data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();
         }

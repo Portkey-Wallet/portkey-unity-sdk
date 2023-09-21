@@ -14,8 +14,10 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Google.Protobuf.dll",
-        "AElf.Client.dll",
-        "AElf.Types.dll"
+        "AElf.Types.dll",
+        "Moq.dll",
+        "Newtonsoft.Json.dll",
+        "BIP39Wallet.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

@@ -16,8 +16,8 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Google.Protobuf.dll",
-        "AElf.Client.dll",
-        "AElf.Types.dll"
+        "AElf.Types.dll",
+        "Moq.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

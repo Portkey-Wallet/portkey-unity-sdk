@@ -88,7 +88,7 @@ namespace Portkey.GraphQL
                     (error) =>
                                 {
                                     //call error callback
-                                    errorCallback(error);
+                                    errorCallback(error.message);
                                 });
         }
 

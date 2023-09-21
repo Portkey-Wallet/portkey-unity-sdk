@@ -1,9 +1,11 @@
 using System;
-using System.Threading.Tasks;
+using System.Collections;
 using AElf;
-using AElf.Client.Dto;
+using AElf.Types;
 using Google.Protobuf;
+using Portkey.Chain.Dto;
 using Portkey.Core;
+using Portkey.Utilities;
 using UnityEngine;
 
 namespace Portkey.Contract
@@ -13,8 +15,11 @@ namespace Portkey.Contract
     /// </summary>
     public class ContractBasic : IContract
     {
+        private const int MAX_POLL_TIMES = 30;
+        
         private readonly IChain _chain;
         public string ContractAddress { get; protected set; }
+        public string ChainId => _chain.ChainInfo.chainId;
 
         /// <summary>
         /// Constructor for ContractBasic to initialize the contract address and its respective chain.
@@ -24,32 +29,97 @@ namespace Portkey.Contract
         public ContractBasic(IChain chain, string contractAddress)
         {
             _chain = chain;
-            ContractAddress = contractAddress;
+            ContractAddress = contractAddress ?? throw new ArgumentException("Contract address cannot be null.");
         }
         
-        public async Task<T> CallAsync<T>(KeyPair keyPair, string methodName, IMessage param) where T : IMessage<T>, new()
+        public IEnumerator CallAsync<T>(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
         {
-            try
+            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
             {
-                var transaction = await _chain.GenerateTransactionAsync(keyPair.Address, ContractAddress, methodName, param);
-                
-                var txWithSign = _chain.SignTransaction(keyPair.PrivateKey, transaction);
-
-                var result = await _chain.ExecuteTransactionAsync(new ExecuteTransactionDto
+                var txWithSign = signingKey.SignTransaction(transaction);
+                var executeTxDto = new ExecuteTransactionDto
                 {
                     RawTransaction = txWithSign.ToByteArray().ToHex()
-                });
+                };
+                
+                StaticCoroutine.StartCoroutine(_chain.ExecuteTransactionAsync(executeTxDto, result =>
+                {
+                    var value = new T();
+                    value.MergeFrom(ByteArrayHelper.HexStringToByteArray(result));
+                    
+                    successCallback?.Invoke(value);
+                }, errorCallback));
+            }, errorCallback);
+        }
 
-                var value = new T();
-                value.MergeFrom(ByteArrayHelper.HexStringToByteArray(result));
-
-                return value;
-            }
-            catch (Exception e)
+        public IEnumerator SendAsync(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
+        {
+            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
             {
-                Debugger.LogException(e);
+                // As different nodes have different block height,
+                // we need to give the next transaction a lower height (-5) so transaction can be successful
+                var refBlockNumber = transaction.RefBlockNumber - 5;
+                refBlockNumber = Math.Max(0, refBlockNumber);
+                
+                StaticCoroutine.StartCoroutine(_chain.GetBlockByHeightAsync(refBlockNumber, blockDto =>
+                {
+                    transaction.RefBlockNumber = refBlockNumber;
+                    transaction.RefBlockPrefix = BlockHelper.GetRefBlockPrefix(Hash.LoadFromHex(blockDto?.BlockHash));
+                    
+                    var txWithSign = signingKey.SignTransaction(transaction);
+                    Debugger.Log("Sending Transaction...");
 
-                return new T();
+                    var sendTxnInput = new SendTransactionInput
+                    {
+                        RawTransaction = txWithSign.ToByteArray().ToHex()
+                    };
+                    StaticCoroutine.StartCoroutine(_chain.SendTransactionAsync(sendTxnInput, result =>
+                    {
+                        StaticCoroutine.StartCoroutine(PollTransactionResultAsync(result.TransactionId, transactionResult =>
+                        {
+                            Debugger.Log($"{methodName} on chain: {_chain.ChainInfo.chainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
+
+                            var txnInfoDto = new IContract.TransactionInfoDto
+                            {
+                                transaction = transaction,
+                                transactionResult = transactionResult
+                            };
+                            successCallback?.Invoke(txnInfoDto);
+                            
+                        }, errorCallback));
+                    }, errorCallback));
+                }, errorCallback));
+            }, errorCallback);
+        }
+        
+        private IEnumerator PollTransactionResultAsync(string transactionId, SuccessCallback<TransactionResultDto> successCallback, ErrorCallback errorCallback)
+        {
+            var times = 0;
+            var transactionResult = new TransactionResultDto();
+            
+            yield return new WaitForSeconds(3);
+            yield return _chain.GetTransactionResultAsync(transactionId, result =>
+            {
+                transactionResult = result;
+            }, errorCallback);
+
+            while (transactionResult.Status == "PENDING" && times < MAX_POLL_TIMES)
+            {
+                times++;
+                yield return _chain.GetTransactionResultAsync(transactionId, result =>
+                {
+                    transactionResult = result;
+                }, errorCallback);
+                yield return new WaitForSeconds(1);
+            }
+
+            if (transactionResult.Status == "PENDING")
+            {
+                errorCallback?.Invoke("Transaction is still pending.");
+            }
+            else
+            {
+                successCallback?.Invoke(transactionResult);
             }
         }
     }

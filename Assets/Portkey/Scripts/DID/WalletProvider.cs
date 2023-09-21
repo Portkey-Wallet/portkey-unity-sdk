@@ -1,5 +1,4 @@
 using BIP39Wallet;
-using NBitcoin;
 using Portkey.Core;
 using KeyPair = Portkey.Core.KeyPair;
 
@@ -8,7 +7,6 @@ namespace Portkey.DID
     public class WalletProvider : IWalletProvider
     {
         private readonly WalletFactory _walletFactory = new AElfWalletFactory();
-        private PrivateKey _privateKey = null;
         private readonly IEncryption _encryption;
         
         public WalletProvider(IEncryption encryption)
@@ -34,10 +32,10 @@ namespace Portkey.DID
 
         public IWallet Create()
         {
-            _privateKey ??= _walletFactory.Create().PrivateKey;
+            var privateKey = _walletFactory.Create().PrivateKey;
             
             // change to our own wrapper class
-            var keyPair = new KeyPair(_privateKey);
+            var keyPair = new KeyPair(privateKey);
 
             return new AElfWallet(keyPair, _encryption);
         }

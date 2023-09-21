@@ -21,10 +21,9 @@ namespace Portkey.Test
         public void CreateTest()
         {
             IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account1 = walletProvider.Create();
-            var account2 = walletProvider.Create();
+            var account = walletProvider.Create();
             
-            Assert.AreEqual(account1.PublicKey, account2.PublicKey);
+            Assert.IsNotNull(account.PublicKey);
         }
         
         [Test]

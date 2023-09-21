@@ -29,17 +29,17 @@ namespace Portkey.Test
         {
             public Dictionary<string, CAInfo> GetCAInfoMap()
             {
-                return _account.accountDetails.caInfoMap;
+                return Account.accountDetails.caInfoMap;
             }
             
             public string GetLoginAccount()
             {
-                return _account.accountDetails.socialInfo.LoginAccount;
+                return Account.accountDetails.socialInfo.LoginAccount;
             }
             
             public string GetManagementWalletAddress()
             {
-                return _account.managementWallet.Address;
+                return Account.managementWallet.Address;
             }
 
             public new IEnumerator GetLoginStatus(string chainId, string sessionId,

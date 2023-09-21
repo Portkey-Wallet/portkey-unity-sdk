@@ -56,7 +56,7 @@ namespace Portkey.Core
         IEnumerator GetHolderInfoByContract(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback);
         IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback);
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
-        ISigningKey GetManagementWallet();
+        ISigningKey GetManagementSigningKey();
         bool IsLoggedIn();
         bool Save(string password, string keyName);
         bool Load(string password, string keyName);

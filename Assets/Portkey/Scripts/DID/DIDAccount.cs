@@ -539,7 +539,7 @@ namespace Portkey.DID
             }, errorCallback);
         }
         
-        public ISigningKey GetManagementWallet()
+        public ISigningKey GetManagementSigningKey()
         {
             return Account?.managementSigningKey;
         }

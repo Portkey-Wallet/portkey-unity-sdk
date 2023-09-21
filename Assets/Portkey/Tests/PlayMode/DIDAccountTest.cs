@@ -29,17 +29,17 @@ namespace Portkey.Test
         {
             public Dictionary<string, CAInfo> GetCAInfoMap()
             {
-                return _data.caInfoMap;
+                return _account.accountDetails.caInfoMap;
             }
             
             public string GetLoginAccount()
             {
-                return _data.socialInfo.LoginAccount;
+                return _account.accountDetails.socialInfo.LoginAccount;
             }
             
-            public string GetEncryptedPrivateKey()
+            public string GetManagementWalletAddress()
             {
-                return _data.aesPrivateKey;
+                return _account.managementWallet.Address;
             }
 
             public new IEnumerator GetLoginStatus(string chainId, string sessionId,
@@ -54,7 +54,7 @@ namespace Portkey.Test
                 yield return base.GetRegisterStatus(chainId, sessionId, successCallback, errorCallback);
             }
 
-            public DidAccountMock(IPortkeySocialService socialService, IStorageSuite<string> storageSuite, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IEncryption encryption) : base(socialService, storageSuite, walletProvider, connectionService, contractProvider, encryption)
+            public DidAccountMock(IPortkeySocialService socialService, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository) : base(socialService, walletProvider, connectionService, contractProvider, accountRepository)
             {
             }
         }
@@ -85,6 +85,14 @@ namespace Portkey.Test
             encryptionMock.Setup(provider => provider.Decrypt(It.IsAny<byte[]>(), It.IsAny<string>()))
                 .Returns((byte[] data, string password) => "decrypted_mock");
             return encryptionMock;
+        }
+        
+        private static Mock<IAccountRepository> GetAccountRepositoryMock()
+        {
+            var accountRepositoryMock = new Mock<IAccountRepository>();
+            accountRepositoryMock.Setup(repo => repo.Save(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Account>()))
+                .Returns(true);
+            return accountRepositoryMock;
         }
 
         private static Mock<IContract> GetContractMock<T>() where T : IMessage<T>, new()
@@ -207,9 +215,9 @@ namespace Portkey.Test
             var socialServiceMock = GetSocialServiceMock();
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
-            var encryptionMock = GetEncryptionMock();
+            var accountRepositoryMock = GetAccountRepositoryMock();
 
-            var didWallet = new DidAccountMock(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object);
             
             yield return didWallet.GetRegisterStatus("AELF_mock", "sessionId_mock", (response) =>
             {
@@ -225,9 +233,9 @@ namespace Portkey.Test
             var socialServiceMock = GetSocialServiceMock();
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
-            var encryptionMock = GetEncryptionMock();
-            
-            var didWallet = new DIDAccount(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
+            var accountRepositoryMock = GetAccountRepositoryMock();
+
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object);
             var registerParam = new RegisterParams
             {
                 type = AccountType.Google,
@@ -252,10 +260,9 @@ namespace Portkey.Test
             var socialServiceMock = GetSocialServiceMock();
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
-            var encryptionMock = GetEncryptionMock();
-            
-            var didWallet = new DidAccountMock(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
-            
+            var accountRepositoryMock = GetAccountRepositoryMock();
+
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object);
             yield return didWallet.GetLoginStatus("AELF_mock", "sessionId_mock", (response) =>
             {
                 Assert.AreEqual(response.caAddress, "caAddress_mock");
@@ -270,9 +277,9 @@ namespace Portkey.Test
             var socialServiceMock = GetSocialServiceMock();
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
-            var encryptionMock = GetEncryptionMock();
-            
-            var didWallet = new DIDAccount(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
+            var accountRepositoryMock = GetAccountRepositoryMock();
+
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object);
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -299,9 +306,9 @@ namespace Portkey.Test
             var socialServiceMock = GetSocialServiceMock();
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
-            var encryptionMock = GetEncryptionMock();
-            
-            var didWallet = new DIDAccount(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
+            var accountRepositoryMock = GetAccountRepositoryMock();
+
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object);
             var param = new EditManagerParams
             {
                 chainId = "chainId_mock"
@@ -320,9 +327,9 @@ namespace Portkey.Test
             var socialServiceMock = GetSocialServiceMock();
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
-            var encryptionMock = GetEncryptionMock();
-            
-            var didWallet = new DIDAccount(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
+            var accountRepositoryMock = GetAccountRepositoryMock();
+
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object);
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -370,10 +377,9 @@ namespace Portkey.Test
             var socialServiceMock = GetSocialServiceMock();
             var contractMock = GetContractMock<GetVerifierServersOutput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
-            var encryptionMock = GetEncryptionMock();
-            
-            var didWallet = new DIDAccount(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryptionMock.Object);
+            var accountRepositoryMock = GetAccountRepositoryMock();
 
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object);
             var done = false;
             yield return didWallet.GetVerifierServers("AELF", (result) =>
             {
@@ -407,8 +413,9 @@ namespace Portkey.Test
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryption = new AESEncryption();
+            var accountRepository = new AccountRepository(_storageSuite, encryption, new WalletProvider(encryption));
             
-            var didWallet = new DidAccountMock(socialServiceMock.Object, _storageSuite, accountProviderMock.Object, _connectionService, contractProviderMock.Object, encryption);
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepository);
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -425,10 +432,9 @@ namespace Portkey.Test
                 didWallet.Load(PASSWORD, KEY);
                 var afterLoginAccount = didWallet.GetLoginAccount();
                 var afterCaInfoMap = didWallet.GetCAInfoMap();
-                var afterEncryptedPrivateKey = didWallet.GetEncryptedPrivateKey();
-                var afterPrivateKey = encryption.Decrypt(Convert.FromBase64String(afterEncryptedPrivateKey), PASSWORD);
+                var afterDecryptedAddress = didWallet.GetManagementWalletAddress();
                 
-                Assert.AreEqual(afterPrivateKey, KeyPair.PrivateKey);
+                Assert.AreEqual(KeyPair.Address, afterDecryptedAddress);
                 Assert.AreEqual(actualLoginAccount, afterLoginAccount);
                 Assert.AreEqual(actualCaInfoMap["chainId_mock"].caAddress, afterCaInfoMap["chainId_mock"].caAddress);
             }, Assert.Fail);

@@ -15,13 +15,11 @@ namespace Portkey.Core
     
     public class AccountDetails
     {
-        public string aesPrivateKey = null;
         public Dictionary<string, CAInfo> caInfoMap = new Dictionary<string, CAInfo>();
         public SocialInfo socialInfo = new SocialInfo();
 
         public void Clear()
         {
-            aesPrivateKey = null;
             caInfoMap.Clear();
             socialInfo = new SocialInfo();
         }

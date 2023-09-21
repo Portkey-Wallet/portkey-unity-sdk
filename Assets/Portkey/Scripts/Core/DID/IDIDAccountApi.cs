@@ -58,5 +58,7 @@ namespace Portkey.Core
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
         IWallet GetManagementWallet();
         bool IsLoggedIn();
+        bool Save(string password, string keyName);
+        bool Load(string password, string keyName);
     }
 }

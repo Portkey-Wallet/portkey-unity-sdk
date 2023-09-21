@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Portkey.Core;
 
@@ -10,23 +9,23 @@ namespace Portkey.DID
         private readonly IStorageSuite<string> _storageSuite;
         private readonly IEncryption _encryption;
         private readonly ISigningKeyGenerator _signingKeyGenerator;
+        private readonly IAccountGenerator _accountGenerator;
 
-        private class SavedAccount
-        {
-            public string aesPrivateKey = null;
-            public Dictionary<string, CAInfo> caInfoMap = new Dictionary<string, CAInfo>();
-            public SocialInfo socialInfo = new SocialInfo();
-        }
-        
-        public AccountRepository(IStorageSuite<string> storageSuite, IEncryption encryption, ISigningKeyGenerator signingKeyGenerator)
+        public AccountRepository(IStorageSuite<string> storageSuite, IEncryption encryption, ISigningKeyGenerator signingKeyGenerator, IAccountGenerator accountGenerator)
         {
             _storageSuite = storageSuite;
             _encryption = encryption;
             _signingKeyGenerator = signingKeyGenerator;
+            _accountGenerator = accountGenerator;
         }
         
         public bool Save(string keyName, string password, Account account)
         {
+            if (account == null)
+            {
+                throw new ArgumentException("Account is null.");
+            }
+            
             var encryptedPrivateKey = EncryptWallet(account.managementSigningKey, password);
             var aesPrivateKey = Convert.ToBase64String(encryptedPrivateKey);
             
@@ -71,7 +70,7 @@ namespace Portkey.DID
             }
             
             var managementWallet = _signingKeyGenerator.CreateFromEncryptedPrivateKey(Convert.FromBase64String(savedAccount.aesPrivateKey), password);
-            account = CreateAccount(savedAccount, managementWallet);
+            account = _accountGenerator.Create(savedAccount, managementWallet);
             
             return true;
         }
@@ -80,19 +79,6 @@ namespace Portkey.DID
         {
             if (encryptor == null) throw new NullReferenceException("Encryptor does not exist!");
             return encryptor.Encrypt(password);
-        }
-
-        private static Account CreateAccount(SavedAccount savedAccount, ISigningKey signingKey)
-        {
-            return new Account
-            {
-                managementSigningKey = signingKey,
-                accountDetails = new AccountDetails
-                {
-                    caInfoMap = savedAccount.caInfoMap,
-                    socialInfo = savedAccount.socialInfo
-                }
-            };
         }
     }
 }

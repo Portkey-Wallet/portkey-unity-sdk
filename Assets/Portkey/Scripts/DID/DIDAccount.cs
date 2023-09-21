@@ -19,32 +19,18 @@ namespace Portkey.DID
         private readonly IConnectionService _connectionService;
         private readonly IContractProvider _contractProvider;
         private readonly IAccountRepository _accountRepository;
+        private readonly IAccountGenerator _accountGenerator;
 
-        protected Account Account;
+        protected Account Account = null;
 
-        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository)
+        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator)
         {
             _socialService = socialService;
             _signingKeyGenerator = signingKeyGenerator;
             _connectionService = connectionService;
             _contractProvider = contractProvider;
             _accountRepository = accountRepository;
-            
-            Account = new Account
-            {
-                accountDetails = new AccountDetails(),
-                managementSigningKey = null
-            };
-        }
-
-        private void InitializeManagementWallet()
-        {
-            if (Account.managementSigningKey != null)
-            {
-                return;
-            }
-            
-            Account.managementSigningKey = _signingKeyGenerator.Create();
+            _accountGenerator = accountGenerator;
         }
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
@@ -59,8 +45,6 @@ namespace Portkey.DID
 
         public IEnumerator Login(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {
-            InitializeManagementWallet();
-
             if (!Account.accountDetails.socialInfo.Exists())
             {
                 errorCallback("Account not logged in.");
@@ -77,12 +61,12 @@ namespace Portkey.DID
         public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
         {
             Reset();
-            
-            InitializeManagementWallet();
+
+            var signingKey = _signingKeyGenerator.Create();
             
             var context = new Context
             {
-                clientId = Account.managementSigningKey.Address,
+                clientId = signingKey.Address,
                 requestId = Guid.NewGuid().ToString()
             };
 
@@ -90,21 +74,21 @@ namespace Portkey.DID
             {
                 chainId = param.chainId,
                 loginGuardianIdentifier = param.loginGuardianIdentifier,
-                manager = Account.managementSigningKey.Address,
+                manager = signingKey.Address,
                 guardiansApproved = param.guardiansApprovedList,
                 extraData = param.extraData,
                 context = context
             };
             yield return _socialService.Recovery(recoveryParam, (result) =>
             {
-                StaticCoroutine.StartCoroutine(GetLoginStatus(param.chainId, result.sessionId, (status) =>
+                StaticCoroutine.StartCoroutine(GetLoginStatus(param.chainId, result.sessionId, signingKey, (status) =>
                 {
                     successCallback(new LoginResult(status, result.sessionId));
                 }, errorCallback));
             }, errorCallback);
         }
 
-        protected IEnumerator GetLoginStatus(string chainId, string sessionId, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
+        protected IEnumerator GetLoginStatus(string chainId, string sessionId, ISigningKey signingKey, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
             return _socialService.GetRecoverStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
             {
@@ -122,11 +106,10 @@ namespace Portkey.DID
                     };
                     StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
                     {
-                        var isCurrentAccountManager = info.managerInfos.Any(manager => manager.address == Account.managementSigningKey.Address);
+                        var isCurrentAccountManager = info.managerInfos.Any(manager => manager.address == signingKey.Address);
                         if (isCurrentAccountManager)
                         {
-                            UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
-                            UpdateCAInfo(chainId, status.caHash, status.caAddress);
+                            Account = _accountGenerator.Create(chainId, info.guardianList.guardians[0].guardianIdentifier, status.caHash, status.caAddress, signingKey);
                         }
 
                         successCallback(status);
@@ -147,14 +130,14 @@ namespace Portkey.DID
         
         private bool IsCAInfoEmpty(string chainId)
         {
-            return Account.managementSigningKey?.Address != null && !Account.accountDetails.caInfoMap.ContainsKey(chainId);
+            return Account == null || !Account.accountDetails.caInfoMap.ContainsKey(chainId);
         }
         
         public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {
-            if(Account.managementSigningKey == null)
+            if(Account == null)
             {
-                errorCallback("ManagerWallet does not exist!");
+                errorCallback("Account is not logged in!");
                 yield break;
             }
             if(param.caHash == null && Account.accountDetails.caInfoMap.TryGetValue(param.chainId, out var caInfo))
@@ -183,57 +166,57 @@ namespace Portkey.DID
         {
             Reset();
             
-            InitializeManagementWallet();
-            param.manager = Account.managementSigningKey.Address;
+            var signingKey = _signingKeyGenerator.Create();
+            
+            param.manager = signingKey.Address;
             param.context = new Context
             {
-                clientId = Account.managementSigningKey.Address,
+                clientId = signingKey.Address,
                 requestId = Guid.NewGuid().ToString()
             };
             
             yield return _socialService.Register(param, (result) =>
             {
-                StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId, (status) =>
+                StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId, signingKey, (status) =>
                 {
                     successCallback(new RegisterResult(status, result.sessionId));
                 }, errorCallback));
             }, errorCallback);
         }
 
-        protected IEnumerator GetRegisterStatus(string chainId, string sessionId, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
+        protected IEnumerator GetRegisterStatus(string chainId, string sessionId, ISigningKey signingKey, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
             return _socialService.GetRegisterStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
+            {
+                if(status == null)
                 {
-                    if(status == null)
+                    errorCallback("Failed to get register status.");
+                    return;
+                }
+                if(IsFirstTimeRegisterPassed(chainId, status))
+                {
+                    var holderInfoParams = new GetHolderInfoParams
                     {
-                        errorCallback("Failed to get register status.");
-                        return;
-                    }
-                    if(IsFirstTimeRegisterPassed(chainId, status))
+                        chainId = chainId,
+                        caHash = status.caHash
+                    };
+                    StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
                     {
-                        var holderInfoParams = new GetHolderInfoParams
+                        var isCurrentAccountManager = info.managerInfos.Any(manager => manager.address == signingKey.Address);
+                        if (isCurrentAccountManager)
                         {
-                            chainId = chainId,
-                            caHash = status.caHash
-                        };
-                        StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
-                        {
-                            var isCurrentAccountManager = info.managerInfos.Any(manager => manager.address == Account.managementSigningKey.Address);
-                            if (isCurrentAccountManager)
-                            {
-                                UpdateAccountInfo(info.guardianList.guardians[0].guardianIdentifier);
-                                UpdateCAInfo(chainId, status.caHash, status.caAddress);
-                            }
+                            Account = _accountGenerator.Create(chainId, info.guardianList.guardians[0].guardianIdentifier, status.caHash, status.caAddress, signingKey);
+                        }
 
-                            successCallback(status);
-                        }, errorCallback));
-                    }
-                    else
-                    {
                         successCallback(status);
-                    }
-                },
-                errorCallback);
+                    }, errorCallback));
+                }
+                else
+                {
+                    successCallback(status);
+                }
+            },
+            errorCallback);
         }
 
         private void UpdateAccountInfo(string guardianIdentifier)
@@ -276,7 +259,7 @@ namespace Portkey.DID
             var manager = param.manager;
             
             // If manager is not specified, use the management wallet.
-            if(manager == null && Account.managementSigningKey != null)
+            if(manager == null && Account != null)
             {
                 manager = Account.managementSigningKey.Address;
             }
@@ -294,7 +277,7 @@ namespace Portkey.DID
             yield return _socialService.GetHolderInfoByManager(caHolderInfoByManagerParams, (result) =>
             {
                 var info = result.caHolders[0];
-                if (info != null && manager == Account.managementSigningKey?.Address &&
+                if (info != null && Account != null && manager == Account.managementSigningKey.Address &&
                     info.holderManagerInfo.caAddress != null && info.holderManagerInfo.caHash != null)
                 {
                     UpdateCAInfo(param.chainId, info.holderManagerInfo.caHash, info.holderManagerInfo.caAddress);
@@ -453,20 +436,21 @@ namespace Portkey.DID
 
         private bool IsLoginAccountTheRequestedGuardian(GetHolderInfoParams param, IHolderInfo holderInfo)
         {
-            return holderInfo != null && param.guardianIdentifier == Account.accountDetails.socialInfo?.LoginAccount;
+            return holderInfo != null && Account != null && param.guardianIdentifier == Account.accountDetails.socialInfo?.LoginAccount;
         }
 
         public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
         {
-            InitializeManagementWallet();
             yield return _contractProvider.GetContract(chainId,  (contract) =>
             {
                 StaticCoroutine.StartCoroutine(GetVerifierServersByContract(contract, successCallback, errorCallback));
             }, errorCallback);
         }
         
-        private IEnumerator GetVerifierServersByContract(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback) {
-            yield return contract.CallAsync<GetVerifierServersOutput>(Account.managementSigningKey, "GetVerifierServers", new Empty(), result =>
+        private IEnumerator GetVerifierServersByContract(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
+        {
+            var signingKey = (Account == null)? _signingKeyGenerator.Create() : Account.managementSigningKey;
+            yield return contract.CallAsync<GetVerifierServersOutput>(signingKey, "GetVerifierServers", new Empty(), result =>
             {
                 var verifierItems = ConvertToVerifierItems(result);
                 successCallback(verifierItems);
@@ -557,26 +541,26 @@ namespace Portkey.DID
         
         public ISigningKey GetManagementWallet()
         {
-            return Account.managementSigningKey;
+            return Account?.managementSigningKey;
         }
         
         public bool IsLoggedIn()
         {
-            return Account.accountDetails.caInfoMap.Count > 0 && Account.accountDetails.socialInfo.Exists();
+            return Account?.accountDetails.caInfoMap.Count > 0 && Account.accountDetails.socialInfo.Exists();
         }
 
         private void Reset()
         {
-            Account.accountDetails.Clear();
-            Account.managementSigningKey = null;
+            Account = null;
         }
 
         private IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
-            if (Account.managementSigningKey == null)
+            if(Account == null)
             {
-                throw new Exception("Manager Account does not exist.");
+                errorCallback("User is not logged in.");
+                yield break;
             }
             
             yield return _contractProvider.GetContract(editManagerParams.chainId, (contract) =>
@@ -597,9 +581,9 @@ namespace Portkey.DID
         private IEnumerator RemoveManager(EditManagerParams param, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
-            if(Account.managementSigningKey == null)
+            if(Account == null)
             {
-                errorCallback("Management Account does not exist.");
+                errorCallback("User is not logged in.");
                 yield break;
             }
             
@@ -623,7 +607,7 @@ namespace Portkey.DID
 
         private bool IsCurrentAccount(EditManagerParams param)
         {
-            return param.managerInfo?.Address.ToString() == Account.managementSigningKey.Address && Account.accountDetails.caInfoMap[param.chainId].caHash == param.caHash;
+            return param.managerInfo?.Address.ToString() == Account?.managementSigningKey.Address && Account?.accountDetails.caInfoMap[param.chainId].caHash == param.caHash;
         }
     }
 }

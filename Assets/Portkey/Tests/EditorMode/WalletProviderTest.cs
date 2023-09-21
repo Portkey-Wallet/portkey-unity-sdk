@@ -20,8 +20,8 @@ namespace Portkey.Test
         [Test]
         public void CreateTest()
         {
-            IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account = walletProvider.Create();
+            ISigningKeyGenerator signingKeyGenerator = new SigningKeyGenerator(_encryption);
+            var account = signingKeyGenerator.Create();
             
             Assert.IsNotNull(account.PublicKey);
         }
@@ -29,8 +29,8 @@ namespace Portkey.Test
         [Test]
         public void GetAccountFromPrivateKeyTest()
         {
-            IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account = walletProvider.CreateFromPrivateKey(PRIVATE_KEY);
+            ISigningKeyGenerator signingKeyGenerator = new SigningKeyGenerator(_encryption);
+            var account = signingKeyGenerator.CreateFromPrivateKey(PRIVATE_KEY);
             
             Assert.AreEqual(ADDRESS, account.Address);
             Assert.AreEqual(PUBLIC_KEY, account.PublicKey);
@@ -39,10 +39,10 @@ namespace Portkey.Test
         [Test]
         public void GetAccountFromEncryptedPrivateKeyTest()
         {
-            IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account = walletProvider.CreateFromPrivateKey(PRIVATE_KEY);
+            ISigningKeyGenerator signingKeyGenerator = new SigningKeyGenerator(_encryption);
+            var account = signingKeyGenerator.CreateFromPrivateKey(PRIVATE_KEY);
             var encryptedPrivateKey = account.Encrypt(PASSWORD);
-            var accountFromEncryptedPrivateKey = walletProvider.CreateFromEncryptedPrivateKey(encryptedPrivateKey, PASSWORD);
+            var accountFromEncryptedPrivateKey = signingKeyGenerator.CreateFromEncryptedPrivateKey(encryptedPrivateKey, PASSWORD);
             
             Assert.AreEqual(account.Address, accountFromEncryptedPrivateKey.Address);
             Assert.AreEqual(account.PublicKey, accountFromEncryptedPrivateKey.PublicKey);
@@ -51,8 +51,8 @@ namespace Portkey.Test
         [Test]
         public void GetAccountFromPrivateKeyFailTest()
         {
-            IWalletProvider walletProvider = new WalletProvider(_encryption);
-            var account = walletProvider.CreateFromPrivateKey(ANOTHER_PRIVATE_KEY);
+            ISigningKeyGenerator signingKeyGenerator = new SigningKeyGenerator(_encryption);
+            var account = signingKeyGenerator.CreateFromPrivateKey(ANOTHER_PRIVATE_KEY);
             
             Assert.AreNotEqual(PUBLIC_KEY, account.PublicKey);
         }

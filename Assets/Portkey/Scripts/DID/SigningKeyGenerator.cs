@@ -4,12 +4,12 @@ using KeyPair = Portkey.Core.KeyPair;
 
 namespace Portkey.DID
 {
-    public class WalletProvider : IWalletProvider
+    public class SigningKeyGenerator : ISigningKeyGenerator
     {
         private readonly WalletFactory _walletFactory = new AElfWalletFactory();
         private readonly IEncryption _encryption;
         
-        public WalletProvider(IEncryption encryption)
+        public SigningKeyGenerator(IEncryption encryption)
         {
             _encryption = encryption;
         }

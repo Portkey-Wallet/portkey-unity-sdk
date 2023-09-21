@@ -15,17 +15,17 @@ namespace Portkey.DID
         private const string DEFAULT_KEY_NAME = "portkey_sdk_did_wallet";
 
         private readonly IPortkeySocialService _socialService;
-        private readonly IWalletProvider _walletProvider;
+        private readonly ISigningKeyGenerator _signingKeyGenerator;
         private readonly IConnectionService _connectionService;
         private readonly IContractProvider _contractProvider;
         private readonly IAccountRepository _accountRepository;
 
         protected Account Account;
 
-        public DIDAccount(IPortkeySocialService socialService, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository)
+        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository)
         {
             _socialService = socialService;
-            _walletProvider = walletProvider;
+            _signingKeyGenerator = signingKeyGenerator;
             _connectionService = connectionService;
             _contractProvider = contractProvider;
             _accountRepository = accountRepository;
@@ -44,7 +44,7 @@ namespace Portkey.DID
                 return;
             }
             
-            Account.managementSigningKey = _walletProvider.Create();
+            Account.managementSigningKey = _signingKeyGenerator.Create();
         }
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)

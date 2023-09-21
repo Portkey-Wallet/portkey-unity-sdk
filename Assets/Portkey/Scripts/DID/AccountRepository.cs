@@ -9,7 +9,7 @@ namespace Portkey.DID
     {
         private readonly IStorageSuite<string> _storageSuite;
         private readonly IEncryption _encryption;
-        private readonly IWalletProvider _walletProvider;
+        private readonly ISigningKeyGenerator _signingKeyGenerator;
 
         private class SavedAccount
         {
@@ -18,11 +18,11 @@ namespace Portkey.DID
             public SocialInfo socialInfo = new SocialInfo();
         }
         
-        public AccountRepository(IStorageSuite<string> storageSuite, IEncryption encryption, IWalletProvider walletProvider)
+        public AccountRepository(IStorageSuite<string> storageSuite, IEncryption encryption, ISigningKeyGenerator signingKeyGenerator)
         {
             _storageSuite = storageSuite;
             _encryption = encryption;
-            _walletProvider = walletProvider;
+            _signingKeyGenerator = signingKeyGenerator;
         }
         
         public bool Save(string keyName, string password, Account account)
@@ -70,7 +70,7 @@ namespace Portkey.DID
                 return false;
             }
             
-            var managementWallet = _walletProvider.CreateFromEncryptedPrivateKey(Convert.FromBase64String(savedAccount.aesPrivateKey), password);
+            var managementWallet = _signingKeyGenerator.CreateFromEncryptedPrivateKey(Convert.FromBase64String(savedAccount.aesPrivateKey), password);
             account = CreateAccount(savedAccount, managementWallet);
             
             return true;

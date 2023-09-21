@@ -54,7 +54,7 @@ namespace Portkey.Test
                 yield return base.GetRegisterStatus(chainId, sessionId, successCallback, errorCallback);
             }
 
-            public DidAccountMock(IPortkeySocialService socialService, IWalletProvider walletProvider, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository) : base(socialService, walletProvider, connectionService, contractProvider, accountRepository)
+            public DidAccountMock(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository) : base(socialService, signingKeyGenerator, connectionService, contractProvider, accountRepository)
             {
             }
         }
@@ -69,9 +69,9 @@ namespace Portkey.Test
                             "b1eae0819f3af0189283342c79adcac9028b251da52056e1e5b2ba79a8b4ccf1",
                             "0473eeb8965c3ebabc388055b7a2a8b8f9f4ea0e546055b7207a23a921e9642c5f68a4f0d9e66efba116d3adc018e8bc5eea5f6600b60168ac73e5db4b6cea693a");
 */
-        private static Mock<IWalletProvider> GetAccountProviderMock()
+        private static Mock<ISigningKeyGenerator> GetAccountProviderMock()
         {
-            var accountProviderMock = new Mock<IWalletProvider>();
+            var accountProviderMock = new Mock<ISigningKeyGenerator>();
             accountProviderMock.Setup(provider => provider.Create())
                 .Returns(new AElfSigningKey(KeyPair, Encryption));
             return accountProviderMock;
@@ -413,7 +413,7 @@ namespace Portkey.Test
             var contractMock = GetContractMock<AddManagerInfoInput>();
             var contractProviderMock = GetContractProviderMock(contractMock);
             var encryption = new AESEncryption();
-            var accountRepository = new AccountRepository(_storageSuite, encryption, new WalletProvider(encryption));
+            var accountRepository = new AccountRepository(_storageSuite, encryption, new SigningKeyGenerator(encryption));
             
             var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepository);
             var accountLoginParams = new AccountLoginParams

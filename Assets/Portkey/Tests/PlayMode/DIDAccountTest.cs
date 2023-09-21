@@ -39,7 +39,7 @@ namespace Portkey.Test
             
             public string GetManagementWalletAddress()
             {
-                return Account.managementWallet.Address;
+                return Account.managementSigningKey.Address;
             }
 
             public new IEnumerator GetLoginStatus(string chainId, string sessionId,
@@ -73,7 +73,7 @@ namespace Portkey.Test
         {
             var accountProviderMock = new Mock<IWalletProvider>();
             accountProviderMock.Setup(provider => provider.Create())
-                .Returns(new AElfWallet(KeyPair, Encryption));
+                .Returns(new AElfSigningKey(KeyPair, Encryption));
             return accountProviderMock;
         }
         
@@ -98,16 +98,16 @@ namespace Portkey.Test
         private static Mock<IContract> GetContractMock<T>() where T : IMessage<T>, new()
         {
             var contractMock = new Mock<IContract>();
-            contractMock.Setup(contract => contract.CallAsync<T>(It.IsAny<IWallet>(),
+            contractMock.Setup(contract => contract.CallAsync<T>(It.IsAny<ISigningKey>(),
                     It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<T>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback((IWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new T()))
-                .Returns((IWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
-            contractMock.Setup(contract => contract.SendAsync(It.IsAny<IWallet>(),
+                .Callback((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new T()))
+                .Returns((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
+            contractMock.Setup(contract => contract.SendAsync(It.IsAny<ISigningKey>(),
                     It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<IContract.TransactionInfoDto>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback((IWallet wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new IContract.TransactionInfoDto { transactionResult = new TransactionResultDto { Status = "MINED" }}))
-                .Returns((IWallet wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
+                .Callback((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new IContract.TransactionInfoDto { transactionResult = new TransactionResultDto { Status = "MINED" }}))
+                .Returns((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
             return contractMock;
         }
 
@@ -362,7 +362,7 @@ namespace Portkey.Test
             yield return didWallet.Logout(logoutParam, (result) =>
             {
                 contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
-                contractMock.Verify(contract => contract.SendAsync(It.IsAny<IWallet>(), "RemoveManagerInfo", It.IsAny<RemoveManagerInfoInput>(), It.IsAny<SuccessCallback<IContract.TransactionInfoDto>>(), It.IsAny<ErrorCallback>()), Times.Once());
+                contractMock.Verify(contract => contract.SendAsync(It.IsAny<ISigningKey>(), "RemoveManagerInfo", It.IsAny<RemoveManagerInfoInput>(), It.IsAny<SuccessCallback<IContract.TransactionInfoDto>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 accountProviderMock.Verify(provider => provider.Create(), Times.Once());
                 socialServiceMock.Verify(service => service.Recovery(It.IsAny<RecoveryParams>(), It.IsAny<SuccessCallback<SessionIdResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
                 socialServiceMock.Verify(service => service.GetRecoverStatus(It.IsAny<string>(), It.IsAny<QueryOptions>(), It.IsAny<SuccessCallback<RecoverStatusResult>>(), It.IsAny<ErrorCallback>()), Times.Once());
@@ -386,7 +386,7 @@ namespace Portkey.Test
                 done = true;
                 accountProviderMock.Verify(provider => provider.Create(), Times.Once());
                 contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
-                contractMock.Verify(contract => contract.CallAsync<GetVerifierServersOutput>(It.IsAny<IWallet>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
+                contractMock.Verify(contract => contract.CallAsync<GetVerifierServersOutput>(It.IsAny<ISigningKey>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
                     It.IsAny<ErrorCallback>()), Times.Once());
                 Assert.AreNotEqual(null, result);
             }, error =>

@@ -14,30 +14,30 @@ namespace Portkey.DID
             _encryption = encryption;
         }
 
-        public IWallet CreateFromEncryptedPrivateKey(byte[] encryptedPrivateKey, string password)
+        public ISigningKey CreateFromEncryptedPrivateKey(byte[] encryptedPrivateKey, string password)
         {
             var privateKey = _encryption.Decrypt(encryptedPrivateKey, password);
             return CreateFromPrivateKey(privateKey);
         }
 
-        public IWallet CreateFromPrivateKey(string privateKey)
+        public ISigningKey CreateFromPrivateKey(string privateKey)
         {
             var newPrivateKey = PrivateKey.Parse(privateKey);
             
             // change to our own wrapper class
             var keyPair = new KeyPair(newPrivateKey);
             
-            return new AElfWallet(keyPair, _encryption);
+            return new AElfSigningKey(keyPair, _encryption);
         }
 
-        public IWallet Create()
+        public ISigningKey Create()
         {
             var privateKey = _walletFactory.Create().PrivateKey;
             
             // change to our own wrapper class
             var keyPair = new KeyPair(privateKey);
 
-            return new AElfWallet(keyPair, _encryption);
+            return new AElfSigningKey(keyPair, _encryption);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Portkey.DID
     /// <summary>
     /// EOA Wallet, used to act as management account of DID wallet.
     /// </summary>
-    public class AElfWallet : IWallet
+    public class AElfSigningKey : ISigningKey
     {
         private readonly KeyPair _keyPair;
         private readonly IEncryption _encryption;
@@ -18,7 +18,7 @@ namespace Portkey.DID
         public string Address => _keyPair.Address;
         public string PublicKey => _keyPair.PublicKey;
 
-        public AElfWallet(KeyPair keyPair, IEncryption encryption)
+        public AElfSigningKey(KeyPair keyPair, IEncryption encryption)
         {
             _keyPair = keyPair;
             _encryption = encryption;

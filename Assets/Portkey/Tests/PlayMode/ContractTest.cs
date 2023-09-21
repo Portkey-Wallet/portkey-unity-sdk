@@ -27,7 +27,7 @@ namespace Portkey.Test
                                                                         "83829798ac92d428ed13b29fe60ace1a7a10e7a347bdc9f23a85615339068f1c",
                                                                         "045ab0516fda4eeb504ad8d7ce8a2a24e5af6004afa9ff3ee26f2c697e334be48c31597e1905711a6aa749fc475787000b5d6260bcf0d457f23c60aa60bb6c8602");
         */
-        private static readonly AElfWallet Wallet = new AElfWallet(KeyPair, new AESEncryption());
+        private static readonly AElfSigningKey SigningKey = new AElfSigningKey(KeyPair, new AESEncryption());
         
         private static Mock<IChainProvider> GetChainProviderMock(Mock<IChain> chainMock)
         {
@@ -75,9 +75,9 @@ namespace Portkey.Test
             return chainMock;
         }
 
-        private static Mock<IWallet> GetWalletMock()
+        private static Mock<ISigningKey> GetWalletMock()
         {
-            var walletMock = new Mock<IWallet>();
+            var walletMock = new Mock<ISigningKey>();
             walletMock.Setup(wallet => wallet.SignTransaction(It.IsAny<Transaction>())).Returns(new Transaction());
 
             return walletMock;
@@ -133,7 +133,7 @@ namespace Portkey.Test
 
             IContract contract = new ContractBasic(chainMock.Object, testMainChain.ContractInfos["CAContract"].ContractAddress);
 
-            yield return contract.CallAsync<GetVerifierServersOutput>(Wallet, "GetVerifierServers", new Empty(),
+            yield return contract.CallAsync<GetVerifierServersOutput>(SigningKey, "GetVerifierServers", new Empty(),
                 result =>
                 {
                     done = true;
@@ -172,7 +172,7 @@ namespace Portkey.Test
                 CaHash = Hash.LoadFromHex("594ebf395cdba58b0e725d71eb3c1a17d57662b0667a92f770f341d4e794b76b")
             };
             
-            yield return contract.SendAsync(Wallet, "AddManagerInfo", input, result =>
+            yield return contract.SendAsync(SigningKey, "AddManagerInfo", input, result =>
             {
                 done = true;
                 Assert.AreEqual(TRANSACTION_ID, result.transactionResult.TransactionId);

@@ -27,7 +27,7 @@ namespace Portkey.DID
         
         public bool Save(string keyName, string password, Account account)
         {
-            var encryptedPrivateKey = EncryptWallet(account.managementWallet, password);
+            var encryptedPrivateKey = EncryptWallet(account.managementSigningKey, password);
             var aesPrivateKey = Convert.ToBase64String(encryptedPrivateKey);
             
             var savedAccount = new SavedAccount
@@ -82,11 +82,11 @@ namespace Portkey.DID
             return encryptor.Encrypt(password);
         }
 
-        private static Account CreateAccount(SavedAccount savedAccount, IWallet wallet)
+        private static Account CreateAccount(SavedAccount savedAccount, ISigningKey signingKey)
         {
             return new Account
             {
-                managementWallet = wallet,
+                managementSigningKey = signingKey,
                 accountDetails = new AccountDetails
                 {
                     caInfoMap = savedAccount.caInfoMap,

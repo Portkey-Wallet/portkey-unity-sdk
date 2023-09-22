@@ -42,6 +42,11 @@ namespace Portkey.UI
             }
         }
 
+        public void SignIn()
+        {
+            did.TransportConfig.Send("portkey.did://domain/login");
+        }
+
         private void AuthCallback(ICredential credential)
         {
             StartCoroutine(did.AuthService.GetGuardians(credential, guardians =>

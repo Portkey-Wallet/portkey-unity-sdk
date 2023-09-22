@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acfb75b4ffa17458da8248a41f452850, type: 3}
   m_Name: PortkeyTransportConfig
   m_EditorClassIdentifier: 
-  androidTransport: {fileID: 11400000, guid: aa3f25d5781af4c10b788d1ff1afe03d, type: 2}
+  androidTransport: {fileID: 11400000, guid: c619134b7d85648b88a2514baa6ba6a7, type: 2}

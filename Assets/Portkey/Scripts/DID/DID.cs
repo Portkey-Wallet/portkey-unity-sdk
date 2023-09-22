@@ -7,6 +7,7 @@ using Portkey.Core;
 using Portkey.Encryption;
 using Portkey.SocialProvider;
 using Portkey.Storage;
+using Portkey.Transport;
 using UnityEngine;
 
 namespace Portkey.DID
@@ -16,6 +17,7 @@ namespace Portkey.DID
         [SerializeField] private IHttp _request;
         [SerializeField] private PortkeyConfig _config;
         [SerializeField] private GraphQL.GraphQL _graphQL;
+        [SerializeField] private PortkeyTransportConfig _transportConfig;
         
         private ISocialProvider _socialProvider;
         private IPortkeySocialService _portkeySocialService;
@@ -56,6 +58,7 @@ namespace Portkey.DID
         /// <param name="chainId">The chain ID related to the chain to get.</param>
         /// <returns>Chain object related to the specified chain ID.</returns>
         public IChain GetChain(string chainId) => _chainProvider.GetChain(chainId);
+        public TransportConfig TransportConfig => _transportConfig;
 
         public IBiometric GetBiometric()
         {

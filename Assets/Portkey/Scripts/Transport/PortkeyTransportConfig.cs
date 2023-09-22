@@ -9,13 +9,17 @@ namespace Portkey.Transport
     [CreateAssetMenu(fileName = "PortkeyTransportConfig", menuName = "Portkey/Transport/PortkeyTransportConfig", order = 0)]
     public class PortkeyTransportConfig : TransportConfig
     {
-#if UNITY_ANDROID || UNITY_EDITOR
         /// <summary>
         /// Android transport class to support android deeplinks.
         /// </summary>
         [SerializeField]
         private AndroidTransport androidTransport;
-#endif
+
+        /// <summary>
+        /// Android transport class to support android deeplinks.
+        /// </summary>
+        [SerializeField]
+        private IOSTransport iosTransport;
 
         public override void Send(string url)
         {
@@ -24,6 +28,11 @@ namespace Portkey.Transport
             if (androidTransport != null)
             {
                 androidTransport.Send(url);
+            }
+#elif UNITY_IOS
+            if (iosTransport != null)
+            {
+                iosTransport.Send(url);
             }
 #endif
         }

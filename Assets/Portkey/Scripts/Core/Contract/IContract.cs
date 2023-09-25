@@ -20,24 +20,24 @@ namespace Portkey.Core
         string ChainId { get; }
         
         /// <summary>
-        /// CallTransactionAsync is a generic method that can be used to call a contract Get method and execute the transaction.
+        /// CallAsync is a generic method that can be used to call a contract method (Read-only operation).
         /// </summary>
-        /// <param name="wallet">EOA Wallet to sign the transaction with.</param>
+        /// <param name="keyPair">Keypair to sign the transaction with.</param>
         /// <param name="methodName">Name of the method to call from the contract.</param>
         /// <param name="param">Parameters for calling the method from the contract.</param>
         /// <typeparam name="T">Protobuf IMessage inherited classes corresponding to the called contract method.</typeparam>
         /// <param name="successCallback">The callback function when user is successful in calling the method on the contract.</param>
         /// <param name="errorCallback">The callback function when there is an error.</param>
-        IEnumerator CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new();
+        IEnumerator CallAsync<T>(KeyPair keyPair, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new();
 
         /// <summary>
-        /// SendTransactionAsync is a generic method that can be used to call a contract Set method and execute the transaction.
+        /// SendAsync is a generic method that can be used to call a contract Set method and execute the transaction.
         /// </summary>
         /// <param name="wallet">EOA Wallet to sign the transaction with.</param>
         /// <param name="methodName">Name of the method to call from the contract.</param>
         /// <param name="param">Parameters for calling the method from the contract.</param>
         /// <param name="successCallback">The callback function when user is successful in transaction for the method on the contract.</param>
         /// <param name="errorCallback">The callback function when there is an error.</param>
-        IEnumerator SendTransactionAsync(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<TransactionInfoDto> successCallback, ErrorCallback errorCallback);
+        IEnumerator SendAsync(KeyPair keyPair, string methodName, IMessage param, SuccessCallback<TransactionInfoDto> successCallback, ErrorCallback errorCallback);
     }
 }

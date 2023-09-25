@@ -32,11 +32,11 @@ namespace Portkey.Contract
             ContractAddress = contractAddress ?? throw new ArgumentException("Contract address cannot be null.");
         }
         
-        public IEnumerator CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
+        public IEnumerator CallAsync<T>(KeyPair keyPair, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
         {
-            yield return _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param, transaction =>
+            yield return _chain.GenerateTransactionAsync(keyPair.Address, ContractAddress, methodName, param, transaction =>
             {
-                var txWithSign = _chain.SignTransaction(wallet.PrivateKey, transaction);
+                var txWithSign = _chain.SignTransaction(keyPair.PrivateKey, transaction);
                 var executeTxDto = new ExecuteTransactionDto
                 {
                     RawTransaction = txWithSign.ToByteArray().ToHex()
@@ -52,9 +52,9 @@ namespace Portkey.Contract
             }, errorCallback);
         }
 
-        public IEnumerator SendTransactionAsync(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
+        public IEnumerator SendAsync(KeyPair keyPair, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
         {
-            yield return _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param, transaction =>
+            yield return _chain.GenerateTransactionAsync(keyPair.Address, ContractAddress, methodName, param, transaction =>
             {
                 // As different nodes have different block height,
                 // we need to give the next transaction a lower height (-5) so transaction can be successful
@@ -66,7 +66,7 @@ namespace Portkey.Contract
                     transaction.RefBlockNumber = refBlockNumber;
                     transaction.RefBlockPrefix = BlockHelper.GetRefBlockPrefix(Hash.LoadFromHex(blockDto?.BlockHash));
                     
-                    var txWithSign = _chain.SignTransaction(wallet.PrivateKey, transaction);
+                    var txWithSign = _chain.SignTransaction(keyPair.PrivateKey, transaction);
                     Debugger.Log("Sending Transaction...");
 
                     var sendTxnInput = new SendTransactionInput

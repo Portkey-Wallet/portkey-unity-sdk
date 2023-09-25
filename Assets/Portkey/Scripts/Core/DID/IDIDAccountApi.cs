@@ -37,7 +37,10 @@ namespace Portkey.Core
         public string[] verifierAddresses;
     }
     
-    public interface IDIDAccountMethods
+    /// <summary>
+    /// Interface for the calling of Portkey DID Backend API.
+    /// </summary>
+    public interface IDIDAccountApi
     {
         /// <summary>
         /// A coroutine for logging in with scan.
@@ -89,7 +92,7 @@ namespace Portkey.Core
         /// To get the wallet information such as Address and Private Key of the management wallet which can be used for signing in place of the contract account.
         /// </summary>
         /// <returns>BlockchainWallet object that contains private key and address.</returns>
-        BlockchainWallet GetWallet();
+        IWallet GetWallet();
         bool IsLoggedIn();
     }
 }

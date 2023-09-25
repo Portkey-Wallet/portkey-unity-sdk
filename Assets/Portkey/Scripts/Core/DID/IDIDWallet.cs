@@ -1,18 +1,25 @@
-using System.Collections;
-
 namespace Portkey.Core
 {
-    public interface IDIDWallet : IWallet, IDIDAccountMethods
+    public interface IDIDWallet : IDIDAccountApi
     {
         /// <summary>
-        /// For adding a manager account to the DID.
+        /// Initializes the DID Wallet with a new EOA if it does not have one.
         /// </summary>
-        /// <param name="editManagerParams">Parameters for adding manager account.</param>
-        public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
+        public void InitializeAccount();
+        
         /// <summary>
-        /// For removing a manager account to the DID.
+        /// For saving the DID Wallet.
         /// </summary>
-        /// <param name="editManagerParams">Parameters for removing manager account.</param>
-        public IEnumerator RemoveManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
+        /// <param name="password">Password to encrypt the DID Wallet Info.</param>
+        /// <param name="keyName"></param>
+        /// <returns>True if saving is successful, false otherwise.</returns>
+        public bool Save(string password, string keyName);
+        
+        /// <summary>
+        /// For loading the DID Wallet.
+        /// </summary>
+        /// <param name="password">Password to decrypt the DID Wallet Info.</param>
+        /// <param name="keyName"></param>
+        public void Load(string password, string keyName);
     }
 }

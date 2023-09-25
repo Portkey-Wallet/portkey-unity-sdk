@@ -4,22 +4,23 @@ using Google.Protobuf;
 using NUnit.Framework;
 using Portkey.Core;
 using Portkey.DID;
+using Portkey.Encryption;
 using Portkey.Utilities;
 using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.Test
 {
-    public class WalletAccountTest
+    public class AElfWalletTest
     {
         private const string PRIVATE_KEY = "03bd0cea9730bcfc8045248fd7f4841ea19315995c44801a3dfede0ca872f808";
-        private readonly IAccountProvider<WalletAccount> _accountProvider = new AccountProvider();
+        private readonly IWalletProvider _walletProvider = new WalletProvider(new AESEncryption());
         
         [Test]
         public void SignTest()
         {
             const string SIGNED =
                 "59EF1D3B2B853FCA1E33D07765DEBAAF38A81442CFE90822D4334E8FCE9889D80C99A0BE1858C1F26B4D99987EFF6003F33B7C3F32BBDB9CEEC68A1E8A4DB4B000";
-            var wallet = _accountProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
+            var wallet = _walletProvider.CreateFromPrivateKey(PRIVATE_KEY);
             var result = wallet.Sign("68656c6c6f20776f726c643939482801");
             
             Assert.AreEqual(SIGNED, result.ToHexString());
@@ -40,7 +41,7 @@ namespace Portkey.Test
 
             const string SIGNED =
                 "WMfWt3EGPQ06YpVmXup4tXjZQBunSrgycHKeu3ZT4/F9oSgi2oSKN7ZhNu9dUjsDkTgRkb/2F9LDPcpTm8BgTwE\u003d";
-            var wallet = _accountProvider.GetAccountFromPrivateKey(PRIVATE_KEY);
+            var wallet = _walletProvider.CreateFromPrivateKey(PRIVATE_KEY);
             var result = wallet.SignTransaction(transaction);
             
             Assert.AreEqual(SIGNED, result.Signature.ToBase64());

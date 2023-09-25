@@ -1,22 +1,18 @@
-using System;
-
 namespace Portkey.Core
 {
     /// <summary>
-    /// A class that holds the address, private key, and mnemonic of a standard EOA wallet.
+    /// A class that holds the private key, corresponding public key and address.
     /// </summary>
-    public class BlockchainWallet
+    public class KeyPair
     {
         public string Address { get; private set; }
         public string PrivateKey { get; private set; }
-        public string Mnemonic { get; private set; }
         public string PublicKey { get; private set; }
         
-        public BlockchainWallet(string address, string privateKey, string mnemonic, string publicKey)
+        public KeyPair(string address, string privateKey, string publicKey)
         {
             Address = address;
             PrivateKey = privateKey;
-            Mnemonic = mnemonic;
             PublicKey = publicKey;
         }
     }

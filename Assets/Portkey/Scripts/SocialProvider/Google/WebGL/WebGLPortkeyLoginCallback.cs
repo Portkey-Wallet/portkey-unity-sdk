@@ -20,8 +20,9 @@ namespace Portkey.SocialProvider
             "Apple" => AccountType.Apple,
             _ => throw new Exception("Not supported provider")
         };
-        
-        public ISocialLogin SocialLogin { get; set; }
+
+        public Action<string> OnSuccessCallback { get; set; }
+        public Action<string> OnFailureCallback { get; set; }
 
         public void OnSuccess(string data)
         {
@@ -29,7 +30,7 @@ namespace Portkey.SocialProvider
             try
             {
                 var loginData = JsonConvert.DeserializeObject<WebGLPortkeySocialLoginData>(data);
-                SocialLogin.RequestSocialInfo(loginData.token);
+                OnSuccessCallback?.Invoke(loginData.token);
             }
             catch (Exception e)
             {
@@ -40,7 +41,7 @@ namespace Portkey.SocialProvider
 
         public void OnFailure(string error)
         {
-            SocialLogin.HandleError("Login Cancelled!");
+            OnFailureCallback?.Invoke("Login Cancelled!");
             Destroy(gameObject);
         }
     }

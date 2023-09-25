@@ -7,7 +7,9 @@ namespace Portkey.SocialProvider
 {
     public class IOSPortkeyAppleLoginCallback : MonoBehaviour, IPortkeySocialLoginCallback
     {
-        public ISocialLogin SocialLogin { get; set; }
+        public Action<string> OnSuccessCallback { get; set; }
+        public Action<string> OnFailureCallback { get; set; }
+        
         private bool _isSuccess;
 
         private void Start()
@@ -39,27 +41,14 @@ namespace Portkey.SocialProvider
         {
             _isSuccess = true;
             Debugger.Log($"IOSPortkeyAppleLoginOnSuccess {data}");
-            try
-            {
-                SocialLogin.RequestSocialInfo(data);
-            }
-            catch (Exception e)
-            {
-                Debugger.LogException(e);
-            }
+
+            OnSuccessCallback?.Invoke(data);
             Destroy(gameObject);
         }
 
         public void OnFailure(string error)
         {
-            try
-            {
-                SocialLogin.HandleError("Login Cancelled!");
-            }
-            catch (Exception e)
-            {
-                Debugger.LogException(e);
-            }
+            OnFailureCallback?.Invoke("Login Cancelled!");
             Destroy(gameObject);
         }
     }

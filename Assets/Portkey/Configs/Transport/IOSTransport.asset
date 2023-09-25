@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd18d5cc8a2ee42188a2c10f688d43f9, type: 3}
   m_Name: IOSTransport
   m_EditorClassIdentifier: 
-  downloadLink: 
+  downloadLink: https://apps.apple.com/us/app/portkey-ca-wallet-crypto-nft/id6445808228
   packageName: 

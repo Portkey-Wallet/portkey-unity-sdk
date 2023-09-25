@@ -42,9 +42,17 @@ namespace Portkey.UI
             }
         }
 
-        public void SignIn()
+        public void SignInWithApp()
         {
-            did.TransportConfig.Send("portkey.did://domain/login");
+            did.AuthService.Message.Loading(true, "Loading...");
+            StartCoroutine(did.AuthService.LoginWithPortkeyApp(LoggedIn));
+        }
+
+        private void LoggedIn(DIDWalletInfo walletInfo)
+        {
+            did.AuthService.Message.Loading(false);
+            setPinViewController.Initialize(walletInfo);
+            setPinViewController.SetPreviousView(gameObject);
         }
 
         private void AuthCallback(ICredential credential)

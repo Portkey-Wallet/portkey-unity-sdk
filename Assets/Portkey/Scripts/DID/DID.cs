@@ -5,6 +5,7 @@ using Portkey.Chain;
 using Portkey.Contract;
 using Portkey.Core;
 using Portkey.Encryption;
+using Portkey.GraphQL;
 using Portkey.SocialProvider;
 using Portkey.Storage;
 using Portkey.Transport;
@@ -16,9 +17,9 @@ namespace Portkey.DID
     {
         [SerializeField] private IHttp _request;
         [SerializeField] private PortkeyConfig _config;
-        [SerializeField] private GraphQL.GraphQL _graphQL;
-        [SerializeField] private PortkeyTransportConfig _transportConfig;
-        
+        [SerializeField] protected GraphQLConfig _graphQLConfig;
+
+        private GraphQL.GraphQL _graphQL;
         private ISocialProvider _socialProvider;
         private IPortkeySocialService _portkeySocialService;
         private IStorageSuite<string> _storageSuite;
@@ -36,6 +37,7 @@ namespace Portkey.DID
 
         public void Awake()
         {
+            _graphQL = new GraphQL.GraphQL(_graphQLConfig);
             _socialProvider = new SocialLoginProvider(_config, _request);
             _portkeySocialService = new PortkeySocialService(_config, _request, _graphQL);
             _socialVerifierProvider = new SocialVerifierProvider(_socialProvider, _portkeySocialService);
@@ -47,7 +49,7 @@ namespace Portkey.DID
             _encryption = new AESEncryption();
             _biometricProvider = new BiometricProvider();
             _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
-            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
+            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config, _accountProvider);
         }
         
         public IAuthService AuthService => _authService;
@@ -58,7 +60,6 @@ namespace Portkey.DID
         /// <param name="chainId">The chain ID related to the chain to get.</param>
         /// <returns>Chain object related to the specified chain ID.</returns>
         public IChain GetChain(string chainId) => _chainProvider.GetChain(chainId);
-        public TransportConfig TransportConfig => _transportConfig;
 
         public IBiometric GetBiometric()
         {

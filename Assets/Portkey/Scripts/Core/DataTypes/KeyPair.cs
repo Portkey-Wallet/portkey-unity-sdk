@@ -1,3 +1,5 @@
+using BIP39Wallet;
+
 namespace Portkey.Core
 {
     /// <summary>
@@ -6,14 +8,14 @@ namespace Portkey.Core
     public class KeyPair
     {
         public string Address { get; private set; }
-        public string PrivateKey { get; private set; }
+        public PrivateKey PrivateKey { get; private set; }
         public string PublicKey { get; private set; }
         
-        public KeyPair(string address, string privateKey, string publicKey)
+        public KeyPair(PrivateKey privateKey)
         {
-            Address = address;
             PrivateKey = privateKey;
-            PublicKey = publicKey;
+            PublicKey = privateKey.PublicKey.ToString();
+            Address = privateKey.PublicKey.ToAddress();
         }
     }
 }

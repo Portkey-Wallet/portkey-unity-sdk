@@ -5,7 +5,7 @@ namespace Portkey.Core
         public CAInfo caInfo;
         public string pin;
         public string chainId;
-        public BlockchainWallet wallet;
+        public ISigningKey wallet;
         public ManagerInfoType managerInfo;
     }
 

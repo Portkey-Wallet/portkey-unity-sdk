@@ -13,7 +13,7 @@ namespace Portkey.DID
         private string DEFAULT_CHAIN_ID = "AELF";
         
         private readonly IPortkeySocialService _portkeySocialService;
-        private readonly DIDWallet<WalletAccount> _did;
+        private readonly DIDAccount _did;
         private readonly ISocialProvider _socialLoginProvider;
         private readonly ISocialVerifierProvider _socialVerifierProvider;
         private readonly IVerifierService _verifierService;
@@ -27,7 +27,7 @@ namespace Portkey.DID
         private EmailLogin Email { get; set; }
         private PhoneLogin Phone { get; set; }
 
-        public AuthService(IPortkeySocialService portkeySocialService, DIDWallet<WalletAccount> did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider, PortkeyConfig config)
+        public AuthService(IPortkeySocialService portkeySocialService, DIDAccount did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider, PortkeyConfig config)
         {
             _portkeySocialService = portkeySocialService;
             _did = did;
@@ -498,7 +498,7 @@ namespace Portkey.DID
             {
                 caInfo = caInfo,
                 chainId = chainId,
-                wallet = _did.GetWallet(),
+                wallet = _did.GetManagementSigningKey(),
                 managerInfo = new ManagerInfoType
                 {
                     managerUniqueId = sessionId,

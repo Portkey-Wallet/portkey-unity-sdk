@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Portkey.DID
 {
-    public class DID : MonoBehaviour, ISocialProvider, IDIDWallet
+    public class DID : MonoBehaviour, ISocialProvider, IDIDAccountApi
     {
         [SerializeField] private IHttp _request;
         [SerializeField] private PortkeyConfig _config;
@@ -20,31 +20,36 @@ namespace Portkey.DID
         private ISocialProvider _socialProvider;
         private IPortkeySocialService _portkeySocialService;
         private IStorageSuite<string> _storageSuite;
-        private IAccountProvider<WalletAccount> _accountProvider;
-        private IConnectService _connectService;
+        private ISigningKeyGenerator _signingKeyGenerator;
+        private IConnectionService _connectService;
         private IChainProvider _chainProvider;
         private IContractProvider _caContractProvider;
         private IEncryption _encryption;
         private ISocialVerifierProvider _socialVerifierProvider;
         private IBiometricProvider _biometricProvider;
         private IAuthService _authService;
+        private IAccountGenerator _accountGenerator;
+        private IAccountRepository _accountRepository;
         
-        private DIDWallet<WalletAccount> _didWallet;
+        private DIDAccount _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
 
         public void Awake()
         {
+            _encryption = new AESEncryption();
             _socialProvider = new SocialLoginProvider(_config, _request);
             _portkeySocialService = new PortkeySocialService(_config, _request, _graphQL);
             _socialVerifierProvider = new SocialVerifierProvider(_socialProvider, _portkeySocialService);
             _storageSuite = new NonPersistentStorage<string>();
-            _accountProvider = new AccountProvider();
-            _connectService = new ConnectService<IHttp>(_config.ApiBaseUrl, _request);
-            _chainProvider = new AElfChainProvider(_request);
-            _caContractProvider = new CAContractProvider(_portkeySocialService, _chainProvider);
-            _encryption = new AESEncryption();
+            _signingKeyGenerator = new SigningKeyGenerator(_encryption);
+            _connectService = new ConnectionService<IHttp>(_config.ApiBaseUrl, _request);
+            _chainProvider = new AElfChainProvider(_request, _portkeySocialService);
+            _accountGenerator = new AccountGenerator();
+            _accountRepository = new AccountRepository(_storageSuite, _encryption, _signingKeyGenerator, _accountGenerator);
+            _caContractProvider = new CAContractProvider(_chainProvider);
             _biometricProvider = new BiometricProvider();
-            _didWallet = new DIDWallet<WalletAccount>(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _encryption);
+            
+            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator);
             _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
         }
         
@@ -55,7 +60,7 @@ namespace Portkey.DID
         /// </summary>
         /// <param name="chainId">The chain ID related to the chain to get.</param>
         /// <returns>Chain object related to the specified chain ID.</returns>
-        public IChain GetChain(string chainId) => _chainProvider.GetChain(chainId);
+        public IEnumerator GetChain(string chainId, SuccessCallback<IChain> successCallback, ErrorCallback errorCallback) => _chainProvider.GetChain(chainId, successCallback, errorCallback);
 
         public IBiometric GetBiometric()
         {
@@ -77,7 +82,7 @@ namespace Portkey.DID
             return _didWallet.Save(password, keyName);
         }
 
-        public IWallet Load(string password, string keyName)
+        bool IDIDAccountApi.Load(string password, string keyName)
         {
             return _didWallet.Load(password, keyName);
         }
@@ -97,21 +102,9 @@ namespace Portkey.DID
             return _didWallet.Logout(param, successCallback, errorCallback);
         }
 
-        public IEnumerator GetLoginStatus(string chainId, string sessionId, SuccessCallback<RecoverStatusResult> successCallback,
-            ErrorCallback errorCallback)
-        {
-            return _didWallet.GetLoginStatus(chainId, sessionId, successCallback, errorCallback);
-        }
-
         public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
         {
             return _didWallet.Register(param, successCallback, errorCallback);
-        }
-
-        public IEnumerator GetRegisterStatus(string chainId, string sessionId, SuccessCallback<RegisterStatusResult> successCallback,
-            ErrorCallback errorCallback)
-        {
-            return _didWallet.GetRegisterStatus(chainId, sessionId, successCallback, errorCallback);
         }
 
         public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
@@ -160,31 +153,19 @@ namespace Portkey.DID
             return _didWallet.GetCAHolderInfo(chainId, successCallback, errorCallback);
         }
 
+        public ISigningKey GetManagementSigningKey()
+        {
+            return _didWallet.GetManagementSigningKey();
+        }
+
         public void Reset()
         {
             _didWallet.Reset();
         }
 
-        public BlockchainWallet GetWallet()
-        {
-            return _didWallet.GetWallet();
-        }
-
         public bool IsLoggedIn()
         {
             return _didWallet.IsLoggedIn();
-        }
-
-        public IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
-            ErrorCallback errorCallback)
-        {
-            return _didWallet.AddManager(editManagerParams, successCallback, errorCallback);
-        }
-
-        public IEnumerator RemoveManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
-            ErrorCallback errorCallback)
-        {
-            return _didWallet.RemoveManager(editManagerParams, successCallback, errorCallback);
         }
     }
 }

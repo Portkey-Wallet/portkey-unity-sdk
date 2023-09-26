@@ -7,50 +7,34 @@ namespace Portkey.Contract
 {
     public class CAContractProvider : IContractProvider
     {
-        private Dictionary<string, IContract> _contracts = new Dictionary<string, IContract>();
-        private IPortkeySocialService _service;
-        private IChainProvider _chainProvider;
-        private Dictionary<string, ChainInfo> _chainInfos = new Dictionary<string, ChainInfo>();
+        private readonly Dictionary<string, IContract> _contracts = new Dictionary<string, IContract>();
+        private readonly IChainProvider _chainProvider;
 
-        public CAContractProvider(IPortkeySocialService service, IChainProvider chainProvider)
+        public CAContractProvider(IChainProvider chainProvider)
         {
-            _service = service;
             _chainProvider = chainProvider;
         }
 
         public IEnumerator GetContract(string chainId, SuccessCallback<IContract> successCallback, ErrorCallback errorCallback)
         {
-            if (_chainInfos.ContainsKey(chainId))
+            if (_contracts.TryGetValue(chainId, out var contract))
             {
-                if (_contracts.TryGetValue(chainId, out var contract))
-                {
-                    successCallback(contract);
-                    yield break;
-                }
-                
-                var newContract = CreateContractBasic(chainId);
-                
+                successCallback(contract);
+                yield break;
+            }
+
+            yield return _chainProvider.GetChain(chainId, chain =>
+            {
+                var newContract = CreateCAContract(chain);
                 successCallback(newContract);
-            }
-            else
-            {
-                yield return _service.GetChainsInfo(chains =>
-                {
-                    _chainProvider.SetChainInfo(chains.items);
-                    _chainInfos = chains.items?.ToDictionary(info => info.chainId, info => info);
-
-                    var newContract = CreateContractBasic(chainId);
-
-                    successCallback(newContract);
-                }, errorCallback);
-            }
+            }, errorCallback);
         }
 
-        private ContractBasic CreateContractBasic(string chainId)
+        private ContractBasic CreateCAContract(IChain chain)
         {
-            var chain = _chainProvider.GetChain(chainId);
-            var newContract = new ContractBasic(chain, _chainInfos?[chainId].caContractAddress);
-            _contracts[chainId] = newContract;
+            var chainInfo = chain.ChainInfo;
+            var newContract = new ContractBasic(chain, chainInfo.caContractAddress);
+            _contracts[chainInfo.chainId] = newContract;
             return newContract;
         }
     }

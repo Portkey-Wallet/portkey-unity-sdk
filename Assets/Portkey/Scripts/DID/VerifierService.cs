@@ -9,10 +9,10 @@ namespace Portkey.DID
     public class VerifierService : IVerifierService
     {
         private readonly Dictionary< string, Dictionary<string, VerifierItem> > _verifiers = new Dictionary<string, Dictionary<string, VerifierItem>>();
-        private readonly DIDWallet<WalletAccount> _didWallet;
+        private readonly DIDAccount _didWallet;
         private readonly IPortkeySocialService _portkeySocialService;
         
-        public VerifierService(DIDWallet<WalletAccount> didWallet, IPortkeySocialService portkeySocialService)
+        public VerifierService(DIDAccount didWallet, IPortkeySocialService portkeySocialService)
         {
             _didWallet = didWallet;
             _portkeySocialService = portkeySocialService;

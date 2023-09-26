@@ -1,5 +1,5 @@
+using System.Text;
 using AElf;
-using AElf.Cryptography;
 using AElf.Types;
 using Google.Protobuf;
 using Portkey.Core;
@@ -10,15 +10,15 @@ namespace Portkey.DID
     /// <summary>
     /// EOA Wallet, used to act as management account of DID wallet.
     /// </summary>
-    public class AElfWallet : IWallet
+    public class AElfSigningKey : ISigningKey
     {
         private readonly KeyPair _keyPair;
-        private IEncryption _encryption;
+        private readonly IEncryption _encryption;
         
         public string Address => _keyPair.Address;
         public string PublicKey => _keyPair.PublicKey;
 
-        public AElfWallet(KeyPair keyPair, IEncryption encryption)
+        public AElfSigningKey(KeyPair keyPair, IEncryption encryption)
         {
             _keyPair = keyPair;
             _encryption = encryption;
@@ -26,22 +26,30 @@ namespace Portkey.DID
         
         public Transaction SignTransaction(Transaction transaction)
         {
-            var byteArray = transaction.GetHash().ToByteArray();
-            var numArray = CryptoHelper.SignWithPrivateKey(ByteArrayHelper.HexStringToByteArray(_keyPair.PrivateKey), byteArray);
-            transaction.Signature = ByteString.CopyFrom(numArray);
+            var temp = transaction.GetHash();
+            var byteArray = temp.ToByteArray();
+            var signature = Sign(byteArray);
+
+            transaction.Signature = ByteString.CopyFrom(signature);
             return transaction;
         }
 
         public byte[] Sign(string data)
         {
-            var byteData = data.GetBytes();
-            var privy = ByteArrayHelper.HexStringToByteArray(_keyPair.PrivateKey);
-            return CryptoHelper.SignWithPrivateKey(privy, byteData);
+            var signature = Sign(Encoding.UTF8.GetBytes(data));
+
+            return signature;
+        }
+        
+        private byte[] Sign(byte[] byteArray)
+        {
+            var signature = _keyPair.PrivateKey.Sign(byteArray);
+            return signature;
         }
 
         public byte[] Encrypt(string password)
         {
-            return _encryption.Encrypt(_keyPair.PrivateKey, password);
+            return _encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
         }
     }
 }

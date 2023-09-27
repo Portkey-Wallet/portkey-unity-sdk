@@ -5,8 +5,7 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Scripts",
-        "TestUtilities",
-        "PortkeyUnityHelper"
+        "TestUtilities"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,7 +17,7 @@
         "AElf.Types.dll",
         "Moq.dll",
         "Newtonsoft.Json.dll",
-        "BIP39Wallet.dll"
+        "AElf.HdWallet.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

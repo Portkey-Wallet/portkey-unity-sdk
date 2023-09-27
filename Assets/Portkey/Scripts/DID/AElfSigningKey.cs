@@ -49,7 +49,7 @@ namespace Portkey.DID
 
         public byte[] Encrypt(string password)
         {
-            return _encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
+            return null;//_encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using AElf.HdWallet;
 using AElf.Types;
-using BIP39Wallet;
 using Google.Protobuf;
 using Moq;
 using NUnit.Framework;

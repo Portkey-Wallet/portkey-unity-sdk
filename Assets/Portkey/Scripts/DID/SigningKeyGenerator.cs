@@ -1,4 +1,4 @@
-using BIP39Wallet;
+using AElf.HdWallet;
 using Portkey.Core;
 using KeyPair = Portkey.Core.KeyPair;
 

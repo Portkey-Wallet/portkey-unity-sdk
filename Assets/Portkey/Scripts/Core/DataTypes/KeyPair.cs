@@ -1,4 +1,4 @@
-using BIP39Wallet;
+using AElf.HdWallet;
 
 namespace Portkey.Core
 {

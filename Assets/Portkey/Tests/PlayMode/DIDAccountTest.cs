@@ -1,8 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using AElf;
-using BIP39Wallet;
+using AElf.HdWallet;
 using Google.Protobuf;
 using Moq;
 using NUnit.Framework;
@@ -13,10 +12,8 @@ using Portkey.DID;
 using Portkey.Encryption;
 using Portkey.Network;
 using Portkey.Storage;
-using Portkey.Utilities;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Guardian = Portkey.Core.Guardian;
 using GuardianList = Portkey.Core.GuardianList;
 
 namespace Portkey.Test

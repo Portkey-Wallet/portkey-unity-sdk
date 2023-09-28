@@ -23,20 +23,6 @@ mergeInto(LibraryManager.library, {
     }
   },
   
-  GetManagementAccount: async function () {
-    try {
-        var provider = window.portkey;
-        const accounts = await provider.request({ method: 'accounts' });
-        window.unityInstance.SendMessage('PortkeyExtensionConnectCallback', 'OnGetManagementAccount', JSON.stringify(accounts));
-        console.log(accounts);
-    } catch (e) {
-        console.log(e);
-        // An error will be thrown if the user denies the permission request.
-        console.log('user denied the permission request');
-        window.unityInstance.SendMessage('PortkeyExtensionConnectCallback', 'OnError', 'User denied the permission request!');
-    }
-  },
-  
   SignMessage: async function (messageInHex) {
     try {
       var provider = window.portkey;
@@ -45,6 +31,21 @@ mergeInto(LibraryManager.library, {
         payload: {
           data: UTF8ToString(messageInHex),
         }
+      });
+      if (!signature) throw new Error('Sign failed!');
+      window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnSign', signature);
+    } catch (e) {
+        console.log(e);
+        window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnError', 'Sign failed!');
+    }
+  },
+  
+  SendTransaction: async function (payload) {
+    try {
+      var provider = window.portkey;
+      const signature = await provider.request({
+        method: 'sendTransaction',
+        UTF8ToString(payload)
       });
       if (!signature) throw new Error('Sign failed!');
       window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnSign', signature);

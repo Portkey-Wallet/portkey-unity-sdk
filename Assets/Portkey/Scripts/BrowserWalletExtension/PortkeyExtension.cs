@@ -16,23 +16,18 @@ namespace Portkey.BrowserWalletExtension
     
     public class PortkeyExtension : IBrowserWalletExtension
     {
-        private CaAddresses _caAddresses = null;
-        
 #if UNITY_WEBGL
             //&& !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern bool IsPortkeyExtensionExist();
         [DllImport("__Internal")]
         private static extern void Connect();
-        [DllImport("__Internal")]
-        private static extern void GetManagementAccount();
 #endif
         
         public void Connect(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
         {
             if (IsPortkeyExtensionExist())
             {
-                _caAddresses = null;
                 Listen(successCallback, errorCallback);
                 Connect();
             }
@@ -48,13 +43,13 @@ namespace Portkey.BrowserWalletExtension
             var callbackComponent = gameObject.AddComponent<PortkeyExtensionConnectCallback>();
             callbackComponent.OnErrorCallback = OnError;
             callbackComponent.OnConnectCallback = OnConnect;
-            callbackComponent.OnGetManagementAccountCallback = OnGetManagementAccount;
             
             void OnConnect(string data)
             {
+                CaAddresses caAddresses = null;
                 try
                 {
-                    _caAddresses = JsonConvert.DeserializeObject<CaAddresses>(data);
+                    caAddresses = JsonConvert.DeserializeObject<CaAddresses>(data);
                 }
                 catch (Exception e)
                 {
@@ -63,16 +58,11 @@ namespace Portkey.BrowserWalletExtension
                     return;
                 }
 
-                GetManagementAccount();
-            }
-            
-            void OnGetManagementAccount(string data)
-            {
                 var walletInfo = new DIDWalletInfo
                 {
                     caInfo = new CAInfo
                     {
-                        caAddress = _caAddresses.AELF[0],
+                        caAddress = caAddresses.AELF[0],
                         caHash = null
                     },
                     chainId = "AELF",

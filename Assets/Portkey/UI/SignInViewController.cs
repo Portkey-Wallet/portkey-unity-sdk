@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Portkey.BrowserWalletExtension;
 using Portkey.Core;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -40,6 +42,24 @@ namespace Portkey.UI
                 default:
                     throw new ArgumentException("Not expected account type!");
             }
+        }
+        
+        private DIDWalletInfo _walletInfo;
+        
+        public void SignInWithExtension()
+        {
+            StartCoroutine(did.AuthService.LoginWithPortkeyExtension(OnConnect));
+        }
+        
+        private void OnConnect(DIDWalletInfo walletInfo)
+        {
+            _walletInfo = walletInfo;
+        }
+
+        public void Signature()
+        {
+            //_walletInfo.wallet.SignTransaction("68656c6c6f20776f726c643939482801");
+            //Debugger.Log($"Signature: {signature}");
         }
 
         private void AuthCallback(ICredential credential)

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.Tasks;
 using AElf;
 using AElf.Types;
 using Google.Protobuf;
@@ -24,11 +25,13 @@ namespace Portkey.DID
             _encryption = encryption;
         }
         
-        public Transaction SignTransaction(Transaction transaction)
+        public async Task<Transaction> SignTransaction(Transaction transaction)
         {
             var temp = transaction.GetHash();
             var byteArray = temp.ToByteArray();
             var signature = Sign(byteArray);
+
+            await Task.Delay(1000);
 
             transaction.Signature = ByteString.CopyFrom(signature);
             return transaction;

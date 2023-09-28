@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AElf.HdWallet;
 using AElf.Types;
 using Google.Protobuf;
@@ -95,7 +96,7 @@ namespace Portkey.Test
         private static Mock<ISigningKey> GetWalletMock()
         {
             var walletMock = new Mock<ISigningKey>();
-            walletMock.Setup(wallet => wallet.SignTransaction(It.IsAny<Transaction>())).Returns(new Transaction());
+            walletMock.Setup(wallet => wallet.SignTransaction(It.IsAny<Transaction>())).Returns(Task.FromResult(new Transaction()));
 
             return walletMock;
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Portkey.BrowserWalletExtension;
 using Portkey.Core;
 using Portkey.SocialProvider;
 using Portkey.Utilities;
@@ -26,6 +27,7 @@ namespace Portkey.DID
         public IAuthMessage Message { get; private set; }
         private EmailLogin Email { get; set; }
         private PhoneLogin Phone { get; set; }
+        private IBrowserWalletExtension BrowserWalletExtension { get; set; }
 
         public AuthService(IPortkeySocialService portkeySocialService, DIDAccount did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider, PortkeyConfig config)
         {
@@ -39,6 +41,7 @@ namespace Portkey.DID
             Message = new AuthMessage();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
+            BrowserWalletExtension = new PortkeyExtension();
             AppleCredentialProvider = new AppleCredentialProvider(_socialLoginProvider, Message);
             GoogleCredentialProvider = new GoogleCredentialProvider(_socialLoginProvider, Message);
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
@@ -481,6 +484,12 @@ namespace Portkey.DID
                 var walletInfo = CreateDIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery);
                 successCallback(walletInfo);
             }, OnError));
+        }
+
+        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            BrowserWalletExtension.Connect(successCallback, OnError);
+            yield break;
         }
 
         public IEnumerator Logout(SuccessCallback<bool> successCallback)

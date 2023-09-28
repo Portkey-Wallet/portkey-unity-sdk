@@ -42,7 +42,7 @@ namespace Portkey.Test
             const string SIGNED =
                 "WMfWt3EGPQ06YpVmXup4tXjZQBunSrgycHKeu3ZT4/F9oSgi2oSKN7ZhNu9dUjsDkTgRkb/2F9LDPcpTm8BgTwE\u003d";
             var wallet = _signingKeyGenerator.CreateFromPrivateKey(PRIVATE_KEY);
-            var result = wallet.SignTransaction(transaction);
+            var result = wallet.SignTransaction(transaction).Result;
             
             Assert.AreEqual(SIGNED, result.Signature.ToBase64());
         }

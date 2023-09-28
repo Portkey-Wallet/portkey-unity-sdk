@@ -21,6 +21,7 @@ namespace Portkey.Core
         IEnumerator SignUp(ICredential credential, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator Login(Guardian loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback);
+        IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator Logout(SuccessCallback<bool> successCallback);
     }
 }

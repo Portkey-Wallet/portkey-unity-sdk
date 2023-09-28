@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using AElf;
 using AElf.Types;
 using Google.Protobuf;
@@ -34,9 +35,9 @@ namespace Portkey.Contract
         
         public IEnumerator CallAsync<T>(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
         {
-            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
+            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, async transaction =>
             {
-                var txWithSign = signingKey.SignTransaction(transaction);
+                var txWithSign = await signingKey.SignTransaction(transaction);
                 var executeTxDto = new ExecuteTransactionDto
                 {
                     RawTransaction = txWithSign.ToByteArray().ToHex()
@@ -61,12 +62,12 @@ namespace Portkey.Contract
                 var refBlockNumber = transaction.RefBlockNumber - 5;
                 refBlockNumber = Math.Max(0, refBlockNumber);
                 
-                StaticCoroutine.StartCoroutine(_chain.GetBlockByHeightAsync(refBlockNumber, blockDto =>
+                StaticCoroutine.StartCoroutine(_chain.GetBlockByHeightAsync(refBlockNumber, async blockDto =>
                 {
                     transaction.RefBlockNumber = refBlockNumber;
                     transaction.RefBlockPrefix = BlockHelper.GetRefBlockPrefix(Hash.LoadFromHex(blockDto?.BlockHash));
                     
-                    var txWithSign = signingKey.SignTransaction(transaction);
+                    var txWithSign = await signingKey.SignTransaction(transaction);
                     Debugger.Log("Sending Transaction...");
 
                     var sendTxnInput = new SendTransactionInput

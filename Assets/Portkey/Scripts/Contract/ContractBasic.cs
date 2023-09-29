@@ -121,7 +121,9 @@ namespace Portkey.Contract
             else
             {
 #if UNITY_WEBGL
-                SendTransaction("");
+                var formatter = new JsonFormatter(new JsonFormatter.Settings(true));
+                var payload = formatter.Format(param);
+                SendTransaction(payload);
 #endif
             }
         }

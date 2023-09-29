@@ -129,6 +129,21 @@ namespace Portkey.Test
             while (!done)
                 yield return null;
         }
+
+        [Test]
+        public void ContractMessageTest()
+        {
+            IMessage param = new AddManagerInfoInput
+            {
+                ManagerInfo = null,
+                CaHash = Hash.LoadFromHex("594ebf395cdba58b0e725d71eb3c1a17d57662b0667a92f770f341d4e794b76b")
+            };
+            
+            var formatter = new JsonFormatter(new JsonFormatter.Settings(true));
+            var payload = formatter.Format(param);
+            
+            Debugger.Log(payload);
+        }
         
         /// <summary>
         /// Create a test to make sure the handling of errors for contract basic is working.

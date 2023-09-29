@@ -30,8 +30,13 @@ namespace Portkey.DID
             var temp = transaction.GetHash();
             var byteArray = temp.ToByteArray();
             var signature = Sign(byteArray);
+            
+            Debugger.LogError("start wait");
 
-            await Task.Delay(1000);
+            //TODO: doesn't work, have to change to coroutine
+            await Task.Delay(10000);
+            
+            Debugger.LogError("end wait");
 
             transaction.Signature = ByteString.CopyFrom(signature);
             return transaction;

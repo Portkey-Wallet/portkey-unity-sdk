@@ -39,20 +39,5 @@ mergeInto(LibraryManager.library, {
         window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnError', 'Sign failed!');
     }
   },
-  
-  SendTransaction: async function (payload) {
-    try {
-      var provider = window.portkey;
-      const signature = await provider.request({
-        method: 'sendTransaction',
-        UTF8ToString(payload)
-      });
-      if (!signature) throw new Error('Sign failed!');
-      window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnSign', signature);
-    } catch (e) {
-        console.log(e);
-        window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnError', 'Sign failed!');
-    }
-  },
 
 });

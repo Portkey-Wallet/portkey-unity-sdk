@@ -54,25 +54,6 @@ namespace Portkey.Contract
                 }, errorCallback));
             }, errorCallback);
         }
-        
-#if UNITY_WEBGL
-        [DllImport("__Internal")]
-        private static extern void SendTransaction(string payload);
-
-        private class PayloadForExtension
-        {
-            public class MethodParam
-            {
-                
-            }
-            
-            public string rpcUrl;
-            public string chainId;
-            public string contractAddress;
-            public string method;
-            
-        }
-#endif
 
         public IEnumerator SendAsync(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
         {
@@ -123,7 +104,7 @@ namespace Portkey.Contract
 #if UNITY_WEBGL
                 var formatter = new JsonFormatter(new JsonFormatter.Settings(true));
                 var payload = formatter.Format(param);
-                SendTransaction(payload);
+                //SendTransaction(payload);
 #endif
             }
         }

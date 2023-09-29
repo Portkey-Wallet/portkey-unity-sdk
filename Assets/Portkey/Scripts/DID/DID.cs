@@ -8,7 +8,6 @@ using Portkey.Encryption;
 using Portkey.GraphQL;
 using Portkey.SocialProvider;
 using Portkey.Storage;
-using Portkey.Transport;
 using UnityEngine;
 
 namespace Portkey.DID
@@ -33,6 +32,7 @@ namespace Portkey.DID
         private IAuthService _authService;
         private IAccountGenerator _accountGenerator;
         private IAccountRepository _accountRepository;
+        private IAppLogin _appLogin;
         
         private DIDAccount _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
@@ -52,9 +52,10 @@ namespace Portkey.DID
             _accountRepository = new AccountRepository(_storageSuite, _encryption, _signingKeyGenerator, _accountGenerator);
             _caContractProvider = new CAContractProvider(_chainProvider);
             _biometricProvider = new BiometricProvider();
+            _appLogin = new PortkeyAppLogin(_config.PortkeyTransportConfig, _signingKeyGenerator, _portkeySocialService);
             
-            _didWallet = new DIDAccount(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _accountRepository, _accountGenerator);
-            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config, _accountGenerator);
+            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin);
+            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
         }
         
         public IAuthService AuthService => _authService;
@@ -160,6 +161,11 @@ namespace Portkey.DID
         public ISigningKey GetManagementSigningKey()
         {
             return _didWallet.GetManagementSigningKey();
+        }
+
+        public IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        {
+            return _didWallet.LoginWithPortkeyApp(chainId, successCallback, errorCallback);
         }
 
         public void Reset()

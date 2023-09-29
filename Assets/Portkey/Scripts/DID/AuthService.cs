@@ -14,12 +14,9 @@ namespace Portkey.DID
         
         private readonly IPortkeySocialService _portkeySocialService;
         private readonly DIDAccount _did;
-        private readonly ISocialProvider _socialLoginProvider;
         private readonly ISocialVerifierProvider _socialVerifierProvider;
         private readonly IVerifierService _verifierService;
-        private readonly IAccountProvider<WalletAccount> _accountProvider;
         private readonly PortkeyConfig _config;
-        private readonly IAppLogin _appLogin;
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }
@@ -33,18 +30,15 @@ namespace Portkey.DID
         {
             _portkeySocialService = portkeySocialService;
             _did = did;
-            _socialLoginProvider = socialLoginProvider;
             _socialVerifierProvider = socialVerifierProvider;
             _config = config;
-            _accountProvider = accountProvider;
             
             _verifierService = new VerifierService(_did, _portkeySocialService);
             Message = new AuthMessage();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
-            _appLogin = new PortkeyAppLogin(_config.PortkeyTransportConfig, _accountProvider, _portkeySocialService);
-            AppleCredentialProvider = new AppleCredentialProvider(_socialLoginProvider, Message);
-            GoogleCredentialProvider = new GoogleCredentialProvider(_socialLoginProvider, Message);
+            AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message);
+            GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message);
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
             EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
 
@@ -411,8 +405,8 @@ namespace Portkey.DID
                     return;
                 }
 
-                var walletInfo = CreateDIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
-                    registerResult.SessionId, AddManagerType.Register);
+                var walletInfo = new DIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
+                    registerResult.SessionId, AddManagerType.Register, _did.GetManagementSigningKey());
                 successCallback(walletInfo);
             }, OnError);
         }
@@ -482,14 +476,17 @@ namespace Portkey.DID
                     return;
                 }
                 
-                var walletInfo = CreateDIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery);
+                var walletInfo = new DIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery, _did.GetManagementSigningKey());
                 successCallback(walletInfo);
             }, OnError));
         }
 
         public IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _appLogin.Login(Message.ChainId, successCallback, OnError);
+            yield return _did.LoginWithPortkeyApp(Message.ChainId, result =>
+            {
+                successCallback(new DIDWalletInfo(result.caHolder, result.managementAccount));
+            }, OnError);
         }
 
         public IEnumerator Logout(SuccessCallback<bool> successCallback)
@@ -499,24 +496,6 @@ namespace Portkey.DID
                 chainId = Message.ChainId
             };
             yield return _did.Logout(param, successCallback, OnError);
-        }
-
-        private DIDWalletInfo CreateDIDWalletInfo(string chainId, string guardianId, AccountType accountType, CAInfo caInfo, string sessionId, AddManagerType type)
-        {
-            var walletInfo = new DIDWalletInfo
-            {
-                caInfo = caInfo,
-                chainId = chainId,
-                wallet = _did.GetManagementSigningKey(),
-                managerInfo = new ManagerInfoType
-                {
-                    managerUniqueId = sessionId,
-                    guardianIdentifier = guardianId,
-                    accountType = accountType,
-                    type = type
-                }
-            };
-            return walletInfo;
         }
         
         private static bool IsCAValid(CAInfo caInfo)

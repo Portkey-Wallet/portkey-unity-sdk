@@ -20,10 +20,11 @@ namespace Portkey.DID
         private readonly IContractProvider _contractProvider;
         private readonly IAccountRepository _accountRepository;
         private readonly IAccountGenerator _accountGenerator;
+        private readonly IAppLogin _appLogin;
 
         protected Account Account = null;
 
-        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator)
+        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin)
         {
             _socialService = socialService;
             _signingKeyGenerator = signingKeyGenerator;
@@ -31,6 +32,7 @@ namespace Portkey.DID
             _contractProvider = contractProvider;
             _accountRepository = accountRepository;
             _accountGenerator = accountGenerator;
+            _appLogin = appLogin;
         }
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
@@ -543,7 +545,16 @@ namespace Portkey.DID
         {
             return Account?.managementSigningKey;
         }
-        
+
+        public IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        {
+            yield return _appLogin.Login(chainId, result =>
+            {
+                Account = _accountGenerator.Create(chainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
+                successCallback(result);
+            }, errorCallback);
+        }
+
         public bool IsLoggedIn()
         {
             return Account?.accountDetails.caInfoMap.Count > 0 && Account.accountDetails.socialInfo.Exists();

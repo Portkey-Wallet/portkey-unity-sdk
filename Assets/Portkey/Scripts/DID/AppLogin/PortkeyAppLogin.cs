@@ -34,20 +34,20 @@ namespace Portkey.DID
             public string websiteIcon;
         }
         
-        private readonly IAccountProvider<WalletAccount> _accountProvider;
+        private readonly ISigningKeyGenerator _signingKeyGenerator;
         private readonly IPortkeySocialService _portkeySocialService;
         private readonly TransportConfig _config;
         
-        public PortkeyAppLogin(TransportConfig config, IAccountProvider<WalletAccount> accountProvider, IPortkeySocialService portkeySocialService)
+        public PortkeyAppLogin(TransportConfig config, ISigningKeyGenerator signingKeyGenerator, IPortkeySocialService portkeySocialService)
         {
             _config = config;
-            _accountProvider = accountProvider;
+            _signingKeyGenerator = signingKeyGenerator;
             _portkeySocialService = portkeySocialService;
         }
         
-        public IEnumerator Login(string chainId, SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        public IEnumerator Login(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
-            var privateKey = _accountProvider.CreateAccount();
+            var privateKey = _signingKeyGenerator.Create();
             var guid = System.Guid.NewGuid().ToString();
             
             Debugger.LogError(privateKey.Address);
@@ -89,25 +89,31 @@ namespace Portkey.DID
             yield break;
         }
 
-        private IEnumerator WaitForResponse(float timer, string chainId, WalletAccount wallet, SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        private IEnumerator WaitForResponse(float timer, string chainId, ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
             yield return new WaitForSeconds(WAIT_INTERVAL);
             timer += WAIT_INTERVAL;
 
             var param = new GetCAHolderByManagerParams
             {
-                manager = wallet.Address,
+                manager = signingKey.Address,
                 chainId = chainId
             };
             yield return _portkeySocialService.GetHolderInfoByManager(param, result =>
             {
                 foreach (var caHolder in result.caHolders)
                 {
-                    foreach (var didWalletInfo in from manager in caHolder.holderManagerInfo.managerInfos where manager.address == wallet.Address select CreateDIDWalletInfo(caHolder, wallet.Wallet))
+                    if (caHolder.holderManagerInfo.managerInfos.All(manager => manager.address != signingKey.Address))
                     {
-                        successCallback(didWalletInfo);
-                        return;
+                        continue;
                     }
+                    var loginResult = new PortkeyAppLoginResult
+                    {
+                        caHolder = caHolder, 
+                        managementAccount = signingKey
+                    };
+                    successCallback(loginResult);
+                    return;
                 }
 
                 if (timer > LOGIN_TIMEOUT)
@@ -117,7 +123,7 @@ namespace Portkey.DID
                 }
 
                 //if we did not find the manager, we poll again
-                StaticCoroutine.StartCoroutine(WaitForResponse(timer, chainId, wallet, successCallback, errorCallback));
+                StaticCoroutine.StartCoroutine(WaitForResponse(timer, chainId, signingKey, successCallback, errorCallback));
             }, error =>
             {
                 Debugger.LogError(error);
@@ -128,30 +134,8 @@ namespace Portkey.DID
                     return;
                 }
                 
-                StaticCoroutine.StartCoroutine(WaitForResponse(timer, chainId, wallet, successCallback, errorCallback));
+                StaticCoroutine.StartCoroutine(WaitForResponse(timer, chainId, signingKey, successCallback, errorCallback));
             });
-        }
-        
-        private DIDWalletInfo CreateDIDWalletInfo(CaHolderWithGuardian caHolder, BlockchainWallet wallet)
-        {
-            var walletInfo = new DIDWalletInfo
-            {
-                caInfo = new CAInfo
-                {
-                    caAddress = caHolder.holderManagerInfo.caAddress,
-                    caHash = caHolder.holderManagerInfo.caHash
-                },
-                chainId = caHolder.holderManagerInfo.originChainId,
-                wallet = wallet,
-                managerInfo = new ManagerInfoType
-                {
-                    managerUniqueId = caHolder.holderManagerInfo.id,
-                    guardianIdentifier = caHolder.holderManagerInfo.id,
-                    accountType = (AccountType)caHolder.loginGuardianInfo[0].loginGuardian.type,
-                    type = AddManagerType.AddManager
-                }
-            };
-            return walletInfo;
         }
     }
 }

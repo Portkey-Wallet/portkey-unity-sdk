@@ -5,8 +5,10 @@ using Portkey.Chain;
 using Portkey.Contract;
 using Portkey.Core;
 using Portkey.Encryption;
+using Portkey.GraphQL;
 using Portkey.SocialProvider;
 using Portkey.Storage;
+using Portkey.Transport;
 using UnityEngine;
 
 namespace Portkey.DID
@@ -15,8 +17,9 @@ namespace Portkey.DID
     {
         [SerializeField] private IHttp _request;
         [SerializeField] private PortkeyConfig _config;
-        [SerializeField] private GraphQL.GraphQL _graphQL;
-        
+        [SerializeField] protected GraphQLConfig _graphQLConfig;
+
+        private GraphQL.GraphQL _graphQL;
         private ISocialProvider _socialProvider;
         private IPortkeySocialService _portkeySocialService;
         private IStorageSuite<string> _storageSuite;
@@ -36,6 +39,7 @@ namespace Portkey.DID
 
         public void Awake()
         {
+            _graphQL = new GraphQL.GraphQL(_graphQLConfig);
             _encryption = new AESEncryption();
             _socialProvider = new SocialLoginProvider(_config, _request);
             _portkeySocialService = new PortkeySocialService(_config, _request, _graphQL);
@@ -49,8 +53,8 @@ namespace Portkey.DID
             _caContractProvider = new CAContractProvider(_chainProvider);
             _biometricProvider = new BiometricProvider();
             
-            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator);
-            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
+            _didWallet = new DIDAccount(_portkeySocialService, _storageSuite, _accountProvider, _connectService, _caContractProvider, _accountRepository, _accountGenerator);
+            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config, _accountGenerator);
         }
         
         public IAuthService AuthService => _authService;

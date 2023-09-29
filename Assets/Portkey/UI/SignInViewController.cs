@@ -42,6 +42,19 @@ namespace Portkey.UI
             }
         }
 
+        public void SignInWithApp()
+        {
+            did.AuthService.Message.Loading(true, "Loading...");
+            StartCoroutine(did.AuthService.LoginWithPortkeyApp(LoggedIn));
+        }
+
+        private void LoggedIn(DIDWalletInfo walletInfo)
+        {
+            did.AuthService.Message.Loading(false);
+            setPinViewController.Initialize(walletInfo);
+            setPinViewController.SetPreviousView(gameObject);
+        }
+
         private void AuthCallback(ICredential credential)
         {
             StartCoroutine(did.AuthService.GetGuardians(credential, guardians =>

@@ -21,6 +21,7 @@ public class LockViewController : MonoBehaviour
     
     private void OnApplicationPause(bool pauseStatus)
     {
+        return;
         if (pauseStatus && did.IsLoggedIn() && setPinViewController.IsLoginCompleted && !isBiometricPromptOpened)
         {
             ResetPIN();

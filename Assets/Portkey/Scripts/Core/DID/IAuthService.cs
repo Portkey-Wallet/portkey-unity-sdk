@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Portkey.SocialProvider;
+using UnityEngine;
 
 namespace Portkey.Core
 {
@@ -22,6 +23,7 @@ namespace Portkey.Core
         IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator Login(Guardian loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback);
+        IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator Logout(SuccessCallback<bool> successCallback);
     }
 }

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Portkey.Core;
 using Portkey.SocialProvider;
 using Portkey.Utilities;
+using UnityEngine;
 
 namespace Portkey.DID
 {
@@ -43,6 +44,7 @@ namespace Portkey.DID
             EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
 
             Message.ChainId = DEFAULT_CHAIN_ID;
+            Message.OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;
         }
 
         private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<Guardian>> successCallback, ErrorCallback errorCallback)
@@ -483,10 +485,20 @@ namespace Portkey.DID
 
         public IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _did.LoginWithPortkeyApp(Message.ChainId, result =>
+            yield return _did.LoginWithPortkeyApp(Message.ChainId, PortkeyAppLoginSuccess(successCallback), OnError);
+        }
+
+        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            yield return _did.LoginWithQRCode(Message.ChainId, qrCodeCallback, PortkeyAppLoginSuccess(successCallback), OnError);
+        }
+        
+        private static SuccessCallback<PortkeyAppLoginResult> PortkeyAppLoginSuccess(SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            return result =>
             {
                 successCallback(new DIDWalletInfo(result.caHolder, result.managementAccount));
-            }, OnError);
+            };
         }
 
         public IEnumerator Logout(SuccessCallback<bool> successCallback)

@@ -33,6 +33,8 @@ namespace Portkey.DID
         private IAccountGenerator _accountGenerator;
         private IAccountRepository _accountRepository;
         private IAppLogin _appLogin;
+        private IQRLogin _qrLogin;
+        private ILoginPoller _loginPoller;
         
         private DIDAccount _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
@@ -52,9 +54,11 @@ namespace Portkey.DID
             _accountRepository = new AccountRepository(_storageSuite, _encryption, _signingKeyGenerator, _accountGenerator);
             _caContractProvider = new CAContractProvider(_chainProvider);
             _biometricProvider = new BiometricProvider();
-            _appLogin = new PortkeyAppLogin(_config.PortkeyTransportConfig, _signingKeyGenerator, _portkeySocialService);
+            _loginPoller = new LoginPoller(_portkeySocialService);
+            _appLogin = new PortkeyAppLogin(_config.PortkeyTransportConfig, _signingKeyGenerator, _loginPoller);
+            _qrLogin = new QRLogin(_loginPoller, _signingKeyGenerator);
             
-            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin);
+            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin);
             _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
         }
         
@@ -90,11 +94,6 @@ namespace Portkey.DID
         bool IDIDAccountApi.Load(string password, string keyName)
         {
             return _didWallet.Load(password, keyName);
-        }
-
-        public IEnumerator Login(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
-        {
-            return _didWallet.Login(param, successCallback, errorCallback);
         }
 
         public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
@@ -166,6 +165,12 @@ namespace Portkey.DID
         public IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
             return _didWallet.LoginWithPortkeyApp(chainId, successCallback, errorCallback);
+        }
+
+        public IEnumerator LoginWithQRCode(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            return _didWallet.LoginWithQRCode(chainId, qrCodeCallback, successCallback, errorCallback);
         }
 
         public void Reset()

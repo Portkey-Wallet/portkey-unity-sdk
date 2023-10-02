@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
+using UnityEngine;
 using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.DID
@@ -21,10 +22,11 @@ namespace Portkey.DID
         private readonly IAccountRepository _accountRepository;
         private readonly IAccountGenerator _accountGenerator;
         private readonly IAppLogin _appLogin;
+        private readonly IQRLogin _qrLogin;
 
         protected Account Account = null;
 
-        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin)
+        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin, IQRLogin qrLogin)
         {
             _socialService = socialService;
             _signingKeyGenerator = signingKeyGenerator;
@@ -33,6 +35,7 @@ namespace Portkey.DID
             _accountRepository = accountRepository;
             _accountGenerator = accountGenerator;
             _appLogin = appLogin;
+            _qrLogin = qrLogin;
         }
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
@@ -43,21 +46,6 @@ namespace Portkey.DID
         public bool Load(string password, string keyName = DEFAULT_KEY_NAME)
         {
             return _accountRepository.Load(keyName, password, out Account);
-        }
-
-        public IEnumerator Login(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
-        {
-            if (!Account.accountDetails.socialInfo.Exists())
-            {
-                errorCallback("Account not logged in.");
-                yield break;
-            }
-
-            yield return AddManager(param, result =>
-            {
-                // TODO: result.error error handling
-                successCallback(result);
-            }, errorCallback);
         }
 
         public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
@@ -553,6 +541,21 @@ namespace Portkey.DID
                 Account = _accountGenerator.Create(chainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
                 successCallback(result);
             }, errorCallback);
+        }
+
+        public IEnumerator LoginWithQRCode(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            yield return _qrLogin.Login(chainId, qrCodeCallback, result =>
+            {
+                Account = _accountGenerator.Create(chainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
+                successCallback(result);
+            }, errorCallback);
+        }
+        
+        public void CancelLoginWithQRCode()
+        {
+            _qrLogin.Cancel();
         }
 
         public bool IsLoggedIn()

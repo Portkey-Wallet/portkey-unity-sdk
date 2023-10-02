@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEngine;
 
 namespace Portkey.Core
 {
@@ -48,12 +49,6 @@ namespace Portkey.Core
     /// </summary>
     public interface IDIDAccountApi
     {
-        /// <summary>
-        /// For logging in with QR scan.
-        /// </summary>
-        /// <param name="param">Provides chain ID, caHash and manager info.</param>
-        /// <returns>True if able to login, false otherwise.</returns>
-        IEnumerator Login(ScanLoginParam param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
         IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback);
         IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
         IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback);
@@ -64,6 +59,7 @@ namespace Portkey.Core
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
         ISigningKey GetManagementSigningKey();
         IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
+        IEnumerator LoginWithQRCode(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
         bool IsLoggedIn();
         bool Save(string password, string keyName);
         bool Load(string password, string keyName);

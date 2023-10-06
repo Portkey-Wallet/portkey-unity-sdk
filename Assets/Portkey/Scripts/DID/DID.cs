@@ -54,14 +54,8 @@ namespace Portkey.DID
         }
         
         public IAuthService AuthService => _authService;
+        public IChainProvider ChainProvider => _chainProvider;
         
-        /// <summary>
-        /// Get the chain object with a specified chain ID.
-        /// </summary>
-        /// <param name="chainId">The chain ID related to the chain to get.</param>
-        /// <returns>Chain object related to the specified chain ID.</returns>
-        public IEnumerator GetChain(string chainId, SuccessCallback<IChain> successCallback, ErrorCallback errorCallback) => _chainProvider.GetChain(chainId, successCallback, errorCallback);
-
         public IBiometric GetBiometric()
         {
             return _biometricProvider.GetBiometric();

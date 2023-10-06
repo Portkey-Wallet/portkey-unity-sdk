@@ -56,8 +56,10 @@ namespace Portkey.UI
             chainInfoText.text = LOADING_MESSAGE;
             _chainIdToCaAddress.Clear();
             ResetTokenUIInfos();
+            
+            chainInfoText.text = _walletInfo.chainId;
 
-            StartCoroutine(GetChainInfo());
+            StartCoroutine(GetChainsInfo());
         }
 
         private void ResetTokenUIInfos()
@@ -71,65 +73,36 @@ namespace Portkey.UI
             }
         }
 
-        private IEnumerator GetChainInfo()
+        private IEnumerator GetChainsInfo()
         {
-            yield return did.PortkeySocialService.GetChainsInfo(chains =>
+            yield return did.ChainProvider.GetAvailableChainIds(chainIds =>
             {
-                var chainInfos = chains.items?.ToDictionary(info => info.chainId, info => info);
-                if (chainInfos == null || !chainInfos.TryGetValue(_walletInfo.chainId, out var currChainInfo))
+                var index = 0;
+                foreach (var chainId in chainIds)
                 {
-                    return;
+                    var uiIndex = index;
+                    StartCoroutine(did.ChainProvider.GetChain(chainId, chain =>
+                    {
+                        RequestInfoFromContract(uiIndex, chain);
+                    }, OnError));
+                    ++index;
                 }
-                
-                chainInfoText.text = currChainInfo.chainId;
-                
-                SetupTokenUpdate(chainInfos);
             }, OnError);
         }
 
-        private void SetupTokenUpdate(Dictionary<string, ChainInfo> chainInfos)
+        private void RequestInfoFromContract(int index, IChain chain)
         {
-            var index = 0;
-            foreach (var chainInfo in chainInfos)
-            {
-                if (index >= tokenInfos.Length)
-                    break;
+            var tokenContract = new ContractBasic(chain, chain.ChainInfo.defaultToken.address);
 
-                var token = chainInfo.Value.defaultToken;
-                var tokenAddress = token.address;
-
-                var tokenSymbol = token.symbol;
-                RequestInfo(chainInfo, tokenAddress, index, token);
-                ++index;
-            }
+            RequestHolderInfoByChainId(index, tokenContract, chain.ChainInfo.defaultToken);
         }
 
-        private void RequestInfo(KeyValuePair<string, ChainInfo> chainInfo, string tokenAddress, int index, DefaultToken token)
-        {
-            StartCoroutine(did.GetChain(chainInfo.Key,
-            chain =>
-            {
-                RequestInfoFromContract(chain, tokenAddress, chainInfo.Key, index, token);
-            },
-            error =>
-            {
-                Debugger.LogError(error);
-            }));
-        }
-
-        private void RequestInfoFromContract(IChain chain, string tokenAddress, string chainId, int index, DefaultToken token)
-        {
-            var tokenContract = new ContractBasic(chain, tokenAddress);
-
-            RequestHolderInfoByChainId(chainId, index, tokenContract, token);
-        }
-
-        private void RequestHolderInfoByChainId(string chainId, int index, ContractBasic tokenContract, DefaultToken token)
+        private void RequestHolderInfoByChainId(int index, ContractBasic tokenContract, DefaultToken token)
         {
             var getHolderInfoParam = new GetHolderInfoParams
             {
                 caHash = _walletInfo.caInfo.caHash,
-                chainId = chainId
+                chainId = tokenContract.ChainId
             };
             StartCoroutine(PollHolderInfo(index, tokenContract, token, getHolderInfoParam));
         }

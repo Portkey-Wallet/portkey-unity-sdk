@@ -59,7 +59,7 @@ namespace Portkey.UI
             
             chainInfoText.text = _walletInfo.chainId;
 
-            StartCoroutine(GetChainsInfo());
+            StartCoroutine(GetAvailableChains());
         }
 
         private void ResetTokenUIInfos()
@@ -73,7 +73,7 @@ namespace Portkey.UI
             }
         }
 
-        private IEnumerator GetChainsInfo()
+        private IEnumerator GetAvailableChains()
         {
             yield return did.ChainProvider.GetAvailableChainIds(chainIds =>
             {
@@ -83,31 +83,24 @@ namespace Portkey.UI
                     var uiIndex = index;
                     StartCoroutine(did.ChainProvider.GetChain(chainId, chain =>
                     {
-                        RequestInfoFromContract(uiIndex, chain);
+                        RequestHolderCaAddress(uiIndex, chain, _walletInfo.caInfo.caHash);
                     }, OnError));
                     ++index;
                 }
             }, OnError);
         }
 
-        private void RequestInfoFromContract(int index, IChain chain)
-        {
-            var tokenContract = new ContractBasic(chain, chain.ChainInfo.defaultToken.address);
-
-            RequestHolderInfoByChainId(index, tokenContract, chain.ChainInfo.defaultToken);
-        }
-
-        private void RequestHolderInfoByChainId(int index, ContractBasic tokenContract, DefaultToken token)
+        private void RequestHolderCaAddress(int index, IChain chain, string caHash)
         {
             var getHolderInfoParam = new GetHolderInfoParams
             {
-                caHash = _walletInfo.caInfo.caHash,
-                chainId = tokenContract.ChainId
+                caHash = caHash,
+                chainId = chain.ChainInfo.chainId
             };
-            StartCoroutine(PollHolderInfo(index, tokenContract, token, getHolderInfoParam));
+            StartCoroutine(PollHolderInfo(index, chain, getHolderInfoParam));
         }
 
-        private IEnumerator PollHolderInfo(int index, IContract tokenContract, DefaultToken token, GetHolderInfoParams holderInfoParams)
+        private IEnumerator PollHolderInfo(int index, IChain chain, GetHolderInfoParams holderInfoParams)
         {
             while (!_isSignOut || !_chainIdToCaAddress.ContainsKey(holderInfoParams.chainId))
             {
@@ -120,8 +113,10 @@ namespace Portkey.UI
                     }
 
                     _chainIdToCaAddress[holderInfoParams.chainId] = holderInfo.caAddress;
+                    
+                    var tokenContract = new ContractBasic(chain, chain.ChainInfo.defaultToken.address);
 
-                    StartCoroutine(PollTokenBalance(index, tokenContract, token));
+                    StartCoroutine(PollTokenBalance(index, tokenContract, chain.ChainInfo.defaultToken));
                 }, error => { });
 
                 yield return new WaitForSeconds(5);
@@ -151,7 +146,6 @@ namespace Portkey.UI
             };
             yield return tokenContract.CallAsync<GetBalanceOutput>(_walletInfo.wallet, "GetBalance", balanceInput, output =>
             {
-                var ownerAddress = output.Owner;
                 tokenInfos[index].chainLabelText.text = tokenContract.ChainId;
                 tokenInfos[index].tokenLabelText.text = output.Symbol;
                 var decimals = 0;

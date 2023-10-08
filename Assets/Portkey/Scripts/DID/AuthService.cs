@@ -6,6 +6,7 @@ using Portkey.Core;
 using Portkey.SocialProvider;
 using Portkey.Utilities;
 using UnityEngine;
+using DeviceInfoType = Portkey.Core.DeviceInfoType;
 
 namespace Portkey.DID
 {

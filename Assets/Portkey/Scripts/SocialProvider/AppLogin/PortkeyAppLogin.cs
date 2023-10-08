@@ -1,6 +1,7 @@
 using System.Collections;
 using Newtonsoft.Json;
 using Portkey.Core;
+using Portkey.Utilities;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -24,7 +25,7 @@ namespace Portkey.SocialProvider
         public IEnumerator Login(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
             var signingKey = _signingKeyGenerator.Create();
-            var guid = System.Guid.NewGuid().ToString();
+            var guid = System.Guid.NewGuid().ToString().RemoveAllDash();
 
             var data = new Data
             {

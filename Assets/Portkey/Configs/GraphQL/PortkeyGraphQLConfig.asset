@@ -441,9 +441,11 @@ MonoBehaviour:
     isComplete: 0
   - name: caHolderManagerInfo
     operationType: 0
-    query: "query caHolderManagerInfo {\n    caHolderManagerInfo {\n        originChainId\n       
-      managerInfos {\n            extraData\n            address\n        }\n       
-      caAddress\n        caHash\n        chainId\n        id\n    }\n}"
+    query: "query caHolderManagerInfo {\n    caHolderManagerInfo(dto: {chainId: \"AELF\",
+      manager: \"vmmS3mzgeDXcSDcMB6GJ6UqvsYmGuSLYQHWKHSZk6Ude6GbSM\", maxResultCount:
+      1, skipCount: 0}) {\n        originChainId\n        managerInfos {\n           
+      extraData\n            address\n        }\n        caAddress\n        caHash\n       
+      chainId\n        id\n    }\n}"
     queryString: caHolderManagerInfo
     returnType: CAHolderManagerDto
     queryOptions:
@@ -604,7 +606,8 @@ MonoBehaviour:
     isComplete: 1
   - name: loginGuardianInfo
     operationType: 0
-    query: "query loginGuardianInfo {\n    loginGuardianInfo {\n        loginGuardian
+    query: "query loginGuardianInfo {\n    loginGuardianInfo(dto: {caHash: \"1897c84b206d6f8e3aa7dff6d7eabdfb9b3fa9cf86fc49b46b88f74e13d07d01\",
+      chainId: \"AELF\", maxResultCount: 100, skipCount: 0}) {\n        loginGuardian
       {\n            isLoginGuardian\n            salt\n            identifierHash\n           
       verifierId\n            type\n        }\n        manager\n        caAddress\n       
       caHash\n        chainId\n        id\n    }\n}"
@@ -828,5 +831,5 @@ MonoBehaviour:
       - name: loginGuardian
         type: GuardianDto
       hasChanged: 0
-    isComplete: 0
+    isComplete: 1
   request: {fileID: 11400000, guid: e645be7cb8d2e4a23abee15bbb39bdef, type: 2}

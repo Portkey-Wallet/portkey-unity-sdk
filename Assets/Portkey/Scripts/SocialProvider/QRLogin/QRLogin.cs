@@ -2,6 +2,7 @@ using QRCoder;
 using System.Collections;
 using Newtonsoft.Json;
 using Portkey.Core;
+using Portkey.Utilities;
 using QRCoder.Unity;
 using UnityEngine;
 
@@ -9,21 +10,6 @@ namespace Portkey.SocialProvider
 {
     public class QRLogin : IQRLogin
     {
-        private struct Data
-        {
-            public struct ExtraData
-            {
-                public DeviceInfoType deviceInfo;
-                public string version;
-            }
-
-            public string type;
-            public string address;
-            public string netWorkType;
-            public string chainType;
-            public ExtraData extraData;
-        }
-        
         private readonly QRCodeGenerator _qrGenerator = new QRCodeGenerator();
         private readonly ISigningKeyGenerator _signingKeyGenerator;
         private readonly ILoginPoller _loginPoller;
@@ -39,11 +25,13 @@ namespace Portkey.SocialProvider
         public IEnumerator Login(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
             var signingKey = _signingKeyGenerator.Create();
+            var guid = System.Guid.NewGuid().ToString().RemoveAllDash();
 
             var data = new Data
             {
                 type = "login",
                 address = signingKey.Address,
+                id = guid,
                 netWorkType = "TESTNET",
                 chainType = chainId.ToLower(),
                 extraData = new Data.ExtraData

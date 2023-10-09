@@ -8,6 +8,7 @@ using Portkey.Encryption;
 using Portkey.GraphQL;
 using Portkey.SocialProvider;
 using Portkey.Storage;
+using Portkey.Utilities;
 using UnityEngine;
 
 namespace Portkey.DID
@@ -35,6 +36,7 @@ namespace Portkey.DID
         private IAppLogin _appLogin;
         private IQRLogin _qrLogin;
         private ILoginPoller _loginPoller;
+        private IQRCodeGenerator _qrCodeGenerator;
         
         private DIDAccount _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
@@ -56,7 +58,8 @@ namespace Portkey.DID
             _biometricProvider = new BiometricProvider();
             _loginPoller = new LoginPoller(_portkeySocialService);
             _appLogin = new PortkeyAppLogin(_config.PortkeyTransportConfig, _signingKeyGenerator, _loginPoller);
-            _qrLogin = new QRLogin(_loginPoller, _signingKeyGenerator);
+            _qrCodeGenerator = new QRCodeGenerator();
+            _qrLogin = new QRLogin(_loginPoller, _signingKeyGenerator, _qrCodeGenerator);
             
             _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin);
             _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);

@@ -87,6 +87,8 @@ namespace Portkey.GraphQL
                                 }, 
                     (error) =>
                                 {
+                                    Debugger.LogError(error.code);
+                                    Debugger.LogError(error.details);
                                     //call error callback
                                     errorCallback(error.message);
                                 });

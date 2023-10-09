@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Portkey.Core;
-using Portkey.GraphQL;
 using Portkey.Utilities;
-using UnityEngine;
 using Types = GraphQLCodeGen.Types;
 
 namespace Portkey.GraphQL
@@ -13,6 +11,11 @@ namespace Portkey.GraphQL
     /// </summary>
     public class GraphQL: IDIDGraphQL, IGraphQL
     {
+        private class HolderInfoDto
+        {
+            public Types.GetCaHolderManagerInfoDto dto;
+        }
+        
         private GraphQLConfig _graphQLConfig;
 
         private const string QUERY_CAHOLDERMANAGERINFO = "caHolderManagerInfo";
@@ -34,15 +37,18 @@ namespace Portkey.GraphQL
                 yield break;
             }
 
-            var dto = new Types.GetCaHolderManagerInfoDto
+            var dto = new HolderInfoDto
             {
-                manager = manager,
-                chainId = chainId,
-                maxResultCount = 1,
-                skipCount = 0
+                dto = new Types.GetCaHolderManagerInfoDto
+                {
+                    manager = manager,
+                    chainId = chainId,
+                    maxResultCount = 1,
+                    skipCount = 0
+                }
             };
             
-            query.SetArgs(new { dto = dto.GetInputObject() });
+            query.SetArgs(dto);
             
             Debugger.Log(query.query);
             
@@ -72,14 +78,14 @@ namespace Portkey.GraphQL
                         return;
                     }
 
-                    var dto = new Types.GetLoginGuardianInfoDto
+                    var loginGuardianInfoDto = new Types.GetLoginGuardianInfoDto
                     {
                         caHash = response.caHolderManagerInfo[0].caHash,
                         chainId = chainId,
                         skipCount = 0,
                         maxResultCount = 100
                     };
-                    query.SetArgs(new { dto = dto.GetInputObject() });
+                    query.SetArgs(new { dto = loginGuardianInfoDto });
                     StaticCoroutine.StartCoroutine(_graphQLConfig.Query<Types.Query>(query,
                         responseToLogin =>
                         {

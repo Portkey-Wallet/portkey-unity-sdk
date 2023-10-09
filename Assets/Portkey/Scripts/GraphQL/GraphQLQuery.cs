@@ -26,9 +26,16 @@ namespace Portkey.GraphQL
             Subscription
         }
 
-        public void SetArgs(object inputObject)
+        public void SetArgs<T>(T inputObject)
         {
-            var json = JsonConvert.SerializeObject(inputObject, new Utilities.EnumInputConverter());
+            var json = JsonConvert.SerializeObject(inputObject, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Converters = new List<JsonConverter>
+                {
+                    new Utilities.EnumInputConverter()
+                }
+            });
             try
             {
                 _args = Utilities.JsonToArgument(json);

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: IOSTransport
   m_EditorClassIdentifier: 
   downloadLink: https://apps.apple.com/us/app/portkey-ca-wallet-crypto-nft/id6445808228
-  packageName: portkey.did
+  packageName: com.portkey.did

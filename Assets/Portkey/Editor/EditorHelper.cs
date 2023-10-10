@@ -1,5 +1,6 @@
 using System;
 using Portkey.Core;
+using Portkey.Transport;
 using UnityEditor;
 using UnityEngine;
 
@@ -30,6 +31,22 @@ namespace Portkey.Editor
 
             return (PortkeyConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]),
                 typeof(PortkeyConfig));
+        }
+        
+        public static IOSTransport GetIOSTransportConfig(string name)
+        {
+            var guids = AssetDatabase.FindAssets($"t:{nameof(IOSTransport)} {name}");
+            if (guids.Length == 0)
+            {
+                throw new Exception($"No {nameof(IOSTransport)} found!");
+            }
+            else if (guids.Length > 0)
+            {
+                Debug.LogWarning($"More than one {nameof(IOSTransport)} found, taking first one");
+            }
+
+            return (IOSTransport)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]),
+                typeof(IOSTransport));
         }
     }
 }

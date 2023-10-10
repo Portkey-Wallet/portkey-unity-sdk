@@ -47,7 +47,7 @@ static AppCheck *_sharedInstance;
     NSLog(@"Started AppCheck");
 }
 
--(int)Search: (NSURL*) URL{
+-(bool)Search: (NSURL*) URL{
     UIApplication *application = [UIApplication sharedApplication];
     
     return [application canOpenURL:URL];
@@ -56,16 +56,11 @@ static AppCheck *_sharedInstance;
 -(bool)CheckApp: (NSString*) URL_LOC
 {
     NSString* URL = [URL_LOC stringByAppendingString: @"://"];
-    NSURL* customURL = [NSURL fileURLWithPath:URL];
+    NSURL* customURL = [NSURL URLWithString:URL];
     
-    int ans = [self Search:customURL];
+    bool ans = [self Search:customURL];
     
-    NSLog(@"AppCheck %i",ans);
-    
-    if(ans == 1)
-        return true;
-    
-    return false;
+    return ans;
 }
 
 @end

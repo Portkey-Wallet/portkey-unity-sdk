@@ -105,10 +105,10 @@ namespace Portkey.GraphQL
                 errorCallback);
         }
 
-        public IEnumerator Query<T>(string query, SuccessCallback<T> successCallback,
+        public IEnumerator Query<T>(string operationName, string query, SuccessCallback<T> successCallback,
             ErrorCallback errorCallback)
         {
-            return _graphQLConfig.Query<T>(query, successCallback, errorCallback);
+            return _graphQLConfig.Query(operationName, query, successCallback, errorCallback);
         }
 
         public IEnumerator Query<T>(GraphQLQuery query, SuccessCallback<T> successCallback,

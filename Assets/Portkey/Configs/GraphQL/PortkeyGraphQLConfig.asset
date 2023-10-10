@@ -442,7 +442,7 @@ MonoBehaviour:
   - name: caHolderManagerInfo
     operationType: 0
     query: "query caHolderManagerInfo {\n    caHolderManagerInfo(dto: {chainId: \"AELF\",
-      manager: \"vmmS3mzgeDXcSDcMB6GJ6UqvsYmGuSLYQHWKHSZk6Ude6GbSM\", maxResultCount:
+      manager: \"2X5dwAPyzd1rnherLPjExbLgSvSphUXFNJAcspUzRF7aXX83jk\", maxResultCount:
       1, skipCount: 0}) {\n        originChainId\n        managerInfos {\n           
       extraData\n            address\n        }\n        caAddress\n        caHash\n       
       chainId\n        id\n    }\n}"

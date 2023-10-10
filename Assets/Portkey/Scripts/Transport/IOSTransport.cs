@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Portkey.Transport
 {
@@ -13,8 +14,7 @@ namespace Portkey.Transport
         /// <summary>
         /// iOS package name.
         /// </summary>
-        [SerializeField]
-        private string packageName;
+        [SerializeField] private string urlScheme;
 
 #if UNITY_IOS
         [DllImport("__Internal")]
@@ -24,12 +24,14 @@ namespace Portkey.Transport
         private static extern bool CheckApp(string URL);
 #endif
         
+        public string URLScheme => urlScheme;
+        
         protected override bool TrySend(string url)
         {
 #if UNITY_IOS
             InitilizeAppCheck();
 
-            if (!CheckApp(packageName))
+            if (!CheckApp(urlScheme))
             {
                 return false;
             }

@@ -1,5 +1,6 @@
 using System.IO;
 using Portkey.Core;
+using Portkey.Transport;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.iOS.Xcode;
@@ -61,8 +62,16 @@ namespace Portkey.Editor
 
             AddGoogleLoginRelatedInfo(rootDict, portkeyConfig);
             AddIOSBiometricInfo(rootDict);
+            AddQuerySchema(rootDict);
 
             File.WriteAllText(plistPath, plist.WriteToString());
+        }
+
+        private static void AddQuerySchema(PlistElementDict rootDict)
+        {
+            var iosTransport = EditorHelper.GetIOSTransportConfig("IOSTransport");
+            
+            rootDict.CreateArray("LSApplicationQueriesSchemes").AddString(iosTransport.URLScheme);
         }
 
         private static void AddIOSBiometricInfo(PlistElementDict rootDict)

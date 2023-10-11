@@ -8,7 +8,6 @@ namespace Portkey.SocialProvider
     public class PCAppleLogin : AppleLoginBase
     {
         private readonly string _url;
-        private readonly int _port = Utilities.GetRandomUnusedPort();
 
         public PCAppleLogin(PortkeyConfig config, IHttp request) : base(request)
         {
@@ -18,25 +17,24 @@ namespace Portkey.SocialProvider
         // ReSharper disable Unity.PerformanceAnalysis
         protected override void OnAuthenticate()
         {
+            var port = Utilities.GetRandomUnusedPort();
             const string loginUri = "social-login/";
             const string loginType = "Apple";
-            var redirectUri = $"https://openlogin.portkey.finance/unity-sdk-callback&state={_port}/";
-
-            // SetupAuthenticationCallback();
-
+            var redirectUri = $"https://openlogin.portkey.finance/unity-sdk-callback&state={port}/";
+            
             Debugger.Log("Authenticating for PC");
             var url = $"{_url}{loginUri}{loginType}/?redirectURI={redirectUri}";
-#if UNITY_STANDALONE
+#if UNITY_STANDALONE || UNITY_EDITOR
             Application.OpenURL(url);
 #endif
-            Listen();
+            Listen(port);
 
         }
-        
-        private void Listen()
+
+        private void Listen(int port)
         {
             var httpListener = new System.Net.HttpListener();
-            httpListener.Prefixes.Add($"http://localhost:{_port}/");
+            httpListener.Prefixes.Add($"http://localhost:{port}/");
             httpListener.Start();
 
             var context = System.Threading.SynchronizationContext.Current;
@@ -83,6 +81,7 @@ namespace Portkey.SocialProvider
             var accessToken = parameters.Get("token");
             if (accessToken == null)
             {
+                _errorCallback?.Invoke("access token is null");
                 return;
             }
 

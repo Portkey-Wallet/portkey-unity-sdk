@@ -494,10 +494,11 @@ namespace Portkey.DID
             yield return _did.LoginWithQRCode(Message.ChainId, qrCodeCallback, PortkeyAppLoginSuccess(successCallback), OnError);
         }
         
-        private static SuccessCallback<PortkeyAppLoginResult> PortkeyAppLoginSuccess(SuccessCallback<DIDWalletInfo> successCallback)
+        private SuccessCallback<PortkeyAppLoginResult> PortkeyAppLoginSuccess(SuccessCallback<DIDWalletInfo> successCallback)
         {
             return result =>
             {
+                Message.ChainId = result.caHolder.holderManagerInfo.originChainId;
                 successCallback(new DIDWalletInfo(result.caHolder, result.managementAccount));
             };
         }

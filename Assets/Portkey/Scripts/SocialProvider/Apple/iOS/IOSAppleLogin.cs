@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Portkey.Core;
 using UnityEngine;
@@ -28,7 +29,8 @@ namespace Portkey.SocialProvider
         {
             var gameObject = new GameObject("IOSPortkeyAppleLoginCallback");
             var callbackComponent = gameObject.AddComponent<IOSPortkeyAppleLoginCallback>();
-            callbackComponent.SocialLogin = this;
+            callbackComponent.OnSuccessCallback = OnSuccess;
+            callbackComponent.OnFailureCallback = OnFailure;
         }
         
 #if UNITY_IOS
@@ -44,6 +46,24 @@ namespace Portkey.SocialProvider
 #if UNITY_IOS
             SignInApple(url, _redirectUri);
 #endif
+        }
+
+        private void OnSuccess(string identifyToken)
+        {
+            try
+            {
+                RequestSocialInfo(identifyToken, null, null);
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+                HandleError("Error in logging in. Please try again.");
+            }
+        }
+        
+        private void OnFailure(string error)
+        {
+            HandleError("Login Cancelled!");
         }
     }
 }

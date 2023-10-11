@@ -84,7 +84,7 @@ namespace Portkey.Network
         {
             data.JsonData??=string.Empty;
 
-            var postData = Encoding.ASCII.GetBytes(data.JsonData);
+            var postData = Encoding.UTF8.GetBytes(data.JsonData);
             using var request = new UnityWebRequest(data.Url, 
                 UnityWebRequest.kHttpVerbPOST,
                 new DownloadHandlerBuffer(), 

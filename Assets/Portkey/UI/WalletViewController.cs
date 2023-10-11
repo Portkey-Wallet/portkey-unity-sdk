@@ -99,12 +99,29 @@ namespace Portkey.UI
                 var tokenAddress = token.address;
 
                 var tokenSymbol = token.symbol;
-                var tokenContract = new ContractBasic(did.GetChain(chainInfo.Key), tokenAddress);
-
-                RequestHolderInfoByChainId(chainInfo.Key, index, tokenContract, token);
-
+                RequestInfo(chainInfo, tokenAddress, index, token);
                 ++index;
             }
+        }
+
+        private void RequestInfo(KeyValuePair<string, ChainInfo> chainInfo, string tokenAddress, int index, DefaultToken token)
+        {
+            StartCoroutine(did.GetChain(chainInfo.Key,
+            chain =>
+            {
+                RequestInfoFromContract(chain, tokenAddress, chainInfo.Key, index, token);
+            },
+            error =>
+            {
+                Debugger.LogError(error);
+            }));
+        }
+
+        private void RequestInfoFromContract(IChain chain, string tokenAddress, string chainId, int index, DefaultToken token)
+        {
+            var tokenContract = new ContractBasic(chain, tokenAddress);
+
+            RequestHolderInfoByChainId(chainId, index, tokenContract, token);
         }
 
         private void RequestHolderInfoByChainId(string chainId, int index, ContractBasic tokenContract, DefaultToken token)
@@ -159,7 +176,7 @@ namespace Portkey.UI
                 Owner = caAddress.ToAddress(),
                 Symbol = token.symbol
             };
-            yield return tokenContract.CallTransactionAsync<GetBalanceOutput>(_walletInfo.wallet, "GetBalance", balanceInput, output =>
+            yield return tokenContract.CallAsync<GetBalanceOutput>(_walletInfo.wallet, "GetBalance", balanceInput, output =>
             {
                 var ownerAddress = output.Owner;
                 tokenInfos[index].chainLabelText.text = tokenContract.ChainId;

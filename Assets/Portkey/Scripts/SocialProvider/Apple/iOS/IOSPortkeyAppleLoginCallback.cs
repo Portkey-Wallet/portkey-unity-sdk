@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Portkey.Core;
 using UnityEngine;
 
@@ -6,53 +7,48 @@ namespace Portkey.SocialProvider
 {
     public class IOSPortkeyAppleLoginCallback : MonoBehaviour, IPortkeySocialLoginCallback
     {
-        public ISocialLogin SocialLogin { get; set; }
+        public Action<string> OnSuccessCallback { get; set; }
+        public Action<string> OnFailureCallback { get; set; }
+        
+        private bool _isSuccess;
 
         private void Start()
         {
-            Debugger.LogError(gameObject.name + " created");
+            _isSuccess = false;
         }
 
-        private void OnDestroy()
+        private void OnApplicationPause(bool pauseStatus)
         {
-            Debugger.LogError(gameObject.name + " destroyed");
-        }
+            Debugger.Log($"IOSPortkeyAppleLoginOnApplicationPause isPaused: {pauseStatus}");
 
-        private void OnApplicationFocus(bool hasFocus)
-        {
-            if (!hasFocus)
+            if(!pauseStatus)
             {
-                return;
+                StartCoroutine(WaitAndFail(2.5f));
             }
-            
-            //if we get back focus from apple login (webview or native prompt), we assume that login is cancelled
-            OnFailure("Login Cancelled!");
+        }
+
+        private IEnumerator WaitAndFail(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+
+            if (!_isSuccess)
+            {
+                OnFailure("Login Cancelled!");
+            }
         }
 
         public void OnSuccess(string data)
         {
+            _isSuccess = true;
             Debugger.Log($"IOSPortkeyAppleLoginOnSuccess {data}");
-            try
-            {
-                SocialLogin.RequestSocialInfo(data);
-            }
-            catch (Exception e)
-            {
-                Debugger.LogException(e);
-            }
+
+            OnSuccessCallback?.Invoke(data);
             Destroy(gameObject);
         }
 
         public void OnFailure(string error)
         {
-            try
-            {
-                SocialLogin.HandleError("Login Cancelled!");
-            }
-            catch (Exception e)
-            {
-                Debugger.LogException(e);
-            }
+            OnFailureCallback?.Invoke("Login Cancelled!");
             Destroy(gameObject);
         }
     }

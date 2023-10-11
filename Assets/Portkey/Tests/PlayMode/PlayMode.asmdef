@@ -5,8 +5,7 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Scripts",
-        "TestUtilities",
-        "PortkeyUnityHelper"
+        "TestUtilities"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -17,7 +16,8 @@
         "Google.Protobuf.dll",
         "AElf.Types.dll",
         "Moq.dll",
-        "Newtonsoft.Json.dll"
+        "Newtonsoft.Json.dll",
+        "AElf.HdWallet.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

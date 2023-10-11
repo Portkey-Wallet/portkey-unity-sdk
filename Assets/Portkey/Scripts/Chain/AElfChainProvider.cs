@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Portkey.Core;
@@ -7,39 +8,60 @@ namespace Portkey.Chain
     public class AElfChainProvider : IChainProvider
     {
         private readonly Dictionary<string, IChain> _chains = new Dictionary<string, IChain>();
-        private Dictionary<string, string> _chainUrls = null;
+        private Dictionary<string, string> _chainUrls = new Dictionary<string, string>();
+        private Dictionary<string, ChainInfo> _chainInfos = new Dictionary<string, ChainInfo>();
         private readonly IHttp _http;
+        private readonly IPortkeySocialService _service;
         
-        public AElfChainProvider(IHttp http)
+        public AElfChainProvider(IHttp http, IPortkeySocialService service)
         {
             _http = http;
+            _service = service;
         }
         
-        public IChain GetChain(string chainId)
+        public IEnumerator GetChain(string chainId, SuccessCallback<IChain> successCallback, ErrorCallback errorCallback)
         {
-            if(_chainUrls == null)
-            {
-                throw new System.NullReferenceException("ChainInfo is not set");
-            }
-            
             if (_chains.TryGetValue(chainId, out var chain))
             {
-                return chain;
+                successCallback(chain);
+                yield break;
             }
             
-            if (!_chainUrls.TryGetValue(chainId, out var chainUrl))
+            if (_chainInfos.TryGetValue(chainId, out var info))
             {
-                throw new System.ArgumentException($"ChainInfo for chainId {chainId} is not found");
+                CreateChainAndCallback(info);
+                yield break;
             }
-            var newChain = new AElfChain(chainId, chainUrl, _http);
-            _chains[chainId] = newChain;
 
+            yield return _service.GetChainsInfo(chains =>
+            {
+                SetChainInfos(chains.items);
+                
+                if (!_chainInfos.TryGetValue(chainId, out var chainInfo))
+                {
+                    errorCallback($"Chain: {chainId} not found.");
+                    return;
+                }
+                CreateChainAndCallback(chainInfo);
+            }, errorCallback);
+
+            void CreateChainAndCallback(ChainInfo chainInfo)
+            {
+                var newChain = CreateChain(chainInfo);
+                successCallback(newChain);
+            }
+        }
+
+        private AElfChain CreateChain(ChainInfo chainInfo)
+        {
+            var newChain = new AElfChain(chainInfo, _http);
+            _chains[chainInfo.chainId] = newChain;
             return newChain;
         }
 
-        public void SetChainInfo(ChainInfo[] chainInfos)
+        private void SetChainInfos(ChainInfo[] chainInfos)
         {
-            _chainUrls = chainInfos?.ToDictionary(info => info.chainId, info => info.endPoint);
+            _chainInfos = chainInfos?.ToDictionary(info => info.chainId, info => info);
         }
     }
 }

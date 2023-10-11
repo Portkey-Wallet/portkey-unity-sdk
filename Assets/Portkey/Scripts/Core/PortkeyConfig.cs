@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Portkey.Transport;
 using UnityEngine;
 
 namespace Portkey.Core
@@ -93,6 +94,8 @@ namespace Portkey.Core
         [Header("Apple PC Login")]
         [SerializeField] private string applePCLoginUrl = "https://openlogin.portkey.finance/";
         
+        [Header("Login App Settings")]
+        [SerializeField] private TransportConfig portkeyTransportConfig;
 
         /// <summary>
         /// A getter for the chain infos.
@@ -111,6 +114,7 @@ namespace Portkey.Core
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;
+        public TransportConfig PortkeyTransportConfig => portkeyTransportConfig;
         
         public void OnBeforeSerialize()
         {

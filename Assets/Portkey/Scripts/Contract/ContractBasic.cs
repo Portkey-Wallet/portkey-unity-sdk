@@ -19,7 +19,7 @@ namespace Portkey.Contract
         
         private readonly IChain _chain;
         public string ContractAddress { get; protected set; }
-        public string ChainId => _chain.ChainId;
+        public string ChainId => _chain.ChainInfo.chainId;
 
         /// <summary>
         /// Constructor for ContractBasic to initialize the contract address and its respective chain.
@@ -32,11 +32,11 @@ namespace Portkey.Contract
             ContractAddress = contractAddress ?? throw new ArgumentException("Contract address cannot be null.");
         }
         
-        public IEnumerator CallTransactionAsync<T>(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
+        public IEnumerator CallAsync<T>(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
         {
-            yield return _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param, transaction =>
+            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
             {
-                var txWithSign = _chain.SignTransaction(wallet.PrivateKey, transaction);
+                var txWithSign = signingKey.SignTransaction(transaction);
                 var executeTxDto = new ExecuteTransactionDto
                 {
                     RawTransaction = txWithSign.ToByteArray().ToHex()
@@ -52,9 +52,9 @@ namespace Portkey.Contract
             }, errorCallback);
         }
 
-        public IEnumerator SendTransactionAsync(BlockchainWallet wallet, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
+        public IEnumerator SendAsync(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
         {
-            yield return _chain.GenerateTransactionAsync(wallet.Address, ContractAddress, methodName, param, transaction =>
+            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
             {
                 // As different nodes have different block height,
                 // we need to give the next transaction a lower height (-5) so transaction can be successful
@@ -66,7 +66,7 @@ namespace Portkey.Contract
                     transaction.RefBlockNumber = refBlockNumber;
                     transaction.RefBlockPrefix = BlockHelper.GetRefBlockPrefix(Hash.LoadFromHex(blockDto?.BlockHash));
                     
-                    var txWithSign = _chain.SignTransaction(wallet.PrivateKey, transaction);
+                    var txWithSign = signingKey.SignTransaction(transaction);
                     Debugger.Log("Sending Transaction...");
 
                     var sendTxnInput = new SendTransactionInput
@@ -77,7 +77,7 @@ namespace Portkey.Contract
                     {
                         StaticCoroutine.StartCoroutine(PollTransactionResultAsync(result.TransactionId, transactionResult =>
                         {
-                            Debugger.Log($"{methodName} on chain: {_chain.ChainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
+                            Debugger.Log($"{methodName} on chain: {_chain.ChainInfo.chainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
 
                             var txnInfoDto = new IContract.TransactionInfoDto
                             {

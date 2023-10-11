@@ -12,6 +12,7 @@ namespace Portkey.Core
         delegate void OnChainIdChangedHandler(string chainId);
         delegate void OnVerifierServerSelectedHandler(string guardianId, AccountType accountType, string verifierServerName);
         delegate void OnConfirmSendCodeHandler();
+        delegate void OnCancelLoginWithQRCodeHandler();
         
         event OnInputVerificationCodeHandler OnInputVerificationCodeEvent;
         event OnCancelCodeVerificationHandler OnCancelCodeVerificationEvent;
@@ -23,6 +24,7 @@ namespace Portkey.Core
         event OnChainIdChangedHandler OnChainIdChangedEvent;
         event OnVerifierServerSelectedHandler OnVerifierServerSelectedEvent;
         event OnConfirmSendCodeHandler OnConfirmSendCodeEvent;
+        event OnCancelLoginWithQRCodeHandler OnCancelLoginWithQRCodeEvent;
 
         string ChainId { get; set; }
         void InputVerificationCode(string code);
@@ -34,5 +36,6 @@ namespace Portkey.Core
         void Error(string error);
         void VerifierServerSelected(string guardianId, AccountType accountType, string verifierServerName);
         void ConfirmSendCode();
+        void CancelLoginWithQRCode();
     }
 }

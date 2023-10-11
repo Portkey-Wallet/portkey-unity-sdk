@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Plugins/WebGL.meta
 guid: 67a200ed40a99486784d82caded51ce4
+========
+guid: 3c57523b63ddb094b835b6613da12763
+>>>>>>>> origin/feature/did-wallet:Assets/Plugins/IngameDebugConsole.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

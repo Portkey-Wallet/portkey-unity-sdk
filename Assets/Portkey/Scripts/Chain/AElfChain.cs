@@ -22,14 +22,15 @@ namespace Portkey.Chain
             public string RawTransaction;
         }
         
-        private string _baseUrl;
-        private IHttp _httpService;
-        public string ChainId { get; private set; }
+        private readonly string _baseUrl;
+        private readonly IHttp _httpService;
         
-        public AElfChain(string chainId, string rpcUrl, IHttp httpService)
+        public ChainInfo ChainInfo { get; }
+        
+        public AElfChain(ChainInfo chainInfo, IHttp httpService)
         {
-            _baseUrl = rpcUrl;
-            ChainId = chainId;
+            _baseUrl = chainInfo.endPoint;
+            ChainInfo = chainInfo;
             _httpService = httpService;
         }
         
@@ -78,7 +79,8 @@ namespace Portkey.Chain
             yield return Get(data, successCallback, errorCallback);
         }
 
-        public IEnumerator GenerateTransactionAsync(string from, string to, string methodName, IMessage input, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GenerateTransactionAsync(string from, string to, string methodName, IMessage input,
+            SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback)
         {
             AssertValidAddress(to);
 
@@ -98,22 +100,13 @@ namespace Portkey.Chain
             }, errorCallback);
         }
 
-        public Transaction SignTransaction(string privateKeyHex, Transaction transaction)
-        {
-            var byteArray = transaction.GetHash().ToByteArray();
-            var privateKey = ByteArrayHelper.HexStringToByteArray(privateKeyHex);
-            var numArray = BIP39Wallet.BIP39Wallet.Wallet.Sign(privateKey, byteArray);
-            transaction.Signature = ByteString.CopyFrom(numArray);
-            return transaction;
-        }
-
         public IEnumerator ExecuteTransactionAsync(ExecuteTransactionDto input, SuccessCallback<string> successCallback, ErrorCallback errorCallback)
         {
             var txnPostDto = new TransactionPostDto
             {
                 RawTransaction = input.RawTransaction
             };
-            var parameters = new JsonRequestData()
+            var parameters = new JsonRequestData
             {
                 Url = GetRequestUrl(_baseUrl, "api/blockChain/executeTransaction"),
                 JsonData = JsonConvert.SerializeObject(txnPostDto),

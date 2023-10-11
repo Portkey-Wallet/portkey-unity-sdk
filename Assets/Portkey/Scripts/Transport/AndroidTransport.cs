@@ -27,20 +27,7 @@ namespace Portkey.Transport
                 return false;
             }
             
-            var uriClass = new AndroidJavaClass("android.net.Uri");
-            var uriData = uriClass.CallStatic<AndroidJavaObject>("parse", url);
-
-            var i = packageManager.Call<AndroidJavaObject>("getLaunchIntentForPackage", packageName);
-            if (i == null)
-            {
-                Debug.LogError($"Intent is null. Package name specified: {packageName}.");
-                return false;
-            }
-            
-            i.Call<AndroidJavaObject>("setAction", "android.intent.action.VIEW");
-            i.Call<AndroidJavaObject>("setData", uriData);
-
-            currentActivity.Call("startActivity", i);
+            Application.OpenURL(url);
             return true;
 #else
             return false;

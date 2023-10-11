@@ -74,6 +74,16 @@ namespace Portkey.UI
             OpenView();
         }
         
+        public void Initialize(DIDWalletInfo walletInfo)
+        {
+            //sign up using socials
+            _onPinComplete = () =>
+            {
+                OpenNextView(walletInfo);
+            };
+            OpenView();
+        }
+        
         public void Initialize(VerifiedCredential verifiedCredential)
         {
             //sign up using phone or email

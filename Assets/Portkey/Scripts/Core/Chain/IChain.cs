@@ -11,7 +11,7 @@ namespace Portkey.Core
     /// </summary>
     public interface IChain
     {
-        string ChainId { get; }
+        ChainInfo ChainInfo { get; }
         IEnumerator GetChainStatus(SuccessCallback<ChainStatusDto> successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// GenerateTransactionAsync is a method that can be used to generate a transaction for a method contract call.
@@ -22,13 +22,6 @@ namespace Portkey.Core
         /// <param name="input">Parameter input corresponding to the method called from the contract.</param>
         /// <returns>Transaction data corresponding to this transaction.</returns>
         IEnumerator GenerateTransactionAsync(string? from, string? to, string methodName, IMessage input, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback);
-        /// <summary>
-        /// Sign transaction with private key for a given transaction data.
-        /// </summary>
-        /// <param name="privateKeyHex">Private key related to the user's wallet in hexadecimal.</param>
-        /// <param name="transaction">Transaction data to sign.</param>
-        /// <returns>Signed transaction data.</returns>
-        Transaction SignTransaction(string? privateKeyHex, Transaction transaction);
         /// <summary>
         /// Execute the transaction on the blockchain.
         /// </summary>

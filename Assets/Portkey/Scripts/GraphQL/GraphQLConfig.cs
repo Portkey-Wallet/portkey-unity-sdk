@@ -76,7 +76,6 @@ namespace Portkey.GraphQL
             return request.Post(jsonRequestData, 
                 (response) =>
                                 {
-                                    Debugger.LogError("Succeeded in getting response!");
                                     var json = JObject.Parse(response);
                                     string data = null;
                                     if (json.TryGetValue("errors", out var errorMessage))

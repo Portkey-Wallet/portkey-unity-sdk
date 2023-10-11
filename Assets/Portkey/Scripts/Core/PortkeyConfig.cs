@@ -89,6 +89,10 @@ namespace Portkey.Core
         [Header("Approval Settings")]
         [SerializeField] private int minApprovals = 3;
         [SerializeField] private int denominator = 5;
+        
+        [Header("Apple PC Login")]
+        [SerializeField] private string applePCLoginUrl = "https://openlogin.portkey.finance/";
+        
 
         /// <summary>
         /// A getter for the chain infos.
@@ -103,6 +107,7 @@ namespace Portkey.Core
         public string GoogleIOSDotReverseClientId => googleIosDotReverseClientId;
         public string GoogleWebGLClientId => googleWebGLClientId;
         public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
+        public string ApplePCLoginUrl => applePCLoginUrl;
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;

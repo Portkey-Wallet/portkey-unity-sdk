@@ -45,20 +45,8 @@ namespace Portkey.SocialProvider
         private Texture2D CreateQRCode(ISigningKey signingKey)
         {
             var guid = System.Guid.NewGuid().ToString().RemoveAllDash();
-            
-            var data = new Data
-            {
-                type = "login",
-                address = signingKey.Address,
-                id = guid,
-                netWorkType = "TESTNET",
-                chainType = "aelf",
-                extraData = new Data.ExtraData
-                {
-                    deviceInfo = DeviceInfoType.GetDeviceInfo(),
-                    version = "2.0.0"
-                }
-            };
+
+            var data = Data.GetDefaultData(signingKey, guid);
 
             var qrData = $"{JsonConvert.SerializeObject(data)}";
             var qrCodeAsTexture2D = _qrCodeGenerator.GenerateQRCode(qrData, 280, 280);

@@ -27,19 +27,7 @@ namespace Portkey.SocialProvider
             var signingKey = _signingKeyGenerator.Create();
             var guid = System.Guid.NewGuid().ToString().RemoveAllDash();
 
-            var data = new Data
-            {
-                type = "login",
-                address = signingKey.Address,
-                id = guid,
-                netWorkType = "TESTNET",
-                chainType = "aelf",
-                extraData = new Data.ExtraData
-                {
-                    deviceInfo = DeviceInfoType.GetDeviceInfo(),
-                    version = "2.0.0"
-                }
-            };
+            var data = Data.GetDefaultData(signingKey, guid);
         
             var appData = new AppData
             {

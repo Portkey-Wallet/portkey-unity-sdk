@@ -57,7 +57,7 @@ namespace Portkey.GraphQL
             return _schemaClass;
         }
 
-        public IEnumerator Query<T>(string operationName, string query, SuccessCallback<T> successCallback,
+        private IEnumerator Query<T>(string operationName, string query, SuccessCallback<T> successCallback,
             ErrorCallback errorCallback)
         {
             var payload = new GraphQLPayload

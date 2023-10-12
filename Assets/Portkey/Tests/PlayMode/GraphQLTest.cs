@@ -82,7 +82,7 @@ public class GraphQLTest
                 Assert.Fail($"No Query by name <{QUERY_NAME_GETCAHOLDERINFO}> found!");
             };
             
-            StartCoroutine(_graphQl.Query<GraphQLCodeGen.Types.Query>(query.name, query.query, SuccessCallback, ErrorCallback));
+            StartCoroutine(_graphQl.Query<GraphQLCodeGen.Types.Query>(query, SuccessCallback, ErrorCallback));
         }
         
         private void SuccessCallback(GraphQLCodeGen.Types.Query param)
@@ -132,7 +132,7 @@ public class GraphQLTest
         };
         query.SetArgs(new { dto = dto.GetInputObject()});
         
-        return graphQlTest.Query<GraphQLCodeGen.Types.Query>(query.name, query.query, SuccessCallback, ErrorCallback);
+        return graphQlTest.Query<GraphQLCodeGen.Types.Query>(query, SuccessCallback, ErrorCallback);
     }
 
     [Test]
@@ -219,7 +219,7 @@ public class GraphQLTest
             Assert.Fail($"No Query by name <{QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO}> found!");
         };
         
-        return graphQlTest.Query<GraphQLCodeGen.Types.Query>(query.name, query.query, GraphQLPostNullReturnSuccessCallback, GraphQLPostNullReturnErrorCallback);
+        return graphQlTest.Query<GraphQLCodeGen.Types.Query>(query, GraphQLPostNullReturnSuccessCallback, GraphQLPostNullReturnErrorCallback);
     }
     
     private void GraphQLPostNullReturnErrorCallback(string message)

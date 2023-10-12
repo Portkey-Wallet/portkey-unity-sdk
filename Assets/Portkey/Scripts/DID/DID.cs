@@ -165,15 +165,17 @@ namespace Portkey.DID
             return _didWallet.GetManagementSigningKey();
         }
 
-        public IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
-        {
-            return _didWallet.LoginWithPortkeyApp(chainId, successCallback, errorCallback);
-        }
-
-        public IEnumerator LoginWithQRCode(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback,
+        public IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback,
             ErrorCallback errorCallback)
         {
-            return _didWallet.LoginWithQRCode(chainId, qrCodeCallback, successCallback, errorCallback);
+            return _didWallet.LoginWithPortkeyApp(successCallback, errorCallback);
+        }
+
+        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback,
+            SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            return _didWallet.LoginWithQRCode(qrCodeCallback, successCallback, errorCallback);
         }
 
         public void Reset()

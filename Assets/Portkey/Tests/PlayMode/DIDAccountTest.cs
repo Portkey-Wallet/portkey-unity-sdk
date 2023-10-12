@@ -83,28 +83,28 @@ namespace Portkey.Test
         private static Mock<IAppLogin> GetAppLoginMock()
         {
             var appLoginMock = new Mock<IAppLogin>();
-            appLoginMock.Setup(appLogin => appLogin.Login(It.IsAny<string>(), It.IsAny<SuccessCallback<PortkeyAppLoginResult>>(),
+            appLoginMock.Setup(appLogin => appLogin.Login(It.IsAny<SuccessCallback<PortkeyAppLoginResult>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new PortkeyAppLoginResult
+                .Callback((SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new PortkeyAppLoginResult
                 {
                     caHolder = new CaHolderWithGuardian(),
                     managementAccount = new AElfSigningKey(KeyPair, Encryption)
                 }))
-                .Returns((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => new List<int>().GetEnumerator());
+                .Returns((SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => new List<int>().GetEnumerator());
             return appLoginMock;
         }
         
         private static Mock<IQRLogin> GetQRLoginMock()
         {
             var qrLoginMock = new Mock<IQRLogin>();
-            qrLoginMock.Setup(qrLogin => qrLogin.Login(It.IsAny<string>(), It.IsAny<SuccessCallback<Texture2D>>(), It.IsAny<SuccessCallback<PortkeyAppLoginResult>>(),
+            qrLoginMock.Setup(qrLogin => qrLogin.Login(It.IsAny<SuccessCallback<Texture2D>>(), It.IsAny<SuccessCallback<PortkeyAppLoginResult>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback((string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new PortkeyAppLoginResult
+                .Callback((SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new PortkeyAppLoginResult
                 {
                     caHolder = new CaHolderWithGuardian(),
                     managementAccount = new AElfSigningKey(KeyPair, Encryption)
                 }))
-                .Returns((string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => new List<int>().GetEnumerator());
+                .Returns((SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => new List<int>().GetEnumerator());
             return qrLoginMock;
         }
         

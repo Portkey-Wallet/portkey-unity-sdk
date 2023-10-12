@@ -22,7 +22,7 @@ namespace Portkey.SocialProvider
             _loginPoller = loginPoller;
         }
         
-        public IEnumerator Login(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator Login(SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
             var signingKey = _signingKeyGenerator.Create();
             var guid = System.Guid.NewGuid().ToString().RemoveAllDash();
@@ -33,7 +33,7 @@ namespace Portkey.SocialProvider
                 address = signingKey.Address,
                 id = guid,
                 netWorkType = "TESTNET",
-                chainType = chainId.ToLower(),
+                chainType = "aelf",
                 extraData = new Data.ExtraData
                 {
                     deviceInfo = DeviceInfoType.GetDeviceInfo(),
@@ -54,7 +54,7 @@ namespace Portkey.SocialProvider
 
             _config.Send(uri);
 
-            _loginPollerHandler = _loginPoller.Start(chainId, signingKey, result =>
+            _loginPollerHandler = _loginPoller.Start(signingKey, result =>
             {
                 _loginPollerHandler = null;
                 successCallback(result);

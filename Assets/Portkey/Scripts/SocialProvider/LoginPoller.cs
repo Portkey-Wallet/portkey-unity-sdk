@@ -27,7 +27,8 @@ namespace Portkey.SocialProvider
             _currentIndex = 0;
         }
 
-        public LoginPollerHandler Start(string chainId, ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback, float timeOut, float pollInterval)
+        public LoginPollerHandler Start(ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback, float timeOut, float pollInterval)
         {
             var handler = new LoginPollerHandler
             {

@@ -534,21 +534,20 @@ namespace Portkey.DID
             return Account?.managementSigningKey;
         }
 
-        public IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
-            yield return _appLogin.Login(chainId, result =>
+            yield return _appLogin.Login(result =>
             {
-                Account = _accountGenerator.Create(chainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
+                Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
                 successCallback(result);
             }, errorCallback);
         }
 
-        public IEnumerator LoginWithQRCode(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback,
-            ErrorCallback errorCallback)
+        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
-            yield return _qrLogin.Login(chainId, qrCodeCallback, result =>
+            yield return _qrLogin.Login(qrCodeCallback, result =>
             {
-                Account = _accountGenerator.Create(chainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
+                Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
                 successCallback(result);
             }, errorCallback);
         }

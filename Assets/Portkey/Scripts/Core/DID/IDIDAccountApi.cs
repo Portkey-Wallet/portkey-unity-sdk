@@ -58,8 +58,10 @@ namespace Portkey.Core
         IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback);
         IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback);
         ISigningKey GetManagementSigningKey();
-        IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
-        IEnumerator LoginWithQRCode(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
+        IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback);
+        IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback,
+            SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
         bool IsLoggedIn();
         bool Save(string password, string keyName);
         bool Load(string password, string keyName);

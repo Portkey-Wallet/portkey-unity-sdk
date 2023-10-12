@@ -486,12 +486,12 @@ namespace Portkey.DID
 
         public IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _did.LoginWithPortkeyApp(Message.ChainId, PortkeyAppLoginSuccess(successCallback), OnError);
+            yield return _did.LoginWithPortkeyApp(PortkeyAppLoginSuccess(successCallback), OnError);
         }
 
         public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _did.LoginWithQRCode(Message.ChainId, qrCodeCallback, PortkeyAppLoginSuccess(successCallback), OnError);
+            yield return _did.LoginWithQRCode(qrCodeCallback, PortkeyAppLoginSuccess(successCallback), OnError);
         }
         
         private SuccessCallback<PortkeyAppLoginResult> PortkeyAppLoginSuccess(SuccessCallback<DIDWalletInfo> successCallback)

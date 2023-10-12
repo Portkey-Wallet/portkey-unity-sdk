@@ -11,7 +11,8 @@ namespace Portkey.Core
         private const float LOGIN_TIMEOUT = 40.0f;
         private const float WAIT_INTERVAL = 2.0f;
         
-        LoginPollerHandler Start(string chainId, ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback, float timeOut = LOGIN_TIMEOUT, float pollInterval = WAIT_INTERVAL);
+        LoginPollerHandler Start(ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback, float timeOut = LOGIN_TIMEOUT, float pollInterval = WAIT_INTERVAL);
         void Stop(LoginPollerHandler handler);
     }
 }

@@ -39,18 +39,20 @@ namespace Portkey.Contract
         {
             yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, async transaction =>
             {
-                var txWithSign = await signingKey.SignTransaction(transaction);
-                var executeTxDto = new ExecuteTransactionDto
+                StaticCoroutine.StartCoroutine(signingKey.SignTransaction(transaction, txWithSign =>
                 {
-                    RawTransaction = txWithSign.ToByteArray().ToHex()
-                };
+                    var executeTxDto = new ExecuteTransactionDto
+                    {
+                        RawTransaction = txWithSign.ToByteArray().ToHex()
+                    };
 
-                StaticCoroutine.StartCoroutine(_chain.ExecuteTransactionAsync(executeTxDto, result =>
-                {
-                    var value = new T();
-                    value.MergeFrom(ByteArrayHelper.HexStringToByteArray(result));
+                    StaticCoroutine.StartCoroutine(_chain.ExecuteTransactionAsync(executeTxDto, result =>
+                    {
+                        var value = new T();
+                        value.MergeFrom(ByteArrayHelper.HexStringToByteArray(result));
 
-                    successCallback?.Invoke(value);
+                        successCallback?.Invoke(value);
+                    }, errorCallback));
                 }, errorCallback));
             }, errorCallback);
         }
@@ -72,20 +74,19 @@ namespace Portkey.Contract
                         transaction.RefBlockPrefix =
                             BlockHelper.GetRefBlockPrefix(Hash.LoadFromHex(blockDto?.BlockHash));
 
-                        var txWithSign = await signingKey.SignTransaction(transaction);
-                        Debugger.Log("Sending Transaction...");
+                        StaticCoroutine.StartCoroutine(signingKey.SignTransaction(transaction, txWithSign =>
+                        {
+                            Debugger.Log("Sending Transaction...");
 
-                        var sendTxnInput = new SendTransactionInput
-                        {
-                            RawTransaction = txWithSign.ToByteArray().ToHex()
-                        };
-                        StaticCoroutine.StartCoroutine(_chain.SendTransactionAsync(sendTxnInput, result =>
-                        {
-                            StaticCoroutine.StartCoroutine(PollTransactionResultAsync(result.TransactionId,
-                                transactionResult =>
+                            var sendTxnInput = new SendTransactionInput
+                            {
+                                RawTransaction = txWithSign.ToByteArray().ToHex()
+                            };
+                            StaticCoroutine.StartCoroutine(_chain.SendTransactionAsync(sendTxnInput, result =>
+                            {
+                                StaticCoroutine.StartCoroutine(PollTransactionResultAsync(result.TransactionId, transactionResult =>
                                 {
-                                    Debugger.Log(
-                                        $"{methodName} on chain: {_chain.ChainInfo.chainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
+                                    Debugger.Log($"{methodName} on chain: {_chain.ChainInfo.chainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
 
                                     var txnInfoDto = new IContract.TransactionInfoDto
                                     {
@@ -93,8 +94,8 @@ namespace Portkey.Contract
                                         transactionResult = transactionResult
                                     };
                                     successCallback?.Invoke(txnInfoDto);
-
                                 }, errorCallback));
+                            }, errorCallback));
                         }, errorCallback));
                     }, errorCallback));
                 }, errorCallback);

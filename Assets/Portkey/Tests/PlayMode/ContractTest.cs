@@ -96,7 +96,12 @@ namespace Portkey.Test
         private static Mock<ISigningKey> GetWalletMock()
         {
             var walletMock = new Mock<ISigningKey>();
-            walletMock.Setup(wallet => wallet.SignTransaction(It.IsAny<Transaction>())).Returns(Task.FromResult(new Transaction()));
+            walletMock.Setup(wallet => wallet.SignTransaction(It.IsAny<Transaction>(), It.IsAny<SuccessCallback<Transaction>>(), It.IsAny<ErrorCallback>()))
+                .Callback((Transaction transaction, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback) =>
+                {
+                    transaction.Signature = ByteString.CopyFromUtf8("signature_mock");
+                    successCallback?.Invoke(transaction);
+                }).Returns(new List<int>().GetEnumerator());
 
             return walletMock;
         }

@@ -500,41 +500,43 @@ namespace Portkey.DID
             }
 
             var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
-            var signature = BitConverter.ToString(Account.managementSigningKey.Sign($"{Account.managementSigningKey.Address}-{timestamp}"));
-            var publicKey = Account.managementSigningKey.PublicKey;
-            var requestTokenConfig = new RequestTokenConfig
+            yield return Account.managementSigningKey.Sign($"{Account.managementSigningKey.Address}-{timestamp}", signatureBytes =>
             {
-                grant_type = "signature",
-                client_id = "CAServer_App",
-                scope = "CAServer",
-                signature = signature,
-                pubkey = publicKey,
-                timestamp = timestamp,
-                ca_hash = caHash,
-                chain_id = chainId
-            };
-            
-            yield return _connectionService.GetConnectToken(requestTokenConfig, (token) =>
-            {
-                if(token == null)
+                var signature = BitConverter.ToString(signatureBytes);
+                var publicKey = Account.managementSigningKey.PublicKey;
+                var requestTokenConfig = new RequestTokenConfig
                 {
-                    errorCallback("Failed to get token.");
-                    return;
-                }
-                
-                StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
+                    grant_type = "signature",
+                    client_id = "CAServer_App",
+                    scope = "CAServer",
+                    signature = signature,
+                    pubkey = publicKey,
+                    timestamp = timestamp,
+                    ca_hash = caHash,
+                    chain_id = chainId
+                };
+                StaticCoroutine.StartCoroutine(_connectionService.GetConnectToken(requestTokenConfig, (token) =>
                 {
-                    if(caHolderInfo == null)
+                    if(token == null)
                     {
-                        errorCallback("Failed to get CA Holder Info.");
+                        errorCallback("Failed to get token.");
                         return;
                     }
-
-                    if (caHolderInfo.nickName != null)
+                
+                    StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
                     {
-                        Account.accountDetails.socialInfo.Nickname = caHolderInfo.nickName;
-                    }
-                    successCallback(caHolderInfo);
+                        if(caHolderInfo == null)
+                        {
+                            errorCallback("Failed to get CA Holder Info.");
+                            return;
+                        }
+
+                        if (caHolderInfo.nickName != null)
+                        {
+                            Account.accountDetails.socialInfo.Nickname = caHolderInfo.nickName;
+                        }
+                        successCallback(caHolderInfo);
+                    }, errorCallback));
                 }, errorCallback));
             }, errorCallback);
         }

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Text;
 using System.Threading.Tasks;
 using AElf;
@@ -25,30 +26,6 @@ namespace Portkey.DID
             _encryption = encryption;
         }
         
-        public async Task<Transaction> SignTransaction(Transaction transaction)
-        {
-            var temp = transaction.GetHash();
-            var byteArray = temp.ToByteArray();
-            var signature = Sign(byteArray);
-            
-            Debugger.LogError("start wait");
-
-            //TODO: doesn't work, have to change to coroutine
-            await Task.Delay(10000);
-            
-            Debugger.LogError("end wait");
-
-            transaction.Signature = ByteString.CopyFrom(signature);
-            return transaction;
-        }
-
-        public byte[] Sign(string data)
-        {
-            var signature = Sign(Encoding.UTF8.GetBytes(data));
-
-            return signature;
-        }
-        
         private byte[] Sign(byte[] byteArray)
         {
             var signature = _keyPair.PrivateKey.Sign(byteArray);
@@ -58,6 +35,25 @@ namespace Portkey.DID
         public byte[] Encrypt(string password)
         {
             return null;//_encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
+        }
+
+        public IEnumerator SignTransaction(Transaction transaction, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback)
+        {
+            var temp = transaction.GetHash();
+            var byteArray = temp.ToByteArray();
+            var signature = Sign(byteArray);
+
+            transaction.Signature = ByteString.CopyFrom(signature);
+            successCallback?.Invoke(transaction);
+            yield break;
+        }
+
+        public IEnumerator Sign(string data, SuccessCallback<byte[]> successCallback, ErrorCallback errorCallback)
+        {
+            var signature = Sign(Encoding.UTF8.GetBytes(data));
+
+            successCallback?.Invoke(signature);
+            yield break;
         }
     }
 }

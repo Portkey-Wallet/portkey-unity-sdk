@@ -41,6 +41,8 @@ namespace Portkey.BrowserWalletExtension
 
         private void Listen(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
         {
+            CaAddresses caAddresses = null;
+            
             var gameObject = new GameObject("PortkeyExtensionConnectCallback");
             var callbackComponent = gameObject.AddComponent<PortkeyExtensionConnectCallback>();
             callbackComponent.OnErrorCallback = OnError;
@@ -49,7 +51,6 @@ namespace Portkey.BrowserWalletExtension
             
             void OnConnect(string data)
             {
-                CaAddresses caAddresses = null;
                 try
                 {
                     caAddresses = JsonConvert.DeserializeObject<CaAddresses>(data);
@@ -62,7 +63,21 @@ namespace Portkey.BrowserWalletExtension
                 }
                 
                 GetCurrentManagerAddress();
+            }
 
+            void OnGetManagementAccountAddress(string address)
+            {
+                if (address == null)
+                {
+                    callbackComponent.OnError("Get management account address failed!");
+                    return;
+                }
+                if(caAddresses?.AELF.Count == 0)
+                {
+                    callbackComponent.OnError("Connecting to Portkey Extension failed!");
+                    return;
+                }
+                
                 var walletInfo = new DIDWalletInfo
                 {
                     caInfo = new CAInfo
@@ -72,14 +87,10 @@ namespace Portkey.BrowserWalletExtension
                     },
                     chainId = "AELF",
                     managerInfo = null,
-                    wallet = new PortkeyExtensionSigningKey()
+                    wallet = new PortkeyExtensionSigningKey(address)
                 };
                 
                 successCallback?.Invoke(walletInfo);
-            }
-
-            void OnGetManagementAccountAddress(string data)
-            {
             }
 
             void OnError(string error)

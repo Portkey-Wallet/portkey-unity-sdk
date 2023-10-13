@@ -10,10 +10,6 @@ mergeInto(LibraryManager.library, {
   },
   
   Connect: async function () {
-    if(IsPortkeyExtensionExist() == false) {
-      window.unityInstance.SendMessage('PortkeyExtensionConnectCallback', 'OnError', 'Portkey extension not found!');
-      return;
-    }
     try {
         var provider = window.portkey;
         const accounts = await provider.request({ method: 'requestAccounts' });
@@ -28,10 +24,6 @@ mergeInto(LibraryManager.library, {
   },
   
   SignMessage: async function (messageInHex) {
-    if(IsPortkeyExtensionExist() == false) {
-      window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnError', 'Portkey extension not found!');
-      return;
-    }
     try {
       var provider = window.portkey;
       const signature = await provider.request({
@@ -49,19 +41,14 @@ mergeInto(LibraryManager.library, {
   },
 
   GetCurrentManagerAddress: async function () {
-    if(IsPortkeyExtensionExist() == false) {
-        window.unityInstance.SendMessage('PortkeyExtensionConnectCallback', 'OnError', 'Portkey extension not found!');
-        return;
-    }
     try {
         var provider = window.portkey;
         const managerAddress = await provider.request({ method: 'wallet_getCurrentManagerAddress' });
         window.unityInstance.SendMessage('PortkeyExtensionConnectCallback', 'OnGetManagementAccountAddress', managerAddress);
-        console.log(accounts);
     } catch (e) {
         console.log(e);
         console.log('fail to get management account address');
         window.unityInstance.SendMessage('PortkeyExtensionConnectCallback', 'OnError', 'Unable to get management account address!');
     }
-  },
+  }
 });

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using AElf;
@@ -12,40 +13,22 @@ namespace Portkey.BrowserWalletExtension
 {
     public class PortkeyExtensionSigningKey : ISigningKey
     {
-        private string _signature = null;
-        
-        [DllImport("__Internal")]
-        private static extern void SignMessage(string messageInHex);
-        
-        public async Task<Transaction> SignTransaction(Transaction transaction)
+        public PortkeyExtensionSigningKey(string address)
         {
-            var hex = transaction.GetHash().ToByteArray().ToHex();
-
-            _signature = null;
-            Listen();
-            
-            SignMessage(hex);
-            
-            var signature = await GetSignature();
-
-            transaction.Signature = ByteString.CopyFrom(signature.GetBytes());
-            return transaction;
-        }
-
-        public byte[] Sign(string data)
-        {
-            throw new System.NotImplementedException();
+            Address = address;
         }
 
         public byte[] Encrypt(string password)
         {
-            throw new System.NotImplementedException();
+            Debugger.Log("Portkey Extension does not support encryption.");
+            return null;
         }
 
-        public string Address => null;
+        public string Address { get; } = null;
+
         public string PublicKey => null;
         
-        private void Listen()
+        private void Listen(SuccessCallback<byte[]> successCallback, ErrorCallback errorCallback)
         {
             var gameObject = new GameObject("PortkeyExtensionSignCallback");
             var callbackComponent = gameObject.AddComponent<PortkeyExtensionSignCallback>();
@@ -54,24 +37,35 @@ namespace Portkey.BrowserWalletExtension
             
             void OnSign(string signature)
             {
-                _signature = signature;
+                successCallback?.Invoke(signature.GetBytes());
             }
         
             void OnError(string error)
             {
-                _signature = "";
-                Debugger.LogError(error);
+                errorCallback?.Invoke(error);
             }
         }
-        
-        private async Task<string> GetSignature()
-        {
-            while (_signature == null)
-            {
-                await Task.Delay(100);
-            }
 
-            return _signature;
+        public IEnumerator SignTransaction(Transaction transaction, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback)
+        {
+            var messageHash = transaction.GetHash().ToByteArray().ToHex();
+
+            yield return Sign(messageHash, signature =>
+            {
+                transaction.Signature = ByteString.CopyFrom(signature);
+                successCallback?.Invoke(transaction);
+            }, errorCallback);
+        }
+
+        [DllImport("__Internal")]
+        private static extern void SignMessage(string messageInHex);
+        
+        public IEnumerator Sign(string data, SuccessCallback<byte[]> successCallback, ErrorCallback errorCallback)
+        {
+            Listen(successCallback, errorCallback);
+            
+            SignMessage(data);
+            yield break;
         }
     }
 }

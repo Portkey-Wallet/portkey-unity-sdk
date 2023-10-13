@@ -1,11 +1,11 @@
-using System.Threading.Tasks;
+using System.Collections;
 using AElf.Types;
 
 namespace Portkey.Core
 {
     public interface ISigner
     {
-        public Task<Transaction> SignTransaction(Transaction transaction);
-        public byte[] Sign(string data);
+        public IEnumerator SignTransaction(Transaction transaction, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback);
+        public IEnumerator Sign(string data, SuccessCallback<byte[]> successCallback, ErrorCallback errorCallback);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using AElf.Types;
 using Newtonsoft.Json.Linq;
+using Portkey.BrowserWalletExtension;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
@@ -140,6 +141,11 @@ namespace Portkey.DID
             if(param.caHash == null)
             {
                 errorCallback("CAHash does not exist!");
+                yield break;
+            }
+            if (Account.managementSigningKey is PortkeyExtensionSigningKey)
+            {
+                successCallback?.Invoke(true);
                 yield break;
             }
             param.managerInfo ??= new ManagerInfo

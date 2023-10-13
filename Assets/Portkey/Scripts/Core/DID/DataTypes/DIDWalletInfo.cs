@@ -3,7 +3,6 @@ namespace Portkey.Core
     public class DIDWalletInfo
     {
         public CAInfo caInfo;
-        public string pin;
         public string chainId;
         public ISigningKey wallet;
         public ManagerInfoType managerInfo;

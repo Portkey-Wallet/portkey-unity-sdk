@@ -144,6 +144,7 @@ namespace Portkey.DID
             }
             if (Account.managementSigningKey is PortkeyExtensionSigningKey)
             {
+                Reset();
                 successCallback?.Invoke(true);
                 yield break;
             }

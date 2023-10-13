@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace Portkey.DID
 {
-    public class DID : MonoBehaviour, ISocialProvider, IDIDAccountApi
+    public class DID : MonoBehaviour
     {
         [SerializeField] private IHttp _request;
         [SerializeField] private PortkeyConfig _config;
@@ -25,12 +25,10 @@ namespace Portkey.DID
         private IStorageSuite<string> _storageSuite;
         private ISigningKeyGenerator _signingKeyGenerator;
         private IConnectionService _connectService;
-        private IChainProvider _chainProvider;
         private IContractProvider _caContractProvider;
         private IEncryption _encryption;
         private ISocialVerifierProvider _socialVerifierProvider;
         private IBiometricProvider _biometricProvider;
-        private IAuthService _authService;
         private IAccountGenerator _accountGenerator;
         private IAccountRepository _accountRepository;
         private IAppLogin _appLogin;
@@ -41,7 +39,6 @@ namespace Portkey.DID
         private IVerifierService _verifierService;
         
         private DIDAccount _didWallet;
-        public IPortkeySocialService PortkeySocialService => _portkeySocialService;
 
         public void Awake()
         {
@@ -53,38 +50,29 @@ namespace Portkey.DID
             _storageSuite = new NonPersistentStorage<string>();
             _signingKeyGenerator = new SigningKeyGenerator(_encryption);
             _connectService = new ConnectionService<IHttp>(_config.ApiBaseUrl, _request);
-            _chainProvider = new AElfChainProvider(_request, _portkeySocialService);
+            ChainProvider = new AElfChainProvider(_request, _portkeySocialService);
             _accountGenerator = new AccountGenerator();
             _accountRepository = new AccountRepository(_storageSuite, _encryption, _signingKeyGenerator, _accountGenerator);
-            _caContractProvider = new CAContractProvider(_chainProvider);
+            _caContractProvider = new CAContractProvider(ChainProvider);
             _biometricProvider = new BiometricProvider();
             _loginPoller = new LoginPoller(_portkeySocialService);
             _appLogin = new PortkeyAppLogin(_config.PortkeyTransportConfig, _signingKeyGenerator, _loginPoller);
             _browserWalletExtension = new PortkeyExtension();
             _qrCodeGenerator = new QRCodeGenerator();
             _qrLogin = new QRLogin(_loginPoller, _signingKeyGenerator, _qrCodeGenerator);
-            _verifierService = new VerifierService(_portkeySocialService, _caContractProvider, _chainProvider);
+            _verifierService = new VerifierService(_portkeySocialService, _caContractProvider, ChainProvider);
             
             _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin, _browserWalletExtension);
-            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config, _verifierService);
+            AuthService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config, _verifierService);
         }
         
-        public IAuthService AuthService => _authService;
-        public IChainProvider ChainProvider => _chainProvider;
-        
+        public IPortkeySocialService PortkeySocialService => _portkeySocialService;
+        public IAuthService AuthService { get; private set; }
+        public IChainProvider ChainProvider { get; private set; }
+
         public IBiometric GetBiometric()
         {
             return _biometricProvider.GetBiometric();
-        }
-
-        public ISocialLogin GetSocialLogin(AccountType type)
-        {
-            return _socialProvider.GetSocialLogin(type);
-        }
-
-        public ISocialVerifier GetSocialVerifier(AccountType type)
-        {
-            return _socialVerifierProvider.GetSocialVerifier(type);
         }
 
         public bool Save(string password, string keyName)
@@ -92,24 +80,9 @@ namespace Portkey.DID
             return _didWallet.Save(password, keyName);
         }
 
-        bool IDIDAccountApi.Load(string password, string keyName)
+        public bool Load(string password, string keyName)
         {
             return _didWallet.Load(password, keyName);
-        }
-
-        public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
-        {
-            return _didWallet.Login(param, successCallback, errorCallback);
-        }
-
-        public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
-        {
-            return _didWallet.Logout(param, successCallback, errorCallback);
-        }
-
-        public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
-        {
-            return _didWallet.Register(param, successCallback, errorCallback);
         }
 
         public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
@@ -127,39 +100,6 @@ namespace Portkey.DID
             ErrorCallback errorCallback)
         {
             return _didWallet.GetHolderInfoByContract(param, successCallback, errorCallback);
-        }
-
-        public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
-        {
-            yield return _didWallet.GetCAHolderInfo(chainId, successCallback, errorCallback);
-        }
-
-        public ISigningKey GetManagementSigningKey()
-        {
-            return _didWallet.GetManagementSigningKey();
-        }
-
-        public IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback,
-            ErrorCallback errorCallback)
-        {
-            yield return _didWallet.LoginWithPortkeyApp(successCallback, errorCallback);
-        }
-
-        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
-        {
-            yield return _didWallet.LoginWithPortkeyExtension(successCallback, errorCallback);
-        }
-
-        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback,
-            SuccessCallback<PortkeyAppLoginResult> successCallback,
-            ErrorCallback errorCallback)
-        {
-            yield return _didWallet.LoginWithQRCode(qrCodeCallback, successCallback, errorCallback);
-        }
-
-        public void Reset()
-        {
-            _didWallet.Reset();
         }
 
         public bool IsLoggedIn()

@@ -22,6 +22,8 @@ namespace Portkey.BrowserWalletExtension
         private static extern bool IsPortkeyExtensionExist();
         [DllImport("__Internal")]
         private static extern void Connect();
+        [DllImport("__Internal")]
+        private static extern void GetCurrentManagerAddress();
 #endif
         
         public void Connect(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)

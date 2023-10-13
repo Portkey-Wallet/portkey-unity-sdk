@@ -7,12 +7,19 @@ namespace Portkey.SocialProvider
     public class PortkeyExtensionConnectCallback : MonoBehaviour, IBrowserWalletExtensionConnectCallback
     {
         public Action<string> OnConnectCallback { get; set; }
+        public Action<string> OnGetManagementAccountAddressCallback { get; set; }
         public Action<string> OnErrorCallback { get; set; }
         
         public void OnConnect(string data)
         {
             Debugger.Log($"PortkeyExtensionCallback OnConnect {data}");
             OnConnectCallback?.Invoke(data);
+        }
+
+        public void OnGetManagementAccountAddress(string data)
+        {
+            Debugger.Log($"PortkeyExtensionCallback OnGetManagementAccountAddress {data}");
+            OnGetManagementAccountAddressCallback?.Invoke(data);
         }
 
         public void OnError(string error)

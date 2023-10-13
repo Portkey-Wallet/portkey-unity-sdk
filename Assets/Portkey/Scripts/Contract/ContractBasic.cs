@@ -3,7 +3,6 @@ using System.Collections;
 using AElf;
 using AElf.Types;
 using Google.Protobuf;
-using Portkey.BrowserWalletExtension;
 using Portkey.Chain.Dto;
 using Portkey.Core;
 using Portkey.DID;
@@ -21,8 +20,11 @@ namespace Portkey.Contract
         private const int MAX_POLL_TIMES = 30;
         
         private readonly IChain _chain;
+        
+        //hack: should not be here and used here at all. CallAsync should not require signing key.
         private readonly ISigningKeyGenerator _signingKeyGenerator;
         private ISigningKey _signingKey = null;
+        
         public string ContractAddress { get; protected set; }
         public string ChainId => _chain.ChainInfo.chainId;
 
@@ -66,55 +68,44 @@ namespace Portkey.Contract
 
         public IEnumerator SendAsync(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<IContract.TransactionInfoDto> successCallback, ErrorCallback errorCallback)
         {
-            if (signingKey is not PortkeyExtensionSigningKey portkeyExtensionSigningKey)
+            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
             {
-                yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
+                // As different nodes have different block height,
+                // we need to give the next transaction a lower height (-5) so transaction can be successful
+                var refBlockNumber = transaction.RefBlockNumber - 5;
+                refBlockNumber = Math.Max(0, refBlockNumber);
+
+                StaticCoroutine.StartCoroutine(_chain.GetBlockByHeightAsync(refBlockNumber, blockDto =>
                 {
-                    // As different nodes have different block height,
-                    // we need to give the next transaction a lower height (-5) so transaction can be successful
-                    var refBlockNumber = transaction.RefBlockNumber - 5;
-                    refBlockNumber = Math.Max(0, refBlockNumber);
+                    transaction.RefBlockNumber = refBlockNumber;
+                    transaction.RefBlockPrefix =
+                        BlockHelper.GetRefBlockPrefix(Hash.LoadFromHex(blockDto?.BlockHash));
 
-                    StaticCoroutine.StartCoroutine(_chain.GetBlockByHeightAsync(refBlockNumber, blockDto =>
+                    StaticCoroutine.StartCoroutine(signingKey.SignTransaction(transaction, txWithSign =>
                     {
-                        transaction.RefBlockNumber = refBlockNumber;
-                        transaction.RefBlockPrefix =
-                            BlockHelper.GetRefBlockPrefix(Hash.LoadFromHex(blockDto?.BlockHash));
+                        Debugger.Log("Sending Transaction...");
 
-                        StaticCoroutine.StartCoroutine(signingKey.SignTransaction(transaction, txWithSign =>
+                        var sendTxnInput = new SendTransactionInput
                         {
-                            Debugger.Log("Sending Transaction...");
+                            RawTransaction = txWithSign.ToByteArray().ToHex()
+                        };
+                        StaticCoroutine.StartCoroutine(_chain.SendTransactionAsync(sendTxnInput, result =>
+                        {
+                            StaticCoroutine.StartCoroutine(PollTransactionResultAsync(result.TransactionId, transactionResult =>
+                            {
+                                Debugger.Log($"{methodName} on chain: {_chain.ChainInfo.chainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
 
-                            var sendTxnInput = new SendTransactionInput
-                            {
-                                RawTransaction = txWithSign.ToByteArray().ToHex()
-                            };
-                            StaticCoroutine.StartCoroutine(_chain.SendTransactionAsync(sendTxnInput, result =>
-                            {
-                                StaticCoroutine.StartCoroutine(PollTransactionResultAsync(result.TransactionId, transactionResult =>
+                                var txnInfoDto = new IContract.TransactionInfoDto
                                 {
-                                    Debugger.Log($"{methodName} on chain: {_chain.ChainInfo.chainId} \nStatus: {transactionResult.Status} \nError:{transactionResult.Error} \nTransactionId: {transactionResult.TransactionId} \nBlockNumber: {transactionResult.BlockNumber}\n");
-
-                                    var txnInfoDto = new IContract.TransactionInfoDto
-                                    {
-                                        transaction = transaction,
-                                        transactionResult = transactionResult
-                                    };
-                                    successCallback?.Invoke(txnInfoDto);
-                                }, errorCallback));
+                                    transaction = transaction,
+                                    transactionResult = transactionResult
+                                };
+                                successCallback?.Invoke(txnInfoDto);
                             }, errorCallback));
                         }, errorCallback));
                     }, errorCallback));
-                }, errorCallback);
-            }
-            else
-            {
-#if UNITY_WEBGL
-                var formatter = new JsonFormatter(new JsonFormatter.Settings(true));
-                var payload = formatter.Format(param);
-                //SendTransaction(payload);
-#endif
-            }
+                }, errorCallback));
+            }, errorCallback);
         }
         
         private IEnumerator PollTransactionResultAsync(string transactionId, SuccessCallback<TransactionResultDto> successCallback, ErrorCallback errorCallback)

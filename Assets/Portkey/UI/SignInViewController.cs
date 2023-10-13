@@ -44,8 +44,6 @@ namespace Portkey.UI
             }
         }
         
-        private DIDWalletInfo _walletInfo;
-        
         public void SignInWithExtension()
         {
             StartCoroutine(did.AuthService.LoginWithPortkeyExtension(OnConnect));
@@ -53,13 +51,9 @@ namespace Portkey.UI
         
         private void OnConnect(DIDWalletInfo walletInfo)
         {
-            _walletInfo = walletInfo;
-        }
-
-        public void Signature()
-        {
-            //_walletInfo.wallet.SignTransaction("68656c6c6f20776f726c643939482801");
-            //Debugger.Log($"Signature: {signature}");
+            setPinViewController.Initialize(walletInfo);
+            setPinViewController.SetPreviousView(gameObject);
+            CloseView();
         }
 
         private void AuthCallback(ICredential credential)

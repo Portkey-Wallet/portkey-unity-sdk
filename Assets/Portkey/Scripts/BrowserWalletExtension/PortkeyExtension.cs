@@ -77,18 +77,12 @@ namespace Portkey.BrowserWalletExtension
                     callbackComponent.OnError("Connecting to Portkey Extension failed!");
                     return;
                 }
-                
-                var walletInfo = new DIDWalletInfo
+
+                var walletInfo = new DIDWalletInfo("AELF", null, 0, new CAInfo
                 {
-                    caInfo = new CAInfo
-                    {
-                        caAddress = caAddresses.AELF[0],
-                        caHash = null
-                    },
-                    chainId = "AELF",
-                    managerInfo = null,
-                    wallet = new PortkeyExtensionSigningKey(address)
-                };
+                    caAddress = caAddresses.AELF[0],
+                    caHash = null
+                }, null, AddManagerType.Recovery, new PortkeyExtensionSigningKey(address));
                 
                 successCallback?.Invoke(walletInfo);
             }

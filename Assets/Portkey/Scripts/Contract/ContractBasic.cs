@@ -37,7 +37,7 @@ namespace Portkey.Contract
         
         public IEnumerator CallAsync<T>(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
         {
-            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, async transaction =>
+            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
             {
                 StaticCoroutine.StartCoroutine(signingKey.SignTransaction(transaction, txWithSign =>
                 {
@@ -68,7 +68,7 @@ namespace Portkey.Contract
                     var refBlockNumber = transaction.RefBlockNumber - 5;
                     refBlockNumber = Math.Max(0, refBlockNumber);
 
-                    StaticCoroutine.StartCoroutine(_chain.GetBlockByHeightAsync(refBlockNumber, async blockDto =>
+                    StaticCoroutine.StartCoroutine(_chain.GetBlockByHeightAsync(refBlockNumber, blockDto =>
                     {
                         transaction.RefBlockNumber = refBlockNumber;
                         transaction.RefBlockPrefix =

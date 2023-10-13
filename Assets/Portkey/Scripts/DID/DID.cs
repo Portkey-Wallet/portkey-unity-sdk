@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Linq;
 using Portkey.Biometric;
 using Portkey.BrowserWalletExtension;
 using Portkey.Chain;
@@ -39,6 +38,7 @@ namespace Portkey.DID
         private IBrowserWalletExtension _browserWalletExtension;
         private ILoginPoller _loginPoller;
         private IQRCodeGenerator _qrCodeGenerator;
+        private IVerifierService _verifierService;
         
         private DIDAccount _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
@@ -63,9 +63,10 @@ namespace Portkey.DID
             _browserWalletExtension = new PortkeyExtension();
             _qrCodeGenerator = new QRCodeGenerator();
             _qrLogin = new QRLogin(_loginPoller, _signingKeyGenerator, _qrCodeGenerator);
+            _verifierService = new VerifierService(_portkeySocialService, _caContractProvider, _chainProvider);
             
             _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin, _browserWalletExtension);
-            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
+            _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config, _verifierService);
         }
         
         public IAuthService AuthService => _authService;
@@ -126,30 +127,6 @@ namespace Portkey.DID
             ErrorCallback errorCallback)
         {
             return _didWallet.GetHolderInfoByContract(param, successCallback, errorCallback);
-        }
-
-        public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
-        {
-            yield return _portkeySocialService.GetChainsInfo((chainInfos) =>
-            {
-                var chainInfo = chainInfos.items.FirstOrDefault(info => info.chainId == chainId);
-                if (chainInfo == null)
-                {
-                    errorCallback("Network Error!");
-                    return;
-                }
-
-                StartCoroutine(_didWallet.GetVerifierServers(chainInfo.chainId, result =>
-                {
-                    if (result == null || result.Length == 0)
-                    {
-                        errorCallback("Network Error!");
-                        return;
-                    }
-                    
-                    successCallback(result);
-                }, errorCallback));
-            }, errorCallback);
         }
 
         public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)

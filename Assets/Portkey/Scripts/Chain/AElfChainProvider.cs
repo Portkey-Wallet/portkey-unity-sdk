@@ -9,7 +9,6 @@ namespace Portkey.Chain
     public class AElfChainProvider : IChainProvider
     {
         private readonly Dictionary<string, IChain> _chains = new Dictionary<string, IChain>();
-        private Dictionary<string, string> _chainUrls = new Dictionary<string, string>();
         private Dictionary<string, ChainInfo> _chainInfos = new Dictionary<string, ChainInfo>();
         private readonly IHttp _http;
         private readonly IPortkeySocialService _service;

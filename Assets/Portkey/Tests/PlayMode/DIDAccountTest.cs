@@ -389,41 +389,6 @@ namespace Portkey.Test
         }
         
         [UnityTest]
-        public IEnumerator GetVerifierServersTest()
-        {
-            var accountProviderMock = GetAccountProviderMock();
-            var socialServiceMock = GetSocialServiceMock();
-            var contractMock = GetContractMock<GetVerifierServersOutput>();
-            var contractProviderMock = GetContractProviderMock(contractMock);
-            var accountRepositoryMock = GetAccountRepositoryMock();
-            var accountGeneratorMock = GetAccountGeneratorMock();
-            var appLoginMock = GetAppLoginMock();
-            var qrLoginMock = GetQRLoginMock();
-
-            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object, new PortkeyExtension());
-            var done = false;
-            yield return didWallet.GetVerifierServers("AELF", (result) =>
-            {
-                done = true;
-                accountProviderMock.Verify(provider => provider.Create(), Times.Once());
-                contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
-                contractMock.Verify(contract => contract.CallAsync<GetVerifierServersOutput>(It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
-                    It.IsAny<ErrorCallback>()), Times.Once());
-                Assert.AreNotEqual(null, result);
-            }, error =>
-            {
-                done = true;
-                Assert.Fail(error);
-            });
-
-            while (!done)
-            {
-                yield return new WaitForSeconds(0.5f);
-            }
-
-        }
-        
-        [UnityTest]
         public IEnumerator SaveTest()
         {
             const string PASSWORD = "myPassword";

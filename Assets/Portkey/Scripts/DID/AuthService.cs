@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Portkey.BrowserWalletExtension;
 using Portkey.Core;
 using Portkey.SocialProvider;
 using Portkey.Utilities;
@@ -29,14 +28,14 @@ namespace Portkey.DID
         private EmailLogin Email { get; set; }
         private PhoneLogin Phone { get; set; }
 
-        public AuthService(IPortkeySocialService portkeySocialService, DIDAccount did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider, PortkeyConfig config)
+        public AuthService(IPortkeySocialService portkeySocialService, DIDAccount did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider, PortkeyConfig config, IVerifierService verifierService)
         {
             _portkeySocialService = portkeySocialService;
             _did = did;
             _socialVerifierProvider = socialVerifierProvider;
             _config = config;
             
-            _verifierService = new VerifierService(_did, _portkeySocialService);
+            _verifierService = verifierService;
             Message = new AuthMessage();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);

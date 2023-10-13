@@ -69,11 +69,7 @@ namespace Portkey.DID
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
         public IAuthService AuthService { get; private set; }
         public IChainProvider ChainProvider { get; private set; }
-
-        public IBiometric GetBiometric()
-        {
-            return _biometricProvider.GetBiometric();
-        }
+        public IBiometric Biometric => _biometricProvider.GetBiometric();
 
         public bool Save(string password, string keyName)
         {

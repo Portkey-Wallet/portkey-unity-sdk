@@ -299,7 +299,7 @@ namespace Portkey.DID
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                StaticCoroutine.StartCoroutine(contract.CallAsync<GetHolderInfoOutput>(Account.managementSigningKey, "GetHolderInfo", holderInfoInput, result =>
+                StaticCoroutine.StartCoroutine(contract.CallAsync<GetHolderInfoOutput>("GetHolderInfo", holderInfoInput, result =>
                 {
                     var holderInfo = ConvertToHolderInfo(result);
                     UpdateCAInfo(param.chainId, holderInfo.caHash, holderInfo.caAddress);
@@ -440,7 +440,7 @@ namespace Portkey.DID
         private IEnumerator GetVerifierServersByContract(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
         {
             var signingKey = (Account == null)? _signingKeyGenerator.Create() : Account.managementSigningKey;
-            yield return contract.CallAsync<GetVerifierServersOutput>(signingKey, "GetVerifierServers", new Empty(), result =>
+            yield return contract.CallAsync<GetVerifierServersOutput>("GetVerifierServers", new Empty(), result =>
             {
                 var verifierItems = ConvertToVerifierItems(result);
                 successCallback(verifierItems);

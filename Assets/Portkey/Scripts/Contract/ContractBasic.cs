@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using AElf;
 using AElf.Types;
 using Google.Protobuf;
 using Portkey.BrowserWalletExtension;
 using Portkey.Chain.Dto;
 using Portkey.Core;
+using Portkey.DID;
+using Portkey.Encryption;
 using Portkey.Utilities;
 using UnityEngine;
 
@@ -21,6 +21,8 @@ namespace Portkey.Contract
         private const int MAX_POLL_TIMES = 30;
         
         private readonly IChain _chain;
+        private readonly ISigningKeyGenerator _signingKeyGenerator;
+        private ISigningKey _signingKey = null;
         public string ContractAddress { get; protected set; }
         public string ChainId => _chain.ChainInfo.chainId;
 
@@ -31,19 +33,24 @@ namespace Portkey.Contract
         /// <param name="contractAddress">The contract address related to this contract.</param>
         public ContractBasic(IChain chain, string contractAddress)
         {
+            _signingKeyGenerator = new SigningKeyGenerator(new AESEncryption());
+            
             _chain = chain;
             ContractAddress = contractAddress ?? throw new ArgumentException("Contract address cannot be null.");
         }
         
-        public IEnumerator CallAsync<T>(ISigningKey signingKey, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
+        public IEnumerator CallAsync<T>(string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new()
         {
-            yield return _chain.GenerateTransactionAsync(signingKey.Address, ContractAddress, methodName, param, transaction =>
+            _signingKey ??= _signingKeyGenerator.Create();
+
+            yield return _chain.GenerateTransactionAsync(_signingKey.Address, ContractAddress, methodName, param, transaction =>
             {
-                StaticCoroutine.StartCoroutine(signingKey.SignTransaction(transaction, txWithSign =>
+                StaticCoroutine.StartCoroutine(_signingKey.SignTransaction(transaction, txWithSign =>
                 {
+                    var txnHex = txWithSign.ToByteArray().ToHex();
                     var executeTxDto = new ExecuteTransactionDto
                     {
-                        RawTransaction = txWithSign.ToByteArray().ToHex()
+                        RawTransaction = txnHex
                     };
 
                     StaticCoroutine.StartCoroutine(_chain.ExecuteTransactionAsync(executeTxDto, result =>

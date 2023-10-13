@@ -139,11 +139,10 @@ namespace Portkey.Test
         private static Mock<IContract> GetContractMock<T>() where T : IMessage<T>, new()
         {
             var contractMock = new Mock<IContract>();
-            contractMock.Setup(contract => contract.CallAsync<T>(It.IsAny<ISigningKey>(),
-                    It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<T>>(),
+            contractMock.Setup(contract => contract.CallAsync<T>(It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<T>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new T()))
-                .Returns((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
+                .Callback((string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new T()))
+                .Returns((string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
             contractMock.Setup(contract => contract.SendAsync(It.IsAny<ISigningKey>(),
                     It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<IContract.TransactionInfoDto>>(),
                     It.IsAny<ErrorCallback>()))
@@ -407,7 +406,7 @@ namespace Portkey.Test
                 done = true;
                 accountProviderMock.Verify(provider => provider.Create(), Times.Once());
                 contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
-                contractMock.Verify(contract => contract.CallAsync<GetVerifierServersOutput>(It.IsAny<ISigningKey>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
+                contractMock.Verify(contract => contract.CallAsync<GetVerifierServersOutput>(It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
                     It.IsAny<ErrorCallback>()), Times.Once());
                 Assert.AreNotEqual(null, result);
             }, error =>

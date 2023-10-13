@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Linq;
+using AElf;
 using AElf.Types;
 using Google.Protobuf;
 using NUnit.Framework;
@@ -38,6 +39,15 @@ namespace Portkey.Test
             
             while (!done)
                 yield return null;
+        }
+        
+        [Test]
+        public void HexToBytesLengthTest()
+        {
+            const string HEX = "9f8cccbb20c48b5df56e8595296e0f33998381f9b2b1b8ba6777ba73a1e959c44f6cbdc653f920202ab5437c5e4bef9a1f9b8e6dc57f77a2a963976ceb38f56a01";
+            var bytes = HEX.HexToBytes();
+            
+            Assert.AreEqual(65, bytes.Length);
         }
         
         [UnityTest]

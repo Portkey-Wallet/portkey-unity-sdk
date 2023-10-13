@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Portkey.Contract;
 using AElf.Contracts.MultiToken;
 using Portkey.Core;
@@ -102,6 +101,28 @@ namespace Portkey.UI
 
         private IEnumerator PollHolderInfo(int index, IChain chain, GetHolderInfoParams holderInfoParams)
         {
+            if (holderInfoParams.caHash == null)
+            {
+                var param = new GetHolderInfoByManagerParams
+                {
+                    manager = _walletInfo.wallet.Address,
+                    chainId = chain.ChainInfo.chainId
+                };
+                while (!_isSignOut || !_chainIdToCaAddress.ContainsKey(param.chainId))
+                {
+                    yield return did.GetHolderInfo(param, (holderInfo) =>
+                    {
+                        _chainIdToCaAddress[param.chainId] = holderInfo.holderManagerInfo.caAddress;
+                    
+                        var tokenContract = new ContractBasic(chain, chain.ChainInfo.defaultToken.address);
+
+                        StartCoroutine(PollTokenBalance(index, tokenContract, chain.ChainInfo.defaultToken));
+                    }, error => { });
+
+                    yield return new WaitForSeconds(5);
+                }
+                yield break;
+            }
             while (!_isSignOut || !_chainIdToCaAddress.ContainsKey(holderInfoParams.chainId))
             {
                 yield return did.GetHolderInfoByContract(holderInfoParams, (holderInfo) =>
@@ -144,7 +165,7 @@ namespace Portkey.UI
                 Owner = caAddress.ToAddress(),
                 Symbol = token.symbol
             };
-            yield return tokenContract.CallAsync<GetBalanceOutput>(_walletInfo.wallet, "GetBalance", balanceInput, output =>
+            yield return tokenContract.CallAsync<GetBalanceOutput>("GetBalance", balanceInput, output =>
             {
                 tokenInfos[index].chainLabelText.text = tokenContract.ChainId;
                 tokenInfos[index].tokenLabelText.text = output.Symbol;

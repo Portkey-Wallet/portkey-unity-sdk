@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using AElf;
 using AElf.Types;
 using Google.Protobuf;
 using Portkey.Core;
 using Portkey.SocialProvider;
+using Portkey.Utilities;
 using UnityEngine;
 
 namespace Portkey.BrowserWalletExtension
@@ -37,7 +39,7 @@ namespace Portkey.BrowserWalletExtension
             
             void OnSign(string signature)
             {
-                successCallback?.Invoke(signature.GetBytes());
+                successCallback?.Invoke(signature.HexToBytes());
             }
         
             void OnError(string error)
@@ -49,7 +51,7 @@ namespace Portkey.BrowserWalletExtension
         public IEnumerator SignTransaction(Transaction transaction, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback)
         {
             var messageHash = transaction.GetHash().ToByteArray().ToHex();
-
+            
             yield return Sign(messageHash, signature =>
             {
                 transaction.Signature = ByteString.CopyFrom(signature);

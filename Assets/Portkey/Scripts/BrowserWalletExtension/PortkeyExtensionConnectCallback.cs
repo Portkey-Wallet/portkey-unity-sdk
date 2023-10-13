@@ -20,6 +20,7 @@ namespace Portkey.SocialProvider
         {
             Debugger.Log($"PortkeyExtensionCallback OnGetManagementAccountAddress {data}");
             OnGetManagementAccountAddressCallback?.Invoke(data);
+            Destroy(gameObject);
         }
 
         public void OnError(string error)

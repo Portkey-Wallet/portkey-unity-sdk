@@ -110,10 +110,10 @@ namespace Portkey.Core
         public GuardianDto[] guardians = null;
     }
     
-    [Serializable]
-    public class GetHolderInfoByManagerParams : GetHolderInfoParams
+    public class GetHolderInfoByManagerParams
     {
         public string manager = null;
+        public string chainId = null;
     }
     
     [Serializable]

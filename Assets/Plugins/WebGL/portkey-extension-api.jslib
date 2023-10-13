@@ -33,7 +33,7 @@ mergeInto(LibraryManager.library, {
         }
       });
       if (!signature) throw new Error('Sign failed!');
-      window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnSign', signature);
+      window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnSign', JSON.stringify(signature));
     } catch (e) {
         console.log(e);
         window.unityInstance.SendMessage('PortkeyExtensionSignCallback', 'OnError', 'Sign failed!');

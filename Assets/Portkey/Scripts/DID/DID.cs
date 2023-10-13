@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Linq;
 using Portkey.Biometric;
+using Portkey.BrowserWalletExtension;
 using Portkey.Chain;
 using Portkey.Contract;
 using Portkey.Core;
@@ -35,6 +36,7 @@ namespace Portkey.DID
         private IAccountRepository _accountRepository;
         private IAppLogin _appLogin;
         private IQRLogin _qrLogin;
+        private IBrowserWalletExtension _browserWalletExtension;
         private ILoginPoller _loginPoller;
         private IQRCodeGenerator _qrCodeGenerator;
         
@@ -58,10 +60,11 @@ namespace Portkey.DID
             _biometricProvider = new BiometricProvider();
             _loginPoller = new LoginPoller(_portkeySocialService);
             _appLogin = new PortkeyAppLogin(_config.PortkeyTransportConfig, _signingKeyGenerator, _loginPoller);
+            _browserWalletExtension = new PortkeyExtension();
             _qrCodeGenerator = new QRCodeGenerator();
             _qrLogin = new QRLogin(_loginPoller, _signingKeyGenerator, _qrCodeGenerator);
             
-            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin);
+            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin, _browserWalletExtension);
             _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
         }
         
@@ -151,7 +154,7 @@ namespace Portkey.DID
 
         public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
         {
-            return _didWallet.GetCAHolderInfo(chainId, successCallback, errorCallback);
+            yield return _didWallet.GetCAHolderInfo(chainId, successCallback, errorCallback);
         }
 
         public ISigningKey GetManagementSigningKey()
@@ -162,14 +165,19 @@ namespace Portkey.DID
         public IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback,
             ErrorCallback errorCallback)
         {
-            return _didWallet.LoginWithPortkeyApp(successCallback, errorCallback);
+            yield return _didWallet.LoginWithPortkeyApp(successCallback, errorCallback);
+        }
+
+        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        {
+            yield return _didWallet.LoginWithPortkeyExtension(successCallback, errorCallback);
         }
 
         public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback,
             SuccessCallback<PortkeyAppLoginResult> successCallback,
             ErrorCallback errorCallback)
         {
-            return _didWallet.LoginWithQRCode(qrCodeCallback, successCallback, errorCallback);
+            yield return _didWallet.LoginWithQRCode(qrCodeCallback, successCallback, errorCallback);
         }
 
         public void Reset()

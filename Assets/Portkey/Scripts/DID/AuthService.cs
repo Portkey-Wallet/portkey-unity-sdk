@@ -28,7 +28,6 @@ namespace Portkey.DID
         public IAuthMessage Message { get; private set; }
         private EmailLogin Email { get; set; }
         private PhoneLogin Phone { get; set; }
-        private IBrowserWalletExtension BrowserWalletExtension { get; set; }
 
         public AuthService(IPortkeySocialService portkeySocialService, DIDAccount did, ISocialProvider socialLoginProvider, ISocialVerifierProvider socialVerifierProvider, PortkeyConfig config)
         {
@@ -43,7 +42,6 @@ namespace Portkey.DID
             Phone = new PhoneLogin(_portkeySocialService);
             AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message);
             GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message);
-            BrowserWalletExtension = new PortkeyExtension();
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
             EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
 
@@ -489,8 +487,7 @@ namespace Portkey.DID
 
         public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback)
         {
-            BrowserWalletExtension.Connect(successCallback, OnError);
-            yield break;
+            yield return _did.LoginWithPortkeyExtension(successCallback, OnError);
         }
 
         public IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback)

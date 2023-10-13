@@ -23,10 +23,11 @@ namespace Portkey.DID
         private readonly IAccountGenerator _accountGenerator;
         private readonly IAppLogin _appLogin;
         private readonly IQRLogin _qrLogin;
+        private readonly IBrowserWalletExtension _browserWalletExtension;
 
         protected Account Account = null;
 
-        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin, IQRLogin qrLogin)
+        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin, IQRLogin qrLogin, IBrowserWalletExtension browserWalletExtension)
         {
             _socialService = socialService;
             _signingKeyGenerator = signingKeyGenerator;
@@ -36,6 +37,7 @@ namespace Portkey.DID
             _accountGenerator = accountGenerator;
             _appLogin = appLogin;
             _qrLogin = qrLogin;
+            _browserWalletExtension = browserWalletExtension;
         }
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
@@ -543,6 +545,16 @@ namespace Portkey.DID
                 Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
                 successCallback(result);
             }, errorCallback);
+        }
+
+        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        {
+            _browserWalletExtension.Connect(walletInfo =>
+            {
+                Account = _accountGenerator.Create(walletInfo.chainId, walletInfo.managerInfo.guardianIdentifier, walletInfo.caInfo.caHash, walletInfo.caInfo.caAddress, walletInfo.wallet);
+                successCallback(walletInfo);
+            }, errorCallback);
+            yield break;
         }
 
         public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)

@@ -45,6 +45,7 @@ namespace Portkey.UI
             }
         }
         
+#if UNITY_WEBGL && !UNITY_EDITOR
         public void SignInWithExtension()
         {
             StartCoroutine(did.AuthService.LoginWithPortkeyExtension(OnConnect));
@@ -56,11 +57,16 @@ namespace Portkey.UI
             setPinViewController.SetPreviousView(gameObject);
             CloseView();
         }
+#endif
 
         public void SignInWithApp()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            SignInWithExtension();
+#elif (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
             did.AuthService.Message.Loading(true, "Loading...");
             StartCoroutine(did.AuthService.LoginWithPortkeyApp(LoggedIn));
+#endif
         }
         
         public void SignInWithQRCode()

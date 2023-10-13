@@ -45,6 +45,7 @@ namespace Portkey.BrowserWalletExtension
             var callbackComponent = gameObject.AddComponent<PortkeyExtensionConnectCallback>();
             callbackComponent.OnErrorCallback = OnError;
             callbackComponent.OnConnectCallback = OnConnect;
+            callbackComponent.OnGetManagementAccountAddressCallback = OnGetManagementAccountAddress;
             
             void OnConnect(string data)
             {
@@ -59,6 +60,8 @@ namespace Portkey.BrowserWalletExtension
                     callbackComponent.OnError(e.Message);
                     return;
                 }
+                
+                GetCurrentManagerAddress();
 
                 var walletInfo = new DIDWalletInfo
                 {
@@ -74,7 +77,11 @@ namespace Portkey.BrowserWalletExtension
                 
                 successCallback?.Invoke(walletInfo);
             }
-        
+
+            void OnGetManagementAccountAddress(string data)
+            {
+            }
+
             void OnError(string error)
             {
                 Debugger.LogError(error);

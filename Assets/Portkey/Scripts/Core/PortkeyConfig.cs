@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Portkey.Transport;
 using UnityEngine;
 
 namespace Portkey.Core
@@ -89,6 +90,9 @@ namespace Portkey.Core
         [Header("Approval Settings")]
         [SerializeField] private int minApprovals = 3;
         [SerializeField] private int denominator = 5;
+        
+        [Header("Login App Settings")]
+        [SerializeField] private TransportConfig portkeyTransportConfig;
 
         /// <summary>
         /// A getter for the chain infos.
@@ -106,6 +110,7 @@ namespace Portkey.Core
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;
+        public TransportConfig PortkeyTransportConfig => portkeyTransportConfig;
         
         public void OnBeforeSerialize()
         {

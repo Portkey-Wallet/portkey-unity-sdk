@@ -34,7 +34,7 @@ namespace Portkey.DID
 
         public byte[] Encrypt(string password)
         {
-            return null;//_encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
+            return _encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
         }
 
         public IEnumerator SignTransaction(Transaction transaction, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback)

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eb5ecd35f8e648f0ae1232e27f0c96d, type: 3}
   m_Name: PortkeyGraphQLConfig
   m_EditorClassIdentifier: 
-  url: https://dapp-portkey-test.portkey.finance/Portkey_DID/PortKeyIndexerCASchema/graphql
+  url: http://192.168.66.240:18083/AElfIndexer_DApp/PortKeyIndexerCASchema/graphql
   queries:
   - name: GetCAHolderInfo
     operationType: 0
@@ -439,4 +439,396 @@ MonoBehaviour:
         type: String
       hasChanged: 0
     isComplete: 0
+  - name: caHolderManagerInfo
+    operationType: 0
+    query: "query caHolderManagerInfo {\n    caHolderManagerInfo(dto: {manager: \"PVT6niUuMtNDCzXWsDCYu83RW3uuspTQjXx6g5wAsxTTZQnag\",
+      maxResultCount: 1, skipCount: 0}) {\n        originChainId\n        managerInfos
+      {\n            extraData\n            address\n        }\n        caAddress\n       
+      caHash\n        chainId\n        id\n    }\n}"
+    queryString: caHolderManagerInfo
+    returnType: CAHolderManagerDto
+    queryOptions:
+    - tokenInfo
+    - caHolderTransaction
+    - twoCaHolderTransaction
+    - caHolderTransactionInfo
+    - caHolderManagerInfo
+    - caHolderInfo
+    - loginGuardianInfo
+    - caHolderNFTCollectionBalanceInfo
+    - caHolderNFTBalanceInfo
+    - caHolderTokenBalanceInfo
+    - caHolderBingoInfo
+    - caHolderTransactionAddressInfo
+    - loginGuardianChangeRecordInfo
+    - caHolderManagerChangeRecordInfo
+    - caHolderSearchTokenNFT
+    - syncState
+    - guardianAddedCAHolderInfo
+    fields:
+    - index: 5
+      name: originChainId
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 4
+      name: managerInfos
+      type: ManagerInfo
+      ancestors: 0
+      hasSubField: 1
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 1
+      name: extraData
+      type: String
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: address
+        type: String
+      - name: extraData
+        type: String
+      hasChanged: 0
+    - index: 0
+      name: address
+      type: String
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: address
+        type: String
+      - name: extraData
+        type: String
+      hasChanged: 0
+    - index: 3
+      name: caAddress
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 2
+      name: caHash
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 1
+      name: chainId
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    - index: 0
+      name: id
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: managerInfos
+        type: ManagerInfo
+      - name: originChainId
+        type: String
+      hasChanged: 0
+    isComplete: 1
+  - name: loginGuardianInfo
+    operationType: 0
+    query: "query loginGuardianInfo {\n    loginGuardianInfo(dto: {caHash: \"0f43415a000ff6d6f4ff7c8e8d771da4dc8c5e9e2a2d606f3ba262de44e025c5\",
+      maxResultCount: 100, skipCount: 0}) {\n        loginGuardian {\n           
+      isLoginGuardian\n            salt\n            identifierHash\n           
+      verifierId\n            type\n        }\n        manager\n        caAddress\n       
+      caHash\n        chainId\n        id\n    }\n}"
+    queryString: loginGuardianInfo
+    returnType: LoginGuardianDto
+    queryOptions:
+    - tokenInfo
+    - caHolderTransaction
+    - twoCaHolderTransaction
+    - caHolderTransactionInfo
+    - caHolderManagerInfo
+    - caHolderInfo
+    - loginGuardianInfo
+    - caHolderNFTCollectionBalanceInfo
+    - caHolderNFTBalanceInfo
+    - caHolderTokenBalanceInfo
+    - caHolderBingoInfo
+    - caHolderTransactionAddressInfo
+    - loginGuardianChangeRecordInfo
+    - caHolderManagerChangeRecordInfo
+    - caHolderSearchTokenNFT
+    - syncState
+    - guardianAddedCAHolderInfo
+    fields:
+    - index: 5
+      name: loginGuardian
+      type: GuardianDto
+      ancestors: 0
+      hasSubField: 1
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 4
+      name: isLoginGuardian
+      type: Boolean
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 3
+      name: salt
+      type: String
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 2
+      name: identifierHash
+      type: String
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 1
+      name: verifierId
+      type: String
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 0
+      name: type
+      type: Int
+      ancestors: 1
+      hasSubField: 0
+      fieldOptions:
+      - name: type
+        type: Int
+      - name: verifierId
+        type: String
+      - name: identifierHash
+        type: String
+      - name: salt
+        type: String
+      - name: isLoginGuardian
+        type: Boolean
+      hasChanged: 0
+    - index: 4
+      name: manager
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 3
+      name: caAddress
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 2
+      name: caHash
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 1
+      name: chainId
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    - index: 0
+      name: id
+      type: String
+      ancestors: 0
+      hasSubField: 0
+      fieldOptions:
+      - name: id
+        type: String
+      - name: chainId
+        type: String
+      - name: caHash
+        type: String
+      - name: caAddress
+        type: String
+      - name: manager
+        type: String
+      - name: loginGuardian
+        type: GuardianDto
+      hasChanged: 0
+    isComplete: 1
   request: {fileID: 11400000, guid: e645be7cb8d2e4a23abee15bbb39bdef, type: 2}

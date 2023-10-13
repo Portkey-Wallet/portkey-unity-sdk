@@ -18,6 +18,7 @@ namespace Portkey.UI
         [SerializeField] private EmailLoginViewController emailLoginViewController;
         [SerializeField] private PhoneLoginViewController phoneLoginViewController;
         [SerializeField] private SetPINViewController setPinViewController;
+        [SerializeField] private QRCodeViewController qrCodeViewController;
 
         public void SignIn(int type)
         {
@@ -54,6 +55,24 @@ namespace Portkey.UI
             setPinViewController.Initialize(walletInfo);
             setPinViewController.SetPreviousView(gameObject);
             CloseView();
+        }
+
+        public void SignInWithApp()
+        {
+            did.AuthService.Message.Loading(true, "Loading...");
+            StartCoroutine(did.AuthService.LoginWithPortkeyApp(LoggedIn));
+        }
+        
+        public void SignInWithQRCode()
+        {
+            qrCodeViewController.Initialize(LoggedIn);
+        }
+
+        private void LoggedIn(DIDWalletInfo walletInfo)
+        {
+            did.AuthService.Message.Loading(false);
+            setPinViewController.Initialize(walletInfo);
+            setPinViewController.SetPreviousView(gameObject);
         }
 
         private void AuthCallback(ICredential credential)

@@ -6,6 +6,8 @@ using Portkey.BrowserWalletExtension;
 using Portkey.Core;
 using Portkey.SocialProvider;
 using Portkey.Utilities;
+using UnityEngine;
+using DeviceInfoType = Portkey.Core.DeviceInfoType;
 
 namespace Portkey.DID
 {
@@ -15,7 +17,6 @@ namespace Portkey.DID
         
         private readonly IPortkeySocialService _portkeySocialService;
         private readonly DIDAccount _did;
-        private readonly ISocialProvider _socialLoginProvider;
         private readonly ISocialVerifierProvider _socialVerifierProvider;
         private readonly IVerifierService _verifierService;
         private readonly PortkeyConfig _config;
@@ -33,7 +34,6 @@ namespace Portkey.DID
         {
             _portkeySocialService = portkeySocialService;
             _did = did;
-            _socialLoginProvider = socialLoginProvider;
             _socialVerifierProvider = socialVerifierProvider;
             _config = config;
             
@@ -41,13 +41,14 @@ namespace Portkey.DID
             Message = new AuthMessage();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
+            AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message);
+            GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message);
             BrowserWalletExtension = new PortkeyExtension();
-            AppleCredentialProvider = new AppleCredentialProvider(_socialLoginProvider, Message);
-            GoogleCredentialProvider = new GoogleCredentialProvider(_socialLoginProvider, Message);
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
             EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
 
             Message.ChainId = DEFAULT_CHAIN_ID;
+            Message.OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;
         }
 
         private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<Guardian>> successCallback, ErrorCallback errorCallback)
@@ -410,8 +411,8 @@ namespace Portkey.DID
                     return;
                 }
 
-                var walletInfo = CreateDIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
-                    registerResult.SessionId, AddManagerType.Register);
+                var walletInfo = new DIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
+                    registerResult.SessionId, AddManagerType.Register, _did.GetManagementSigningKey());
                 successCallback(walletInfo);
             }, OnError);
         }
@@ -481,7 +482,7 @@ namespace Portkey.DID
                     return;
                 }
                 
-                var walletInfo = CreateDIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery);
+                var walletInfo = new DIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery, _did.GetManagementSigningKey());
                 successCallback(walletInfo);
             }, OnError));
         }
@@ -492,6 +493,25 @@ namespace Portkey.DID
             yield break;
         }
 
+        public IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            yield return _did.LoginWithPortkeyApp(PortkeyAppLoginSuccess(successCallback), OnError);
+        }
+
+        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            yield return _did.LoginWithQRCode(qrCodeCallback, PortkeyAppLoginSuccess(successCallback), OnError);
+        }
+        
+        private SuccessCallback<PortkeyAppLoginResult> PortkeyAppLoginSuccess(SuccessCallback<DIDWalletInfo> successCallback)
+        {
+            return result =>
+            {
+                Message.ChainId = result.caHolder.holderManagerInfo.originChainId;
+                successCallback(new DIDWalletInfo(result.caHolder, result.managementAccount));
+            };
+        }
+
         public IEnumerator Logout(SuccessCallback<bool> successCallback)
         {
             var param = new EditManagerParams
@@ -499,24 +519,6 @@ namespace Portkey.DID
                 chainId = Message.ChainId
             };
             yield return _did.Logout(param, successCallback, OnError);
-        }
-
-        private DIDWalletInfo CreateDIDWalletInfo(string chainId, string guardianId, AccountType accountType, CAInfo caInfo, string sessionId, AddManagerType type)
-        {
-            var walletInfo = new DIDWalletInfo
-            {
-                caInfo = caInfo,
-                chainId = chainId,
-                wallet = _did.GetManagementSigningKey(),
-                managerInfo = new ManagerInfoType
-                {
-                    managerUniqueId = sessionId,
-                    guardianIdentifier = guardianId,
-                    accountType = accountType,
-                    type = type
-                }
-            };
-            return walletInfo;
         }
         
         private static bool IsCAValid(CAInfo caInfo)

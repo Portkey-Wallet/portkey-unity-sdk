@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Portkey.Core;
-using Portkey.GraphQL;
-using UnityEngine;
+using Portkey.Utilities;
 using Types = GraphQLCodeGen.Types;
 
 namespace Portkey.GraphQL
@@ -10,13 +9,23 @@ namespace Portkey.GraphQL
     /// <summary>
     /// GraphQL is the main class to interact with GraphQL.
     /// </summary>
-    public class GraphQL : MonoBehaviour, IDIDGraphQL, IGraphQL
+    public class GraphQL: IDIDGraphQL, IGraphQL
     {
-        [SerializeField] protected GraphQLConfig _graphQLConfig;
+        private class HolderInfoDto
+        {
+            public Types.GetCaHolderManagerInfoDto dto;
+        }
+        
+        private GraphQLConfig _graphQLConfig;
 
         private const string QUERY_CAHOLDERMANAGERINFO = "caHolderManagerInfo";
         private const string QUERY_LOGINGUARDIANINFO = "loginGuardianInfo";
 
+        public GraphQL (GraphQLConfig graphQLConfig)
+        {
+            _graphQLConfig = graphQLConfig;
+        }
+        
         public IEnumerator GetHolderInfoByManager(string manager, string chainId,
             SuccessCallback<IList<CaHolderWithGuardian>> successCallback,
             ErrorCallback errorCallback)
@@ -28,10 +37,21 @@ namespace Portkey.GraphQL
                 yield break;
             }
 
-            var dto = new Types.GetCaHolderManagerInfoDto();
-            dto.manager = manager;
-            dto.chainId = chainId;
-            query.SetArgs(new { dto = dto.GetInputObject() });
+            var dto = new HolderInfoDto
+            {
+                dto = new Types.GetCaHolderManagerInfoDto
+                {
+                    manager = manager,
+                    chainId = chainId,
+                    maxResultCount = 1,
+                    skipCount = 0
+                }
+            };
+            
+            query.SetArgs(dto);
+            
+            Debugger.Log(query.query);
+            
             yield return _graphQLConfig.Query<Types.Query>(query,
                 response =>
                 {
@@ -58,15 +78,15 @@ namespace Portkey.GraphQL
                         return;
                     }
 
-                    var dto = new Types.GetLoginGuardianInfoDto
+                    var loginGuardianInfoDto = new Types.GetLoginGuardianInfoDto
                     {
                         caHash = response.caHolderManagerInfo[0].caHash,
                         chainId = chainId,
                         skipCount = 0,
                         maxResultCount = 100
                     };
-                    query.SetArgs(new { dto = dto.GetInputObject() });
-                    StartCoroutine(_graphQLConfig.Query<Types.Query>(query,
+                    query.SetArgs(new { dto = loginGuardianInfoDto });
+                    StaticCoroutine.StartCoroutine(_graphQLConfig.Query<Types.Query>(query,
                         responseToLogin =>
                         {
                             if (responseToLogin.loginGuardianInfo == null ||
@@ -85,16 +105,10 @@ namespace Portkey.GraphQL
                 errorCallback);
         }
 
-        public IEnumerator Query<T>(string query, SuccessCallback<T> successCallback,
-            ErrorCallback errorCallback)
-        {
-            return _graphQLConfig.Query<T>(query, successCallback, errorCallback);
-        }
-
         public IEnumerator Query<T>(GraphQLQuery query, SuccessCallback<T> successCallback,
             ErrorCallback errorCallback)
         {
-            return _graphQLConfig.Query<T>(query, successCallback, errorCallback);
+            return _graphQLConfig.Query(query, successCallback, errorCallback);
         }
 
         public GraphQLQuery GetQueryByName(string queryName)

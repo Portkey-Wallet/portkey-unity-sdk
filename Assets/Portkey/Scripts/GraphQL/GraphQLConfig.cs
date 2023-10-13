@@ -6,6 +6,7 @@ using Portkey.Core;
 using Portkey.Storage;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Portkey.Utilities;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -19,6 +20,13 @@ namespace Portkey.GraphQL
     [CreateAssetMenu(fileName = "API Reference", menuName = "Portkey/GraphQL/API Reference")]
     public class GraphQLConfig : ScriptableObject, IGraphQLEditor, IGraphQL
     {
+        private class GraphQLPayload
+        {
+            public string query;
+            public string operationName;
+            public Dictionary<string, string> variables = new Dictionary<string, string>();
+        }
+        
         [SerializeField]
         private string url;
         [SerializeField]
@@ -49,12 +57,20 @@ namespace Portkey.GraphQL
             return _schemaClass;
         }
 
-        public IEnumerator Query<T>(string query, SuccessCallback<T> successCallback, ErrorCallback errorCallback)
+        private IEnumerator Query<T>(string operationName, string query, SuccessCallback<T> successCallback,
+            ErrorCallback errorCallback)
         {
+            var payload = new GraphQLPayload
+            {
+                operationName = operationName,
+                query = query,
+                variables = new Dictionary<string, string>()
+            };
+            
             var jsonRequestData = new JsonRequestData
             {
                 Url = url,
-                JsonData = JsonConvert.SerializeObject(new{query})
+                JsonData = JsonConvert.SerializeObject(payload)
             };
             
             return request.Post(jsonRequestData, 
@@ -98,7 +114,7 @@ namespace Portkey.GraphQL
             {
                 query.BuildQueryString();
             }
-            return Query<T>(query.query, successCallback, errorCallback);
+            return Query(query.name, query.query, successCallback, errorCallback);
         }
 
         public GraphQLQuery GetQueryByName(string queryName)

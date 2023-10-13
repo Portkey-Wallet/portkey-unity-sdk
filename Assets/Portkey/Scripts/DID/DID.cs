@@ -5,8 +5,10 @@ using Portkey.Chain;
 using Portkey.Contract;
 using Portkey.Core;
 using Portkey.Encryption;
+using Portkey.GraphQL;
 using Portkey.SocialProvider;
 using Portkey.Storage;
+using Portkey.Utilities;
 using UnityEngine;
 
 namespace Portkey.DID
@@ -15,8 +17,9 @@ namespace Portkey.DID
     {
         [SerializeField] private IHttp _request;
         [SerializeField] private PortkeyConfig _config;
-        [SerializeField] private GraphQL.GraphQL _graphQL;
-        
+        [SerializeField] protected GraphQLConfig _graphQLConfig;
+
+        private GraphQL.GraphQL _graphQL;
         private ISocialProvider _socialProvider;
         private IPortkeySocialService _portkeySocialService;
         private IStorageSuite<string> _storageSuite;
@@ -30,12 +33,17 @@ namespace Portkey.DID
         private IAuthService _authService;
         private IAccountGenerator _accountGenerator;
         private IAccountRepository _accountRepository;
+        private IAppLogin _appLogin;
+        private IQRLogin _qrLogin;
+        private ILoginPoller _loginPoller;
+        private IQRCodeGenerator _qrCodeGenerator;
         
         private DIDAccount _didWallet;
         public IPortkeySocialService PortkeySocialService => _portkeySocialService;
 
         public void Awake()
         {
+            _graphQL = new GraphQL.GraphQL(_graphQLConfig);
             _encryption = new AESEncryption();
             _socialProvider = new SocialLoginProvider(_config, _request);
             _portkeySocialService = new PortkeySocialService(_config, _request, _graphQL);
@@ -48,8 +56,12 @@ namespace Portkey.DID
             _accountRepository = new AccountRepository(_storageSuite, _encryption, _signingKeyGenerator, _accountGenerator);
             _caContractProvider = new CAContractProvider(_chainProvider);
             _biometricProvider = new BiometricProvider();
+            _loginPoller = new LoginPoller(_portkeySocialService);
+            _appLogin = new PortkeyAppLogin(_config.PortkeyTransportConfig, _signingKeyGenerator, _loginPoller);
+            _qrCodeGenerator = new QRCodeGenerator();
+            _qrLogin = new QRLogin(_loginPoller, _signingKeyGenerator, _qrCodeGenerator);
             
-            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator);
+            _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin);
             _authService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config);
         }
         
@@ -85,11 +97,6 @@ namespace Portkey.DID
         bool IDIDAccountApi.Load(string password, string keyName)
         {
             return _didWallet.Load(password, keyName);
-        }
-
-        public IEnumerator Login(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
-        {
-            return _didWallet.Login(param, successCallback, errorCallback);
         }
 
         public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
@@ -156,6 +163,19 @@ namespace Portkey.DID
         public ISigningKey GetManagementSigningKey()
         {
             return _didWallet.GetManagementSigningKey();
+        }
+
+        public IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            return _didWallet.LoginWithPortkeyApp(successCallback, errorCallback);
+        }
+
+        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback,
+            SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            return _didWallet.LoginWithQRCode(qrCodeCallback, successCallback, errorCallback);
         }
 
         public void Reset()

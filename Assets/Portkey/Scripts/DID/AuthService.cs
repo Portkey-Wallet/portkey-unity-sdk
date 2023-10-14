@@ -150,6 +150,13 @@ namespace Portkey.DID
             };
         }
 
+        /// <summary> The GetRequiredApprovedGuardiansCount function returns the number of guardians that must be approved to recover the user's Portkey DID Account.        
+        /// The function takes in an integer representing the total number of guardians, and returns an integer representing the minimum required approvals.</summary>
+        ///
+        /// <param name="int totalGuardians"> /// the total number of guardians.
+        /// </param>
+        ///
+        /// <returns> The number of approved guardians required to recover the user's Portkey DID Account.</returns>
         public int GetRequiredApprovedGuardiansCount(int totalGuardians)
         {
             if (totalGuardians <= _config.MinApprovals)
@@ -159,6 +166,14 @@ namespace Portkey.DID
             return (int) (_config.MinApprovals * totalGuardians / (float)_config.Denominator + 1);
         }
 
+        /// <summary> The GetGuardians function retrieves a list of guardians for the specified user.</summary>        
+        ///
+        /// <param name="ICredential credential"> /// the credential of the user to get guardians for.
+        /// </param>
+        /// <param name="SuccessCallback&lt;List&lt;Guardian&gt;&gt; successCallback"> /// this is the callback that will be called when the request has been completed. it returns a list of guardian objects.
+        /// </param>
+        ///
+        /// <returns> A list of guardians.</returns>
         public IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<Guardian>> successCallback)
         {
             yield return GetGuardians(credential.SocialInfo.sub, successCallback, OnError);
@@ -174,6 +189,21 @@ namespace Portkey.DID
             yield return GetGuardians(emailAddress.String, successCallback, OnError);
         }
 
+        /// <summary> The Verify function is used to verify a guardian's identity.        
+        /// &lt;para&gt;The function takes in a Guardian object and an optional ICredential object.&lt;/para&gt;
+        /// &lt;para&gt;If the ICredential is not provided, the function will attempt to retrieve it from the user.&lt;/para&gt;
+        /// &lt;list type=&quot;bullet&quot;&gt;
+        ///     &lt;item&gt;&lt;description&gt;&lt;b&gt;(Step 1)&lt;/b&gt;: If an ICredential was provided, check if its accountType matches that of the Guardian&lt;/description&gt;&lt;/item&gt; 
+        ///     &lt;item&gt;&lt;description&gt;&lt;b&gt;(Step 2)&lt;/b&gt;: Get token</summary>
+        ///
+        /// <param name="Guardian guardian"> ///     the guardian to be approved.
+        /// </param>
+        /// <param name="SuccessCallback&lt;ApprovedGuardian&gt; successCallback"> ///     the callback function that will be called when the guardian is approved.
+        /// </param>
+        /// <param name="ICredential credential"> ///     if the credential is not null, it will be used to verify the guardian.
+        /// </param>
+        ///
+        /// <returns> A verifiedcredential.</returns>
         public IEnumerator Verify(Guardian guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null)
         {
             // 1. Create ICredential based on guardian's accountType
@@ -183,86 +213,67 @@ namespace Portkey.DID
 
             if (credential != null)
             {
-                if (!IsCredentialMatchGuardian(credential, guardian))
-                {
-                    OnError("Account does not match your guardian.");
-                    yield break;
-                }
-
-                switch (guardian.accountType)
-                {
-                    case AccountType.Apple or AccountType.Google:
-                        SocialVerifyAndApproveGuardian(credential, guardian);
-                        break;
-                    case AccountType.Email:
-                        EmailVerifyAndApproveGuardian((EmailCredential)credential, guardian);
-                        break;
-                    case AccountType.Phone:
-                        PhoneVerifyAndApproveGuardian((PhoneCredential)credential, guardian);
-                        break;
-                    default:
-                        OnError($"Unsupported account type: {guardian.accountType}.");
-                        break;
-                }
+                VerifyGuardian(guardian, credential, successCallback);
                 yield break;
             }
-            
-            if (guardian.accountType == AccountType.Apple)
-            {
-                AppleCredentialProvider.Get(appleCredential =>
-                {
-                    if (!IsCredentialMatchGuardian(appleCredential, guardian))
-                    {
-                        OnError("Account does not match your guardian.");
-                        return;
-                    }
 
-                    SocialVerifyAndApproveGuardian(appleCredential, guardian);
-                });
-            }
-            else if (guardian.accountType == AccountType.Google)
+            switch (guardian.accountType)
             {
-                GoogleCredentialProvider.Get(googleCredential =>
-                {
-                    if (!IsCredentialMatchGuardian(googleCredential, guardian))
+                case AccountType.Apple:
+                    AppleCredentialProvider.Get(appleCredential =>
                     {
-                        OnError("Account does not match your guardian.");
-                        return;
-                    }
+                        VerifyGuardian(guardian, appleCredential, successCallback);
+                    });
+                    break;
+                case AccountType.Google:
+                    GoogleCredentialProvider.Get(googleCredential =>
+                    {
+                        VerifyGuardian(guardian, googleCredential, successCallback);
+                    });
+                    break;
+                case AccountType.Email:
+                    yield return EmailCredentialProvider.Get(EmailAddress.Parse(guardian.id), emailCredential =>
+                    {
+                        VerifyGuardian(guardian, emailCredential, successCallback);
+                    }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery);
+                    break;
+                case AccountType.Phone:
+                    yield return PhoneCredentialProvider.Get(PhoneNumber.Parse(guardian.id), phoneCredential =>
+                    {
+                        VerifyGuardian(guardian, phoneCredential, successCallback);
+                    }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery);
+                    break;
+                default:
+                    OnError($"Unsupported account type: {guardian.accountType}");
+                    break;
+            }
+        }
 
-                    SocialVerifyAndApproveGuardian(googleCredential, guardian);
-                });
-            }
-            else if (guardian.accountType == AccountType.Email)
+        private void VerifyGuardian(Guardian guardian, ICredential credential, SuccessCallback<ApprovedGuardian> successCallback)
+        {
+            if (!IsCredentialMatchGuardian(credential, guardian))
             {
-                yield return EmailCredentialProvider.Get(EmailAddress.Parse(guardian.id), emailCredential =>
-                {
-                    if (!IsCredentialMatchGuardian(emailCredential, guardian))
-                    {
-                        OnError("Account does not match your guardian.");
-                        return;
-                    }
-                    
-                    EmailVerifyAndApproveGuardian(emailCredential, guardian);
-                }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery);
+                OnError("Account does not match your guardian.");
+                return;
             }
-            else if (guardian.accountType == AccountType.Phone)
+
+            switch (guardian.accountType)
             {
-                yield return PhoneCredentialProvider.Get(PhoneNumber.Parse(guardian.id), phoneCredential =>
-                {
-                    if (!IsCredentialMatchGuardian(phoneCredential, guardian))
-                    {
-                        OnError("Account does not match your guardian.");
-                        return;
-                    }
-                    
-                    PhoneVerifyAndApproveGuardian(phoneCredential, guardian);
-                }, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery);
+                case AccountType.Apple or AccountType.Google:
+                    SocialVerifyAndApproveGuardian(credential, guardian);
+                    break;
+                case AccountType.Email:
+                    EmailVerifyAndApproveGuardian((EmailCredential)credential, guardian);
+                    break;
+                case AccountType.Phone:
+                    PhoneVerifyAndApproveGuardian((PhoneCredential)credential, guardian);
+                    break;
+                default:
+                    OnError($"Unsupported account type: {guardian.accountType}.");
+                    break;
             }
-            else
-            {
-                OnError($"Unsupported account type: {guardian.accountType}");
-            }
+
+            return;
 
             void EmailVerifyAndApproveGuardian(EmailCredential cred, Guardian guard)
             {
@@ -303,16 +314,16 @@ namespace Portkey.DID
                 var approvedGuardian = CreateApprovedGuardian(guard, verifiedCredential);
                 successCallback(approvedGuardian);
             }
+        }
 
-            bool IsCredentialMatchGuardian(ICredential cred, Guardian guard)
-            {
-                return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
-            }
+        private static bool IsMatchingVerifier(ICodeCredential cred, Guardian guard)
+        {
+            return cred.ChainId == guard.chainId && cred.VerifierId == guard.verifier.id;
+        }
 
-            bool IsMatchingVerifier(ICodeCredential cred, Guardian guard)
-            {
-                return cred.ChainId == guard.chainId && cred.VerifierId == guard.verifier.id;
-            }
+        private static bool IsCredentialMatchGuardian(ICredential cred, Guardian guard)
+        {
+            return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
         }
 
         private void VerifyPhoneCredential(PhoneCredential credential, SuccessCallback<VerifiedCredential> successCallback)
@@ -375,6 +386,17 @@ namespace Portkey.DID
             }, Message.ChainId);
         }
         
+        /// <summary> The SignUp function is used to register a new DID on the blockchain.        
+        /// &lt;para&gt;The SignUp function takes in a VerifiedCredential object, which contains information about the user's social media account and their verification document.&lt;/para&gt;
+        /// &lt;para&gt;The SignUp function also takes in a SuccessCallback&lt;DIDWalletInfo&gt;, which is called when the registration process has completed successfully.&lt;/para&gt;</summary>
+        ///
+        /// <param name="VerifiedCredential verifiedCredential"> /// verifiedcredential is a class that contains the verified credential of a user.
+        /// </param>
+        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// a callback function that is called when the operation succeeds. 
+        /// the parameter of this function is a didwalletinfo object containing information about the newly created wallet.
+        /// </param>
+        ///
+        /// <returns> A didwalletinfo object.</returns>
         public IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
         {
             _did.Reset();
@@ -414,6 +436,15 @@ namespace Portkey.DID
             }, OnError);
         }
 
+        /// <summary> The SignUp function is used to register a new DID on the blockchain.          
+        /// The SignUp function takes in an ICredential object as its first parameter, which can be any ICredential.
+        /// The second parameter of the SignUp function is a SuccessCallback&lt;DIDWalletInfo&gt; delegate that will be called when the sign up process has completed successfully.</summary>
+        ///
+        /// <param name="ICredential credential"> The credential to be verified.</param>
+        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// the callback function that will be called when the sign up is successful. 
+        /// </param>
+        ///
+        /// <returns> A didwalletinfo object.</returns>
         public IEnumerator SignUp(ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
         {
             switch (credential.AccountType)
@@ -449,6 +480,21 @@ namespace Portkey.DID
             }
         }
 
+        /// <summary> The Login function is used to log in a user with a list of approved guardians.        
+        /// &lt;para&gt;The Login function takes the following parameters:&lt;/para&gt;
+        /// &lt;list type=&quot;bullet&quot;&gt;
+        ///     &lt;item&gt;&lt;description&gt;&lt;paramref name=&quot;loginGuardian&quot;/&gt; - The Guardian object that contains the user's DID.&lt;/description&gt;&lt;/item&gt;
+        ///     &lt;item&gt;&lt;description&gt;&lt;paramref name=&quot;approvedGuardians&quot;/&gt; - A list of approved Guardians for this login session.&lt;/description&gt;&lt;/item&gt; 
+        /// &lt;/list&gt; 
+        /// </summary>
+        ///
+        /// <param name="Guardian loginGuardian"> The guardian that is used to login</param>
+        /// <param name="List&lt;ApprovedGuardian&gt; approvedGuardians"> /// list of approved guardians.
+        /// </param>
+        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// the callback function that will be called when the login is successful. 
+        /// </param>
+        ///
+        /// <returns> The didwalletinfo object.</returns>
         public IEnumerator Login(Guardian loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback)
         {
             _did.Reset();
@@ -484,16 +530,42 @@ namespace Portkey.DID
             }, OnError));
         }
 
+        /// <summary> The LoginWithPortkeyExtension function is used to login using Portkey Browser Extension.        
+        /// &lt;para&gt;- The first parameter is a SuccessCallback function that returns the DIDWalletInfo object.&lt;/para&gt;
+        /// </summary>
+        ///
+        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// the callback that is called when the login process succeeds.
+        /// </param>
+        ///
+        /// <returns> A didwalletinfo object</returns>
         public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback)
         {
             yield return _did.LoginWithPortkeyExtension(successCallback, OnError);
         }
 
+        /// <summary> The LoginWithPortkeyApp function is used to login with the Portkey app on mobile devices.        
+        /// &lt;para&gt;The function takes a SuccessCallback as an argument, which will be called if the login was successful.&lt;/para&gt;
+        /// </summary>
+        ///
+        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// successcallback&lt;didwalletinfo&gt; successcallback is a callback function that returns the didwalletinfo object.
+        /// </param>
+        ///
+        /// <returns> A didwalletinfo object.</returns>
         public IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback)
         {
             yield return _did.LoginWithPortkeyApp(PortkeyAppLoginSuccess(successCallback), OnError);
         }
 
+        /// <summary> The LoginWithQRCode function is used to login with a QR code.        
+        /// &lt;para&gt;The qrCodeCallback function will be called when the QR code is ready.&lt;/para&gt;
+        /// &lt;para&gt;The successCallback function will be called when the user has successfully logged in.&lt;/para&gt;</summary>
+        ///
+        /// <param name="SuccessCallback&lt;Texture2D&gt; qrCodeCallback"> ///     &lt;para&gt;a callback to return the qr code image.&lt;/para&gt;
+        /// </param>
+        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// this is the callback that will be called when the login process is successful.
+        /// </param>
+        ///
+        /// <returns> A texture2d object.</returns>
         public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<DIDWalletInfo> successCallback)
         {
             yield return _did.LoginWithQRCode(qrCodeCallback, PortkeyAppLoginSuccess(successCallback), OnError);
@@ -508,6 +580,12 @@ namespace Portkey.DID
             };
         }
 
+        /// <summary> The Logout function logs out the user from the DID service.</summary>        
+        ///
+        /// <param name="SuccessCallback&lt;bool&gt; successCallback"> /// the success callback.
+        /// </param>
+        ///
+        /// <returns> A bool value indicating if the log out operation was successful.</returns>
         public IEnumerator Logout(SuccessCallback<bool> successCallback)
         {
             var param = new EditManagerParams

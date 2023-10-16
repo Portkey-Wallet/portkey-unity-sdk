@@ -16,7 +16,13 @@ namespace Portkey.Core
             public TransactionResultDto transactionResult;
         }
         
+        /// <summary>
+        /// For getting the contract address.
+        /// </summary>
         string ContractAddress { get; }
+        /// <summary>
+        /// For getting the corresponding chain Id to the contract.
+        /// </summary>
         string ChainId { get; }
         
         /// <summary>

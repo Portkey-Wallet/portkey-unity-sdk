@@ -319,11 +319,6 @@ namespace Portkey.DID
             return Post("/api/app/account/isGoogleRecaptchaOpen", requestParams, successCallback, OnError(errorCallback));
         }
 
-        public IEnumerator GetPhoneCountryCode(SuccessCallback<ICountryItem[]> successCallback, ErrorCallback errorCallback)
-        {
-            return Get("/api/app/phone/info", successCallback, OnError(errorCallback));
-        }
-
         public IEnumerator GetPhoneCountryCodeWithLocal(SuccessCallback<IPhoneCountryCodeResult> successCallback, ErrorCallback errorCallback)
         {
             return Get("/api/app/phone/info", successCallback, OnError(errorCallback));

@@ -65,8 +65,6 @@ namespace Portkey.DID
             _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin, _browserWalletExtension);
             AuthService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config, _verifierService);
         }
-        
-        public IPortkeySocialService PortkeySocialService => _portkeySocialService;
         public IAuthService AuthService { get; private set; }
         public IChainProvider ChainProvider { get; private set; }
         public IBiometric Biometric => _biometricProvider.GetBiometric();
@@ -81,21 +79,22 @@ namespace Portkey.DID
             return _didWallet.Load(password, keyName);
         }
 
-        public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
-        {
-            return _didWallet.GetHolderInfo(param, successCallback, errorCallback);
-        }
-
         public IEnumerator GetHolderInfo(GetHolderInfoByManagerParams param, SuccessCallback<CaHolderWithGuardian> successCallback,
             ErrorCallback errorCallback)
         {
-            return _didWallet.GetHolderInfo(param, successCallback, errorCallback);
+            yield return _didWallet.GetHolderInfo(param, successCallback, errorCallback);
         }
 
         public IEnumerator GetHolderInfoByContract(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback,
             ErrorCallback errorCallback)
         {
-            return _didWallet.GetHolderInfoByContract(param, successCallback, errorCallback);
+            yield return _didWallet.GetHolderInfoByContract(param, successCallback, errorCallback);
+        }
+
+        public IEnumerator GetPhoneCountryCodeWithLocal(SuccessCallback<IPhoneCountryCodeResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            yield return _portkeySocialService.GetPhoneCountryCodeWithLocal(successCallback, errorCallback);
         }
 
         public bool IsLoggedIn()

@@ -114,7 +114,7 @@ namespace Portkey.Chain
     
             return _httpService.Post(parameters, result => successCallback?.Invoke(result), error => OnError(error, errorCallback));
         }
-
+        
         public IEnumerator GetBlockByHeightAsync(long blockHeight, SuccessCallback<BlockDto> successCallback, ErrorCallback errorCallback, bool includeTransactions = false)
         {
             var url = GetRequestUrl(_baseUrl,
@@ -127,7 +127,7 @@ namespace Portkey.Chain
             };
             yield return Get(data, successCallback, errorCallback);
         }
-
+        
         public IEnumerator SendTransactionAsync(SendTransactionInput input, SuccessCallback<SendTransactionOutput> successCallback, ErrorCallback errorCallback)
         {
             var txnPostDto = new TransactionPostDto

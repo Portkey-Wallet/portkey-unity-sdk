@@ -18,7 +18,7 @@ namespace Portkey.Chain
             _http = http;
             _service = service;
         }
-
+        
         public IEnumerator GetAvailableChainIds(SuccessCallback<string[]> successCallback, ErrorCallback errorCallback)
         {
             if (_chainInfos.Keys.Count != 0)
@@ -36,7 +36,7 @@ namespace Portkey.Chain
                 successCallback?.Invoke(_chainInfos.Keys.ToArray());
             }
         }
-
+        
         public IEnumerator GetChain(string chainId, SuccessCallback<IChain> successCallback, ErrorCallback errorCallback)
         {
             if (_chains.TryGetValue(chainId, out var chain))

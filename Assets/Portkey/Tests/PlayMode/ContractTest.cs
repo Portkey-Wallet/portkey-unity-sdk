@@ -114,11 +114,8 @@ namespace Portkey.Test
         {
             var done = false;
             
-            var config = GetPortkeyConfig("PortkeyTestConfig");
-            var testMainChain = config.ChainInfos["TestMain"];
             var chainMock = GetChainMock();
-            var walletMock = GetWalletMock();
-            IContract contract = new ContractBasic(chainMock.Object, testMainChain.ContractInfos["CAContract"].ContractAddress);
+            IContract contract = new ContractBasic(chainMock.Object, "2imqjpkCwnvYzfnr61Lp2XQVN2JU17LPkA9AZzmRZzV5LRRWmR");
 
             yield return contract.CallAsync<GetVerifierServersOutput>("GetVerifierServers", new Empty(),
                 result =>
@@ -161,15 +158,13 @@ namespace Portkey.Test
             const string EXCEPION_MESSAGE = "Failed to execute tx.";
             LogAssert.ignoreFailingMessages = true;
             
-            var config = GetPortkeyConfig("PortkeyTestConfig");
-            var testMainChain = config.ChainInfos["TestMain"];
             var chainMock = GetChainMock();
             chainMock.Setup(chain => chain.ExecuteTransactionAsync(It.IsAny<ExecuteTransactionDto>(),
                     It.IsAny<SuccessCallback<string>>(), It.IsAny<ErrorCallback>()))
                 .Returns(new List<int>().GetEnumerator())
                 .Callback((ExecuteTransactionDto input, SuccessCallback<string> successCallback, ErrorCallback errorCallback) => errorCallback?.Invoke(EXCEPION_MESSAGE));
 
-            IContract contract = new ContractBasic(chainMock.Object, testMainChain.ContractInfos["CAContract"].ContractAddress);
+            IContract contract = new ContractBasic(chainMock.Object, "2imqjpkCwnvYzfnr61Lp2XQVN2JU17LPkA9AZzmRZzV5LRRWmR");
 
             yield return contract.CallAsync<GetVerifierServersOutput>("GetVerifierServers", new Empty(),
                 result =>
@@ -192,8 +187,6 @@ namespace Portkey.Test
             var done = false;
             const string TRANSACTION_ID = "0x1234567890";
             
-            var config = GetPortkeyConfig("PortkeyTestConfig");
-            var testMainChain = config.ChainInfos["TestMain"];
             var chainMock = GetChainMock();
             chainMock.Setup(chain => chain.GetTransactionResultAsync(It.IsAny<string>(),
                     It.IsAny<SuccessCallback<TransactionResultDto>>(), It.IsAny<ErrorCallback>()))
@@ -204,7 +197,7 @@ namespace Portkey.Test
                 }));
 
 
-            IContract contract = new ContractBasic(chainMock.Object, testMainChain.ContractInfos["CAContract"].ContractAddress);
+            IContract contract = new ContractBasic(chainMock.Object, "2imqjpkCwnvYzfnr61Lp2XQVN2JU17LPkA9AZzmRZzV5LRRWmR");
             var input = new AddManagerInfoInput
             {
                 CaHash = Hash.LoadFromHex("594ebf395cdba58b0e725d71eb3c1a17d57662b0667a92f770f341d4e794b76b")

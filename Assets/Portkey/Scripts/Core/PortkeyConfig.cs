@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Portkey.Transport;
 using UnityEngine;
 
 namespace Portkey.Core
@@ -10,56 +6,11 @@ namespace Portkey.Core
     /// Portkey configuration object. Contains only config data.
     /// </summary>
     [CreateAssetMenu(fileName = "PortkeyConfig", menuName = "Portkey/PortkeyConfig", order = 1)]
-    public class PortkeyConfig : ScriptableObject, ISerializationCallbackReceiver
+    public class PortkeyConfig : ScriptableObject
     {
-        [Serializable]
-        public class ChainInfo : ISerializationCallbackReceiver
-        {
-            [Header("Chain Info")]
-            [SerializeField]
-            private string chainId;
-            [SerializeField]
-            private string rpcUrl;
-            [Header("Contracts")]
-            [SerializeField]
-            private ContractInfo[] contractInfos;
-
-            public string ChainId => chainId;
-            public string RpcUrl => rpcUrl;
-            
-            /// <summary>
-            /// A getter for the contract infos for contracts that are deployed on this chain.
-            /// </summary>
-            public Dictionary<string, ContractInfo> ContractInfos { get; private set; }
-            public void OnBeforeSerialize()
-            {
-            }
-
-            public void OnAfterDeserialize()
-            {
-                // create a runtime dictionary to access the contract infos by contract id since dictionaries are not serializable
-                ContractInfos = contractInfos?.ToDictionary(contractInfo => contractInfo.ContractId, contractInfo => contractInfo);
-            }
-        }
-        
-        [Serializable]
-        public class ContractInfo
-        {
-            [SerializeField]
-            private string contractId;
-            [SerializeField]
-            private string contractAddress;
-            
-            public string ContractId => contractId;
-            public string ContractAddress => contractAddress;
-        }
-
         [Header("Portkey Endpoint")]
         [SerializeField]
         private string apiBaseUrl;
-        [Header("Blockchain Info")]
-        [SerializeField]
-        private ChainInfo[] chainInfos;
         
         [Header("Google PC Login")]
         [SerializeField]
@@ -97,7 +48,6 @@ namespace Portkey.Core
         /// <summary>
         /// A getter for the chain infos.
         /// </summary>
-        public Dictionary<string, ChainInfo> ChainInfos { get; private set; }
         public string ApiBaseUrl => apiBaseUrl;
         public string GooglePCClientId => googlePCClientId;
         public string GooglePCClientSecret => googlePCClientSecret;
@@ -111,15 +61,5 @@ namespace Portkey.Core
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;
         public TransportConfig PortkeyTransportConfig => portkeyTransportConfig;
-        
-        public void OnBeforeSerialize()
-        {
-        }
-
-        public void OnAfterDeserialize()
-        {
-            // create a runtime dictionary to access the chain infos by chain id since dictionaries are not serializable
-            ChainInfos = chainInfos?.ToDictionary(chainInfo => chainInfo.ChainId, chainInfo => chainInfo);
-        }
     }
 }

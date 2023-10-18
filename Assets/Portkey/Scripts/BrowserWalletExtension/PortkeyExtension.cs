@@ -16,8 +16,7 @@ namespace Portkey.BrowserWalletExtension
     
     public class PortkeyExtension : IBrowserWalletExtension
     {
-#if UNITY_WEBGL
-            //&& !UNITY_EDITOR
+#if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern bool IsPortkeyExtensionExist();
         [DllImport("__Internal")]
@@ -28,6 +27,7 @@ namespace Portkey.BrowserWalletExtension
         
         public void Connect(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
             if (IsPortkeyExtensionExist())
             {
                 Listen(successCallback, errorCallback);
@@ -37,10 +37,12 @@ namespace Portkey.BrowserWalletExtension
             {
                 errorCallback("Portkey extension not found!");
             }
+#endif
         }
 
         private void Listen(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
             CaAddresses caAddresses = null;
             
             var gameObject = new GameObject("PortkeyExtensionConnectCallback");
@@ -92,6 +94,7 @@ namespace Portkey.BrowserWalletExtension
                 Debugger.LogError(error);
                 errorCallback?.Invoke(error);
             }
+#endif
         }
     }
 }

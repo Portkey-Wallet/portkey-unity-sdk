@@ -44,13 +44,6 @@ namespace Portkey.UI
             }
         }
         
-#if UNITY_WEBGL && !UNITY_EDITOR
-        public void SignInWithExtension()
-        {
-            StartCoroutine(did.AuthService.LoginWithPortkeyExtension(LoggedIn));
-        }
-#endif
-
         private void StartLoginLoading()
         {
             did.AuthService.Message.Loading(true, "Loading...");
@@ -58,6 +51,13 @@ namespace Portkey.UI
             cancelLoadingViewController.Initialize(did, gameObject);
 #endif
         }
+        
+#if UNITY_WEBGL && !UNITY_EDITOR
+        public void SignInWithExtension()
+        {
+            StartCoroutine(did.AuthService.LoginWithPortkeyExtension(LoggedIn));
+        }
+#endif
 
         public void SignInWithApp()
         {

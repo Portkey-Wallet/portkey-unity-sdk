@@ -57,7 +57,7 @@ namespace Portkey.GraphQL
             return _schemaClass;
         }
 
-        public IEnumerator Query<T>(string operationName, string query, SuccessCallback<T> successCallback,
+        private IEnumerator Query<T>(string operationName, string query, SuccessCallback<T> successCallback,
             ErrorCallback errorCallback)
         {
             var payload = new GraphQLPayload
@@ -76,7 +76,6 @@ namespace Portkey.GraphQL
             return request.Post(jsonRequestData, 
                 (response) =>
                                 {
-                                    Debugger.LogError("Succeeded in getting response!");
                                     var json = JObject.Parse(response);
                                     string data = null;
                                     if (json.TryGetValue("errors", out var errorMessage))
@@ -104,8 +103,6 @@ namespace Portkey.GraphQL
                                 }, 
                     (error) =>
                                 {
-                                    Debugger.LogError(error.code);
-                                    Debugger.LogError(error.details);
                                     //call error callback
                                     errorCallback(error.message);
                                 });

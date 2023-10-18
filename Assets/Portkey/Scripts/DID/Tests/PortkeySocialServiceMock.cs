@@ -112,11 +112,6 @@ namespace Portkey.Test
             throw new System.NotImplementedException();
         }
 
-        public IEnumerator GetPhoneCountryCode(SuccessCallback<ICountryItem[]> successCallback, ErrorCallback errorCallback)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public IEnumerator GetPhoneCountryCodeWithLocal(SuccessCallback<IPhoneCountryCodeResult> successCallback, ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();

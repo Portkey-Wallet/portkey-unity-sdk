@@ -123,7 +123,7 @@ namespace Portkey.UI
 
         private void OpenNextView(DIDWalletInfo walletInfo)
         {
-            var biometric = did.GetBiometric();
+            var biometric = did.Biometric;
             if (biometric == null)
             {
                 OpenWalletView(walletInfo);

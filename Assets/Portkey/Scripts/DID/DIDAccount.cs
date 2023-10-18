@@ -3,11 +3,11 @@ using System.Collections;
 using System.Linq;
 using AElf.Types;
 using Newtonsoft.Json.Linq;
+using Portkey.BrowserWalletExtension;
 using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Utilities;
 using UnityEngine;
-using Empty = Google.Protobuf.WellKnownTypes.Empty;
 
 namespace Portkey.DID
 {
@@ -23,10 +23,11 @@ namespace Portkey.DID
         private readonly IAccountGenerator _accountGenerator;
         private readonly IAppLogin _appLogin;
         private readonly IQRLogin _qrLogin;
+        private readonly IBrowserWalletExtension _browserWalletExtension;
 
         protected Account Account = null;
 
-        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin, IQRLogin qrLogin)
+        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin, IQRLogin qrLogin, IBrowserWalletExtension browserWalletExtension)
         {
             _socialService = socialService;
             _signingKeyGenerator = signingKeyGenerator;
@@ -36,6 +37,7 @@ namespace Portkey.DID
             _accountGenerator = accountGenerator;
             _appLogin = appLogin;
             _qrLogin = qrLogin;
+            _browserWalletExtension = browserWalletExtension;
         }
 
         public bool Save(string password, string keyName = DEFAULT_KEY_NAME)
@@ -138,6 +140,12 @@ namespace Portkey.DID
             if(param.caHash == null)
             {
                 errorCallback("CAHash does not exist!");
+                yield break;
+            }
+            if (Account.managementSigningKey is PortkeyExtensionSigningKey)
+            {
+                Reset();
+                successCallback?.Invoke(true);
                 yield break;
             }
             param.managerInfo ??= new ManagerInfo
@@ -299,7 +307,7 @@ namespace Portkey.DID
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                StaticCoroutine.StartCoroutine(contract.CallAsync<GetHolderInfoOutput>(Account.managementSigningKey, "GetHolderInfo", holderInfoInput, result =>
+                StaticCoroutine.StartCoroutine(contract.CallAsync<GetHolderInfoOutput>("GetHolderInfo", holderInfoInput, result =>
                 {
                     var holderInfo = ConvertToHolderInfo(result);
                     UpdateCAInfo(param.chainId, holderInfo.caHash, holderInfo.caAddress);
@@ -429,50 +437,6 @@ namespace Portkey.DID
             return holderInfo != null && Account != null && param.guardianIdentifier == Account.accountDetails.socialInfo?.LoginAccount;
         }
 
-        public IEnumerator GetVerifierServers(string chainId, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
-        {
-            yield return _contractProvider.GetContract(chainId,  (contract) =>
-            {
-                StaticCoroutine.StartCoroutine(GetVerifierServersByContract(contract, successCallback, errorCallback));
-            }, errorCallback);
-        }
-        
-        private IEnumerator GetVerifierServersByContract(IContract contract, SuccessCallback<VerifierItem[]> successCallback, ErrorCallback errorCallback)
-        {
-            var signingKey = (Account == null)? _signingKeyGenerator.Create() : Account.managementSigningKey;
-            yield return contract.CallAsync<GetVerifierServersOutput>(signingKey, "GetVerifierServers", new Empty(), result =>
-            {
-                var verifierItems = ConvertToVerifierItems(result);
-                successCallback(verifierItems);
-            }, errorCallback);
-        }
-
-        private static VerifierItem[] ConvertToVerifierItems(GetVerifierServersOutput result)
-        {
-            var verifierItems = new VerifierItem[result.VerifierServers.Count];
-            for (var i = 0; i < result.VerifierServers.Count; i++)
-            {
-                var verifierServer = result.VerifierServers[i];
-                var addresses = new string[verifierServer.VerifierAddresses.Count];
-                for (var j = 0; j < verifierServer.VerifierAddresses.Count; j++)
-                {
-                    addresses[j] = verifierServer.VerifierAddresses[j].ToString();
-                }
-
-                var item = new VerifierItem
-                {
-                    id = verifierServer.Id.ToHex(),
-                    name = verifierServer.Name,
-                    imageUrl = verifierServer.ImageUrl,
-                    endPoints = verifierServer.EndPoints.ToArray(),
-                    verifierAddresses = addresses
-                };
-                verifierItems[i] = item;
-            }
-
-            return verifierItems;
-        }
-
         public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
         {
             if(_connectionService == null)
@@ -490,41 +454,43 @@ namespace Portkey.DID
             }
 
             var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
-            var signature = BitConverter.ToString(Account.managementSigningKey.Sign($"{Account.managementSigningKey.Address}-{timestamp}"));
-            var publicKey = Account.managementSigningKey.PublicKey;
-            var requestTokenConfig = new RequestTokenConfig
+            yield return Account.managementSigningKey.Sign($"{Account.managementSigningKey.Address}-{timestamp}", signatureBytes =>
             {
-                grant_type = "signature",
-                client_id = "CAServer_App",
-                scope = "CAServer",
-                signature = signature,
-                pubkey = publicKey,
-                timestamp = timestamp,
-                ca_hash = caHash,
-                chain_id = chainId
-            };
-            
-            yield return _connectionService.GetConnectToken(requestTokenConfig, (token) =>
-            {
-                if(token == null)
+                var signature = BitConverter.ToString(signatureBytes);
+                var publicKey = Account.managementSigningKey.PublicKey;
+                var requestTokenConfig = new RequestTokenConfig
                 {
-                    errorCallback("Failed to get token.");
-                    return;
-                }
-                
-                StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
+                    grant_type = "signature",
+                    client_id = "CAServer_App",
+                    scope = "CAServer",
+                    signature = signature,
+                    pubkey = publicKey,
+                    timestamp = timestamp,
+                    ca_hash = caHash,
+                    chain_id = chainId
+                };
+                StaticCoroutine.StartCoroutine(_connectionService.GetConnectToken(requestTokenConfig, (token) =>
                 {
-                    if(caHolderInfo == null)
+                    if(token == null)
                     {
-                        errorCallback("Failed to get CA Holder Info.");
+                        errorCallback("Failed to get token.");
                         return;
                     }
-
-                    if (caHolderInfo.nickName != null)
+                
+                    StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
                     {
-                        Account.accountDetails.socialInfo.Nickname = caHolderInfo.nickName;
-                    }
-                    successCallback(caHolderInfo);
+                        if(caHolderInfo == null)
+                        {
+                            errorCallback("Failed to get CA Holder Info.");
+                            return;
+                        }
+
+                        if (caHolderInfo.nickName != null)
+                        {
+                            Account.accountDetails.socialInfo.Nickname = caHolderInfo.nickName;
+                        }
+                        successCallback(caHolderInfo);
+                    }, errorCallback));
                 }, errorCallback));
             }, errorCallback);
         }
@@ -534,21 +500,30 @@ namespace Portkey.DID
             return Account?.managementSigningKey;
         }
 
-        public IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
-            yield return _appLogin.Login(chainId, result =>
+            yield return _appLogin.Login(result =>
             {
-                Account = _accountGenerator.Create(chainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
+                Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
                 successCallback(result);
             }, errorCallback);
         }
 
-        public IEnumerator LoginWithQRCode(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback,
-            ErrorCallback errorCallback)
+        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
         {
-            yield return _qrLogin.Login(chainId, qrCodeCallback, result =>
+            _browserWalletExtension.Connect(walletInfo =>
             {
-                Account = _accountGenerator.Create(chainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
+                Account = _accountGenerator.Create(walletInfo.chainId, walletInfo.managerInfo.guardianIdentifier, walletInfo.caInfo.caHash, walletInfo.caInfo.caAddress, walletInfo.wallet);
+                successCallback(walletInfo);
+            }, errorCallback);
+            yield break;
+        }
+
+        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        {
+            yield return _qrLogin.Login(qrCodeCallback, result =>
+            {
+                Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
                 successCallback(result);
             }, errorCallback);
         }

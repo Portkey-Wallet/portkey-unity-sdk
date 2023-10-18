@@ -27,6 +27,12 @@ namespace Portkey.DID
             }
             
             var encryptedPrivateKey = EncryptWallet(account.managementSigningKey, password);
+
+            if (encryptedPrivateKey == null)
+            {
+                throw new ArgumentException("Unsupported method of login for saving.");
+            }
+            
             var aesPrivateKey = Convert.ToBase64String(encryptedPrivateKey);
             
             var savedAccount = new SavedAccount

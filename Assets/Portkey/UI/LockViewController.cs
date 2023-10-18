@@ -50,7 +50,7 @@ public class LockViewController : MonoBehaviour
 
     private void PromptBiometric()
     {
-        var biometric = did.GetBiometric();
+        var biometric = did.Biometric;
         if (biometric == null)
         {
             return;
@@ -89,7 +89,7 @@ public class LockViewController : MonoBehaviour
     private void DisplayLock(bool display)
     {
         body.SetActive(display);
-        biometricButton.gameObject.SetActive(display && did.GetBiometric() != null && setPinViewController.UseBiometric);
+        biometricButton.gameObject.SetActive(display && did.Biometric != null && setPinViewController.UseBiometric);
     }
     
     public void OnClickNumber(int number)

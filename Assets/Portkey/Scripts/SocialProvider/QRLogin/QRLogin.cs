@@ -21,43 +21,32 @@ namespace Portkey.SocialProvider
             _qrCodeGenerator = qrCodeGenerator;
         }
         
-        public IEnumerator Login(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator Login(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
             var signingKey = _signingKeyGenerator.Create();
             
-            Listen(chainId, signingKey, successCallback, errorCallback);
+            Listen(signingKey, successCallback, errorCallback);
             
-            var qrCodeAsTexture2D = CreateQRCode(chainId, signingKey);
+            var qrCodeAsTexture2D = CreateQRCode(signingKey);
             qrCodeCallback(qrCodeAsTexture2D);
             yield break;
         }
 
-        private void Listen(string chainId, ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        private void Listen(ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback)
         {
-            _loginPollerHandler = _loginPoller.Start(chainId, signingKey, result =>
+            _loginPollerHandler = _loginPoller.Start(signingKey, result =>
             {
                 _loginPollerHandler = null;
                 successCallback(result);
-            }, errorCallback, ILoginPoller.INFINITE_TIMEOUT);
+            }, errorCallback, timeOut: ILoginPoller.INFINITE_TIMEOUT);
         }
 
-        private Texture2D CreateQRCode(string chainId, ISigningKey signingKey)
+        private Texture2D CreateQRCode(ISigningKey signingKey)
         {
             var guid = System.Guid.NewGuid().ToString().RemoveAllDash();
-            
-            var data = new Data
-            {
-                type = "login",
-                address = signingKey.Address,
-                id = guid,
-                netWorkType = "TESTNET",
-                chainType = chainId.ToLower(),
-                extraData = new Data.ExtraData
-                {
-                    deviceInfo = DeviceInfoType.GetDeviceInfo(),
-                    version = "2.0.0"
-                }
-            };
+
+            var data = Data.GetDefaultData(signingKey, guid);
 
             var qrData = $"{JsonConvert.SerializeObject(data)}";
             var qrCodeAsTexture2D = _qrCodeGenerator.GenerateQRCode(qrData, 280, 280);

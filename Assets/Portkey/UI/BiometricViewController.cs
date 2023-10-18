@@ -55,7 +55,7 @@ namespace Portkey.UI
         
         private void PromptBiometric(Action onBiometricAuthenticated = null)
         {
-            var biometric = did.GetBiometric();
+            var biometric = did.Biometric;
             if (biometric == null)
             {
                 throw new Exception("Biometric is not supported on this device.");

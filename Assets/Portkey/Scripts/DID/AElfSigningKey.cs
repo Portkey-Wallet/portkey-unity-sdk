@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Text;
+using System.Threading.Tasks;
 using AElf;
 using AElf.Types;
 using Google.Protobuf;
@@ -24,23 +26,6 @@ namespace Portkey.DID
             _encryption = encryption;
         }
         
-        public Transaction SignTransaction(Transaction transaction)
-        {
-            var temp = transaction.GetHash();
-            var byteArray = temp.ToByteArray();
-            var signature = Sign(byteArray);
-
-            transaction.Signature = ByteString.CopyFrom(signature);
-            return transaction;
-        }
-
-        public byte[] Sign(string data)
-        {
-            var signature = Sign(Encoding.UTF8.GetBytes(data));
-
-            return signature;
-        }
-        
         private byte[] Sign(byte[] byteArray)
         {
             var signature = _keyPair.PrivateKey.Sign(byteArray);
@@ -49,7 +34,26 @@ namespace Portkey.DID
 
         public byte[] Encrypt(string password)
         {
-            return null;//_encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
+            return _encryption.Encrypt(_keyPair.PrivateKey.ToHex(), password);
+        }
+
+        public IEnumerator SignTransaction(Transaction transaction, SuccessCallback<Transaction> successCallback, ErrorCallback errorCallback)
+        {
+            var temp = transaction.GetHash();
+            var byteArray = temp.ToByteArray();
+            var signature = Sign(byteArray);
+
+            transaction.Signature = ByteString.CopyFrom(signature);
+            successCallback?.Invoke(transaction);
+            yield break;
+        }
+
+        public IEnumerator Sign(string data, SuccessCallback<byte[]> successCallback, ErrorCallback errorCallback)
+        {
+            var signature = Sign(Encoding.UTF8.GetBytes(data));
+
+            successCallback?.Invoke(signature);
+            yield break;
         }
     }
 }

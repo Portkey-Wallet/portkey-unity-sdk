@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,6 @@ namespace Portkey.Chain
     public class AElfChainProvider : IChainProvider
     {
         private readonly Dictionary<string, IChain> _chains = new Dictionary<string, IChain>();
-        private Dictionary<string, string> _chainUrls = new Dictionary<string, string>();
         private Dictionary<string, ChainInfo> _chainInfos = new Dictionary<string, ChainInfo>();
         private readonly IHttp _http;
         private readonly IPortkeySocialService _service;
@@ -17,6 +17,24 @@ namespace Portkey.Chain
         {
             _http = http;
             _service = service;
+        }
+        
+        public IEnumerator GetAvailableChainIds(SuccessCallback<string[]> successCallback, ErrorCallback errorCallback)
+        {
+            if (_chainInfos.Keys.Count != 0)
+            {
+                CallbackWithUpdatedChainsInfo();
+                yield break;
+            }
+            
+            yield return UpdateChainsInfo(CallbackWithUpdatedChainsInfo, errorCallback);
+            
+            yield break;
+
+            void CallbackWithUpdatedChainsInfo()
+            {
+                successCallback?.Invoke(_chainInfos.Keys.ToArray());
+            }
         }
         
         public IEnumerator GetChain(string chainId, SuccessCallback<IChain> successCallback, ErrorCallback errorCallback)
@@ -33,10 +51,8 @@ namespace Portkey.Chain
                 yield break;
             }
 
-            yield return _service.GetChainsInfo(chains =>
+            yield return UpdateChainsInfo(() =>
             {
-                SetChainInfos(chains.items);
-                
                 if (!_chainInfos.TryGetValue(chainId, out var chainInfo))
                 {
                     errorCallback($"Chain: {chainId} not found.");
@@ -44,12 +60,24 @@ namespace Portkey.Chain
                 }
                 CreateChainAndCallback(chainInfo);
             }, errorCallback);
+            
+            yield break;
 
             void CreateChainAndCallback(ChainInfo chainInfo)
             {
                 var newChain = CreateChain(chainInfo);
                 successCallback(newChain);
             }
+        }
+        
+        private IEnumerator UpdateChainsInfo(Action successCallback, ErrorCallback errorCallback)
+        {
+            yield return _service.GetChainsInfo(chains =>
+            {
+                SetChainInfos(chains.items);
+                
+                successCallback?.Invoke();
+            }, errorCallback);
         }
 
         private AElfChain CreateChain(ChainInfo chainInfo)

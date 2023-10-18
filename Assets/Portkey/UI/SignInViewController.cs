@@ -43,6 +43,20 @@ namespace Portkey.UI
                     throw new ArgumentException("Not expected account type!");
             }
         }
+        
+#if UNITY_WEBGL && !UNITY_EDITOR
+        public void SignInWithExtension()
+        {
+            StartCoroutine(did.AuthService.LoginWithPortkeyExtension(OnConnect));
+        }
+        
+        private void OnConnect(DIDWalletInfo walletInfo)
+        {
+            setPinViewController.Initialize(walletInfo);
+            setPinViewController.SetPreviousView(gameObject);
+            CloseView();
+        }
+#endif
 
         private void StartLoginLoading()
         {
@@ -54,6 +68,9 @@ namespace Portkey.UI
 
         public void SignInWithApp()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            SignInWithExtension();
+#elif (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
             did.AuthService.Message.Loading(true, "Loading...");
             cancelLoadingViewController.Initialize(did, gameObject, () =>
             {
@@ -64,6 +81,7 @@ namespace Portkey.UI
                 cancelLoadingViewController.CloseView();
                 LoggedIn(walletInfo);
             }));
+#endif
         }
         
         public void SignInWithQRCode()

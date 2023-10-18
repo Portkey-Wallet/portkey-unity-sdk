@@ -27,7 +27,8 @@ namespace Portkey.SocialProvider
             _currentIndex = 0;
         }
 
-        public LoginPollerHandler Start(string chainId, ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback, float timeOut, float pollInterval)
+        public LoginPollerHandler Start(ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback, float timeOut, float pollInterval)
         {
             var handler = new LoginPollerHandler
             {
@@ -41,7 +42,7 @@ namespace Portkey.SocialProvider
                 handler = handler
             };
             
-            var coroutine = StaticCoroutine.StartCoroutine(WaitForResponse(0.0f, pollConfig, chainId, signingKey, successCallback, errorCallback));
+            var coroutine = StaticCoroutine.StartCoroutine(WaitForResponse(0.0f, pollConfig, signingKey, successCallback, errorCallback));
             
             _coroutines.Add(_currentIndex++, coroutine);
             return handler;
@@ -57,7 +58,8 @@ namespace Portkey.SocialProvider
             _coroutines.Remove(handler.id);
         }
         
-        private IEnumerator WaitForResponse(float timer, PollConfig pollConfig, string chainId, ISigningKey signingKey, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        private IEnumerator WaitForResponse(float timer, PollConfig pollConfig, ISigningKey signingKey,
+            SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
             yield return new WaitForSeconds(pollConfig.pollInterval);
             timer += pollConfig.pollInterval;
@@ -65,7 +67,7 @@ namespace Portkey.SocialProvider
             var param = new GetCAHolderByManagerParams
             {
                 manager = signingKey.Address,
-                chainId = chainId
+                chainId = null
             };
             yield return _portkeySocialService.GetHolderInfoByManager(param, result =>
             {
@@ -106,7 +108,7 @@ namespace Portkey.SocialProvider
                 }
 
                 //if we did not find the manager, we poll again
-                _coroutines[pollConfig.handler.id] = StaticCoroutine.StartCoroutine(WaitForResponse(timer, pollConfig, chainId, signingKey, successCallback, errorCallback));
+                _coroutines[pollConfig.handler.id] = StaticCoroutine.StartCoroutine(WaitForResponse(timer, pollConfig, signingKey, successCallback, errorCallback));
             }
         }
     }

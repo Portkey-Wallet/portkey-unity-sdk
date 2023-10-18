@@ -5,6 +5,7 @@ using AElf.HdWallet;
 using Google.Protobuf;
 using Moq;
 using NUnit.Framework;
+using Portkey.BrowserWalletExtension;
 using Portkey.Chain.Dto;
 using Portkey.Contracts.CA;
 using Portkey.Core;
@@ -39,7 +40,7 @@ namespace Portkey.Test
                 return Account.managementSigningKey.Address;
             }
 
-            public DidAccountMock(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin, IQRLogin qrLogin) : base(socialService, signingKeyGenerator, connectionService, contractProvider, accountRepository, accountGenerator, appLogin, qrLogin)
+            public DidAccountMock(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin, IQRLogin qrLogin, IBrowserWalletExtension browserWalletExtension) : base(socialService, signingKeyGenerator, connectionService, contractProvider, accountRepository, accountGenerator, appLogin, qrLogin, browserWalletExtension)
             {
             }
         }
@@ -83,28 +84,28 @@ namespace Portkey.Test
         private static Mock<IAppLogin> GetAppLoginMock()
         {
             var appLoginMock = new Mock<IAppLogin>();
-            appLoginMock.Setup(appLogin => appLogin.Login(It.IsAny<string>(), It.IsAny<SuccessCallback<PortkeyAppLoginResult>>(),
+            appLoginMock.Setup(appLogin => appLogin.Login(It.IsAny<SuccessCallback<PortkeyAppLoginResult>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new PortkeyAppLoginResult
+                .Callback((SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new PortkeyAppLoginResult
                 {
                     caHolder = new CaHolderWithGuardian(),
                     managementAccount = new AElfSigningKey(KeyPair, Encryption)
                 }))
-                .Returns((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => new List<int>().GetEnumerator());
+                .Returns((SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => new List<int>().GetEnumerator());
             return appLoginMock;
         }
         
         private static Mock<IQRLogin> GetQRLoginMock()
         {
             var qrLoginMock = new Mock<IQRLogin>();
-            qrLoginMock.Setup(qrLogin => qrLogin.Login(It.IsAny<string>(), It.IsAny<SuccessCallback<Texture2D>>(), It.IsAny<SuccessCallback<PortkeyAppLoginResult>>(),
+            qrLoginMock.Setup(qrLogin => qrLogin.Login(It.IsAny<SuccessCallback<Texture2D>>(), It.IsAny<SuccessCallback<PortkeyAppLoginResult>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback((string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new PortkeyAppLoginResult
+                .Callback((SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new PortkeyAppLoginResult
                 {
                     caHolder = new CaHolderWithGuardian(),
                     managementAccount = new AElfSigningKey(KeyPair, Encryption)
                 }))
-                .Returns((string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => new List<int>().GetEnumerator());
+                .Returns((SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback) => new List<int>().GetEnumerator());
             return qrLoginMock;
         }
         
@@ -139,11 +140,10 @@ namespace Portkey.Test
         private static Mock<IContract> GetContractMock<T>() where T : IMessage<T>, new()
         {
             var contractMock = new Mock<IContract>();
-            contractMock.Setup(contract => contract.CallAsync<T>(It.IsAny<ISigningKey>(),
-                    It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<T>>(),
+            contractMock.Setup(contract => contract.CallAsync<T>(It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<T>>(),
                     It.IsAny<ErrorCallback>()))
-                .Callback((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new T()))
-                .Returns((ISigningKey wallet, string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
+                .Callback((string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => successCallback?.Invoke(new T()))
+                .Returns((string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) => new List<string>().GetEnumerator());
             contractMock.Setup(contract => contract.SendAsync(It.IsAny<ISigningKey>(),
                     It.IsAny<string>(), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<IContract.TransactionInfoDto>>(),
                     It.IsAny<ErrorCallback>()))
@@ -261,7 +261,7 @@ namespace Portkey.Test
             var appLoginMock = GetAppLoginMock();
             var qrLoginMock = GetQRLoginMock();
 
-            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object);
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object, new PortkeyExtension());
             var registerParam = new RegisterParams
             {
                 type = AccountType.Google,
@@ -291,7 +291,7 @@ namespace Portkey.Test
             var appLoginMock = GetAppLoginMock();
             var qrLoginMock = GetQRLoginMock();
 
-            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object);
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object, new PortkeyExtension());
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -323,7 +323,7 @@ namespace Portkey.Test
             var appLoginMock = GetAppLoginMock();
             var qrLoginMock = GetQRLoginMock();
 
-            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object);
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object, new PortkeyExtension());
             var param = new EditManagerParams
             {
                 chainId = "chainId_mock"
@@ -347,7 +347,7 @@ namespace Portkey.Test
             var appLoginMock = GetAppLoginMock();
             var qrLoginMock = GetQRLoginMock();
 
-            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object);
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object, new PortkeyExtension());
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",
@@ -389,41 +389,6 @@ namespace Portkey.Test
         }
         
         [UnityTest]
-        public IEnumerator GetVerifierServersTest()
-        {
-            var accountProviderMock = GetAccountProviderMock();
-            var socialServiceMock = GetSocialServiceMock();
-            var contractMock = GetContractMock<GetVerifierServersOutput>();
-            var contractProviderMock = GetContractProviderMock(contractMock);
-            var accountRepositoryMock = GetAccountRepositoryMock();
-            var accountGeneratorMock = GetAccountGeneratorMock();
-            var appLoginMock = GetAppLoginMock();
-            var qrLoginMock = GetQRLoginMock();
-
-            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepositoryMock.Object, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object);
-            var done = false;
-            yield return didWallet.GetVerifierServers("AELF", (result) =>
-            {
-                done = true;
-                accountProviderMock.Verify(provider => provider.Create(), Times.Once());
-                contractProviderMock.Verify(provider => provider.GetContract(It.IsAny<string>(), It.IsAny<SuccessCallback<IContract>>(), It.IsAny<ErrorCallback>()), Times.Once());
-                contractMock.Verify(contract => contract.CallAsync<GetVerifierServersOutput>(It.IsAny<ISigningKey>(), It.Is((string s) => s == "GetVerifierServers"), It.IsAny<IMessage>(), It.IsAny<SuccessCallback<GetVerifierServersOutput>>(),
-                    It.IsAny<ErrorCallback>()), Times.Once());
-                Assert.AreNotEqual(null, result);
-            }, error =>
-            {
-                done = true;
-                Assert.Fail(error);
-            });
-
-            while (!done)
-            {
-                yield return new WaitForSeconds(0.5f);
-            }
-
-        }
-        
-        [UnityTest]
         public IEnumerator SaveTest()
         {
             const string PASSWORD = "myPassword";
@@ -439,7 +404,7 @@ namespace Portkey.Test
             var appLoginMock = GetAppLoginMock();
             var qrLoginMock = GetQRLoginMock();
 
-            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepository, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object);
+            var didWallet = new DidAccountMock(socialServiceMock.Object, accountProviderMock.Object, _connectionService, contractProviderMock.Object, accountRepository, accountGeneratorMock.Object, appLoginMock.Object, qrLoginMock.Object, new PortkeyExtension());
             var accountLoginParams = new AccountLoginParams
             {
                 loginGuardianIdentifier = "loginGuardianIdentifier_mock",

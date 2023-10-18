@@ -18,7 +18,7 @@ namespace Portkey.UI
             base.OnEnable();
             
             DID.AuthService.PhoneCredentialProvider.EnableCodeSendConfirmationFlow = true;
-            StartCoroutine(DID.PortkeySocialService.GetPhoneCountryCodeWithLocal(result =>
+            StartCoroutine(DID.GetPhoneCountryCodeWithLocal(result =>
             {
                 PhoneCountryCodeResult = result;
                 countryCodeButtonComponent.SetCountryCodeText($"+{result.locateData.code}");

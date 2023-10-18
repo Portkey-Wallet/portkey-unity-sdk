@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Portkey.SocialProvider
 {
-    public struct Data
+    public class Data
     {
         public struct ExtraData
         {
@@ -17,6 +17,23 @@ namespace Portkey.SocialProvider
         public string netWorkType;
         public string chainType;
         public ExtraData extraData;
+
+        public static Data GetDefaultData(ISigningKey signingKey, string guid)
+        {
+            return new Data
+            {
+                type = "login",
+                address = signingKey.Address,
+                id = guid,
+                netWorkType = "TESTNET",
+                chainType = "aelf",
+                extraData = new Data.ExtraData
+                {
+                    deviceInfo = DeviceInfoType.GetDeviceInfo(),
+                    version = "2.0.0"
+                }
+            };
+        }
     }
 
     public struct AppData

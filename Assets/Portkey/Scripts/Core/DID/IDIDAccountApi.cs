@@ -60,6 +60,8 @@ namespace Portkey.Core
         ISigningKey GetManagementSigningKey();
         IEnumerator LoginWithPortkeyApp(string chainId, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
         IEnumerator LoginWithQRCode(string chainId, SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
+        void CancelLoginWithQRCode();
+        void CancelLoginWithPortkeyApp();
         bool IsLoggedIn();
         bool Save(string password, string keyName);
         bool Load(string password, string keyName);

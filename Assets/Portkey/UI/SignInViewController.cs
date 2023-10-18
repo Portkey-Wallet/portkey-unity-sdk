@@ -55,8 +55,15 @@ namespace Portkey.UI
         public void SignInWithApp()
         {
             did.AuthService.Message.Loading(true, "Loading...");
-            cancelLoadingViewController.Initialize(did, gameObject);
-            StartCoroutine(did.AuthService.LoginWithPortkeyApp(LoggedIn));
+            cancelLoadingViewController.Initialize(did, gameObject, () =>
+            {
+                
+            });
+            StartCoroutine(did.AuthService.LoginWithPortkeyApp(walletInfo =>
+            {
+                cancelLoadingViewController.CloseView();
+                LoggedIn(walletInfo);
+            }));
         }
         
         public void SignInWithQRCode()

@@ -558,6 +558,11 @@ namespace Portkey.DID
             _qrLogin.Cancel();
         }
 
+        public void CancelLoginWithPortkeyApp()
+        {
+            _appLogin.Cancel();
+        }
+
         public bool IsLoggedIn()
         {
             return Account?.accountDetails.caInfoMap.Count > 0 && Account.accountDetails.socialInfo.Exists();

@@ -16,23 +16,19 @@ using Portkey.DID;
 
             OpenView();
         }
-        public void OpenView()
+
+        private void OpenView()
         {
             gameObject.SetActive(true);
         }
         public void OnClickClose()
         {
+            DID.AuthService.Message.Loading(false);
             CloseView();
         }
 
-        public void DeactiveObj()
+        public void CloseView()
         {
-            gameObject.SetActive(false);
-        }
-
-        private void CloseView()
-        {
-            DID.AuthService.Message.Loading(false);
             gameObject.SetActive(false);
         }
     }

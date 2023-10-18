@@ -26,13 +26,11 @@ namespace Portkey.UI
             switch (accountType)
             {
                 case AccountType.Apple:
-                    did.AuthService.Message.Loading(true, "Loading...");
-                    cancelLoadingViewController.Initialize(did, gameObject);
+                    StartLoginLoading();
                     did.AuthService.AppleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Google:
-                    did.AuthService.Message.Loading(true, "Loading...");
-                    cancelLoadingViewController.Initialize(did, gameObject);
+                    StartLoginLoading();
                     did.AuthService.GoogleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Email:
@@ -46,9 +44,18 @@ namespace Portkey.UI
             }
         }
 
+        private void StartLoginLoading()
+        {
+            did.AuthService.Message.Loading(true, "Loading...");
+#if UNITY_EDITOR || UNITY_STANDALONE
+            cancelLoadingViewController.Initialize(did, gameObject);
+#endif
+        }
+
         public void SignInWithApp()
         {
             did.AuthService.Message.Loading(true, "Loading...");
+            cancelLoadingViewController.Initialize(did, gameObject);
             StartCoroutine(did.AuthService.LoginWithPortkeyApp(LoggedIn));
         }
         
@@ -59,10 +66,6 @@ namespace Portkey.UI
 
         private void LoggedIn(DIDWalletInfo walletInfo)
         {
-            // did.AuthService.Message.OnLoadingEvent += (show, message) =>
-            // {
-            //     
-            // }
             did.AuthService.Message.Loading(false);
             setPinViewController.Initialize(walletInfo);
             setPinViewController.SetPreviousView(gameObject);
@@ -74,7 +77,9 @@ namespace Portkey.UI
             {
                 CheckSignUpOrLogin(credential, guardians);
             }));
-            cancelLoadingViewController.DeactiveObj();
+#if UNITY_EDITOR || UNITY_STANDALONE
+            cancelLoadingViewController.CloseView();
+#endif
         }
         
         private void CheckSignUpOrLogin(ICredential credential, List<Guardian> guardians)

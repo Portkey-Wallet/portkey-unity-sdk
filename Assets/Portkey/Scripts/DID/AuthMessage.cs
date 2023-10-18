@@ -17,6 +17,7 @@ namespace Portkey.DID
         public event IAuthMessage.OnVerifierServerSelectedHandler OnVerifierServerSelectedEvent;
         public event IAuthMessage.OnConfirmSendCodeHandler OnConfirmSendCodeEvent;
         public event IAuthMessage.OnCancelLoginWithQRCodeHandler OnCancelLoginWithQRCodeEvent;
+        public event IAuthMessage.OnCancelLoginWithPortkeyAppHandler OnCancelLoginWithPortkeyAppEvent;
 
         public string ChainId
         {
@@ -80,6 +81,11 @@ namespace Portkey.DID
         public void CancelLoginWithQRCode()
         {
             OnCancelLoginWithQRCodeEvent?.Invoke();
+        }
+
+        public void CancelLoginWithPortkeyApp()
+        {
+            OnCancelLoginWithPortkeyAppEvent?.Invoke();
         }
     }
 }

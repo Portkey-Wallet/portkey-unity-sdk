@@ -46,6 +46,7 @@ namespace Portkey.DID
 
             Message.ChainId = DEFAULT_CHAIN_ID;
             Message.OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;
+            Message.OnCancelLoginWithPortkeyAppEvent += _did.CancelLoginWithPortkeyApp;
         }
 
         private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<Guardian>> successCallback, ErrorCallback errorCallback)

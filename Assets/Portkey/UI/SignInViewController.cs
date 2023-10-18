@@ -47,14 +47,7 @@ namespace Portkey.UI
 #if UNITY_WEBGL && !UNITY_EDITOR
         public void SignInWithExtension()
         {
-            StartCoroutine(did.AuthService.LoginWithPortkeyExtension(OnConnect));
-        }
-        
-        private void OnConnect(DIDWalletInfo walletInfo)
-        {
-            setPinViewController.Initialize(walletInfo);
-            setPinViewController.SetPreviousView(gameObject);
-            CloseView();
+            StartCoroutine(did.AuthService.LoginWithPortkeyExtension(LoggedIn));
         }
 #endif
 
@@ -74,7 +67,7 @@ namespace Portkey.UI
             did.AuthService.Message.Loading(true, "Loading...");
             cancelLoadingViewController.Initialize(did, gameObject, () =>
             {
-                
+                did.AuthService.Message.CancelLoginWithPortkeyApp();
             });
             StartCoroutine(did.AuthService.LoginWithPortkeyApp(walletInfo =>
             {
@@ -94,6 +87,7 @@ namespace Portkey.UI
             did.AuthService.Message.Loading(false);
             setPinViewController.Initialize(walletInfo);
             setPinViewController.SetPreviousView(gameObject);
+            CloseView();
         }
 
         private void AuthCallback(ICredential credential)

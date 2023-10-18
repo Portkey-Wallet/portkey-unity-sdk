@@ -17,6 +17,7 @@ namespace Portkey.UI
         [SerializeField] private PhoneLoginViewController phoneLoginViewController;
         [SerializeField] private SetPINViewController setPinViewController;
         [SerializeField] private QRCodeViewController qrCodeViewController;
+        [SerializeField] private CancelLoadingViewController cancelLoadingViewController;
 
         public void SignIn(int type)
         {
@@ -26,10 +27,12 @@ namespace Portkey.UI
             {
                 case AccountType.Apple:
                     did.AuthService.Message.Loading(true, "Loading...");
+                    cancelLoadingViewController.Initialize(did, gameObject);
                     did.AuthService.AppleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Google:
                     did.AuthService.Message.Loading(true, "Loading...");
+                    cancelLoadingViewController.Initialize(did, gameObject);
                     did.AuthService.GoogleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Email:
@@ -56,6 +59,10 @@ namespace Portkey.UI
 
         private void LoggedIn(DIDWalletInfo walletInfo)
         {
+            // did.AuthService.Message.OnLoadingEvent += (show, message) =>
+            // {
+            //     
+            // }
             did.AuthService.Message.Loading(false);
             setPinViewController.Initialize(walletInfo);
             setPinViewController.SetPreviousView(gameObject);
@@ -67,6 +74,7 @@ namespace Portkey.UI
             {
                 CheckSignUpOrLogin(credential, guardians);
             }));
+            cancelLoadingViewController.DeactiveObj();
         }
         
         private void CheckSignUpOrLogin(ICredential credential, List<Guardian> guardians)

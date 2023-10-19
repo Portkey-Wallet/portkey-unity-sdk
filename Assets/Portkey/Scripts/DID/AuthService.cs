@@ -590,8 +590,13 @@ namespace Portkey.DID
             {
                 chainId = Message.ChainId
             };
-            yield return _did.Logout(param, result =>
+            yield return _did.Logout(param, success =>
             {
+                if (!success)
+                {
+                    OnError("Logout failed!");
+                    return;
+                }
                 Message.Logout();
             }, OnError);
         }

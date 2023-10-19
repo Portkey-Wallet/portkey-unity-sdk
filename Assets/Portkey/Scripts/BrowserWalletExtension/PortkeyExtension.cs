@@ -16,6 +16,9 @@ namespace Portkey.BrowserWalletExtension
     
     public class PortkeyExtension : IBrowserWalletExtension
     {
+        private static readonly string CHROME_PORTKEY_DOWNLOAD_URL = "https://chrome.google.com/webstore/detail/portkey-did-crypto-nft/hpjiiechbbhefmpggegmahejiiphbmij";
+        private static readonly string OTHERS_PORTKEY_DOWNLOAD_URL = "https://portkey.finance/download";
+        
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern bool IsPortkeyExtensionExist();
@@ -23,6 +26,8 @@ namespace Portkey.BrowserWalletExtension
         private static extern void Connect();
         [DllImport("__Internal")]
         private static extern void GetCurrentManagerAddress();
+        [DllImport("__Internal")]
+        private static extern string GetBrowserVersion();
 #endif
         
         public void Connect(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
@@ -32,10 +37,17 @@ namespace Portkey.BrowserWalletExtension
             {
                 Listen(successCallback, errorCallback);
                 Connect();
+                return;
+            }
+            
+            var browserVersion = GetBrowserVersion();
+            if (browserVersion.Contains("Chrome"))
+            {
+                Application.OpenURL(CHROME_PORTKEY_DOWNLOAD_URL);
             }
             else
             {
-                errorCallback("Portkey extension not found!");
+                Application.OpenURL(OTHERS_PORTKEY_DOWNLOAD_URL);
             }
 #endif
         }

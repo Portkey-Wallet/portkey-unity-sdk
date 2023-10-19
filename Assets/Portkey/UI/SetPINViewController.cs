@@ -62,17 +62,6 @@ namespace Portkey.UI
             get;
             set;
         } = false;
-
-        public void Initialize(ICredential credential)
-        {
-            //sign up using socials
-            _onPinComplete = () =>
-            {
-                did.AuthService.Message.Loading(true, "Creating address on the chain...");
-                StartCoroutine(did.AuthService.SignUp(credential, OpenNextView));
-            };
-            OpenView();
-        }
         
         public void Initialize(DIDWalletInfo walletInfo)
         {
@@ -86,7 +75,6 @@ namespace Portkey.UI
         
         public void Initialize(VerifiedCredential verifiedCredential)
         {
-            //sign up using phone or email
             _onPinComplete = () =>
             {
                 did.AuthService.Message.Loading(true, "Creating address on the chain...");

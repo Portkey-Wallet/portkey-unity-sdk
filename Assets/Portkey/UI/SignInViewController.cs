@@ -110,8 +110,16 @@ namespace Portkey.UI
                 case 0:
                     SignUpPrompt(() =>
                     {
-                        setPinViewController.Initialize(credential);
-                        setPinViewController.SetPreviousView(gameObject);
+                        switch(credential.AccountType)
+                        {
+                            case AccountType.Apple:
+                                StartCoroutine(did.AuthService.AppleCredentialProvider.Verify(credential, OpenSetPinView));
+                                break;
+                            case AccountType.Google:
+                                StartCoroutine(did.AuthService.GoogleCredentialProvider.Verify(credential, OpenSetPinView));
+                                break;
+                            default: throw new ArgumentException("Not expected account type!");
+                        };
                     });
                     break;
                 default:
@@ -119,6 +127,13 @@ namespace Portkey.UI
                     CloseView();
                     break;
             }
+        }
+
+        private void OpenSetPinView(VerifiedCredential verifiedCredential)
+        {
+            did.AuthService.Message.Loading(false);
+            setPinViewController.Initialize(verifiedCredential);
+            setPinViewController.SetPreviousView(gameObject);
         }
         
         private void SignUpPrompt(Action onConfirm, Action onClose = null)

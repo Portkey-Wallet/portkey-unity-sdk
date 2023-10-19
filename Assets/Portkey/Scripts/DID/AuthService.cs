@@ -39,8 +39,8 @@ namespace Portkey.DID
             Message = new AuthMessage();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
-            AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message);
-            GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message);
+            AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
+            GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
             EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
 

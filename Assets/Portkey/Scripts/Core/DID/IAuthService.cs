@@ -25,6 +25,6 @@ namespace Portkey.Core
         IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<DIDWalletInfo> successCallback);
         IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback);
-        IEnumerator Logout(SuccessCallback<bool> successCallback);
+        IEnumerator Logout();
     }
 }

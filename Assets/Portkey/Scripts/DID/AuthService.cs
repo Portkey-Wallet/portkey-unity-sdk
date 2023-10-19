@@ -541,7 +541,7 @@ namespace Portkey.DID
         /// <returns> A didwalletinfo object</returns>
         public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _did.LoginWithPortkeyExtension(successCallback, OnError);
+            yield return _did.LoginWithPortkeyExtension(successCallback, Message.Logout, OnError);
         }
 
         /// <summary> The LoginWithPortkeyApp function is used to login with the Portkey app on mobile devices.        
@@ -583,17 +583,17 @@ namespace Portkey.DID
 
         /// <summary> The Logout function logs out the user from the DID service.</summary>        
         ///
-        /// <param name="SuccessCallback&lt;bool&gt; successCallback"> /// the success callback.
-        /// </param>
-        ///
         /// <returns> A bool value indicating if the log out operation was successful.</returns>
-        public IEnumerator Logout(SuccessCallback<bool> successCallback)
+        public IEnumerator Logout()
         {
             var param = new EditManagerParams
             {
                 chainId = Message.ChainId
             };
-            yield return _did.Logout(param, successCallback, OnError);
+            yield return _did.Logout(param, result =>
+            {
+                Message.Logout();
+            }, OnError);
         }
         
         private static bool IsCAValid(CAInfo caInfo)

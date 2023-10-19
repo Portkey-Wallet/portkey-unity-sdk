@@ -15,6 +15,10 @@ mergeInto(LibraryManager.library, {
         const accounts = await provider.request({ method: 'requestAccounts' });
         window.unityInstance.SendMessage('PortkeyExtensionConnectCallback', 'OnConnect', JSON.stringify(accounts));
         console.log(accounts);
+        
+        provider.once('disconnected', (error) => {
+            window.unityInstance.SendMessage('PortkeyExtensionConnectCallback', 'OnDisconnected', 'Portkey Extension is disconnected!');
+        });
     } catch (e) {
         console.log(e);
         // An error will be thrown if the user denies the permission request.

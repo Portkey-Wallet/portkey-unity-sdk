@@ -57,8 +57,15 @@ namespace Portkey.UI
             ResetTokenUIInfos();
             
             chainInfoText.text = _walletInfo.chainId;
+            
+            did.AuthService.Message.OnLogoutEvent += OnSuccessLogout;
 
             StartCoroutine(GetAvailableChains());
+        }
+        
+        private void OnDisable()
+        {
+            did.AuthService.Message.OnLogoutEvent -= OnSuccessLogout;
         }
 
         private void ResetTokenUIInfos()
@@ -188,18 +195,12 @@ namespace Portkey.UI
         {
             did.AuthService.Message.Loading(true, "Signing out of Portkey...");
 
-            StartCoroutine(did.AuthService.Logout(OnSuccessLogout));
+            StartCoroutine(did.AuthService.Logout());
         }
         
-        private void OnSuccessLogout(bool success)
+        private void OnSuccessLogout()
         {
             did.AuthService.Message.Loading(false);
-            
-            if (!success)
-            {
-                OnError("Log out failed.");
-                return;
-            }
 
             _isSignOut = true;
             
@@ -227,6 +228,7 @@ namespace Portkey.UI
 
         private void CloseView()
         {
+            StopAllCoroutines();
             gameObject.SetActive(false);
         }
     }

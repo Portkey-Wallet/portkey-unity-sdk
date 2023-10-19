@@ -14,6 +14,7 @@ namespace Portkey.Core
         delegate void OnConfirmSendCodeHandler();
         delegate void OnCancelLoginWithQRCodeHandler();
         delegate void OnCancelLoginWithPortkeyAppHandler();
+        delegate void OnLogoutHandler();
         
         event OnInputVerificationCodeHandler OnInputVerificationCodeEvent;
         event OnCancelCodeVerificationHandler OnCancelCodeVerificationEvent;
@@ -27,7 +28,8 @@ namespace Portkey.Core
         event OnConfirmSendCodeHandler OnConfirmSendCodeEvent;
         event OnCancelLoginWithQRCodeHandler OnCancelLoginWithQRCodeEvent;
         event OnCancelLoginWithPortkeyAppHandler OnCancelLoginWithPortkeyAppEvent;
-
+        event OnLogoutHandler OnLogoutEvent;
+        
         string ChainId { get; set; }
         void InputVerificationCode(string code);
         void CancelCodeVerification();
@@ -40,5 +42,6 @@ namespace Portkey.Core
         void ConfirmSendCode();
         void CancelLoginWithQRCode();
         void CancelLoginWithPortkeyApp();
+        void Logout();
     }
 }

@@ -18,6 +18,7 @@ namespace Portkey.BrowserWalletExtension
     {
         private static readonly string CHROME_PORTKEY_DOWNLOAD_URL = "https://chrome.google.com/webstore/detail/portkey-did-crypto-nft/hpjiiechbbhefmpggegmahejiiphbmij";
         private static readonly string OTHERS_PORTKEY_DOWNLOAD_URL = "https://portkey.finance/download";
+        private PortkeyExtensionConnectCallback _callbackObject = null;
         
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
@@ -30,12 +31,18 @@ namespace Portkey.BrowserWalletExtension
         private static extern string GetBrowserVersion();
 #endif
         
-        public void Connect(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        public void Connect(SuccessCallback<DIDWalletInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
         {
+            if (_callbackObject != null)
+            {
+                _callbackObject.Destroy();
+                _callbackObject = null;
+            }
+            
 #if UNITY_WEBGL && !UNITY_EDITOR
             if (IsPortkeyExtensionExist())
             {
-                Listen(successCallback, errorCallback);
+                Listen(successCallback, OnDisconnected, errorCallback);
                 Connect();
                 return;
             }
@@ -52,16 +59,17 @@ namespace Portkey.BrowserWalletExtension
 #endif
         }
 
-        private void Listen(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        private void Listen(SuccessCallback<DIDWalletInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             CaAddresses caAddresses = null;
             
             var gameObject = new GameObject("PortkeyExtensionConnectCallback");
-            var callbackComponent = gameObject.AddComponent<PortkeyExtensionConnectCallback>();
-            callbackComponent.OnErrorCallback = OnError;
-            callbackComponent.OnConnectCallback = OnConnect;
-            callbackComponent.OnGetManagementAccountAddressCallback = OnGetManagementAccountAddress;
+            _callbackObject = gameObject.AddComponent<PortkeyExtensionConnectCallback>();
+            _callbackObject.OnErrorCallback = OnError;
+            _callbackObject.OnConnectCallback = OnConnect;
+            _callbackObject.OnDisconnectedCallback = OnDisconnected;
+            _callbackObject.OnGetManagementAccountAddressCallback = OnGetManagementAccountAddress;
             
             void OnConnect(string data)
             {
@@ -72,7 +80,7 @@ namespace Portkey.BrowserWalletExtension
                 catch (Exception e)
                 {
                     Debugger.LogException(e);
-                    callbackComponent.OnError(e.Message);
+                    _callbackObject.OnError(e.Message);
                     return;
                 }
                 
@@ -83,12 +91,12 @@ namespace Portkey.BrowserWalletExtension
             {
                 if (address == null)
                 {
-                    callbackComponent.OnError("Get management account address failed!");
+                    _callbackObject.OnError("Get management account address failed!");
                     return;
                 }
                 if(caAddresses?.AELF.Count == 0)
                 {
-                    callbackComponent.OnError("Connecting to Portkey Extension failed!");
+                    _callbackObject.OnError("Connecting to Portkey Extension failed!");
                     return;
                 }
 

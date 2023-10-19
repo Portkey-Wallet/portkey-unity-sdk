@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Portkey.Core;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -19,6 +20,15 @@ namespace Portkey.UI
         [SerializeField] private QRCodeViewController qrCodeViewController;
         [SerializeField] private CancelLoadingViewController cancelLoadingViewController;
 
+#if UNITY_WEBGL
+        [DllImport("__Internal")]
+        private static extern void ExecuteRecaptcha();
+#endif
+        public void OnClickRecaptcha()
+        {
+            ExecuteRecaptcha();
+        }
+        
         public void SignIn(int type)
         {
             var accountType = (AccountType)type;

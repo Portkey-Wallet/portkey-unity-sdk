@@ -41,6 +41,7 @@ namespace Portkey.SocialProvider
                 headers = new Dictionary<string, string>
                 {
                     {"version", "1.3.5"}
+                    //TODO: to get recaptcha response token
                 }
             };
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>

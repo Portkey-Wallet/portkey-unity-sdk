@@ -22,7 +22,7 @@ namespace Portkey.DID
         [SerializeField] private PortkeyConfig _config;
         [SerializeField] protected GraphQLConfig _graphQLConfig;
 
-        private GraphQL.GraphQL _graphQL;
+        private PortkeyDIDGraphQL _portkeyDidGraphQl;
         private ISocialProvider _socialProvider;
         private IPortkeySocialService _portkeySocialService;
         private IStorageSuite<string> _storageSuite;
@@ -45,10 +45,10 @@ namespace Portkey.DID
 
         public void Awake()
         {
-            _graphQL = new GraphQL.GraphQL(_graphQLConfig);
+            _portkeyDidGraphQl = new PortkeyDIDGraphQL(_graphQLConfig);
             _encryption = new AESEncryption();
             _socialProvider = new SocialLoginProvider(_config, _request);
-            _portkeySocialService = new PortkeySocialService(_config, _request, _graphQL);
+            _portkeySocialService = new PortkeySocialService(_config, _request, _portkeyDidGraphQl);
             _socialVerifierProvider = new SocialVerifierProvider(_socialProvider, _portkeySocialService);
             _storageSuite = new NonPersistentStorage<string>();
             _signingKeyGenerator = new SigningKeyGenerator(_encryption);

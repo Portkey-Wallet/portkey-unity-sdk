@@ -7,9 +7,9 @@ using Types = GraphQLCodeGen.Types;
 namespace Portkey.GraphQL
 {
     /// <summary>
-    /// GraphQL is the main class to interact with GraphQL.
+    /// PortkeyDIDGraphQL is the main class to interact with GraphQL.
     /// </summary>
-    public class GraphQL: IDIDGraphQL, IGraphQL
+    public class PortkeyDIDGraphQL: IDIDGraphQL
     {
         private class HolderInfoDto
         {
@@ -21,7 +21,7 @@ namespace Portkey.GraphQL
         private const string QUERY_CAHOLDERMANAGERINFO = "caHolderManagerInfo";
         private const string QUERY_LOGINGUARDIANINFO = "loginGuardianInfo";
 
-        public GraphQL (GraphQLConfig graphQLConfig)
+        public PortkeyDIDGraphQL (GraphQLConfig graphQLConfig)
         {
             _graphQLConfig = graphQLConfig;
         }
@@ -103,17 +103,6 @@ namespace Portkey.GraphQL
                         }, errorCallback));
                 },
                 errorCallback);
-        }
-
-        public IEnumerator Query<T>(GraphQLQuery query, SuccessCallback<T> successCallback,
-            ErrorCallback errorCallback)
-        {
-            return _graphQLConfig.Query(query, successCallback, errorCallback);
-        }
-
-        public GraphQLQuery GetQueryByName(string queryName)
-        {
-            return _graphQLConfig.GetQueryByName(queryName);
         }
     }
 }

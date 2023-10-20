@@ -22,13 +22,13 @@ namespace Portkey.DID
         
         private PortkeyConfig _config;
         private IHttp _http;
-        private GraphQL.GraphQL _graphQl;
+        private GraphQL.PortkeyDIDGraphQL _portkeyDidGraphQl;
 
-        public PortkeySocialService(PortkeyConfig config, IHttp http, GraphQL.GraphQL graphQl)
+        public PortkeySocialService(PortkeyConfig config, IHttp http, GraphQL.PortkeyDIDGraphQL portkeyDidGraphQl)
         {
             _config = config;
             _http = http;
-            _graphQl = graphQl;
+            _portkeyDidGraphQl = portkeyDidGraphQl;
         }
 
         private string GetFullApiUrl(string url)
@@ -291,7 +291,7 @@ namespace Portkey.DID
 
         public IEnumerator GetHolderInfoByManager(GetCAHolderByManagerParams requestParams, SuccessCallback<GetCAHolderByManagerResult> successCallback, ErrorCallback errorCallback)
         {
-            return _graphQl.GetHolderInfoByManager(requestParams.manager, requestParams.chainId, (ret) =>
+            return _portkeyDidGraphQl.GetHolderInfoByManager(requestParams.manager, requestParams.chainId, (ret) =>
             {
                 var result = new GetCAHolderByManagerResult
                 {

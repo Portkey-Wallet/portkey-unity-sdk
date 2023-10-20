@@ -132,6 +132,7 @@ namespace Portkey.DID
                 errorCallback("Account is not logged in!");
                 yield break;
             }
+            param.chainId ??= Account.accountDetails.chainId;
             if(param.caHash == null && Account.accountDetails.caInfoMap.TryGetValue(param.chainId, out var caInfo))
             {
                 param.caHash = caInfo.caHash;

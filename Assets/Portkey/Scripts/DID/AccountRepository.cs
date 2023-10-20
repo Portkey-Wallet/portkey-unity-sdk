@@ -37,6 +37,7 @@ namespace Portkey.DID
             
             var savedAccount = new SavedAccount
             {
+                chainId = account.accountDetails.chainId,
                 aesPrivateKey = aesPrivateKey,
                 caInfoMap = account.accountDetails.caInfoMap,
                 socialInfo = account.accountDetails.socialInfo

@@ -12,6 +12,7 @@ namespace Portkey.DID
                 managementSigningKey = signingKey,
                 accountDetails = new AccountDetails
                 {
+                    chainId = savedAccount.chainId,
                     caInfoMap = savedAccount.caInfoMap,
                     socialInfo = savedAccount.socialInfo
                 }
@@ -31,6 +32,7 @@ namespace Portkey.DID
                 managementSigningKey = signingKey,
                 accountDetails = new AccountDetails
                 {
+                    chainId = chainId,
                     caInfoMap = new Dictionary<string, CAInfo>
                     {
                         {chainId, caInfo}

@@ -515,7 +515,7 @@ namespace Portkey.DID
             {
                 loginGuardianIdentifier = loginGuardian.id.RemoveAllWhiteSpaces(),
                 guardiansApprovedList = approvedGuardians.ToArray(),
-                chainId = Message.ChainId,
+                chainId = loginGuardian.chainId,
                 extraData = extraData
             };
             StaticCoroutine.StartCoroutine(_did.Login(param, result =>
@@ -589,10 +589,7 @@ namespace Portkey.DID
         /// <returns> A bool value indicating if the log out operation was successful.</returns>
         public IEnumerator Logout()
         {
-            var param = new EditManagerParams
-            {
-                chainId = Message.ChainId
-            };
+            var param = new EditManagerParams();
             yield return _did.Logout(param, success =>
             {
                 if (!success)

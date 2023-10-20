@@ -1,5 +1,12 @@
 namespace Portkey.Core
 {
+    public enum LogoutMessage
+    {
+        Logout,
+        PortkeyExtensionLogout,
+        Error
+    }
+    
     public interface IAuthMessage
     {
         delegate void OnInputVerificationCodeHandler(string code);
@@ -14,7 +21,7 @@ namespace Portkey.Core
         delegate void OnConfirmSendCodeHandler();
         delegate void OnCancelLoginWithQRCodeHandler();
         delegate void OnCancelLoginWithPortkeyAppHandler();
-        delegate void OnLogoutHandler();
+        delegate void OnLogoutHandler(LogoutMessage logoutMessage);
         
         event OnInputVerificationCodeHandler OnInputVerificationCodeEvent;
         event OnCancelCodeVerificationHandler OnCancelCodeVerificationEvent;
@@ -42,6 +49,6 @@ namespace Portkey.Core
         void ConfirmSendCode();
         void CancelLoginWithQRCode();
         void CancelLoginWithPortkeyApp();
-        void Logout();
+        void Logout(LogoutMessage logoutMessage);
     }
 }

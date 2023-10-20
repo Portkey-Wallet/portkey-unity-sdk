@@ -90,9 +90,9 @@ namespace Portkey.DID
             OnCancelLoginWithPortkeyAppEvent?.Invoke();
         }
 
-        public void Logout()
+        public void Logout(LogoutMessage logoutMessage)
         {
-            OnLogoutEvent?.Invoke();
+            OnLogoutEvent?.Invoke(logoutMessage);
         }
     }
 }

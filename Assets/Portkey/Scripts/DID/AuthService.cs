@@ -541,7 +541,10 @@ namespace Portkey.DID
         /// <returns> A didwalletinfo object</returns>
         public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback)
         {
-            yield return _did.LoginWithPortkeyExtension(successCallback, Message.Logout, OnError);
+            yield return _did.LoginWithPortkeyExtension(successCallback, () =>
+            {
+                Message.Logout(LogoutMessage.PortkeyExtensionLogout);
+            }, OnError);
         }
 
         /// <summary> The LoginWithPortkeyApp function is used to login with the Portkey app on mobile devices.        
@@ -597,7 +600,7 @@ namespace Portkey.DID
                     OnError("Logout failed!");
                     return;
                 }
-                Message.Logout();
+                Message.Logout(LogoutMessage.Logout);
             }, OnError);
         }
         

@@ -115,7 +115,7 @@ namespace Portkey.UI
                     manager = _walletInfo.wallet.Address,
                     chainId = chain.ChainInfo.chainId
                 };
-                while (!_isSignOut || !_chainIdToCaAddress.ContainsKey(param.chainId))
+                while (!_isSignOut && !_chainIdToCaAddress.ContainsKey(param.chainId))
                 {
                     yield return did.GetHolderInfo(param, (holderInfo) =>
                     {
@@ -130,7 +130,7 @@ namespace Portkey.UI
                 }
                 yield break;
             }
-            while (!_isSignOut || !_chainIdToCaAddress.ContainsKey(holderInfoParams.chainId))
+            while (!_isSignOut && !_chainIdToCaAddress.ContainsKey(holderInfoParams.chainId))
             {
                 yield return did.GetHolderInfoByContract(holderInfoParams, (holderInfo) =>
                 {
@@ -198,7 +198,7 @@ namespace Portkey.UI
             StartCoroutine(did.AuthService.Logout());
         }
         
-        private void OnSuccessLogout()
+        private void OnSuccessLogout(LogoutMessage logoutMessage)
         {
             did.AuthService.Message.Loading(false);
 
@@ -206,6 +206,11 @@ namespace Portkey.UI
             
             ResetViews();
             OpenSignInView();
+
+            if (logoutMessage == LogoutMessage.PortkeyExtensionLogout)
+            {
+                OnError("You are disconnected from the wallet.");
+            }
         }
 
         private void ResetViews()

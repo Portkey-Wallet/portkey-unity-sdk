@@ -85,6 +85,10 @@ namespace Portkey.Core
         /// <param name="error">The error that occurred.</param>
         void Error(string error);
         /// <summary>
+        /// Cancel logging flow when logging in with QR code.
+        /// </summary>
+        void CancelLoginWithQRCode();
+        /// <summary>
         /// Cancel logging flow when logging in with portkey app.
         /// </summary>
         void CancelLoginWithPortkeyApp();

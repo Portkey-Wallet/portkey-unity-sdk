@@ -96,7 +96,7 @@ namespace Portkey.DID
                             }
 
                             var guardian = CreateGuardian(guardianId, guardianDto, chainId, verifier);
-                            if (guardian.isLoginGuardian)
+                            if (guardianId == guardian.id && guardian.isLoginGuardian)
                             {
                                 guardians.Insert(0, guardian);
                             }
@@ -135,7 +135,7 @@ namespace Portkey.DID
                 id = guardianDto.guardianIdentifier,
                 idHash = guardianDto.identifierHash,
                 chainId = chainId,
-                isLoginGuardian = guardianId == guardianDto.guardianIdentifier,
+                isLoginGuardian = guardianDto.isLoginGuardian,
                 verifier = new Verifier
                 {
                     id = verifier.id,
@@ -515,7 +515,7 @@ namespace Portkey.DID
             {
                 loginGuardianIdentifier = loginGuardian.id.RemoveAllWhiteSpaces(),
                 guardiansApprovedList = approvedGuardians.ToArray(),
-                chainId = loginGuardian.chainId,
+                chainId = Message.ChainId,
                 extraData = extraData
             };
             StaticCoroutine.StartCoroutine(_did.Login(param, result =>
@@ -526,7 +526,7 @@ namespace Portkey.DID
                     return;
                 }
                 
-                var walletInfo = new DIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery, _did.GetManagementSigningKey());
+                var walletInfo = new DIDWalletInfo(param.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery, _did.GetManagementSigningKey());
                 successCallback(walletInfo);
             }, OnError));
         }

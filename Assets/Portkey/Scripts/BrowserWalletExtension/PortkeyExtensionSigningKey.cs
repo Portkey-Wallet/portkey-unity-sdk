@@ -58,19 +58,15 @@ namespace Portkey.BrowserWalletExtension
                 successCallback?.Invoke(transaction);
             }, errorCallback);
         }
-        
-#if UNITY_WEBGL && !UNITY_EDITOR
+
         [DllImport("__Internal")]
         private static extern void SignMessage(string messageInHex);
-#endif
         
         public IEnumerator Sign(string data, SuccessCallback<byte[]> successCallback, ErrorCallback errorCallback)
         {
             Listen(successCallback, errorCallback);
             
-#if UNITY_WEBGL && !UNITY_EDITOR
             SignMessage(data);
-#endif
             yield break;
         }
     }

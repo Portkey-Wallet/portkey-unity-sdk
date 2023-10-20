@@ -12,6 +12,10 @@ namespace Portkey.UI
         {
             _did.AuthService.Message.OnErrorEvent += _errorView.ShowErrorText;
             _did.AuthService.Message.OnLoadingEvent += _loadingView.DisplayLoading;
+            
+#if PORTKEY_DEVELOPMENT
+            Instantiate(Resources.Load("IngameDebugConsole/IngameDebugConsole"));
+#endif
         }
         
         private void OnDestroy()

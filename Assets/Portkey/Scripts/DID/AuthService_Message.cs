@@ -2,23 +2,24 @@ using Portkey.Core;
 
 namespace Portkey.DID
 {
-    public class AuthMessage : IAuthMessage
+    public partial class AuthService : IInternalAuthMessage
     {
         private string _chainId;
         
-        public event IAuthMessage.OnCancelCodeVerificationHandler OnCancelCodeVerificationEvent;
-        public event IAuthMessage.OnInputVerificationCodeHandler OnInputVerificationCodeEvent;
         public event IAuthMessage.OnPendingVerificationCodeInputHandler OnPendingVerificationCodeInputEvent;
-        public event IAuthMessage.OnResendVerificationCodeHandler OnResendVerificationCodeEvent;
         public event IAuthMessage.OnResendVerificationCodeCompleteHandler OnResendVerificationCodeCompleteEvent;
         public event IAuthMessage.OnLoadingHandler OnLoadingEvent;
         public event IAuthMessage.OnErrorHandler OnErrorEvent;
         public event IAuthMessage.OnChainIdChangedHandler OnChainIdChangedEvent;
         public event IAuthMessage.OnVerifierServerSelectedHandler OnVerifierServerSelectedEvent;
-        public event IAuthMessage.OnConfirmSendCodeHandler OnConfirmSendCodeEvent;
-        public event IAuthMessage.OnCancelLoginWithQRCodeHandler OnCancelLoginWithQRCodeEvent;
-        public event IAuthMessage.OnCancelLoginWithPortkeyAppHandler OnCancelLoginWithPortkeyAppEvent;
         public event IAuthMessage.OnLogoutHandler OnLogoutEvent;
+        
+        public event IInternalAuthMessage.OnCancelCodeVerificationHandler OnCancelCodeVerificationEvent;
+        public event IInternalAuthMessage.OnInputVerificationCodeHandler OnInputVerificationCodeEvent;
+        public event IInternalAuthMessage.OnResendVerificationCodeHandler OnResendVerificationCodeEvent;
+        public event IInternalAuthMessage.OnConfirmSendCodeHandler OnConfirmSendCodeEvent;
+        public event IInternalAuthMessage.OnCancelLoginWithQRCodeHandler OnCancelLoginWithQRCodeEvent;
+        public event IInternalAuthMessage.OnCancelLoginWithPortkeyAppHandler OnCancelLoginWithPortkeyAppEvent;
 
 
         public string ChainId
@@ -90,7 +91,7 @@ namespace Portkey.DID
             OnCancelLoginWithPortkeyAppEvent?.Invoke();
         }
 
-        public void Logout(LogoutMessage logoutMessage)
+        private void OnLogout(LogoutMessage logoutMessage)
         {
             OnLogoutEvent?.Invoke(logoutMessage);
         }

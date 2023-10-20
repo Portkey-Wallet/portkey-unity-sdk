@@ -10,7 +10,7 @@ using DeviceInfoType = Portkey.Core.DeviceInfoType;
 
 namespace Portkey.DID
 {
-    public class AuthService : IAuthService
+    public partial class AuthService : IAuthService
     {
         private string DEFAULT_CHAIN_ID = "AELF";
         
@@ -36,17 +36,17 @@ namespace Portkey.DID
             _config = config;
             
             _verifierService = verifierService;
-            Message = new AuthMessage();
+            Message = this;
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
             AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
             GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
-            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
-            EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
+            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, this, _verifierService);
+            EmailCredentialProvider = new EmailCredentialProvider(Email, this, _verifierService);
 
             Message.ChainId = DEFAULT_CHAIN_ID;
-            Message.OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;
-            Message.OnCancelLoginWithPortkeyAppEvent += _did.CancelLoginWithPortkeyApp;
+            OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;
+            OnCancelLoginWithPortkeyAppEvent += _did.CancelLoginWithPortkeyApp;
         }
 
         private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<Guardian>> successCallback, ErrorCallback errorCallback)
@@ -543,7 +543,7 @@ namespace Portkey.DID
         {
             yield return _did.LoginWithPortkeyExtension(successCallback, () =>
             {
-                Message.Logout(LogoutMessage.PortkeyExtensionLogout);
+                OnLogout(LogoutMessage.PortkeyExtensionLogout);
             }, OnError);
         }
 
@@ -597,7 +597,7 @@ namespace Portkey.DID
                     OnError("Logout failed!");
                     return;
                 }
-                Message.Logout(LogoutMessage.Logout);
+                OnLogout(LogoutMessage.Logout);
             }, OnError);
         }
         

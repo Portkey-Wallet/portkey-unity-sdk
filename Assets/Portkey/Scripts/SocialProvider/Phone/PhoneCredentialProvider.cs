@@ -6,7 +6,7 @@ namespace Portkey.SocialProvider
 {
     public class PhoneCredentialProvider : CodeCredentialProviderBase<PhoneCredential>
     {
-        public PhoneCredentialProvider(IVerifyCodeLogin phoneLogin, IAuthMessage message, IVerifierService verifierService) : base(phoneLogin, message, verifierService)
+        public PhoneCredentialProvider(IVerifyCodeLogin phoneLogin, IInternalAuthMessage message, IVerifierService verifierService) : base(phoneLogin, message, verifierService)
         {
         }
         

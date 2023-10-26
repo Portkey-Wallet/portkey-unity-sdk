@@ -7,6 +7,7 @@ using Portkey.Core;
 using Portkey.Utilities;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Portkey.UI
 {
@@ -21,7 +22,7 @@ namespace Portkey.UI
     
     public class WalletViewController : MonoBehaviour
     {
-        [SerializeField] private DID.DID did;
+        [FormerlySerializedAs("did")] [SerializeField] private DID.PortkeySDK portkeySDK;
         
         [Header("UI")]
         [SerializeField] private GameObject confirmSignOutDialog;
@@ -58,14 +59,14 @@ namespace Portkey.UI
             
             chainInfoText.text = _walletInfo.chainId;
             
-            did.AuthService.Message.OnLogoutEvent += OnSuccessLogout;
+            portkeySDK.AuthService.Message.OnLogoutEvent += OnSuccessLogout;
 
             StartCoroutine(GetAvailableChains());
         }
         
         private void OnDisable()
         {
-            did.AuthService.Message.OnLogoutEvent -= OnSuccessLogout;
+            portkeySDK.AuthService.Message.OnLogoutEvent -= OnSuccessLogout;
         }
 
         private void ResetTokenUIInfos()
@@ -81,13 +82,13 @@ namespace Portkey.UI
 
         private IEnumerator GetAvailableChains()
         {
-            yield return did.ChainProvider.GetAvailableChainIds(chainIds =>
+            yield return portkeySDK.ChainProvider.GetAvailableChainIds(chainIds =>
             {
                 var index = 0;
                 foreach (var chainId in chainIds)
                 {
                     var uiIndex = index;
-                    StartCoroutine(did.ChainProvider.GetChain(chainId, chain =>
+                    StartCoroutine(portkeySDK.ChainProvider.GetChain(chainId, chain =>
                     {
                         RequestHolderCaAddress(uiIndex, chain, _walletInfo.caInfo.caHash);
                     }, OnError));
@@ -117,7 +118,7 @@ namespace Portkey.UI
                 };
                 while (!_isSignOut && !_chainIdToCaAddress.ContainsKey(param.chainId))
                 {
-                    yield return did.GetHolderInfo(param, (holderInfo) =>
+                    yield return portkeySDK.GetHolderInfo(param, (holderInfo) =>
                     {
                         _chainIdToCaAddress[param.chainId] = holderInfo.holderManagerInfo.caAddress;
                     
@@ -132,7 +133,7 @@ namespace Portkey.UI
             }
             while (!_isSignOut && !_chainIdToCaAddress.ContainsKey(holderInfoParams.chainId))
             {
-                yield return did.GetHolderInfoByContract(holderInfoParams, (holderInfo) =>
+                yield return portkeySDK.GetHolderInfoByContract(holderInfoParams, (holderInfo) =>
                 {
                     if (holderInfo == null || holderInfo.guardianList == null ||
                         holderInfo.guardianList.guardians == null)
@@ -193,14 +194,14 @@ namespace Portkey.UI
 
         public void OnClickSignOut()
         {
-            did.AuthService.Message.Loading(true, "Signing out of Portkey...");
+            portkeySDK.AuthService.Message.Loading(true, "Signing out of Portkey...");
 
-            StartCoroutine(did.AuthService.Logout());
+            StartCoroutine(portkeySDK.AuthService.Logout());
         }
         
         private void OnSuccessLogout(LogoutMessage logoutMessage)
         {
-            did.AuthService.Message.Loading(false);
+            portkeySDK.AuthService.Message.Loading(false);
 
             _isSignOut = true;
             
@@ -228,7 +229,7 @@ namespace Portkey.UI
         
         private void OnError(string error)
         {
-            did.AuthService.Message.Error(error);
+            portkeySDK.AuthService.Message.Error(error);
         }
 
         private void CloseView()

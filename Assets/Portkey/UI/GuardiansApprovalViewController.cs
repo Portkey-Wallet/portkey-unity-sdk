@@ -2,13 +2,14 @@ using System.Collections.Generic;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Portkey.UI
 {
     public class GuardiansApprovalViewController : MonoBehaviour
     {
-        [SerializeField] private DID.DID did;
+        [FormerlySerializedAs("did")] [SerializeField] private DID.PortkeySDK portkeySDK;
         [SerializeField] private SetPINViewController setPINViewController;
         [SerializeField] private SignInViewController signInViewController;
         [SerializeField] private VerifyCodeViewController verifyCodeViewController;
@@ -57,11 +58,11 @@ namespace Portkey.UI
             _guardians = guardians;
             _credential = credential;
             
-            did.AuthService.EmailCredentialProvider.EnableCodeSendConfirmationFlow = false;
-            did.AuthService.PhoneCredentialProvider.EnableCodeSendConfirmationFlow = false;
+            portkeySDK.AuthService.EmailCredentialProvider.EnableCodeSendConfirmationFlow = false;
+            portkeySDK.AuthService.PhoneCredentialProvider.EnableCodeSendConfirmationFlow = false;
             
             expireText.text = "Expire after 1 hour.";
-            totalGuardiansText.text = $"/{did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count).ToString()}";
+            totalGuardiansText.text = $"/{portkeySDK.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count).ToString()}";
             completeButtonGameObject.gameObject.SetActive(true);
             infoDialog.SetActive(false);
 
@@ -96,7 +97,7 @@ namespace Portkey.UI
             UpdateTotalApprovedGuardiansText();
             UpdateGuardianProgressDial();
 
-            var isCompletedVerification = _approvedGuardians.Count >= did.AuthService.GetRequiredApprovedGuardiansCount(_guardians.Count);
+            var isCompletedVerification = _approvedGuardians.Count >= portkeySDK.AuthService.GetRequiredApprovedGuardiansCount(_guardians.Count);
             SetSendButtonInteractable(isCompletedVerification);
 
             if (isCompletedVerification)
@@ -176,7 +177,7 @@ namespace Portkey.UI
                     cred = _credential;
                 }
                 
-                guardianItem.Initialize(guardian, cred, did, verifyCodeViewController, approvedGuardian =>
+                guardianItem.Initialize(guardian, cred, portkeySDK, verifyCodeViewController, approvedGuardian =>
                 {
                     _approvedGuardians.Add(approvedGuardian);
                     UpdateGuardianInfoUI();
@@ -189,7 +190,7 @@ namespace Portkey.UI
         private void UpdateGuardianProgressDial()
         {
             var approvedCount = _approvedGuardians.Count;
-            var requiredCount = did.AuthService.GetRequiredApprovedGuardiansCount(_guardians.Count);
+            var requiredCount = portkeySDK.AuthService.GetRequiredApprovedGuardiansCount(_guardians.Count);
 
             if (approvedCount == requiredCount)
             {

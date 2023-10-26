@@ -35,7 +35,7 @@ namespace Portkey.UI
 
         private Dictionary<string, GameObject> _verifierIconMap = null;
         private Dictionary<AccountType, GameObject> _guardianIconMap = null;
-        private DID.DID _did = null;
+        private DID.PortkeySDK _portkeySDK = null;
         private SuccessCallback<ApprovedGuardian> _onApproved = null;
         private Guardian _guardian = null;
         private bool _approved = false;
@@ -70,9 +70,9 @@ namespace Portkey.UI
             verifyButton.SetActive(false);
         }
 
-        public void Initialize(Guardian guardian, ICredential credential, DID.DID did, VerifyCodeViewController verifyCodeViewController, SuccessCallback<ApprovedGuardian> onApproved)
+        public void Initialize(Guardian guardian, ICredential credential, DID.PortkeySDK portkeySDK, VerifyCodeViewController verifyCodeViewController, SuccessCallback<ApprovedGuardian> onApproved)
         {
-            _did = did;
+            _portkeySDK = portkeySDK;
             _guardian = guardian;
             _verifyCodeViewController = verifyCodeViewController;
             _onApproved = onApproved;
@@ -133,19 +133,19 @@ namespace Portkey.UI
         {
             if(_guardian.verifier.id == null)
             {
-                _did.AuthService.Message.Error("Verifier id does not exist!");
+                _portkeySDK.AuthService.Message.Error("Verifier id does not exist!");
                 return;
             }
             if(_guardian.id == null && _guardian.idHash == null)
             {
-                _did.AuthService.Message.Error("Guardian Identifier does not exist!");
+                _portkeySDK.AuthService.Message.Error("Guardian Identifier does not exist!");
                 return;
             }
 
             if (_guardian.accountType is AccountType.Apple or AccountType.Google)
             {
-                _did.AuthService.Message.Loading(true, "Loading...");
-                StartCoroutine(_did.AuthService.Verify(_guardian, OnApproved, _credential));
+                _portkeySDK.AuthService.Message.Loading(true, "Loading...");
+                StartCoroutine(_portkeySDK.AuthService.Verify(_guardian, OnApproved, _credential));
             }
             else
             {
@@ -155,7 +155,7 @@ namespace Portkey.UI
         
         private void OnApproved(ApprovedGuardian approvedGuardian)
         {
-            _did.AuthService.Message.Loading(false);
+            _portkeySDK.AuthService.Message.Loading(false);
             
             _approved = true;
             DisplayVerificationStatus(_approved);

@@ -16,7 +16,7 @@ namespace Portkey.DID
     /// <summary>
     /// PortkeySDK is the main class to interact with Portkey.
     /// </summary>
-    public class DID : MonoBehaviour
+    public class PortkeySDK : MonoBehaviour
     {
         [SerializeField] private IHttp _request;
         [SerializeField] private PortkeyConfig _config;

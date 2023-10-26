@@ -8,7 +8,7 @@ namespace Portkey.UI
 {
     public class SignInViewController : MonoBehaviour
     {
-        [SerializeField] private DID.DID did;
+        [FormerlySerializedAs("did")] [SerializeField] private DID.PortkeySDK portkeySDK;
         [SerializeField] private UnregisteredViewController unregisteredView;
         [FormerlySerializedAs("guardianApprovalView")] [SerializeField] private GuardiansApprovalViewController guardianApprovalViewController;
         [SerializeField] private ErrorViewController errorView;
@@ -27,17 +27,17 @@ namespace Portkey.UI
             {
                 case AccountType.Apple:
                     StartLoginLoading();
-                    did.AuthService.AppleCredentialProvider.Get(AuthCallback);
+                    portkeySDK.AuthService.AppleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Google:
                     StartLoginLoading();
-                    did.AuthService.GoogleCredentialProvider.Get(AuthCallback);
+                    portkeySDK.AuthService.GoogleCredentialProvider.Get(AuthCallback);
                     break;
                 case AccountType.Email:
-                    emailLoginViewController.Initialize(did, gameObject);
+                    emailLoginViewController.Initialize(portkeySDK, gameObject);
                     break;
                 case AccountType.Phone:
-                    phoneLoginViewController.Initialize(did, gameObject);
+                    phoneLoginViewController.Initialize(portkeySDK, gameObject);
                     break;
                 default:
                     throw new ArgumentException("Not expected account type!");
@@ -46,9 +46,9 @@ namespace Portkey.UI
         
         private void StartLoginLoading()
         {
-            did.AuthService.Message.Loading(true, "Loading...");
+            portkeySDK.AuthService.Message.Loading(true, "Loading...");
 #if UNITY_EDITOR || UNITY_STANDALONE
-            cancelLoadingViewController.Initialize(did, gameObject);
+            cancelLoadingViewController.Initialize(portkeySDK, gameObject);
 #endif
         }
         
@@ -84,7 +84,7 @@ namespace Portkey.UI
 
         private void LoggedIn(DIDWalletInfo walletInfo)
         {
-            did.AuthService.Message.Loading(false);
+            portkeySDK.AuthService.Message.Loading(false);
             setPinViewController.Initialize(walletInfo);
             setPinViewController.SetPreviousView(gameObject);
             CloseView();
@@ -92,7 +92,7 @@ namespace Portkey.UI
 
         private void AuthCallback(ICredential credential)
         {
-            StartCoroutine(did.AuthService.GetGuardians(credential, guardians =>
+            StartCoroutine(portkeySDK.AuthService.GetGuardians(credential, guardians =>
             {
                 CheckSignUpOrLogin(credential, guardians);
             }));
@@ -103,7 +103,7 @@ namespace Portkey.UI
         
         private void CheckSignUpOrLogin(ICredential credential, List<Guardian> guardians)
         {
-            did.AuthService.Message.Loading(false);
+            portkeySDK.AuthService.Message.Loading(false);
             
             switch (guardians.Count)
             {
@@ -113,10 +113,10 @@ namespace Portkey.UI
                         switch(credential.AccountType)
                         {
                             case AccountType.Apple:
-                                StartCoroutine(did.AuthService.AppleCredentialProvider.Verify(credential, OpenSetPinView));
+                                StartCoroutine(portkeySDK.AuthService.AppleCredentialProvider.Verify(credential, OpenSetPinView));
                                 break;
                             case AccountType.Google:
-                                StartCoroutine(did.AuthService.GoogleCredentialProvider.Verify(credential, OpenSetPinView));
+                                StartCoroutine(portkeySDK.AuthService.GoogleCredentialProvider.Verify(credential, OpenSetPinView));
                                 break;
                             default: throw new ArgumentException("Not expected account type!");
                         };
@@ -131,7 +131,7 @@ namespace Portkey.UI
 
         private void OpenSetPinView(VerifiedCredential verifiedCredential)
         {
-            did.AuthService.Message.Loading(false);
+            portkeySDK.AuthService.Message.Loading(false);
             setPinViewController.Initialize(verifiedCredential);
             setPinViewController.SetPreviousView(gameObject);
         }

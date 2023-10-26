@@ -2,12 +2,13 @@ using System;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Portkey.UI
 {
     public class BiometricViewController : MonoBehaviour
     {
-        [SerializeField] private DID.DID did;
+        [FormerlySerializedAs("did")] [SerializeField] private DID.PortkeySDK portkeySDK;
         [SerializeField] private TextMeshProUGUI errorText;
         [SerializeField] private WalletViewController walletView;
         [SerializeField] private SetPINViewController setPinViewController;
@@ -55,7 +56,7 @@ namespace Portkey.UI
         
         private void PromptBiometric(Action onBiometricAuthenticated = null)
         {
-            var biometric = did.Biometric;
+            var biometric = portkeySDK.Biometric;
             if (biometric == null)
             {
                 throw new Exception("Biometric is not supported on this device.");

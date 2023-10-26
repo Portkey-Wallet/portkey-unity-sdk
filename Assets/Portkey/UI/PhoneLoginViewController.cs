@@ -17,12 +17,12 @@ namespace Portkey.UI
         {
             base.OnEnable();
             
-            DID.AuthService.PhoneCredentialProvider.EnableCodeSendConfirmationFlow = true;
-            StartCoroutine(DID.GetPhoneCountryCodeWithLocal(result =>
+            PortkeySDK.AuthService.PhoneCredentialProvider.EnableCodeSendConfirmationFlow = true;
+            StartCoroutine(PortkeySDK.GetPhoneCountryCodeWithLocal(result =>
             {
                 PhoneCountryCodeResult = result;
                 countryCodeButtonComponent.SetCountryCodeText($"+{result.locateData.code}");
-            }, DID.AuthService.Message.Error));
+            }, PortkeySDK.AuthService.Message.Error));
         }
         
         public new void OnValueChanged()
@@ -43,7 +43,7 @@ namespace Portkey.UI
             StartLoading();
 
             var phoneNumber = PhoneNumber.Parse(InputPhoneNumber);
-            StartCoroutine(DID.AuthService.GetGuardians(phoneNumber, guardians =>
+            StartCoroutine(PortkeySDK.AuthService.GetGuardians(phoneNumber, guardians =>
             {
                 CheckSignUpOrLogin(phoneNumber, guardians);
             }));
@@ -56,17 +56,17 @@ namespace Portkey.UI
             switch (guardians.Count)
             {
                 case 0:
-                    DID.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
+                    PortkeySDK.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
                     SignUpPrompt(() =>
                     {
                         ShowLoading(true, "Loading...");
-                        StartCoroutine(DID.AuthService.PhoneCredentialProvider.Get(phoneNumber, credential =>
+                        StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.Get(phoneNumber, credential =>
                         {
-                            StartCoroutine(DID.AuthService.PhoneCredentialProvider.Verify(credential, OpenSetPINView));
+                            StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.Verify(credential, OpenSetPINView));
                         }));
                     }, () =>
                     {
-                        DID.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
+                        PortkeySDK.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
                     });
                     break;
                 default:

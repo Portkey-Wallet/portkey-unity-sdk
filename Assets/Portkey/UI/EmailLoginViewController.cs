@@ -22,18 +22,18 @@ namespace Portkey.UI
         [SerializeField] protected TextMeshProUGUI errorText;
         
         protected GameObject PreviousView { get; set; }
-        protected DID.DID DID { get; set; }
+        protected DID.PortkeySDK PortkeySDK { get; set; }
 
         protected void OnEnable()
         {
             ResetView();
-            DID.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
-            DID.AuthService.EmailCredentialProvider.EnableCodeSendConfirmationFlow = true;
+            PortkeySDK.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
+            PortkeySDK.AuthService.EmailCredentialProvider.EnableCodeSendConfirmationFlow = true;
         }
         
-        public void Initialize(DID.DID did, GameObject previousView)
+        public void Initialize(DID.PortkeySDK portkeySDK, GameObject previousView)
         {
-            DID = did;
+            PortkeySDK = portkeySDK;
             PreviousView = previousView;
 
             OpenView();
@@ -63,7 +63,7 @@ namespace Portkey.UI
             StartLoading();
 
             var emailAddress = EmailAddress.Parse(inputField.text);
-            StartCoroutine(DID.AuthService.GetGuardians(emailAddress, guardians =>
+            StartCoroutine(PortkeySDK.AuthService.GetGuardians(emailAddress, guardians =>
             {
                 CheckSignUpOrLogin(emailAddress, guardians);
             }));
@@ -71,12 +71,12 @@ namespace Portkey.UI
         
         protected void ShowLoading(bool show, string text = "")
         {
-            DID.AuthService.Message.Loading(show, text);
+            PortkeySDK.AuthService.Message.Loading(show, text);
         }
         
         protected void StartLoading()
         {
-            DID.AuthService.Message.Loading(true, "Checking account on the chain...");
+            PortkeySDK.AuthService.Message.Loading(true, "Checking account on the chain...");
         }
         
         private void CheckSignUpOrLogin(EmailAddress emailAddress, List<Guardian> guardians)
@@ -89,9 +89,9 @@ namespace Portkey.UI
                     SignUpPrompt(() =>
                     {
                         ShowLoading(true, "Loading...");
-                        StartCoroutine(DID.AuthService.EmailCredentialProvider.Get(emailAddress, credential =>
+                        StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.Get(emailAddress, credential =>
                         {
-                            StartCoroutine(DID.AuthService.EmailCredentialProvider.Verify(credential, OpenSetPINView));
+                            StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.Verify(credential, OpenSetPINView));
                         }));
                     });
                     break;
@@ -123,7 +123,7 @@ namespace Portkey.UI
             var description = $"{verifierServerName} will send a verification code to {guardianId} to verify your {type}.";
             unregisteredView.Initialize("", description, () =>
             {
-                DID.AuthService.Message.ConfirmSendCode();
+                PortkeySDK.AuthService.Message.ConfirmSendCode();
                 
                 verifyCodeViewController.Initialize(guardianId, accountType, verifierServerName);
             }); 
@@ -150,7 +150,7 @@ namespace Portkey.UI
         
         protected void CloseView()
         {
-            DID.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
+            PortkeySDK.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
             gameObject.SetActive(false);
         }
     }

@@ -510,11 +510,11 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
+        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDAccountInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
         {
             _browserWalletExtension.Connect(walletInfo =>
             {
-                Account = _accountGenerator.Create(walletInfo.chainId, walletInfo.managerInfo.guardianIdentifier, walletInfo.caInfo.caHash, walletInfo.caInfo.caAddress, walletInfo.wallet);
+                Account = _accountGenerator.Create(walletInfo.chainId, walletInfo.managerInfo.guardianIdentifier, walletInfo.caInfo.caHash, walletInfo.caInfo.caAddress, walletInfo.signingKey);
                 successCallback(walletInfo);
             }, OnDisconnected, errorCallback);
             yield break;

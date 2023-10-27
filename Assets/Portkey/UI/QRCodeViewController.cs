@@ -9,7 +9,7 @@ public class QRCodeViewController : MonoBehaviour
     [FormerlySerializedAs("did")] [SerializeField] private PortkeySDK portkeySDK;
     [SerializeField] private Image qrCodeImage;
     
-    public void Initialize(SuccessCallback<DIDWalletInfo> loginSuccess)
+    public void Initialize(SuccessCallback<DIDAccountInfo> loginSuccess)
     {
         OpenView();
         

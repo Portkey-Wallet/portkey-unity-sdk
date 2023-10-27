@@ -52,7 +52,7 @@ namespace Portkey.Core
     {
         IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback);
         IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
-        IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback);
+        IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDAccountInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback);
         IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback);
         IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
         IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback);

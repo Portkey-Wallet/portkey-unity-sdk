@@ -82,10 +82,10 @@ namespace Portkey.UI
             qrCodeViewController.Initialize(LoggedIn);
         }
 
-        private void LoggedIn(DIDWalletInfo walletInfo)
+        private void LoggedIn(DIDAccountInfo accountInfo)
         {
             portkeySDK.AuthService.Message.Loading(false);
-            setPinViewController.Initialize(walletInfo);
+            setPinViewController.Initialize(accountInfo);
             setPinViewController.SetPreviousView(gameObject);
             CloseView();
         }

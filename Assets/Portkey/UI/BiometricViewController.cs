@@ -13,11 +13,11 @@ namespace Portkey.UI
         [SerializeField] private WalletViewController walletView;
         [SerializeField] private SetPINViewController setPinViewController;
 
-        private DIDWalletInfo _walletInfo = null;
+        private DIDAccountInfo _accountInfo = null;
         
-        public DIDWalletInfo WalletInfo
+        public DIDAccountInfo AccountInfo
         {
-            set => _walletInfo = value;
+            set => _accountInfo = value;
         }
 
         private void OnEnable()
@@ -36,9 +36,9 @@ namespace Portkey.UI
             PromptBiometric(CompleteRegistration);
         }
         
-        private void OpenWalletView(DIDWalletInfo walletInfo)
+        private void OpenWalletView(DIDAccountInfo accountInfo)
         {
-            walletView.WalletInfo = walletInfo;
+            walletView.AccountInfo = accountInfo;
             walletView.gameObject.SetActive(true);
             CloseView();
         }
@@ -51,7 +51,7 @@ namespace Portkey.UI
         private void CompleteRegistration()
         {
             setPinViewController.IsLoginCompleted = true;
-            OpenWalletView(_walletInfo);
+            OpenWalletView(_accountInfo);
         }
         
         private void PromptBiometric(Action onBiometricAuthenticated = null)

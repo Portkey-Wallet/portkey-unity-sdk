@@ -37,16 +37,16 @@ namespace Portkey.UI
         [SerializeField] private GuardiansApprovalViewController guardiansApprovalViewController;
         [SerializeField] private LockViewController lockViewController;
         
-        private DIDWalletInfo _walletInfo = null;
+        private DIDAccountInfo _accountInfo = null;
         private bool _isSignOut = false;
 
         private readonly string LOADING_MESSAGE = "Loading...";
 
         private readonly Dictionary<string, string> _chainIdToCaAddress = new Dictionary<string, string>();
         
-        public DIDWalletInfo WalletInfo
+        public DIDAccountInfo AccountInfo
         {
-            set => _walletInfo = value;
+            set => _accountInfo = value;
         }
         
         private void OnEnable()
@@ -57,7 +57,7 @@ namespace Portkey.UI
             _chainIdToCaAddress.Clear();
             ResetTokenUIInfos();
             
-            chainInfoText.text = _walletInfo.chainId;
+            chainInfoText.text = _accountInfo.chainId;
             
             portkeySDK.AuthService.Message.OnLogoutEvent += OnSuccessLogout;
 
@@ -90,7 +90,7 @@ namespace Portkey.UI
                     var uiIndex = index;
                     StartCoroutine(portkeySDK.ChainProvider.GetChain(chainId, chain =>
                     {
-                        RequestHolderCaAddress(uiIndex, chain, _walletInfo.caInfo.caHash);
+                        RequestHolderCaAddress(uiIndex, chain, _accountInfo.caInfo.caHash);
                     }, OnError));
                     ++index;
                 }
@@ -113,7 +113,7 @@ namespace Portkey.UI
             {
                 var param = new GetHolderInfoByManagerParams
                 {
-                    manager = _walletInfo.wallet.Address,
+                    manager = _accountInfo.signingKey.Address,
                     chainId = chain.ChainInfo.chainId
                 };
                 while (!_isSignOut && !_chainIdToCaAddress.ContainsKey(param.chainId))

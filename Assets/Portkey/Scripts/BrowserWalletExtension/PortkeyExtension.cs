@@ -31,7 +31,7 @@ namespace Portkey.BrowserWalletExtension
         private static extern string GetBrowserVersion();
 #endif
         
-        public void Connect(SuccessCallback<DIDWalletInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
+        public void Connect(SuccessCallback<DIDAccountInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
         {
             if (_callbackObject != null)
             {
@@ -59,7 +59,7 @@ namespace Portkey.BrowserWalletExtension
 #endif
         }
 
-        private void Listen(SuccessCallback<DIDWalletInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
+        private void Listen(SuccessCallback<DIDAccountInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             CaAddresses caAddresses = null;
@@ -100,13 +100,13 @@ namespace Portkey.BrowserWalletExtension
                     return;
                 }
 
-                var walletInfo = new DIDWalletInfo("AELF", null, 0, new CAInfo
+                var accountInfo = new DIDAccountInfo("AELF", null, 0, new CAInfo
                 {
                     caAddress = caAddresses.AELF[0],
                     caHash = null
                 }, null, AddManagerType.Recovery, new PortkeyExtensionSigningKey(address));
                 
-                successCallback?.Invoke(walletInfo);
+                successCallback?.Invoke(accountInfo);
             }
 
             void OnError(string error)

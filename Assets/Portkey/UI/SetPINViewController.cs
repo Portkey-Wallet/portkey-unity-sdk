@@ -64,12 +64,12 @@ namespace Portkey.UI
             set;
         } = false;
         
-        public void Initialize(DIDWalletInfo walletInfo)
+        public void Initialize(DIDAccountInfo accountInfo)
         {
             //sign up using socials
             _onPinComplete = () =>
             {
-                OpenNextView(walletInfo);
+                OpenNextView(accountInfo);
             };
             OpenView();
         }
@@ -110,12 +110,12 @@ namespace Portkey.UI
             _onPinComplete?.Invoke();
         }
 
-        private void OpenNextView(DIDWalletInfo walletInfo)
+        private void OpenNextView(DIDAccountInfo accountInfo)
         {
             var biometric = portkeySDK.Biometric;
             if (biometric == null)
             {
-                OpenWalletView(walletInfo);
+                OpenWalletView(accountInfo);
                 return;
             }
             biometric.CanAuthenticate(canAuth =>
@@ -123,27 +123,27 @@ namespace Portkey.UI
                 if (canAuth)
                 {
                     //change to biometric view
-                    OpenBiometricView(walletInfo);
+                    OpenBiometricView(accountInfo);
                 }
                 else
                 {
-                    OpenWalletView(walletInfo);
+                    OpenWalletView(accountInfo);
                 }
             });
         }
 
-        private void OpenWalletView(DIDWalletInfo walletInfo)
+        private void OpenWalletView(DIDAccountInfo accountInfo)
         {
-            walletView.WalletInfo = walletInfo;
+            walletView.AccountInfo = accountInfo;
             walletView.gameObject.SetActive(true);
             IsLoginCompleted = true;
             portkeySDK.AuthService.Message.Loading(false);
             CloseView();
         }
         
-        private void OpenBiometricView(DIDWalletInfo walletInfo)
+        private void OpenBiometricView(DIDAccountInfo accountInfo)
         {
-            biometricView.WalletInfo = walletInfo;
+            biometricView.AccountInfo = accountInfo;
             biometricView.gameObject.SetActive(true);
             portkeySDK.AuthService.Message.Loading(false);
             CloseView();

@@ -154,7 +154,7 @@ namespace Portkey.DID
         /// <summary> The GetRequiredApprovedGuardiansCount function returns the number of guardians that must be approved to recover the user's Portkey DID Account.        
         /// The function takes in an integer representing the total number of guardians, and returns an integer representing the minimum required approvals.</summary>
         ///
-        /// <param name="int totalGuardians"> /// the total number of guardians.
+        /// <param name="int totalGuardians"> The total number of guardians binded to the account.
         /// </param>
         ///
         /// <returns> The number of approved guardians required to recover the user's Portkey DID Account.</returns>

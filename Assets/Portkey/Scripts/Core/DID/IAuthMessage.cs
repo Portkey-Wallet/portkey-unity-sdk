@@ -77,7 +77,7 @@ namespace Portkey.Core
         /// Called when authentication operation is loading.
         /// </summary>
         /// <param name="show">Whether or not to show the loading</param>
-        /// <param name="message">Message to show for loading ( optional</param>
+        /// <param name="message">Message to show for loading (optional)</param>
         void Loading(bool show, string message = null);
         /// <summary>
         /// Reports an authentication operation error to the user.

@@ -1,11 +1,7 @@
-using System.Collections;
-
 namespace Portkey.Core
 {
-    public interface ICodeCredentialProvider
+    public interface ICodeCredentialProvider : ICredentialProvider
     {
         bool EnableCodeSendConfirmationFlow { get; }
-        AccountType AccountType { get; }
-        IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback);
     }
 }

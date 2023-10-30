@@ -10,7 +10,7 @@ using DeviceInfoType = Portkey.Core.DeviceInfoType;
 
 namespace Portkey.DID
 {
-    public class AuthService : IAuthService
+    public partial class AuthService : IAuthService
     {
         private string DEFAULT_CHAIN_ID = "AELF";
         
@@ -36,17 +36,17 @@ namespace Portkey.DID
             _config = config;
             
             _verifierService = verifierService;
-            Message = new AuthMessage();
+            Message = this;
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
-            AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message);
-            GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message);
-            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, Message, _verifierService);
-            EmailCredentialProvider = new EmailCredentialProvider(Email, Message, _verifierService);
+            AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
+            GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
+            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, this, _verifierService);
+            EmailCredentialProvider = new EmailCredentialProvider(Email, this, _verifierService);
 
             Message.ChainId = DEFAULT_CHAIN_ID;
-            Message.OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;
-            Message.OnCancelLoginWithPortkeyAppEvent += _did.CancelLoginWithPortkeyApp;
+            OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;
+            OnCancelLoginWithPortkeyAppEvent += _did.CancelLoginWithPortkeyApp;
         }
 
         private IEnumerator GetGuardians(string guardianId, SuccessCallback<List<Guardian>> successCallback, ErrorCallback errorCallback)
@@ -96,7 +96,7 @@ namespace Portkey.DID
                             }
 
                             var guardian = CreateGuardian(guardianId, guardianDto, chainId, verifier);
-                            if (guardian.isLoginGuardian)
+                            if (guardianId == guardian.id && guardian.isLoginGuardian)
                             {
                                 guardians.Insert(0, guardian);
                             }
@@ -135,7 +135,7 @@ namespace Portkey.DID
                 id = guardianDto.guardianIdentifier,
                 idHash = guardianDto.identifierHash,
                 chainId = chainId,
-                isLoginGuardian = guardianId == guardianDto.guardianIdentifier,
+                isLoginGuardian = guardianDto.isLoginGuardian,
                 verifier = new Verifier
                 {
                     id = verifier.id,
@@ -154,7 +154,7 @@ namespace Portkey.DID
         /// <summary> The GetRequiredApprovedGuardiansCount function returns the number of guardians that must be approved to recover the user's Portkey DID Account.        
         /// The function takes in an integer representing the total number of guardians, and returns an integer representing the minimum required approvals.</summary>
         ///
-        /// <param name="int totalGuardians"> /// the total number of guardians.
+        /// <param name="int totalGuardians"> The total number of guardians binded to the account.
         /// </param>
         ///
         /// <returns> The number of approved guardians required to recover the user's Portkey DID Account.</returns>
@@ -365,7 +365,7 @@ namespace Portkey.DID
             };
         }
 
-        public IEnumerator SignUp(PhoneNumber phoneNumber, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator SignUp(PhoneNumber phoneNumber, SuccessCallback<DIDAccountInfo> successCallback)
         {
             yield return PhoneCredentialProvider.Get(phoneNumber, phoneCredential =>
             {
@@ -376,7 +376,7 @@ namespace Portkey.DID
             }, Message.ChainId);
         }
 
-        public IEnumerator SignUp(EmailAddress emailAddress, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator SignUp(EmailAddress emailAddress, SuccessCallback<DIDAccountInfo> successCallback)
         {
             yield return EmailCredentialProvider.Get(emailAddress, emailCredential =>
             {
@@ -389,16 +389,16 @@ namespace Portkey.DID
         
         /// <summary> The SignUp function is used to register a new DID on the blockchain.        
         /// &lt;para&gt;The SignUp function takes in a VerifiedCredential object, which contains information about the user's social media account and their verification document.&lt;/para&gt;
-        /// &lt;para&gt;The SignUp function also takes in a SuccessCallback&lt;DIDWalletInfo&gt;, which is called when the registration process has completed successfully.&lt;/para&gt;</summary>
+        /// &lt;para&gt;The SignUp function also takes in a SuccessCallback&lt;DIDAccountInfo&gt;, which is called when the registration process has completed successfully.&lt;/para&gt;</summary>
         ///
         /// <param name="VerifiedCredential verifiedCredential"> /// verifiedcredential is a class that contains the verified credential of a user.
         /// </param>
-        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// a callback function that is called when the operation succeeds. 
-        /// the parameter of this function is a didwalletinfo object containing information about the newly created wallet.
+        /// <param name="SuccessCallback&lt;DIDAccountInfo&gt; successCallback"> /// a callback function that is called when the operation succeeds. 
+        /// the parameter of this function is a DIDAccountInfo object containing information about the newly created wallet.
         /// </param>
         ///
-        /// <returns> A didwalletinfo object.</returns>
-        public IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDWalletInfo> successCallback)
+        /// <returns> A DIDAccountInfo object.</returns>
+        public IEnumerator SignUp(VerifiedCredential verifiedCredential, SuccessCallback<DIDAccountInfo> successCallback)
         {
             _did.Reset();
             
@@ -431,7 +431,7 @@ namespace Portkey.DID
                     return;
                 }
 
-                var walletInfo = new DIDWalletInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
+                var walletInfo = new DIDAccountInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
                     registerResult.SessionId, AddManagerType.Register, _did.GetManagementSigningKey());
                 successCallback(walletInfo);
             }, OnError);
@@ -439,14 +439,14 @@ namespace Portkey.DID
 
         /// <summary> The SignUp function is used to register a new DID on the blockchain.          
         /// The SignUp function takes in an ICredential object as its first parameter, which can be any ICredential.
-        /// The second parameter of the SignUp function is a SuccessCallback&lt;DIDWalletInfo&gt; delegate that will be called when the sign up process has completed successfully.</summary>
+        /// The second parameter of the SignUp function is a SuccessCallback&lt;DIDAccountInfo&gt; delegate that will be called when the sign up process has completed successfully.</summary>
         ///
         /// <param name="ICredential credential"> The credential to be verified.</param>
-        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// the callback function that will be called when the sign up is successful. 
+        /// <param name="SuccessCallback&lt;DIDAccountInfo&gt; successCallback"> /// the callback function that will be called when the sign up is successful. 
         /// </param>
         ///
-        /// <returns> A didwalletinfo object.</returns>
-        public IEnumerator SignUp(ICredential credential, SuccessCallback<DIDWalletInfo> successCallback)
+        /// <returns> A DIDAccountInfo object.</returns>
+        public IEnumerator SignUp(ICredential credential, SuccessCallback<DIDAccountInfo> successCallback)
         {
             switch (credential.AccountType)
             {
@@ -492,11 +492,11 @@ namespace Portkey.DID
         /// <param name="Guardian loginGuardian"> The guardian that is used to login</param>
         /// <param name="List&lt;ApprovedGuardian&gt; approvedGuardians"> /// list of approved guardians.
         /// </param>
-        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// the callback function that will be called when the login is successful. 
+        /// <param name="SuccessCallback&lt;DIDAccountInfo&gt; successCallback"> /// the callback function that will be called when the login is successful. 
         /// </param>
         ///
-        /// <returns> The didwalletinfo object.</returns>
-        public IEnumerator Login(Guardian loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDWalletInfo> successCallback)
+        /// <returns> The DIDAccountInfo object.</returns>
+        public IEnumerator Login(Guardian loginGuardian, List<ApprovedGuardian> approvedGuardians, SuccessCallback<DIDAccountInfo> successCallback)
         {
             _did.Reset();
             
@@ -526,33 +526,36 @@ namespace Portkey.DID
                     return;
                 }
                 
-                var walletInfo = new DIDWalletInfo(loginGuardian.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery, _did.GetManagementSigningKey());
+                var walletInfo = new DIDAccountInfo(param.chainId, loginGuardian.id, loginGuardian.accountType, result.Status, result.SessionId, AddManagerType.Recovery, _did.GetManagementSigningKey());
                 successCallback(walletInfo);
             }, OnError));
         }
 
         /// <summary> The LoginWithPortkeyExtension function is used to login using Portkey Browser Extension.        
-        /// &lt;para&gt;- The first parameter is a SuccessCallback function that returns the DIDWalletInfo object.&lt;/para&gt;
+        /// &lt;para&gt;- The first parameter is a SuccessCallback function that returns the DIDAccountInfo object.&lt;/para&gt;
         /// </summary>
         ///
-        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// the callback that is called when the login process succeeds.
+        /// <param name="SuccessCallback&lt;DIDAccountInfo&gt; successCallback"> /// the callback that is called when the login process succeeds.
         /// </param>
         ///
-        /// <returns> A didwalletinfo object</returns>
-        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback)
+        /// <returns> A DIDAccountInfo object</returns>
+        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDAccountInfo> successCallback)
         {
-            yield return _did.LoginWithPortkeyExtension(successCallback, OnError);
+            yield return _did.LoginWithPortkeyExtension(successCallback, () =>
+            {
+                OnLogout(LogoutMessage.PortkeyExtensionLogout);
+            }, OnError);
         }
 
         /// <summary> The LoginWithPortkeyApp function is used to login with the Portkey app on mobile devices.        
         /// &lt;para&gt;The function takes a SuccessCallback as an argument, which will be called if the login was successful.&lt;/para&gt;
         /// </summary>
         ///
-        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// successcallback&lt;didwalletinfo&gt; successcallback is a callback function that returns the didwalletinfo object.
+        /// <param name="SuccessCallback&lt;DIDAccountInfo&gt; successCallback"> /// successcallback&lt;DIDAccountInfo&gt; successcallback is a callback function that returns the DIDAccountInfo object.
         /// </param>
         ///
-        /// <returns> A didwalletinfo object.</returns>
-        public IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDWalletInfo> successCallback)
+        /// <returns> A DIDAccountInfo object.</returns>
+        public IEnumerator LoginWithPortkeyApp(SuccessCallback<DIDAccountInfo> successCallback)
         {
             yield return _did.LoginWithPortkeyApp(PortkeyAppLoginSuccess(successCallback), OnError);
         }
@@ -563,37 +566,39 @@ namespace Portkey.DID
         ///
         /// <param name="SuccessCallback&lt;Texture2D&gt; qrCodeCallback"> ///     &lt;para&gt;a callback to return the qr code image.&lt;/para&gt;
         /// </param>
-        /// <param name="SuccessCallback&lt;DIDWalletInfo&gt; successCallback"> /// this is the callback that will be called when the login process is successful.
+        /// <param name="SuccessCallback&lt;DIDAccountInfo&gt; successCallback"> /// this is the callback that will be called when the login process is successful.
         /// </param>
         ///
         /// <returns> A texture2d object.</returns>
-        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<DIDWalletInfo> successCallback)
+        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<DIDAccountInfo> successCallback)
         {
             yield return _did.LoginWithQRCode(qrCodeCallback, PortkeyAppLoginSuccess(successCallback), OnError);
         }
         
-        private SuccessCallback<PortkeyAppLoginResult> PortkeyAppLoginSuccess(SuccessCallback<DIDWalletInfo> successCallback)
+        private SuccessCallback<PortkeyAppLoginResult> PortkeyAppLoginSuccess(SuccessCallback<DIDAccountInfo> successCallback)
         {
             return result =>
             {
                 Message.ChainId = result.caHolder.holderManagerInfo.originChainId;
-                successCallback(new DIDWalletInfo(result.caHolder, result.managementAccount));
+                successCallback(new DIDAccountInfo(result.caHolder, result.managementAccount));
             };
         }
 
         /// <summary> The Logout function logs out the user from the DID service.</summary>        
         ///
-        /// <param name="SuccessCallback&lt;bool&gt; successCallback"> /// the success callback.
-        /// </param>
-        ///
         /// <returns> A bool value indicating if the log out operation was successful.</returns>
-        public IEnumerator Logout(SuccessCallback<bool> successCallback)
+        public IEnumerator Logout()
         {
-            var param = new EditManagerParams
+            var param = new EditManagerParams();
+            yield return _did.Logout(param, success =>
             {
-                chainId = Message.ChainId
-            };
-            yield return _did.Logout(param, successCallback, OnError);
+                if (!success)
+                {
+                    OnError("Logout failed!");
+                    return;
+                }
+                OnLogout(LogoutMessage.Logout);
+            }, OnError);
         }
         
         private static bool IsCAValid(CAInfo caInfo)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Portkey.Core;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Portkey.UI
 {
@@ -25,7 +26,7 @@ namespace Portkey.UI
         [SerializeField] private PINProgressComponent pinProgress;
         [SerializeField] private TextMeshProUGUI header;
         [SerializeField] private TextMeshProUGUI errorMessage;
-        [SerializeField] private DID.DID did;
+        [FormerlySerializedAs("did")] [SerializeField] private DID.PortkeySDK portkeySDK;
         [SerializeField] private WalletViewController walletView;
         [SerializeField] private BiometricViewController biometricView;
         [SerializeField] private LoadingViewController loadingView;
@@ -62,35 +63,23 @@ namespace Portkey.UI
             get;
             set;
         } = false;
-
-        public void Initialize(ICredential credential)
-        {
-            //sign up using socials
-            _onPinComplete = () =>
-            {
-                did.AuthService.Message.Loading(true, "Creating address on the chain...");
-                StartCoroutine(did.AuthService.SignUp(credential, OpenNextView));
-            };
-            OpenView();
-        }
         
-        public void Initialize(DIDWalletInfo walletInfo)
+        public void Initialize(DIDAccountInfo accountInfo)
         {
             //sign up using socials
             _onPinComplete = () =>
             {
-                OpenNextView(walletInfo);
+                OpenNextView(accountInfo);
             };
             OpenView();
         }
         
         public void Initialize(VerifiedCredential verifiedCredential)
         {
-            //sign up using phone or email
             _onPinComplete = () =>
             {
-                did.AuthService.Message.Loading(true, "Creating address on the chain...");
-                StartCoroutine(did.AuthService.SignUp(verifiedCredential, OpenNextView));
+                portkeySDK.AuthService.Message.Loading(true, "Creating address on the chain...");
+                StartCoroutine(portkeySDK.AuthService.SignUp(verifiedCredential, OpenNextView));
             };
             OpenView();
         }
@@ -100,8 +89,8 @@ namespace Portkey.UI
             //login
             _onPinComplete = () =>
             {
-                did.AuthService.Message.Loading(true, "Initiating social recovery");
-                StartCoroutine(did.AuthService.Login(loginGuardian, approvedGuardians, OpenNextView));
+                portkeySDK.AuthService.Message.Loading(true, "Initiating social recovery");
+                StartCoroutine(portkeySDK.AuthService.Login(loginGuardian, approvedGuardians, OpenNextView));
             };
             OpenView();
         }
@@ -121,12 +110,12 @@ namespace Portkey.UI
             _onPinComplete?.Invoke();
         }
 
-        private void OpenNextView(DIDWalletInfo walletInfo)
+        private void OpenNextView(DIDAccountInfo accountInfo)
         {
-            var biometric = did.Biometric;
+            var biometric = portkeySDK.Biometric;
             if (biometric == null)
             {
-                OpenWalletView(walletInfo);
+                OpenWalletView(accountInfo);
                 return;
             }
             biometric.CanAuthenticate(canAuth =>
@@ -134,29 +123,29 @@ namespace Portkey.UI
                 if (canAuth)
                 {
                     //change to biometric view
-                    OpenBiometricView(walletInfo);
+                    OpenBiometricView(accountInfo);
                 }
                 else
                 {
-                    OpenWalletView(walletInfo);
+                    OpenWalletView(accountInfo);
                 }
             });
         }
 
-        private void OpenWalletView(DIDWalletInfo walletInfo)
+        private void OpenWalletView(DIDAccountInfo accountInfo)
         {
-            walletView.WalletInfo = walletInfo;
+            walletView.AccountInfo = accountInfo;
             walletView.gameObject.SetActive(true);
             IsLoginCompleted = true;
-            did.AuthService.Message.Loading(false);
+            portkeySDK.AuthService.Message.Loading(false);
             CloseView();
         }
         
-        private void OpenBiometricView(DIDWalletInfo walletInfo)
+        private void OpenBiometricView(DIDAccountInfo accountInfo)
         {
-            biometricView.WalletInfo = walletInfo;
+            biometricView.AccountInfo = accountInfo;
             biometricView.gameObject.SetActive(true);
-            did.AuthService.Message.Loading(false);
+            portkeySDK.AuthService.Message.Loading(false);
             CloseView();
         }
 

@@ -1,17 +1,17 @@
 namespace Portkey.Core
 {
-    public class DIDWalletInfo
+    public class DIDAccountInfo
     {
         public CAInfo caInfo;
         public string chainId;
-        public ISigningKey wallet;
+        public ISigningKey signingKey;
         public ManagerInfoType managerInfo;
         
-        public DIDWalletInfo(string chainId, string guardianId, AccountType accountType, CAInfo caInfo, string sessionId, AddManagerType type, ISigningKey signingKey)
+        public DIDAccountInfo(string chainId, string guardianId, AccountType accountType, CAInfo caInfo, string sessionId, AddManagerType type, ISigningKey signingKey)
         {
             this.caInfo = caInfo;
             this.chainId = chainId;
-            wallet = signingKey;
+            this.signingKey = signingKey;
             managerInfo = new ManagerInfoType
             {
                 managerUniqueId = sessionId,
@@ -21,7 +21,7 @@ namespace Portkey.Core
             };
         }
         
-        public DIDWalletInfo(CaHolderWithGuardian caHolder, ISigningKey signingKey)
+        public DIDAccountInfo(CaHolderWithGuardian caHolder, ISigningKey signingKey)
         {
             caInfo = new CAInfo
             {
@@ -29,7 +29,7 @@ namespace Portkey.Core
                 caHash = caHolder.holderManagerInfo.caHash
             };
             chainId = caHolder.holderManagerInfo.originChainId;
-            wallet = signingKey;
+            this.signingKey = signingKey;
             managerInfo = new ManagerInfoType
             {
                 managerUniqueId = caHolder.holderManagerInfo.id,

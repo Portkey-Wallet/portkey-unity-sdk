@@ -7,7 +7,7 @@ namespace Portkey.Core
 {
     public abstract class CodeCredentialProviderBase<T> : ICodeCredentialProvider where T : ICodeCredential
     {
-        protected readonly IAuthMessage _message;
+        protected readonly IInternalAuthMessage _message;
         protected readonly IVerifyCodeLogin _codeLogin;
         private readonly IVerifierService _verifierService;
         private string _verificationCode = null;
@@ -18,7 +18,7 @@ namespace Portkey.Core
         
         public abstract AccountType AccountType { get; }
         
-        protected CodeCredentialProviderBase(IVerifyCodeLogin codeLogin, IAuthMessage message, IVerifierService verifierService)
+        protected CodeCredentialProviderBase(IVerifyCodeLogin codeLogin, IInternalAuthMessage message, IVerifierService verifierService)
         {
             _message = message;
             _codeLogin = codeLogin;

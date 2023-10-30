@@ -4,11 +4,12 @@ using Portkey.DID;
 using Portkey.UI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class LockViewController : MonoBehaviour
 {
-    [SerializeField] private DID did;
+    [FormerlySerializedAs("did")] [SerializeField] private PortkeySDK portkeySDK;
     [SerializeField] private PINProgressComponent pinProgress;
     [SerializeField] private SetPINViewController setPinViewController;
     [SerializeField] private GameObject body;
@@ -21,7 +22,7 @@ public class LockViewController : MonoBehaviour
     
     private void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus && did.IsLoggedIn() && setPinViewController.IsLoginCompleted && !isBiometricPromptOpened)
+        if (pauseStatus && portkeySDK.IsLoggedIn() && setPinViewController.IsLoginCompleted && !isBiometricPromptOpened)
         {
             ResetPIN();
             DisplayLock(true);
@@ -50,7 +51,7 @@ public class LockViewController : MonoBehaviour
 
     private void PromptBiometric()
     {
-        var biometric = did.Biometric;
+        var biometric = portkeySDK.Biometric;
         if (biometric == null)
         {
             return;
@@ -89,7 +90,7 @@ public class LockViewController : MonoBehaviour
     private void DisplayLock(bool display)
     {
         body.SetActive(display);
-        biometricButton.gameObject.SetActive(display && did.Biometric != null && setPinViewController.UseBiometric);
+        biometricButton.gameObject.SetActive(display && portkeySDK.Biometric != null && setPinViewController.UseBiometric);
     }
     
     public void OnClickNumber(int number)

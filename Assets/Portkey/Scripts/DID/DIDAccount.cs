@@ -132,6 +132,7 @@ namespace Portkey.DID
                 errorCallback("Account is not logged in!");
                 yield break;
             }
+            param.chainId ??= Account.accountDetails.chainId;
             if(param.caHash == null && Account.accountDetails.caInfoMap.TryGetValue(param.chainId, out var caInfo))
             {
                 param.caHash = caInfo.caHash;
@@ -509,13 +510,13 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDAccountInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
         {
             _browserWalletExtension.Connect(walletInfo =>
             {
-                Account = _accountGenerator.Create(walletInfo.chainId, walletInfo.managerInfo.guardianIdentifier, walletInfo.caInfo.caHash, walletInfo.caInfo.caAddress, walletInfo.wallet);
+                Account = _accountGenerator.Create(walletInfo.chainId, walletInfo.managerInfo.guardianIdentifier, walletInfo.caInfo.caHash, walletInfo.caInfo.caAddress, walletInfo.signingKey);
                 successCallback(walletInfo);
-            }, errorCallback);
+            }, OnDisconnected, errorCallback);
             yield break;
         }
 

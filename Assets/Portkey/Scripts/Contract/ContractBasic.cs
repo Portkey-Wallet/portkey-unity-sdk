@@ -31,8 +31,8 @@ namespace Portkey.Contract
         /// <summary>
         /// Constructor for ContractBasic to initialize the contract address and its respective chain.
         /// </summary>
-        /// <param name="chain">The chain that the contract resides on.</param>
-        /// <param name="contractAddress">The contract address related to this contract.</param>
+        /// <param name="chain">The chain that the contract is deployed at.</param>
+        /// <param name="contractAddress">The contract address corresponding to this contract.</param>
         public ContractBasic(IChain chain, string contractAddress)
         {
             _signingKeyGenerator = new SigningKeyGenerator(new AESEncryption());

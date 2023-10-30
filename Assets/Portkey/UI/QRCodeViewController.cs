@@ -1,18 +1,19 @@
 using Portkey.Core;
 using Portkey.DID;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class QRCodeViewController : MonoBehaviour
 {
-    [SerializeField] private DID did;
+    [FormerlySerializedAs("did")] [SerializeField] private PortkeySDK portkeySDK;
     [SerializeField] private Image qrCodeImage;
     
-    public void Initialize(SuccessCallback<DIDWalletInfo> loginSuccess)
+    public void Initialize(SuccessCallback<DIDAccountInfo> loginSuccess)
     {
         OpenView();
         
-        StartCoroutine(did.AuthService.LoginWithQRCode(DisplayQRCode, result =>
+        StartCoroutine(portkeySDK.AuthService.LoginWithQRCode(DisplayQRCode, result =>
         {
             CloseView();
             loginSuccess?.Invoke(result);
@@ -31,7 +32,7 @@ public class QRCodeViewController : MonoBehaviour
     
     public void CloseView()
     {
-        did.AuthService.Message.CancelLoginWithQRCode();
+        portkeySDK.AuthService.Message.CancelLoginWithQRCode();
         gameObject.SetActive(false);
     }
 }

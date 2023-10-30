@@ -37,17 +37,17 @@ public class GraphQLTest
 
     private class GraphQLMonoHTTPMockGetHolderInfoByManagerTest : GraphQLMonoTest
     {
-        private GraphQL _graphQl;
+        private PortkeyDIDGraphQL _portkeyDidGraphQl;
         
         private void Awake()
         {
             var config = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} GraphQLConfigGetHolderInfoByManagerMock");
-            _graphQl = new GraphQL(config);
+            _portkeyDidGraphQl = new PortkeyDIDGraphQL(config);
         }
 
         public void Start()
         {
-            StartCoroutine(_graphQl.GetHolderInfoByManager("manager_mock", "chainId_mock", SuccessCallback, ErrorCallback));
+            StartCoroutine(_portkeyDidGraphQl.GetHolderInfoByManager("manager_mock", "chainId_mock", SuccessCallback, ErrorCallback));
         }
         
         private void SuccessCallback(IList<CaHolderWithGuardian> response)
@@ -70,8 +70,7 @@ public class GraphQLTest
         
         private void Awake()
         {
-            var config = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} GraphQLConfigMock");
-            _graphQl = new GraphQL(config);
+            _graphQl = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} GraphQLConfigMock");
         }
 
         public void Start()
@@ -116,8 +115,7 @@ public class GraphQLTest
     [UnityTest]
     public IEnumerator GraphQLPostWorks()
     {
-        var config = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
-        IGraphQL graphQlTest = new GraphQL(config);
+        IGraphQL graphQlTest = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
         
         var query = graphQlTest.GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
         if (query == null)
@@ -210,8 +208,7 @@ public class GraphQLTest
     [UnityTest]
     public IEnumerator GraphQLPostNullReturn()
     {
-        var config = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
-        IGraphQL graphQlTest = new GraphQL(config);
+        IGraphQL graphQlTest = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
         
         var query = graphQlTest.GetQueryByName(QUERY_NAME_CAHOLDERMANAGERCHANGERECORDINFO);
         if (query == null)
@@ -235,8 +232,7 @@ public class GraphQLTest
     [UnityTest]
     public IEnumerator GraphQLQueryNotFound()
     {
-        var config = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
-        IGraphQL graphQlTest = new GraphQL(config);
+        IGraphQL graphQlTest = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
         
         const string queryName = "QueryMock";
         
@@ -277,8 +273,7 @@ public class GraphQLTest
     }
 }";
             
-        var config = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
-        IGraphQL graphQlTest = new GraphQL(config);
+        IGraphQL graphQlTest = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
         
         const string QUERY_NAME_GETCAHOLDERINFO = "GetCAHolderInfo";
         
@@ -318,8 +313,7 @@ public class GraphQLTest
     }
 }";
             
-        var config = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
-        IGraphQL graphQlTest = new GraphQL(config);
+        IGraphQL graphQlTest = GetPortkeyGraphQlConfig($"t:{nameof(GraphQLConfig)} PortkeyGraphQLConfig");
         
         var query = graphQlTest.GetQueryByName(QUERY_NAME_GETCAHOLDERINFO);
         if (query == null)

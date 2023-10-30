@@ -6,13 +6,13 @@ using Portkey.DID;
 
     public class CancelLoadingViewController : MonoBehaviour
     {
-        private DID DID { get; set; }
+        private PortkeySDK PortkeySDK { get; set; }
         private GameObject PreviousView { get; set; }
         private Action OnClickCloseCallback { get; set; }
         
-        public void Initialize(DID did, GameObject previousView, Action onClickCloseCallback = null)
+        public void Initialize(PortkeySDK portkeySDK, GameObject previousView, Action onClickCloseCallback = null)
         {
-            DID = did;
+            PortkeySDK = portkeySDK;
             PreviousView = previousView;
             OnClickCloseCallback = onClickCloseCallback;
 
@@ -25,7 +25,7 @@ using Portkey.DID;
         }
         public void OnClickClose()
         {
-            DID.AuthService.Message.Loading(false);
+            PortkeySDK.AuthService.Message.Loading(false);
             OnClickCloseCallback?.Invoke();
             CloseView();
         }

@@ -2,15 +2,13 @@ using Portkey.Core;
 
 namespace Portkey.SocialProvider
 {
-    public class AppleCredentialProvider
+    public class AppleCredentialProvider : SocialCredentialProviderBase<AppleCredential>
     {
         private readonly ISocialProvider _socialProvider;
-        private readonly IAuthMessage _authMessage;
         
-        public AppleCredentialProvider(ISocialProvider socialProvider, IAuthMessage authMessage)
+        public AppleCredentialProvider(ISocialProvider socialProvider, IAuthMessage authMessage, IVerifierService verifierService, ISocialVerifierProvider socialVerifierProvider) : base(authMessage, verifierService, socialVerifierProvider)
         {
             _socialProvider = socialProvider;
-            _authMessage = authMessage;
         }
         
         public void Get(SuccessCallback<AppleCredential> successCallback)
@@ -20,7 +18,9 @@ namespace Portkey.SocialProvider
             {
                 var appleCredential = new AppleCredential(info.access_token, info.socialInfo);
                 successCallback?.Invoke(appleCredential);
-            }, _authMessage.Error);
+            }, authMessage.Error);
         }
+
+        public override AccountType AccountType => AccountType.Apple;
     }
 }

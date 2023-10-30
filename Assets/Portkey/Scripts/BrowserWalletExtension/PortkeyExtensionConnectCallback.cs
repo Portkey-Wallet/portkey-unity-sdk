@@ -8,6 +8,7 @@ namespace Portkey.SocialProvider
     {
         public Action<string> OnConnectCallback { get; set; }
         public Action<string> OnGetManagementAccountAddressCallback { get; set; }
+        public Action OnDisconnectedCallback { get; set; }
         public Action<string> OnErrorCallback { get; set; }
         
         public void OnConnect(string data)
@@ -20,12 +21,23 @@ namespace Portkey.SocialProvider
         {
             Debugger.Log($"PortkeyExtensionCallback OnGetManagementAccountAddress {data}");
             OnGetManagementAccountAddressCallback?.Invoke(data);
-            Destroy(gameObject);
+        }
+
+        public void OnDisconnected(string data)
+        {
+            Debugger.Log($"PortkeyExtensionCallback OnDisconnected");
+            OnDisconnectedCallback?.Invoke();
+            Destroy();
         }
 
         public void OnError(string error)
         {
             OnErrorCallback?.Invoke(error);
+            Destroy();
+        }
+
+        public void Destroy()
+        {
             Destroy(gameObject);
         }
     }

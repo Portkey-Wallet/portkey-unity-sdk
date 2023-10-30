@@ -36,7 +36,7 @@ namespace Portkey.Core
         IEnumerator CallAsync<T>(string methodName, IMessage param, SuccessCallback<T> successCallback, ErrorCallback errorCallback) where T : IMessage<T>, new();
 
         /// <summary>
-        /// SendAsync is a generic method that can be used to call a contract Set method and execute the transaction.
+        /// SendAsync is a generic method that can be used to call a contract method that changes states and execute the transaction.
         /// </summary>
         /// <param name="signingKey">EOA Wallet to sign the transaction with.</param>
         /// <param name="methodName">Name of the method to call from the contract.</param>

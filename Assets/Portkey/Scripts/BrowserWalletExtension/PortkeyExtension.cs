@@ -16,6 +16,10 @@ namespace Portkey.BrowserWalletExtension
     
     public class PortkeyExtension : IBrowserWalletExtension
     {
+        private static readonly string CHROME_PORTKEY_DOWNLOAD_URL = "https://chrome.google.com/webstore/detail/portkey-did-crypto-nft/hpjiiechbbhefmpggegmahejiiphbmij";
+        private static readonly string OTHERS_PORTKEY_DOWNLOAD_URL = "https://portkey.finance/download";
+        private PortkeyExtensionConnectCallback _callbackObject = null;
+        
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern bool IsPortkeyExtensionExist();
@@ -23,33 +27,49 @@ namespace Portkey.BrowserWalletExtension
         private static extern void Connect();
         [DllImport("__Internal")]
         private static extern void GetCurrentManagerAddress();
+        [DllImport("__Internal")]
+        private static extern string GetBrowserVersion();
 #endif
         
-        public void Connect(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        public void Connect(SuccessCallback<DIDAccountInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
         {
+            if (_callbackObject != null)
+            {
+                _callbackObject.Destroy();
+                _callbackObject = null;
+            }
+            
 #if UNITY_WEBGL && !UNITY_EDITOR
             if (IsPortkeyExtensionExist())
             {
-                Listen(successCallback, errorCallback);
+                Listen(successCallback, OnDisconnected, errorCallback);
                 Connect();
+                return;
+            }
+            
+            var browserVersion = GetBrowserVersion();
+            if (browserVersion.Contains("Chrome"))
+            {
+                Application.OpenURL(CHROME_PORTKEY_DOWNLOAD_URL);
             }
             else
             {
-                errorCallback("Portkey extension not found!");
+                Application.OpenURL(OTHERS_PORTKEY_DOWNLOAD_URL);
             }
 #endif
         }
 
-        private void Listen(SuccessCallback<DIDWalletInfo> successCallback, ErrorCallback errorCallback)
+        private void Listen(SuccessCallback<DIDAccountInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             CaAddresses caAddresses = null;
             
             var gameObject = new GameObject("PortkeyExtensionConnectCallback");
-            var callbackComponent = gameObject.AddComponent<PortkeyExtensionConnectCallback>();
-            callbackComponent.OnErrorCallback = OnError;
-            callbackComponent.OnConnectCallback = OnConnect;
-            callbackComponent.OnGetManagementAccountAddressCallback = OnGetManagementAccountAddress;
+            _callbackObject = gameObject.AddComponent<PortkeyExtensionConnectCallback>();
+            _callbackObject.OnErrorCallback = OnError;
+            _callbackObject.OnConnectCallback = OnConnect;
+            _callbackObject.OnDisconnectedCallback = OnDisconnected;
+            _callbackObject.OnGetManagementAccountAddressCallback = OnGetManagementAccountAddress;
             
             void OnConnect(string data)
             {
@@ -60,7 +80,7 @@ namespace Portkey.BrowserWalletExtension
                 catch (Exception e)
                 {
                     Debugger.LogException(e);
-                    callbackComponent.OnError(e.Message);
+                    _callbackObject.OnError(e.Message);
                     return;
                 }
                 
@@ -71,22 +91,22 @@ namespace Portkey.BrowserWalletExtension
             {
                 if (address == null)
                 {
-                    callbackComponent.OnError("Get management account address failed!");
+                    _callbackObject.OnError("Get management account address failed!");
                     return;
                 }
                 if(caAddresses?.AELF.Count == 0)
                 {
-                    callbackComponent.OnError("Connecting to Portkey Extension failed!");
+                    _callbackObject.OnError("Connecting to Portkey Extension failed!");
                     return;
                 }
 
-                var walletInfo = new DIDWalletInfo("AELF", null, 0, new CAInfo
+                var accountInfo = new DIDAccountInfo("AELF", null, 0, new CAInfo
                 {
                     caAddress = caAddresses.AELF[0],
                     caHash = null
                 }, null, AddManagerType.Recovery, new PortkeyExtensionSigningKey(address));
                 
-                successCallback?.Invoke(walletInfo);
+                successCallback?.Invoke(accountInfo);
             }
 
             void OnError(string error)

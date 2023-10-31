@@ -4171,7 +4171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d76b15202904f01a49b942da687eaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
   confirmSignOutDialog: {fileID: 1606297849121987431}
   chainInfoText: {fileID: 5608933622871011710}
   tokenInfos:
@@ -6793,7 +6793,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _loadingView: {fileID: 1010083445183272794}
   _errorView: {fileID: 5037432561597435791}
-  _did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
 --- !u!1 &3163420711600739922
 GameObject:
   m_ObjectHideFlags: 0
@@ -8981,7 +8981,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24eae586b9a0640f49dc8bc8a0801f03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
   qrCodeImage: {fileID: 5574018252620463863}
 --- !u!1 &4434103366302889048
 GameObject:
@@ -9423,7 +9423,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 181f46811ea044019816320c49afff59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
   errorText: {fileID: 5280008369735387728}
   walletView: {fileID: 3453700473384200439}
   setPinViewController: {fileID: 4979886695840012266}
@@ -10916,7 +10916,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b156c7775419c4819a2b1a88d9685a27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
   setPINViewController: {fileID: 4979886695840012266}
   signInViewController: {fileID: 2058989683410225390}
   verifyCodeViewController: {fileID: 5148459236397785493}
@@ -11274,7 +11274,7 @@ MonoBehaviour:
   pinProgress: {fileID: 3090228614305500969}
   header: {fileID: 6349875265650024062}
   errorMessage: {fileID: 2756956093969332288}
-  did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
   walletView: {fileID: 3453700473384200439}
   biometricView: {fileID: 651648840854701098}
   loadingView: {fileID: 1010083445183272794}
@@ -12004,7 +12004,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   errorView: {fileID: 5037432561597435791}
   loadingView: {fileID: 1010083445183272794}
-  did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
   detailsText: {fileID: 789843522461751441}
   guardianDisplay: {fileID: 1272362755318428026}
   digitSequenceInput: {fileID: 1377237930732483738}
@@ -16118,7 +16118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98e69d4700b954b3e90963aefd3b32e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
   unregisteredView: {fileID: 2935962257760947544}
   guardianApprovalViewController: {fileID: 4753605759836814766}
   errorView: {fileID: 5037432561597435791}
@@ -16127,7 +16127,7 @@ MonoBehaviour:
   phoneLoginViewController: {fileID: 979966043043314324}
   setPinViewController: {fileID: 4979886695840012266}
   qrCodeViewController: {fileID: 7528380094702758031}
-  cancelLoadingViewController: {fileID: 0}
+  cancelLoadingViewController: {fileID: 3672682456458351074}
 --- !u!1 &8421088593639825472
 GameObject:
   m_ObjectHideFlags: 0
@@ -16951,7 +16951,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48b045643da3545138eb25033609f015, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  did: {fileID: 1058882298470602853}
+  portkeySDK: {fileID: 1058882298470602853}
   pinProgress: {fileID: 4325263628159366777}
   setPinViewController: {fileID: 4979886695840012266}
   body: {fileID: 1053819497835100268}

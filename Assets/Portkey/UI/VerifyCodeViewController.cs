@@ -44,7 +44,11 @@ namespace Portkey.UI
         public void Initialize(Guardian guardian, SuccessCallback<ApprovedGuardian> onSuccess)
         {
             Initialize(guardian.id, guardian.accountType, guardian.verifier.name);
-            StartCoroutine(portkeySDK.AuthService.Verify(guardian, onSuccess));
+            StartCoroutine(portkeySDK.AuthService.Verify(guardian, approvedGuardian =>
+            {
+                CloseView();
+                onSuccess?.Invoke(approvedGuardian);
+            }));
         }
 
         public void OpenView()

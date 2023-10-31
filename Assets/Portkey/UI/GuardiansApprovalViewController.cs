@@ -170,14 +170,8 @@ namespace Portkey.UI
                 {
                     continue;
                 }
-
-                ICredential cred = null;
-                if (_credential.AccountType == guardian.accountType && _credential.SocialInfo.sub == guardian.id)
-                {
-                    cred = _credential;
-                }
                 
-                guardianItem.Initialize(guardian, cred, portkeySDK, verifyCodeViewController, approvedGuardian =>
+                guardianItem.Initialize(guardian, _credential, portkeySDK, verifyCodeViewController, approvedGuardian =>
                 {
                     _approvedGuardians.Add(approvedGuardian);
                     UpdateGuardianInfoUI();

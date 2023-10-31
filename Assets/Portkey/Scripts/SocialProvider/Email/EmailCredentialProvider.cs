@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
 using Portkey.Core;
+using Portkey.Core.Captcha;
 
 namespace Portkey.SocialProvider
 {
     public class EmailCredentialProvider : CodeCredentialProviderBase<EmailCredential>
     {
-        public EmailCredentialProvider(IVerifyCodeLogin emailLogin, IInternalAuthMessage message, IVerifierService verifierService) : base(emailLogin, message, verifierService)
+        public EmailCredentialProvider(IVerifyCodeLogin emailLogin, IInternalAuthMessage message, IVerifierService verifierService, ICaptcha captcha) : base(emailLogin, message, verifierService, captcha)
         {
         }
         

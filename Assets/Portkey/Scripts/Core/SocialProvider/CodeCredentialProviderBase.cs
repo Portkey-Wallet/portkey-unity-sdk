@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Portkey.Core.Captcha;
 using Portkey.Utilities;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ namespace Portkey.Core
         protected readonly IInternalAuthMessage _message;
         protected readonly IVerifyCodeLogin _codeLogin;
         private readonly IVerifierService _verifierService;
+        private readonly ICaptcha _captcha;
         private string _verificationCode = null;
         private Coroutine _coroutine = null;
         private bool _sendCodeConfirmation = false;
@@ -18,11 +20,12 @@ namespace Portkey.Core
         
         public abstract AccountType AccountType { get; }
         
-        protected CodeCredentialProviderBase(IVerifyCodeLogin codeLogin, IInternalAuthMessage message, IVerifierService verifierService)
+        protected CodeCredentialProviderBase(IVerifyCodeLogin codeLogin, IInternalAuthMessage message, IVerifierService verifierService, ICaptcha captcha)
         {
             _message = message;
             _codeLogin = codeLogin;
             _verifierService = verifierService;
+            _captcha = captcha;
         }
         
         private void OnInputVerificationCode(string code)
@@ -49,14 +52,14 @@ namespace Portkey.Core
             }, _message.Error));
         }
         
-        public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback)
+        public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
             if(credential is not ICodeCredential codeCredential)
             {
                 throw new Exception("Invalid credential type!");
             }
             
-            yield return _codeLogin.VerifyCode(codeCredential, result =>
+            yield return _codeLogin.VerifyCode(codeCredential, operationType, result =>
             {
                 successCallback?.Invoke(new VerifiedCredential(codeCredential, result.verificationDoc, result.signature));
             }, _message.Error);
@@ -78,7 +81,7 @@ namespace Portkey.Core
             if (verifierId != null)
             {
                 _sendCodeParams.verifierId = verifierId;
-                SendCode(_sendCodeParams, successCallback);
+                ExecuteCaptchaThenSendCode(successCallback);
                 yield break;
             }
 
@@ -92,16 +95,25 @@ namespace Portkey.Core
 
                     _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
                     {
-                        SendCode(_sendCodeParams, successCallback);
+                        ExecuteCaptchaThenSendCode(successCallback);
                     }));
                 }
                 else
                 {
-                    SendCode(_sendCodeParams, successCallback);
+                    ExecuteCaptchaThenSendCode(successCallback);
                 }
             }, _message.Error);
         }
-        
+
+        private void ExecuteCaptchaThenSendCode(SuccessCallback<T> successCallback)
+        {
+            _captcha.ExecuteCaptcha(captchaToken =>
+            {
+                _sendCodeParams.captchaToken = captchaToken;
+                SendCode(_sendCodeParams, successCallback);
+            }, _message.Error);
+        }
+
         private void SendCode(SendCodeParams param, SuccessCallback<T> successCallback)
         {
             StaticCoroutine.StartCoroutine(_codeLogin.SendCode(param, session =>

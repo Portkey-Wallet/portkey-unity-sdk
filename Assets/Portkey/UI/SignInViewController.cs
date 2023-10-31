@@ -20,13 +20,11 @@ namespace Portkey.UI
         [SerializeField] private QRCodeViewController qrCodeViewController;
         [SerializeField] private CancelLoadingViewController cancelLoadingViewController;
 
-#if UNITY_WEBGL
-        [DllImport("__Internal")]
-        private static extern void ExecuteRecaptcha();
-#endif
         public void OnClickRecaptcha()
         {
-            ExecuteRecaptcha();
+#if UNITY_WEBGL
+            //ExecuteRecaptcha();
+#endif
         }
         
         public void SignIn(int type)
@@ -65,7 +63,7 @@ namespace Portkey.UI
 #if UNITY_WEBGL && !UNITY_EDITOR
         public void SignInWithExtension()
         {
-            StartCoroutine(did.AuthService.LoginWithPortkeyExtension(LoggedIn));
+            StartCoroutine(portkeySDK.AuthService.LoginWithPortkeyExtension(LoggedIn));
         }
 #endif
 
@@ -74,15 +72,15 @@ namespace Portkey.UI
 #if UNITY_WEBGL && !UNITY_EDITOR
             SignInWithExtension();
 #elif (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-            did.AuthService.Message.Loading(true, "Loading...");
+            portkeySDK.AuthService.Message.Loading(true, "Loading...");
             cancelLoadingViewController.Initialize(did, gameObject, () =>
             {
-                did.AuthService.Message.CancelLoginWithPortkeyApp();
+                portkeySDK.AuthService.Message.CancelLoginWithPortkeyApp();
             });
-            StartCoroutine(did.AuthService.LoginWithPortkeyApp(walletInfo =>
+            StartCoroutine(portkeySDK.AuthService.LoginWithPortkeyApp(accountInfo =>
             {
                 cancelLoadingViewController.CloseView();
-                LoggedIn(walletInfo);
+                LoggedIn(accountInfo);
             }));
 #endif
         }

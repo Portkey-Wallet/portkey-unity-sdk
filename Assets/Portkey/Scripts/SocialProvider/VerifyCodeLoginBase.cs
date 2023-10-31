@@ -40,8 +40,8 @@ namespace Portkey.SocialProvider
                 },
                 headers = new Dictionary<string, string>
                 {
-                    {"version", "1.3.5"}
-                    //TODO: to get recaptcha response token
+                    {"version", "1.3.5"},
+                    {"Recaptchatoken", param.captchaToken ?? ""}
                 }
             };
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>
@@ -53,7 +53,7 @@ namespace Portkey.SocialProvider
             }, errorCallback);
         }
 
-        public IEnumerator VerifyCode(ICodeCredential credential, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyCode(ICodeCredential credential, OperationTypeEnum operationType, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback)
         {
             var verifyCodeParams = new VerifyVerificationCodeParams
             {
@@ -61,7 +61,8 @@ namespace Portkey.SocialProvider
                 verificationCode = credential.SignInToken,
                 guardianIdentifier = credential.SocialInfo.sub,
                 verifierId = credential.VerifierId,
-                chainId = credential.ChainId
+                chainId = credential.ChainId,
+                operationType = operationType
             };
             yield return _portkeySocialService.VerifyVerificationCode(verifyCodeParams, (response) =>
             {

@@ -35,6 +35,7 @@ namespace Portkey.Core
         public string guardianIdentifier;
         public string verifierId;
         public string chainId;
+        public OperationTypeEnum operationType;
     }
 
     [Serializable]

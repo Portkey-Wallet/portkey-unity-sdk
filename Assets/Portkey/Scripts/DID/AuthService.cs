@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Portkey.Captcha;
 using Portkey.Core;
+using Portkey.Core.Captcha;
 using Portkey.SocialProvider;
 using Portkey.Utilities;
 using UnityEngine;
@@ -19,6 +21,7 @@ namespace Portkey.DID
         private readonly ISocialVerifierProvider _socialVerifierProvider;
         private readonly IVerifierService _verifierService;
         private readonly PortkeyConfig _config;
+        private readonly ICaptcha _captcha;
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }
@@ -37,12 +40,13 @@ namespace Portkey.DID
             
             _verifierService = verifierService;
             Message = this;
+            _captcha = new GoogleRecaptcha();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
             AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
             GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
-            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, this, _verifierService);
-            EmailCredentialProvider = new EmailCredentialProvider(Email, this, _verifierService);
+            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, this, _verifierService, _captcha);
+            EmailCredentialProvider = new EmailCredentialProvider(Email, this, _verifierService, _captcha);
 
             Message.ChainId = DEFAULT_CHAIN_ID;
             OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;
@@ -283,7 +287,7 @@ namespace Portkey.DID
                     OnError("Credential is verified differently from Guardian's definition.");
                     return;
                 }
-                VerifyEmailCredential(cred, verifiedCredential =>
+                VerifyEmailCredential(cred, OperationTypeEnum.communityRecovery, verifiedCredential =>
                 {
                     ReturnApprovedGuardian(guard, verifiedCredential);
                 });
@@ -296,7 +300,7 @@ namespace Portkey.DID
                     OnError("Credential is verified differently from Guardian's definition.");
                     return;
                 }
-                VerifyPhoneCredential(cred, verifiedCredential =>
+                VerifyPhoneCredential(cred, OperationTypeEnum.communityRecovery, verifiedCredential =>
                 {
                     ReturnApprovedGuardian(guard, verifiedCredential);
                 });
@@ -327,14 +331,14 @@ namespace Portkey.DID
             return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
         }
 
-        private void VerifyPhoneCredential(PhoneCredential credential, SuccessCallback<VerifiedCredential> successCallback)
+        private void VerifyPhoneCredential(PhoneCredential credential, OperationTypeEnum operationType, SuccessCallback<VerifiedCredential> successCallback)
         {
-            StaticCoroutine.StartCoroutine(PhoneCredentialProvider.Verify(credential, successCallback));
+            StaticCoroutine.StartCoroutine(PhoneCredentialProvider.Verify(credential, successCallback, operationType));
         }
         
-        private void VerifyEmailCredential(EmailCredential credential, SuccessCallback<VerifiedCredential> successCallback)
+        private void VerifyEmailCredential(EmailCredential credential, OperationTypeEnum operationType, SuccessCallback<VerifiedCredential> successCallback)
         {
-            StaticCoroutine.StartCoroutine(EmailCredentialProvider.Verify(credential, successCallback));
+            StaticCoroutine.StartCoroutine(EmailCredentialProvider.Verify(credential, successCallback, operationType));
         }
 
         private void VerifySocialCredential(ICredential credential, string chainId, string verifierId, OperationTypeEnum operationType, SuccessCallback<VerifiedCredential> successCallback)
@@ -369,7 +373,7 @@ namespace Portkey.DID
         {
             yield return PhoneCredentialProvider.Get(phoneNumber, phoneCredential =>
             {
-                VerifyPhoneCredential(phoneCredential, verifiedCredential =>
+                VerifyPhoneCredential(phoneCredential, OperationTypeEnum.register, verifiedCredential =>
                 {
                     StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                 });
@@ -380,7 +384,7 @@ namespace Portkey.DID
         {
             yield return EmailCredentialProvider.Get(emailAddress, emailCredential =>
             {
-                VerifyEmailCredential(emailCredential, verifiedCredential =>
+                VerifyEmailCredential(emailCredential, OperationTypeEnum.register, verifiedCredential =>
                 {
                     StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                 });
@@ -452,14 +456,14 @@ namespace Portkey.DID
             {
                 case AccountType.Email:
                     var emailCredential = (EmailCredential)credential;
-                    VerifyEmailCredential(emailCredential, verifiedCredential =>
+                    VerifyEmailCredential(emailCredential, OperationTypeEnum.register, verifiedCredential =>
                     {
                         StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                     });
                     break;
                 case AccountType.Phone:
                     var phoneCredential = (PhoneCredential)credential;
-                    VerifyPhoneCredential(phoneCredential, verifiedCredential =>
+                    VerifyPhoneCredential(phoneCredential, OperationTypeEnum.register, verifiedCredential =>
                     {
                         StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                     });

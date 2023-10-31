@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
 using Portkey.Core;
+using Portkey.Core.Captcha;
 
 namespace Portkey.SocialProvider
 {
     public class PhoneCredentialProvider : CodeCredentialProviderBase<PhoneCredential>
     {
-        public PhoneCredentialProvider(IVerifyCodeLogin phoneLogin, IInternalAuthMessage message, IVerifierService verifierService) : base(phoneLogin, message, verifierService)
+        public PhoneCredentialProvider(IVerifyCodeLogin phoneLogin, IInternalAuthMessage message, IVerifierService verifierService, ICaptcha captcha) : base(phoneLogin, message, verifierService, captcha)
         {
         }
         

@@ -18,7 +18,7 @@ namespace Portkey.Core
         
         public abstract AccountType AccountType { get; }
         
-        public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback)
+        public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
             if (credential is not T cred)
             {
@@ -37,7 +37,7 @@ namespace Portkey.Core
                     verifierId = verifierServer.id,
                     accessToken = credential.SignInToken,
                     chainId = chainId,
-                    operationType = (int)OperationTypeEnum.register
+                    operationType = (int)operationType
                 };
                 socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
                 {

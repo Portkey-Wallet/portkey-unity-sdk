@@ -13,7 +13,7 @@ namespace Portkey.Captcha
             return _captcha;
         }
         
-        private ICaptcha GetCaptchaByPlatform()
+        private static ICaptcha GetCaptchaByPlatform()
         {
 #if UNITY_EDITOR || UNITY_STANDALONE
             throw new NotImplementedException("Platform not supported");

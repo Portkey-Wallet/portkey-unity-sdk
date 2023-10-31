@@ -1,4 +1,4 @@
-namespace Portkey.Core.Captcha
+namespace Portkey.Core
 {
     public interface ICaptcha
     {

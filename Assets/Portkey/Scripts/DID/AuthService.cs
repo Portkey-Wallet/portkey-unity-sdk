@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Portkey.Captcha;
 using Portkey.Core;
-using Portkey.Core.Captcha;
 using Portkey.SocialProvider;
 using Portkey.Utilities;
 using UnityEngine;
@@ -21,7 +20,7 @@ namespace Portkey.DID
         private readonly ISocialVerifierProvider _socialVerifierProvider;
         private readonly IVerifierService _verifierService;
         private readonly PortkeyConfig _config;
-        private readonly ICaptcha _captcha;
+        private readonly ICaptchaProvider _captchaProvider;
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }
@@ -40,13 +39,13 @@ namespace Portkey.DID
             
             _verifierService = verifierService;
             Message = this;
-            _captcha = new GoogleRecaptcha();
+            _captchaProvider = new CaptchaProvider();
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
             AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
             GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
-            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, this, _verifierService, _captcha);
-            EmailCredentialProvider = new EmailCredentialProvider(Email, this, _verifierService, _captcha);
+            PhoneCredentialProvider = new PhoneCredentialProvider(Phone, this, _verifierService, _captchaProvider.GetCaptcha());
+            EmailCredentialProvider = new EmailCredentialProvider(Email, this, _verifierService, _captchaProvider.GetCaptcha());
 
             Message.ChainId = DEFAULT_CHAIN_ID;
             OnCancelLoginWithQRCodeEvent += _did.CancelLoginWithQRCode;

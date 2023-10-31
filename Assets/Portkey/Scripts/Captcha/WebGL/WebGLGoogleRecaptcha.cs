@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Portkey.Captcha
 {
-    public class GoogleRecaptcha : ICaptcha
+    public class WebGLGoogleRecaptcha : ICaptcha
     {
         private ICaptchaCallback _callbackObject;
 #if UNITY_WEBGL

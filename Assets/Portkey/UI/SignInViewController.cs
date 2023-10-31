@@ -55,7 +55,7 @@ namespace Portkey.UI
 #if UNITY_WEBGL && !UNITY_EDITOR
         public void SignInWithExtension()
         {
-            StartCoroutine(did.AuthService.LoginWithPortkeyExtension(LoggedIn));
+            StartCoroutine(portkeySDK.AuthService.LoginWithPortkeyExtension(LoggedIn));
         }
 #endif
 
@@ -65,11 +65,11 @@ namespace Portkey.UI
             SignInWithExtension();
 #elif (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
             did.AuthService.Message.Loading(true, "Loading...");
-            cancelLoadingViewController.Initialize(did, gameObject, () =>
+            cancelLoadingViewController.Initialize(portkeySDK, gameObject, () =>
             {
-                did.AuthService.Message.CancelLoginWithPortkeyApp();
+                portkeySDK.AuthService.Message.CancelLoginWithPortkeyApp();
             });
-            StartCoroutine(did.AuthService.LoginWithPortkeyApp(walletInfo =>
+            StartCoroutine(portkeySDK.AuthService.LoginWithPortkeyApp(walletInfo =>
             {
                 cancelLoadingViewController.CloseView();
                 LoggedIn(walletInfo);

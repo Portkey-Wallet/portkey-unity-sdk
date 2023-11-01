@@ -16,8 +16,9 @@ namespace Portkey.Captcha
         public void ExecuteCaptcha(SuccessCallback<string> successCallback, ErrorCallback errorCallback)
         {
             Listen(successCallback, errorCallback);
-            
+#if UNITY_WEBGL
             ExecuteRecaptcha();
+#endif
         }
         
         private void Listen(SuccessCallback<string> successCallback, ErrorCallback errorCallback)

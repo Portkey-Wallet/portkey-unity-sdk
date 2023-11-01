@@ -64,7 +64,7 @@ namespace Portkey.UI
 #if UNITY_WEBGL && !UNITY_EDITOR
             SignInWithExtension();
 #elif (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-            did.AuthService.Message.Loading(true, "Loading...");
+            portkeySDK.AuthService.Message.Loading(true, "Loading...");
             cancelLoadingViewController.Initialize(portkeySDK, gameObject, () =>
             {
                 portkeySDK.AuthService.Message.CancelLoginWithPortkeyApp();

@@ -11,6 +11,7 @@ namespace Portkey.SocialProvider
         public Action<string> OnFailureCallback { get; set; }
         
         private bool _isSuccess;
+        private Coroutine _coroutine = null;
 
         private void Start()
         {
@@ -23,7 +24,7 @@ namespace Portkey.SocialProvider
 
             if(!pauseStatus)
             {
-                StartCoroutine(WaitAndFail(2.5f));
+                _coroutine = StartCoroutine(WaitAndFail(120.0f));
             }
         }
 
@@ -42,6 +43,11 @@ namespace Portkey.SocialProvider
             _isSuccess = true;
             Debugger.Log($"IOSPortkeyAppleLoginOnSuccess {data}");
 
+            if(_coroutine != null)
+            {
+                StopCoroutine(_coroutine);
+            }
+            
             OnSuccessCallback?.Invoke(data);
             Destroy(gameObject);
         }

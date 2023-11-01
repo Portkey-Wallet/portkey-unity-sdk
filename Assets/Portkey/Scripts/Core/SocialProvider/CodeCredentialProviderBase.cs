@@ -51,7 +51,43 @@ namespace Portkey.Core
                 _message.ResendVerificationCodeComplete();
             }, _message.Error));
         }
-        
+
+        public IEnumerator SendCode(string guardianId, SuccessCallback<string> successCallback, string chainId = null, string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
+        {
+            _sendCodeParams = new SendCodeParams
+            {
+                guardianId = guardianId,
+                chainId = chainId,
+                operationType = operationType
+            };
+            
+            if (verifierId != null)
+            {
+                _sendCodeParams.verifierId = verifierId;
+                ExecuteCaptchaThenSendCode(successCallback);
+                yield break;
+            }
+
+            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            {
+                _sendCodeParams.verifierId = verifierServer.id;
+
+                if (EnableCodeSendConfirmationFlow)
+                {
+                    _message.VerifierServerSelected(guardianId, AccountType, verifierServer.name);
+
+                    _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
+                    {
+                        ExecuteCaptchaThenSendCode(successCallback);
+                    }));
+                }
+                else
+                {
+                    ExecuteCaptchaThenSendCode(successCallback);
+                }
+            }, _message.Error);
+        }
+
         public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
             if(credential is not ICodeCredential codeCredential)
@@ -105,6 +141,20 @@ namespace Portkey.Core
             }, _message.Error);
         }
 
+        private void ExecuteCaptchaThenSendCode(SuccessCallback<string> successCallback)
+        {
+            _captcha.ExecuteCaptcha(captchaToken =>
+            {
+                _sendCodeParams.captchaToken = captchaToken;
+                SendCode(_sendCodeParams, successCallback);
+            }, _message.Error);
+        }
+        
+        private void SendCode(SendCodeParams param, SuccessCallback<string> successCallback)
+        {
+            StaticCoroutine.StartCoroutine(_codeLogin.SendCode(param, successCallback, _message.Error));
+        }
+        
         private void ExecuteCaptchaThenSendCode(SuccessCallback<T> successCallback)
         {
             _captcha.ExecuteCaptcha(captchaToken =>
@@ -128,6 +178,7 @@ namespace Portkey.Core
 
             _coroutine = StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
             {
+                Debugger.LogError("Received verification code!");
                 CleanUp();
                 
                 var newCredential = CreateCredential(guardianId, verifierId, chainId, code);

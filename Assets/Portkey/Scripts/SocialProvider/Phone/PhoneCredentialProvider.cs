@@ -18,7 +18,7 @@ namespace Portkey.SocialProvider
         }
 
         // TODO: WIP
-        public ICredential Get(PhoneNumber phoneNumber, string verificationCode)
+        public ICredential Get(PhoneNumber phoneNumber, string chainId, string verificationCode)
         {
             if(_codeLogin.VerifierId == null)
             {
@@ -29,7 +29,7 @@ namespace Portkey.SocialProvider
                 throw new Exception("Please input verification code!");
             }
             
-            return new PhoneCredential(phoneNumber, verificationCode, _message.ChainId, _codeLogin.VerifierId);
+            return new PhoneCredential(phoneNumber, verificationCode, chainId, _codeLogin.VerifierId);
         }
 
         public override AccountType AccountType => AccountType.Phone;

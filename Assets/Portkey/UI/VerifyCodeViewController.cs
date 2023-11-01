@@ -1,5 +1,7 @@
+using System;
 using Portkey.Core;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -17,6 +19,12 @@ namespace Portkey.UI
         [SerializeField] private GuardianDisplayComponent guardianDisplay = null;
         [SerializeField] private DigitSequenceInputComponent digitSequenceInput = null;
         [SerializeField] private TimedButtonComponent resendButton = null;
+        
+        private string _guardianId = null;
+        private string _chainId = null;
+        private AccountType _accountType = AccountType.Email;
+        private Action<ICredential> _onGetCredential = null;
+        private Action _sendCode = null;
 
         private void Start()
         {
@@ -26,6 +34,10 @@ namespace Portkey.UI
 
         public void Initialize(string guardianId, AccountType accountType, string verifierServerName)
         {
+            Debugger.LogError($"Initialize without Guardian. guardianId: {guardianId} accountType: {accountType}");
+            
+            _guardianId = guardianId;
+            _accountType = accountType;
             digitSequenceInput.Clear();
             guardianDisplay.Initialize(guardianId, accountType, verifierServerName);
             detailsText.text = $"A 6-digit verification code has been sent to {guardianId}. Please enter the code within 10 minutes.";
@@ -38,17 +50,51 @@ namespace Portkey.UI
 
         private void OnError(string error)
         {
-            //StartCoroutine(DID.AuthService.EmailCredentialProvider.Verify(credential, OpenSetPINView));
+            //TODO: re-establish verification of code
         }
         
         public void Initialize(Guardian guardian, SuccessCallback<ApprovedGuardian> onSuccess)
         {
             Initialize(guardian.id, guardian.accountType, guardian.verifier.name);
-            StartCoroutine(portkeySDK.AuthService.Verify(guardian, approvedGuardian =>
+            
+            Debugger.LogError($"Initialize with Guardian. guardianId: {guardian.id} accountType: {guardian.accountType}");
+            
+            _chainId = guardian.chainId;
+            
+            switch(guardian.accountType)
             {
-                CloseView();
-                onSuccess?.Invoke(approvedGuardian);
-            }));
+                case AccountType.Email:
+                    _sendCode = () =>
+                    {
+                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardian.id,
+                            session => { }, guardian.chainId, guardian.verifier.id,
+                            OperationTypeEnum.communityRecovery));
+                    };
+                    break;
+                case AccountType.Phone:
+                    _sendCode = () =>
+                    {
+                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardian.id,
+                            session => { }, guardian.chainId, guardian.verifier.id,
+                            OperationTypeEnum.communityRecovery));
+                    };
+                    break;
+                case AccountType.Google:
+                case AccountType.Apple:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            _onGetCredential = (credential) =>
+            {
+                StartCoroutine(portkeySDK.AuthService.Verify(guardian, approvedGuardian =>
+                {
+                    CloseView();
+                    onSuccess?.Invoke(approvedGuardian);
+                }, credential));
+            };
+            
+            _sendCode?.Invoke();
         }
 
         public void OpenView()
@@ -65,15 +111,36 @@ namespace Portkey.UI
                 return;
             }
             
-            portkeySDK.AuthService.Message.InputVerificationCode(code);
+            //portkeySDK.AuthService.Message.InputVerificationCode(code);
+            
+            ICredential credential = null;
+            switch(_accountType)
+            {
+                case AccountType.Email:
+                    credential= portkeySDK.AuthService.EmailCredentialProvider.Get(EmailAddress.Parse(_guardianId), _chainId, code);
+                    break;
+                case AccountType.Phone:
+                    credential= portkeySDK.AuthService.PhoneCredentialProvider.Get(PhoneNumber.Parse(_guardianId), _chainId, code);
+                    break;
+                case AccountType.Google:
+                case AccountType.Apple:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            _onGetCredential?.Invoke(credential);
         }
         
         private void SendVerificationCode()
         {
             portkeySDK.AuthService.Message.Loading(true, "Loading...");
 
+            /*
             portkeySDK.AuthService.Message.ResendVerificationCode();
             portkeySDK.AuthService.Message.OnResendVerificationCodeCompleteEvent += OnResendVerificationCodeComplete;
+            */
+            
+            _sendCode?.Invoke();
         }
 
         private void OnResendVerificationCodeComplete()

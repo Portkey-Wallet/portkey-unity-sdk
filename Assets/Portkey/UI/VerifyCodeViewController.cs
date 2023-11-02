@@ -32,10 +32,48 @@ namespace Portkey.UI
             resendButton.OnClick += SendVerificationCode;
         }
 
-        public void Initialize(string guardianId, AccountType accountType, string verifierServerName)
+        public void Initialize(string guardianId, AccountType accountType, VerifierServerResult verifier, SuccessCallback<VerifiedCredential> onSuccess)
         {
-            Debugger.LogError($"Initialize without Guardian. guardianId: {guardianId} accountType: {accountType}");
+            Initialize(guardianId, accountType, verifier.name);
             
+            switch(accountType)
+            {
+                case AccountType.Email:
+                    _sendCode = () =>
+                    {
+                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardianId,
+                            session => { }, null, verifier.id,
+                            OperationTypeEnum.communityRecovery));
+                    };
+                    break;
+                case AccountType.Phone:
+                    _sendCode = () =>
+                    {
+                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardianId,
+                            session => { }, null, verifier.id,
+                            OperationTypeEnum.communityRecovery));
+                    };
+                    break;
+                case AccountType.Google:
+                case AccountType.Apple:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            _sendCode?.Invoke();
+            
+            _onGetCredential = (credential) =>
+            {
+                StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.Verify(credential, verifiedCredential =>
+                {
+                    CloseView();
+                    onSuccess?.Invoke(verifiedCredential);
+                }));
+            };
+        }
+        
+        private void Initialize(string guardianId, AccountType accountType, string verifierServerName)
+        {
             _guardianId = guardianId;
             _accountType = accountType;
             digitSequenceInput.Clear();
@@ -56,8 +94,6 @@ namespace Portkey.UI
         public void Initialize(Guardian guardian, SuccessCallback<ApprovedGuardian> onSuccess)
         {
             Initialize(guardian.id, guardian.accountType, guardian.verifier.name);
-            
-            Debugger.LogError($"Initialize with Guardian. guardianId: {guardian.id} accountType: {guardian.accountType}");
             
             _chainId = guardian.chainId;
             
@@ -85,6 +121,8 @@ namespace Portkey.UI
                     throw new ArgumentOutOfRangeException();
             }
             
+            _sendCode?.Invoke();
+            
             _onGetCredential = (credential) =>
             {
                 StartCoroutine(portkeySDK.AuthService.Verify(guardian, approvedGuardian =>
@@ -93,8 +131,6 @@ namespace Portkey.UI
                     onSuccess?.Invoke(approvedGuardian);
                 }, credential));
             };
-            
-            _sendCode?.Invoke();
         }
 
         public void OpenView()

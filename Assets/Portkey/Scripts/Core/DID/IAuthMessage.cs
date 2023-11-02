@@ -20,7 +20,7 @@ namespace Portkey.Core
         delegate void OnLoadingHandler(bool show, string message);
         delegate void OnErrorHandler(string error);
         delegate void OnChainIdChangedHandler(string chainId);
-        delegate void OnVerifierServerSelectedHandler(string guardianId, AccountType accountType, string verifierServerName);
+        delegate void OnVerifierServerSelectedHandler(string guardianId, AccountType accountType, VerifierServerResult verifier);
         delegate void OnLogoutHandler(LogoutMessage logoutMessage);
         
         /// <summary>

@@ -54,6 +54,8 @@ namespace Portkey.Core
 
         public IEnumerator SendCode(string guardianId, SuccessCallback<string> successCallback, string chainId = null, string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
+            chainId ??= _message.ChainId;
+            
             _sendCodeParams = new SendCodeParams
             {
                 guardianId = guardianId,
@@ -74,7 +76,7 @@ namespace Portkey.Core
 
                 if (EnableCodeSendConfirmationFlow)
                 {
-                    _message.VerifierServerSelected(guardianId, AccountType, verifierServer.name);
+                    _message.VerifierServerSelected(guardianId, AccountType, verifierServer);
 
                     _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
                     {
@@ -121,13 +123,13 @@ namespace Portkey.Core
                 yield break;
             }
 
-            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            yield return _verifierService.GetVerifierServer(chainId, verifier =>
             {
-                _sendCodeParams.verifierId = verifierServer.id;
+                _sendCodeParams.verifierId = verifier.id;
 
                 if (EnableCodeSendConfirmationFlow)
                 {
-                    _message.VerifierServerSelected(guardianId, AccountType, verifierServer.name);
+                    _message.VerifierServerSelected(guardianId, AccountType, verifier);
 
                     _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
                     {

@@ -71,9 +71,9 @@ namespace Portkey.DID
             OnErrorEvent?.Invoke(error);
         }
 
-        public void VerifierServerSelected(string guardianId, AccountType accountType, string verifierServerName)
+        public void VerifierServerSelected(string guardianId, AccountType accountType, VerifierServerResult verifier)
         {
-            OnVerifierServerSelectedEvent?.Invoke(guardianId, accountType, verifierServerName);
+            OnVerifierServerSelectedEvent?.Invoke(guardianId, accountType, verifier);
         }
 
         public void ConfirmSendCode()

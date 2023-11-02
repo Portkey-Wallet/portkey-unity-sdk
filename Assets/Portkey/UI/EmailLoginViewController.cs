@@ -93,12 +93,6 @@ namespace Portkey.UI
                         {
 
                         }));
-                        /*
-                        StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.Get(emailAddress, credential =>
-                        {
-                            StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.Verify(credential, OpenSetPINView));
-                        }));
-                        */
                     });
                     break;
                 default:

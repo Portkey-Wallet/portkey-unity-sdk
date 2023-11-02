@@ -139,11 +139,7 @@ namespace Portkey.DID
                 idHash = guardianDto.identifierHash,
                 chainId = chainId,
                 isLoginGuardian = guardianDto.isLoginGuardian,
-                verifier = new Verifier
-                {
-                    id = verifier.id,
-                    name = verifier.name
-                },
+                verifier = new Verifier(verifier.id, verifier.name),
                 details = new SocialDetails
                 {
                     thirdPartyEmail = guardianDto.thirdPartyEmail,

@@ -31,7 +31,7 @@ namespace Portkey.UI
             resendButton.OnClick += SendVerificationCode;
         }
 
-        public void Initialize(string guardianId, AccountType accountType, VerifierServerResult verifier, SuccessCallback<VerifiedCredential> onSuccess)
+        public void Initialize(string guardianId, AccountType accountType, Verifier verifier, SuccessCallback<VerifiedCredential> onSuccess)
         {
             Initialize(guardianId, accountType, verifier.name);
             

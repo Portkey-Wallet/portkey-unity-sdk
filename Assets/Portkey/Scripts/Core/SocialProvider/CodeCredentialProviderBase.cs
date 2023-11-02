@@ -75,13 +75,13 @@ namespace Portkey.Core
                 yield break;
             }
 
-            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            yield return _verifierService.GetVerifierServer(chainId, verifier =>
             {
-                _sendCodeParams.verifierId = verifierServer.id;
+                _sendCodeParams.verifierId = verifier.id;
 
                 if (EnableCodeSendConfirmationFlow)
                 {
-                    _message.VerifierServerSelected(guardianId, AccountType, verifierServer);
+                    _message.VerifierServerSelected(guardianId, AccountType, new Verifier(verifier));
 
                     _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
                     {
@@ -154,7 +154,7 @@ namespace Portkey.Core
 
                 if (EnableCodeSendConfirmationFlow)
                 {
-                    _message.VerifierServerSelected(guardianId, AccountType, verifier);
+                    _message.VerifierServerSelected(guardianId, AccountType, new Verifier(verifier));
 
                     _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
                     {

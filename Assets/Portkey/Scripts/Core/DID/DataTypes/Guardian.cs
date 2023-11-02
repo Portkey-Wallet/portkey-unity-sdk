@@ -23,5 +23,17 @@ namespace Portkey.Core
     {
         public string id;
         public string name;
+        
+        public Verifier(VerifierServerResult verifierServerResult)
+        {
+            id = verifierServerResult.id;
+            name = verifierServerResult.name;
+        }
+        
+        public Verifier(string id, string name)
+        {
+            this.id = id;
+            this.name = name;
+        }
     }
 }

@@ -121,7 +121,7 @@ namespace Portkey.UI
             unregisteredView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
         }
 
-        protected void OnVerifierServerSelected(string guardianId, AccountType accountType, VerifierServerResult verifier)
+        protected void OnVerifierServerSelected(string guardianId, AccountType accountType, Verifier verifier)
         {
             ShowLoading(false);
             

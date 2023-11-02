@@ -1,6 +1,6 @@
 namespace Portkey.Core
 {
-    public class EmailAddress
+    public class EmailAddress : ICodeIdentifier
     {
         public string String { get; private set; }
         

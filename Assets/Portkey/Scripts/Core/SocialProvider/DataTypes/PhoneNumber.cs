@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace Portkey.Core
 {
-    public class PhoneNumber
+    public class PhoneNumber : ICodeIdentifier
     {
         public string String { get; private set; }
         

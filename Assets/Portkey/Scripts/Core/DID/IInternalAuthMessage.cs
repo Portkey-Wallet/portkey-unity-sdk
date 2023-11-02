@@ -19,6 +19,6 @@ namespace Portkey.Core
         
         void PendingVerificationCodeInput();
         void ResendVerificationCodeComplete();
-        void VerifierServerSelected(string guardianId, AccountType accountType, string verifierServerName);
+        void VerifierServerSelected(string guardianId, AccountType accountType, Verifier verifier);
     }
 }

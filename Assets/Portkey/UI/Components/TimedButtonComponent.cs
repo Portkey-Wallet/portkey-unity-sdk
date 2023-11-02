@@ -8,7 +8,7 @@ namespace Portkey.UI
     {
         [SerializeField] private TextMeshProUGUI description;
         [SerializeField] private Button button;
-        [SerializeField] private float maxInterval = 60.0f;
+        [SerializeField] private float maxInterval = 60.9f;
 
         private float _timer = 0.0f;
         

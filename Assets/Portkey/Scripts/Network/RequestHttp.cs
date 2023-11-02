@@ -26,7 +26,7 @@ namespace Portkey.Network
                 request.SetRequestHeader(header.Key, header.Value);
             }
             
-            Debugger.Log(url);
+            Debugger.Log($"[GET] url: {url}");
             
             yield return request.SendWebRequest();
 
@@ -37,7 +37,7 @@ namespace Portkey.Network
                 yield break;
             }
             
-            Debugger.Log($"Responsed from url: {url}\n{request.downloadHandler.text}");
+            Debugger.Log($"[GET] Responsed from url: {url}\n{request.downloadHandler.text}");
             successCallback(request.downloadHandler.text);
         }
 
@@ -100,6 +100,8 @@ namespace Portkey.Network
             {
                 request.SetRequestHeader(header.Key, header.Value);
             }
+            
+            Debugger.Log($"[POST] url: {data.Url}");
 
             yield return request.SendWebRequest();
 
@@ -110,6 +112,7 @@ namespace Portkey.Network
                 yield break;
             }
             
+            Debugger.Log($"[POST] Responsed from url: {data.Url}\n{request.downloadHandler.text}");
             successCallback(request.downloadHandler.text);
         }
 
@@ -126,6 +129,8 @@ namespace Portkey.Network
             }
             request.timeout = HTTP_TIMEOUT;
 
+            Debugger.Log($"[POST] url: {data.Url}");
+            
             yield return request.SendWebRequest();
 
             if (request.error != null || request.result != UnityWebRequest.Result.Success)
@@ -135,6 +140,7 @@ namespace Portkey.Network
                 yield break;
             }
             
+            Debugger.Log($"[POST] Responsed from url: {data.Url}\n{request.downloadHandler.text}");
             successCallback(request.downloadHandler.text);
         }
         

@@ -56,17 +56,13 @@ namespace Portkey.UI
             switch (guardians.Count)
             {
                 case 0:
-                    PortkeySDK.AuthService.Message.OnVerifierServerSelectedEvent += OnVerifierServerSelected;
                     SignUpPrompt(() =>
                     {
                         ShowLoading(true, "Loading...");
-                        StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.Get(phoneNumber, credential =>
+                        StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.SendCode(phoneNumber, result =>
                         {
-                            StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.Verify(credential, OpenSetPINView));
+
                         }));
-                    }, () =>
-                    {
-                        PortkeySDK.AuthService.Message.OnVerifierServerSelectedEvent -= OnVerifierServerSelected;
                     });
                     break;
                 default:

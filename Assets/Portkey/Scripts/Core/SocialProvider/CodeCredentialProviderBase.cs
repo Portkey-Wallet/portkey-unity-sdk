@@ -5,11 +5,12 @@ using UnityEngine;
 
 namespace Portkey.Core
 {
-    public abstract class CodeCredentialProviderBase<T> : ICodeCredentialProvider where T : ICodeCredential
+    public abstract class CodeCredentialProviderBase<TCodeCredential, TCodeIdentifier> : ICodeCredentialProvider where TCodeIdentifier : ICodeIdentifier where TCodeCredential : ICodeCredential
     {
         protected readonly IInternalAuthMessage _message;
         protected readonly IVerifyCodeLogin _codeLogin;
         private readonly IVerifierService _verifierService;
+        private readonly ICaptcha _captcha;
         private string _verificationCode = null;
         private Coroutine _coroutine = null;
         private bool _sendCodeConfirmation = false;
@@ -18,11 +19,12 @@ namespace Portkey.Core
         
         public abstract AccountType AccountType { get; }
         
-        protected CodeCredentialProviderBase(IVerifyCodeLogin codeLogin, IInternalAuthMessage message, IVerifierService verifierService)
+        protected CodeCredentialProviderBase(IVerifyCodeLogin codeLogin, IInternalAuthMessage message, IVerifierService verifierService, ICaptcha captcha)
         {
             _message = message;
             _codeLogin = codeLogin;
             _verifierService = verifierService;
+            _captcha = captcha;
         }
         
         private void OnInputVerificationCode(string code)
@@ -48,23 +50,102 @@ namespace Portkey.Core
                 _message.ResendVerificationCodeComplete();
             }, _message.Error));
         }
+
+        public IEnumerator SendCode(TCodeIdentifier codeIdentifier, SuccessCallback<string> successCallback)
+        {
+            string chainId = null;
+            string verifierId = null;
+            
+            if (_codeLogin.IsProcessingAccount(codeIdentifier.String, out var processingInfo))
+            {
+                chainId = processingInfo.chainId;
+                verifierId = processingInfo.verifierId;
+            }
+
+            yield return SendCode(codeIdentifier.String, successCallback, chainId, verifierId, OperationTypeEnum.register);
+        }
         
-        public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback)
+        public IEnumerator SendCode(Guardian guardian, SuccessCallback<string> successCallback)
+        {
+            yield return SendCode(guardian.id, successCallback, guardian.chainId, guardian.verifier.id, OperationTypeEnum.communityRecovery);
+        }
+
+        private IEnumerator SendCode(string guardianId, SuccessCallback<string> successCallback, string chainId, string verifierId, OperationTypeEnum operationType)
+        {
+            Initialize();
+            
+            chainId ??= _message.ChainId;
+            
+            _sendCodeParams = new SendCodeParams
+            {
+                guardianId = guardianId,
+                chainId = chainId,
+                operationType = operationType
+            };
+            
+            if (verifierId != null)
+            {
+                _sendCodeParams.verifierId = verifierId;
+                ExecuteCaptchaThenSendCode(successCallback);
+                yield break;
+            }
+
+            yield return _verifierService.GetVerifierServer(chainId, verifier =>
+            {
+                _sendCodeParams.verifierId = verifier.id;
+
+                if (EnableCodeSendConfirmationFlow)
+                {
+                    _message.VerifierServerSelected(guardianId, AccountType, new Verifier(verifier));
+
+                    _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
+                    {
+                        ExecuteCaptchaThenSendCode(successCallback);
+                    }));
+                }
+                else
+                {
+                    ExecuteCaptchaThenSendCode(successCallback);
+                }
+            }, _message.Error);
+        }
+        
+        public IEnumerator Get(TCodeIdentifier codeIdentifier, SuccessCallback<TCodeCredential> successCallback, string chainId = null, string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
+        {
+            chainId ??= _message.ChainId;
+            yield return GetCredential(codeIdentifier.String, successCallback, chainId, verifierId, operationType);
+        }
+        
+        public ICredential Get(TCodeIdentifier codeIdentifier, string verificationCode)
+        {
+            if(!_codeLogin.IsProcessingAccount(codeIdentifier.String, out var processingInfo))
+            {
+                throw new Exception("Please call the corresponding CredentialProvider's SendCode first!");
+            }
+            if(string.IsNullOrEmpty(verificationCode))
+            {
+                throw new Exception("Please input verification code!");
+            }
+            
+            return CreateCredential(codeIdentifier.String, processingInfo.verifierId, processingInfo.chainId, verificationCode);
+        }
+
+        public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
             if(credential is not ICodeCredential codeCredential)
             {
                 throw new Exception("Invalid credential type!");
             }
             
-            yield return _codeLogin.VerifyCode(codeCredential, result =>
+            yield return _codeLogin.VerifyCode(codeCredential, operationType, result =>
             {
                 successCallback?.Invoke(new VerifiedCredential(codeCredential, result.verificationDoc, result.signature));
             }, _message.Error);
         }
         
-        protected abstract T CreateCredential(string guardianId, string verifierId, string chainId, string code);
+        protected abstract TCodeCredential CreateCredential(string guardianId, string verifierId, string chainId, string code);
 
-        protected IEnumerator GetCredential(string guardianId, SuccessCallback<T> successCallback, string chainId, string verifierId, OperationTypeEnum operationType)
+        protected IEnumerator GetCredential(string guardianId, SuccessCallback<TCodeCredential> successCallback, string chainId, string verifierId, OperationTypeEnum operationType)
         {
             Initialize();
             
@@ -78,31 +159,54 @@ namespace Portkey.Core
             if (verifierId != null)
             {
                 _sendCodeParams.verifierId = verifierId;
-                SendCode(_sendCodeParams, successCallback);
+                ExecuteCaptchaThenSendCode(successCallback);
                 yield break;
             }
 
-            yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+            yield return _verifierService.GetVerifierServer(chainId, verifier =>
             {
-                _sendCodeParams.verifierId = verifierServer.id;
+                _sendCodeParams.verifierId = verifier.id;
 
                 if (EnableCodeSendConfirmationFlow)
                 {
-                    _message.VerifierServerSelected(guardianId, AccountType, verifierServer.name);
+                    _message.VerifierServerSelected(guardianId, AccountType, new Verifier(verifier));
 
                     _coroutine = StaticCoroutine.StartCoroutine(WaitForSendCodeConfirmation(() =>
                     {
-                        SendCode(_sendCodeParams, successCallback);
+                        ExecuteCaptchaThenSendCode(successCallback);
                     }));
                 }
                 else
                 {
-                    SendCode(_sendCodeParams, successCallback);
+                    ExecuteCaptchaThenSendCode(successCallback);
                 }
             }, _message.Error);
         }
+
+        private void ExecuteCaptchaThenSendCode(SuccessCallback<string> successCallback)
+        {
+            _captcha.ExecuteCaptcha(captchaToken =>
+            {
+                _sendCodeParams.captchaToken = captchaToken;
+                SendCode(_sendCodeParams, successCallback);
+            }, _message.Error);
+        }
         
-        private void SendCode(SendCodeParams param, SuccessCallback<T> successCallback)
+        private void SendCode(SendCodeParams param, SuccessCallback<string> successCallback)
+        {
+            StaticCoroutine.StartCoroutine(_codeLogin.SendCode(param, successCallback, _message.Error));
+        }
+        
+        private void ExecuteCaptchaThenSendCode(SuccessCallback<TCodeCredential> successCallback)
+        {
+            _captcha.ExecuteCaptcha(captchaToken =>
+            {
+                _sendCodeParams.captchaToken = captchaToken;
+                SendCode(_sendCodeParams, successCallback);
+            }, _message.Error);
+        }
+
+        private void SendCode(SendCodeParams param, SuccessCallback<TCodeCredential> successCallback)
         {
             StaticCoroutine.StartCoroutine(_codeLogin.SendCode(param, session =>
             {
@@ -110,12 +214,13 @@ namespace Portkey.Core
             }, _message.Error));
         }
 
-        private void PendingVerificationCodeInput(string guardianId, string chainId, string verifierId, SuccessCallback<T> successCallback)
+        private void PendingVerificationCodeInput(string guardianId, string chainId, string verifierId, SuccessCallback<TCodeCredential> successCallback)
         {
             _message.PendingVerificationCodeInput();
 
             _coroutine = StaticCoroutine.StartCoroutine(WaitForInputCode((code) =>
             {
+                Debugger.LogError("Received verification code!");
                 CleanUp();
                 
                 var newCredential = CreateCredential(guardianId, verifierId, chainId, code);

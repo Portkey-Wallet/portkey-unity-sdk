@@ -89,9 +89,9 @@ namespace Portkey.UI
                     SignUpPrompt(() =>
                     {
                         ShowLoading(true, "Loading...");
-                        StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.Get(emailAddress, credential =>
+                        StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.SendCode(emailAddress, result =>
                         {
-                            StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.Verify(credential, OpenSetPINView));
+
                         }));
                     });
                     break;
@@ -115,17 +115,17 @@ namespace Portkey.UI
             unregisteredView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
         }
 
-        protected void OnVerifierServerSelected(string guardianId, AccountType accountType, string verifierServerName)
+        protected void OnVerifierServerSelected(string guardianId, AccountType accountType, Verifier verifier)
         {
             ShowLoading(false);
             
             var type = accountType == AccountType.Email? "email address" : "phone number";
-            var description = $"{verifierServerName} will send a verification code to {guardianId} to verify your {type}.";
+            var description = $"{verifier.name} will send a verification code to {guardianId} to verify your {type}.";
             unregisteredView.Initialize("", description, () =>
             {
                 PortkeySDK.AuthService.Message.ConfirmSendCode();
                 
-                verifyCodeViewController.Initialize(guardianId, accountType, verifierServerName);
+                verifyCodeViewController.Initialize(guardianId, accountType, verifier, OpenSetPINView);
             }); 
         }
 

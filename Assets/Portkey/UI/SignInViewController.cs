@@ -69,10 +69,10 @@ namespace Portkey.UI
             {
                 portkeySDK.AuthService.Message.CancelLoginWithPortkeyApp();
             });
-            StartCoroutine(portkeySDK.AuthService.LoginWithPortkeyApp(walletInfo =>
+            StartCoroutine(portkeySDK.AuthService.LoginWithPortkeyApp(accountInfo =>
             {
                 cancelLoadingViewController.CloseView();
-                LoggedIn(walletInfo);
+                LoggedIn(accountInfo);
             }));
 #endif
         }

@@ -11,7 +11,8 @@ namespace Portkey.SocialProvider
         private string _verifierSessionId = null;
         
         public abstract AccountType AccountType { get; }
-        public string VerifierId { get; private set; } = null;
+        
+        private ProcessingInfo _processingInfo = new();
 
         protected VerifyCodeLoginBase(IPortkeySocialService portkeySocialService)
         {
@@ -19,6 +20,14 @@ namespace Portkey.SocialProvider
         }
         
         protected abstract bool IsCorrectGuardianIdFormat(string id, out string errormessage);
+
+        public bool IsProcessingAccount(string guardianId, out ProcessingInfo processingInfo)
+        {
+            var ret = _processingInfo.guardianId == guardianId.RemoveAllWhiteSpaces();
+            processingInfo = (ret)? _processingInfo: null;
+
+            return ret;
+        }
 
         public IEnumerator SendCode(SendCodeParams param, SuccessCallback<string> successCallback, ErrorCallback errorCallback)
         {
@@ -40,19 +49,22 @@ namespace Portkey.SocialProvider
                 },
                 headers = new Dictionary<string, string>
                 {
-                    {"version", "1.3.5"}
+                    {"version", "1.3.5"},
+                    {"Recaptchatoken", param.captchaToken ?? ""}
                 }
             };
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>
             {
                 _verifierSessionId = response.verifierSessionId;
-                VerifierId = sendCodeParams.body.verifierId;
+                _processingInfo.guardianId = sendCodeParams.body.guardianIdentifier;
+                _processingInfo.verifierId = sendCodeParams.body.verifierId;
+                _processingInfo.chainId = sendCodeParams.body.chainId;
                 
                 successCallback?.Invoke(param.guardianId);
             }, errorCallback);
         }
 
-        public IEnumerator VerifyCode(ICodeCredential credential, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyCode(ICodeCredential credential, OperationTypeEnum operationType, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback)
         {
             var verifyCodeParams = new VerifyVerificationCodeParams
             {
@@ -60,7 +72,8 @@ namespace Portkey.SocialProvider
                 verificationCode = credential.SignInToken,
                 guardianIdentifier = credential.SocialInfo.sub,
                 verifierId = credential.VerifierId,
-                chainId = credential.ChainId
+                chainId = credential.ChainId,
+                operationType = operationType
             };
             yield return _portkeySocialService.VerifyVerificationCode(verifyCodeParams, (response) =>
             {
@@ -70,6 +83,8 @@ namespace Portkey.SocialProvider
                     verificationDoc = verificationDoc,
                     signature = response.signature
                 };
+
+                _processingInfo.guardianId = null;
                 
                 successCallback?.Invoke(verifyCodeResult);
             }, errorCallback);

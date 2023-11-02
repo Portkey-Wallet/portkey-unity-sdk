@@ -163,8 +163,6 @@ namespace Portkey.UI
             
             ICredential credential = null;
             
-            Debugger.LogError($"Verifying guardian Id: {_guardianId}");
-            
             switch(_accountType)
             {
                 case AccountType.Email:

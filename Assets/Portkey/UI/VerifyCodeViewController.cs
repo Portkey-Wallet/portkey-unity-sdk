@@ -21,7 +21,6 @@ namespace Portkey.UI
         [SerializeField] private TimedButtonComponent resendButton = null;
         
         private string _guardianId = null;
-        private string _chainId = null;
         private AccountType _accountType = AccountType.Email;
         private Action<ICredential> _verifyCode = null;
         private Action _sendCode = null;
@@ -54,10 +53,8 @@ namespace Portkey.UI
             
             _sendCode = () =>
             {
-                _chainId = portkeySDK.AuthService.Message.ChainId;
-                
                 StartCoroutine(credentialProvider.SendCode(guardianId,
-                    session => { }, _chainId, verifier.id,
+                    session => { }, null, verifier.id,
                     OperationTypeEnum.communityRecovery));
             };
             
@@ -95,8 +92,6 @@ namespace Portkey.UI
         public void Initialize(Guardian guardian, SuccessCallback<ApprovedGuardian> onSuccess)
         {
             Initialize(guardian.id, guardian.accountType, guardian.verifier.name);
-            
-            _chainId = guardian.chainId;
             
             switch(guardian.accountType)
             {
@@ -154,10 +149,10 @@ namespace Portkey.UI
             switch(_accountType)
             {
                 case AccountType.Email:
-                    credential= portkeySDK.AuthService.EmailCredentialProvider.Get(EmailAddress.Parse(_guardianId), _chainId, code);
+                    credential= portkeySDK.AuthService.EmailCredentialProvider.Get(EmailAddress.Parse(_guardianId), code);
                     break;
                 case AccountType.Phone:
-                    credential= portkeySDK.AuthService.PhoneCredentialProvider.Get(PhoneNumber.Parse(_guardianId), _chainId, code);
+                    credential= portkeySDK.AuthService.PhoneCredentialProvider.Get(PhoneNumber.Parse(_guardianId), code);
                     break;
                 case AccountType.Google:
                 case AccountType.Apple:

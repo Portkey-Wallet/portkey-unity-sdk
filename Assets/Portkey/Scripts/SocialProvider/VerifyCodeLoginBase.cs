@@ -12,6 +12,7 @@ namespace Portkey.SocialProvider
         
         public abstract AccountType AccountType { get; }
         public string VerifierId { get; private set; } = null;
+        public string ChainId { get; private set; } = null;
 
         protected VerifyCodeLoginBase(IPortkeySocialService portkeySocialService)
         {
@@ -48,6 +49,7 @@ namespace Portkey.SocialProvider
             {
                 _verifierSessionId = response.verifierSessionId;
                 VerifierId = sendCodeParams.body.verifierId;
+                ChainId = sendCodeParams.body.chainId;
                 
                 successCallback?.Invoke(param.guardianId);
             }, errorCallback);

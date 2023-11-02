@@ -15,6 +15,7 @@ namespace Portkey.Core
     {
         AccountType AccountType { get; }
         string VerifierId { get; }
+        string ChainId { get; }
         IEnumerator SendCode(SendCodeParams param, SuccessCallback<string> successCallback, ErrorCallback errorCallback);
         IEnumerator VerifyCode(ICodeCredential credential, OperationTypeEnum operationType, SuccessCallback<VerifyCodeResult> successCallback, ErrorCallback errorCallback);
     }

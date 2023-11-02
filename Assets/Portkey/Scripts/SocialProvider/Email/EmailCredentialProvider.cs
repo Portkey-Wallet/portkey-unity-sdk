@@ -17,19 +17,18 @@ namespace Portkey.SocialProvider
             yield return GetCredential(emailAddress.String, successCallback, chainId, verifierId, operationType);
         }
         
-        // TODO: WIP
-        public ICredential Get(EmailAddress emailAddress, string chainId, string verificationCode)
+        public ICredential Get(EmailAddress emailAddress, string verificationCode)
         {
-            if(_codeLogin.VerifierId == null)
+            if(_codeLogin.VerifierId == null || _codeLogin.ChainId == null)
             {
                 throw new Exception("Please call DID.AuthService.EmailCredentialProvider.SendCode first!");
             }
-            if(verificationCode == null)
+            if(string.IsNullOrEmpty(verificationCode))
             {
                 throw new Exception("Please input verification code!");
             }
             
-            return new EmailCredential(emailAddress, verificationCode, chainId, _codeLogin.VerifierId);
+            return new EmailCredential(emailAddress, verificationCode, _codeLogin.ChainId, _codeLogin.VerifierId);
         }
 
         public override AccountType AccountType => AccountType.Email;

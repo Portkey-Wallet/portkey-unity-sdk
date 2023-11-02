@@ -40,12 +40,16 @@ namespace Portkey.UI
                 switch(accountType)
                 {
                     case AccountType.Email:
-                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(EmailAddress.Parse(guardianId),
-                            session => { }));
+                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(EmailAddress.Parse(guardianId), session =>
+                        {
+                            portkeySDK.AuthService.Message.Loading(false);
+                        }));
                         break;
                     case AccountType.Phone:
-                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(PhoneNumber.Parse(guardianId),
-                            session => { }));
+                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(PhoneNumber.Parse(guardianId), session =>
+                        {
+                            portkeySDK.AuthService.Message.Loading(false);
+                        }));
                         break;
                     case AccountType.Google:
                     case AccountType.Apple:
@@ -56,6 +60,7 @@ namespace Portkey.UI
             
             _verifyCode = (credential) =>
             {
+                portkeySDK.AuthService.Message.Loading(true, "Loading...");
                 switch(accountType)
                 {
                     case AccountType.Email:
@@ -71,11 +76,11 @@ namespace Portkey.UI
                 }
             };
             
-            _sendCode?.Invoke();
             return;
 
             void OnVerified(VerifiedCredential verifiedCredential)
             {
+                portkeySDK.AuthService.Message.Loading(false);
                 CloseView();
                 onSuccess?.Invoke(verifiedCredential);
             }
@@ -109,15 +114,19 @@ namespace Portkey.UI
                 case AccountType.Email:
                     _sendCode = () =>
                     {
-                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardian,
-                            session => { }));
+                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardian, session =>
+                        {
+                            portkeySDK.AuthService.Message.Loading(false);
+                        }));
                     };
                     break;
                 case AccountType.Phone:
                     _sendCode = () =>
                     {
-                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardian,
-                            session => { }));
+                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardian, session =>
+                        {
+                            portkeySDK.AuthService.Message.Loading(false);
+                        }));
                     };
                     break;
                 case AccountType.Google:
@@ -152,9 +161,10 @@ namespace Portkey.UI
                 return;
             }
             
-            //portkeySDK.AuthService.Message.InputVerificationCode(code);
-            
             ICredential credential = null;
+            
+            Debugger.LogError($"Verifying guardian Id: {_guardianId}");
+            
             switch(_accountType)
             {
                 case AccountType.Email:
@@ -175,11 +185,6 @@ namespace Portkey.UI
         private void SendVerificationCode()
         {
             portkeySDK.AuthService.Message.Loading(true, "Loading...");
-
-            /*
-            portkeySDK.AuthService.Message.ResendVerificationCode();
-            portkeySDK.AuthService.Message.OnResendVerificationCodeCompleteEvent += OnResendVerificationCodeComplete;
-            */
             
             _sendCode?.Invoke();
         }

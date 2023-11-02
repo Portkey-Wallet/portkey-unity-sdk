@@ -23,7 +23,7 @@ namespace Portkey.UI
         private string _guardianId = null;
         private string _chainId = null;
         private AccountType _accountType = AccountType.Email;
-        private Action<ICredential> _onGetCredential = null;
+        private Action<ICredential> _verifyCode = null;
         private Action _sendCode = null;
 
         private void Start()
@@ -36,23 +36,15 @@ namespace Portkey.UI
         {
             Initialize(guardianId, accountType, verifier.name);
             
+            ICodeCredentialProvider credentialProvider = null;
+            
             switch(accountType)
             {
                 case AccountType.Email:
-                    _sendCode = () =>
-                    {
-                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardianId,
-                            session => { }, null, verifier.id,
-                            OperationTypeEnum.communityRecovery));
-                    };
+                    credentialProvider = portkeySDK.AuthService.EmailCredentialProvider;
                     break;
                 case AccountType.Phone:
-                    _sendCode = () =>
-                    {
-                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardianId,
-                            session => { }, null, verifier.id,
-                            OperationTypeEnum.communityRecovery));
-                    };
+                    credentialProvider = portkeySDK.AuthService.PhoneCredentialProvider;
                     break;
                 case AccountType.Google:
                 case AccountType.Apple:
@@ -60,16 +52,25 @@ namespace Portkey.UI
                     throw new ArgumentOutOfRangeException();
             }
             
-            _sendCode?.Invoke();
-            
-            _onGetCredential = (credential) =>
+            _sendCode = () =>
             {
-                StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.Verify(credential, verifiedCredential =>
+                _chainId = portkeySDK.AuthService.Message.ChainId;
+                
+                StartCoroutine(credentialProvider.SendCode(guardianId,
+                    session => { }, _chainId, verifier.id,
+                    OperationTypeEnum.communityRecovery));
+            };
+            
+            _verifyCode = (credential) =>
+            {
+                StartCoroutine(credentialProvider.Verify(credential, verifiedCredential =>
                 {
                     CloseView();
                     onSuccess?.Invoke(verifiedCredential);
                 }));
             };
+            
+            _sendCode?.Invoke();
         }
         
         private void Initialize(string guardianId, AccountType accountType, string verifierServerName)
@@ -123,7 +124,7 @@ namespace Portkey.UI
             
             _sendCode?.Invoke();
             
-            _onGetCredential = (credential) =>
+            _verifyCode = (credential) =>
             {
                 StartCoroutine(portkeySDK.AuthService.Verify(guardian, approvedGuardian =>
                 {
@@ -164,7 +165,7 @@ namespace Portkey.UI
                     throw new ArgumentOutOfRangeException();
             }
             
-            _onGetCredential?.Invoke(credential);
+            _verifyCode?.Invoke(credential);
         }
         
         private void SendVerificationCode()

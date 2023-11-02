@@ -72,6 +72,8 @@ namespace Portkey.Core
 
         private IEnumerator SendCode(string guardianId, SuccessCallback<string> successCallback, string chainId, string verifierId, OperationTypeEnum operationType)
         {
+            Initialize();
+            
             chainId ??= _message.ChainId;
             
             _sendCodeParams = new SendCodeParams
@@ -116,7 +118,7 @@ namespace Portkey.Core
         
         public ICredential Get(TCodeIdentifier codeIdentifier, string verificationCode)
         {
-            if(_codeLogin.IsProcessingAccount(codeIdentifier.String, out var processingInfo))
+            if(!_codeLogin.IsProcessingAccount(codeIdentifier.String, out var processingInfo))
             {
                 throw new Exception("Please call the corresponding CredentialProvider's SendCode first!");
             }

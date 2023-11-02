@@ -23,7 +23,7 @@ namespace Portkey.SocialProvider
 
         public bool IsProcessingAccount(string guardianId, out ProcessingInfo processingInfo)
         {
-            var ret = _processingInfo.guardianId.Equals(guardianId);
+            var ret = _processingInfo.guardianId == guardianId.RemoveAllWhiteSpaces();
             processingInfo = (ret)? _processingInfo: null;
 
             return ret;

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Portkey.Core
 {
-    public abstract class CodeCredentialProviderBase<T> : ICodeCredentialProvider where T : ICodeCredential
+    public abstract class CodeCredentialProviderBase<T, U> : ICodeCredentialProvider where U : ICodeIdentifier where T : ICodeCredential
     {
         protected readonly IInternalAuthMessage _message;
         protected readonly IVerifyCodeLogin _codeLogin;
@@ -52,6 +52,11 @@ namespace Portkey.Core
             }, _message.Error));
         }
 
+        public IEnumerator SendCode(U codeIdentifier, SuccessCallback<string> successCallback, string chainId = null, string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
+        {
+            yield return SendCode(codeIdentifier.String, successCallback, chainId, verifierId, operationType);
+        }
+
         public IEnumerator SendCode(string guardianId, SuccessCallback<string> successCallback, string chainId = null, string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
             chainId ??= _message.ChainId;
@@ -88,6 +93,26 @@ namespace Portkey.Core
                     ExecuteCaptchaThenSendCode(successCallback);
                 }
             }, _message.Error);
+        }
+        
+        public IEnumerator Get(U codeIdentifier, SuccessCallback<T> successCallback, string chainId = null, string verifierId = null, OperationTypeEnum operationType = OperationTypeEnum.register)
+        {
+            chainId ??= _message.ChainId;
+            yield return GetCredential(codeIdentifier.String, successCallback, chainId, verifierId, operationType);
+        }
+        
+        public ICredential Get(U codeIdentifier, string verificationCode)
+        {
+            if(_codeLogin.VerifierId == null || _codeLogin.ChainId == null)
+            {
+                throw new Exception("Please call the corresponding CredentialProvider's SendCode first!");
+            }
+            if(string.IsNullOrEmpty(verificationCode))
+            {
+                throw new Exception("Please input verification code!");
+            }
+            
+            return CreateCredential(codeIdentifier.String, _codeLogin.VerifierId, _codeLogin.ChainId, verificationCode);
         }
 
         public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback, OperationTypeEnum operationType = OperationTypeEnum.register)

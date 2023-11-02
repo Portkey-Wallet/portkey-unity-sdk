@@ -60,7 +60,7 @@ namespace Portkey.UI
                     SignUpPrompt(() =>
                     {
                         ShowLoading(true, "Loading...");
-                        StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.SendCode(phoneNumber.String, result =>
+                        StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.SendCode(phoneNumber, result =>
                         {
 
                         }));

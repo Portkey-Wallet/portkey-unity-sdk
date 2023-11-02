@@ -89,7 +89,7 @@ namespace Portkey.UI
                     SignUpPrompt(() =>
                     {
                         ShowLoading(true, "Loading...");
-                        StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.SendCode(emailAddress.String, result =>
+                        StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.SendCode(emailAddress, result =>
                         {
 
                         }));

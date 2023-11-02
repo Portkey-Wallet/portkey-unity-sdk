@@ -35,39 +35,50 @@ namespace Portkey.UI
         {
             Initialize(guardianId, accountType, verifier.name);
             
-            ICodeCredentialProvider credentialProvider = null;
-            
-            switch(accountType)
-            {
-                case AccountType.Email:
-                    credentialProvider = portkeySDK.AuthService.EmailCredentialProvider;
-                    break;
-                case AccountType.Phone:
-                    credentialProvider = portkeySDK.AuthService.PhoneCredentialProvider;
-                    break;
-                case AccountType.Google:
-                case AccountType.Apple:
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            
             _sendCode = () =>
             {
-                StartCoroutine(credentialProvider.SendCode(guardianId,
-                    session => { }, null, verifier.id,
-                    OperationTypeEnum.communityRecovery));
+                switch(accountType)
+                {
+                    case AccountType.Email:
+                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(EmailAddress.Parse(guardianId),
+                            session => { }));
+                        break;
+                    case AccountType.Phone:
+                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(PhoneNumber.Parse(guardianId),
+                            session => { }));
+                        break;
+                    case AccountType.Google:
+                    case AccountType.Apple:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             };
             
             _verifyCode = (credential) =>
             {
-                StartCoroutine(credentialProvider.Verify(credential, verifiedCredential =>
+                switch(accountType)
                 {
-                    CloseView();
-                    onSuccess?.Invoke(verifiedCredential);
-                }));
+                    case AccountType.Email:
+                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.Verify(credential, OnVerified));
+                        break;
+                    case AccountType.Phone:
+                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.Verify(credential, OnVerified));
+                        break;
+                    case AccountType.Google:
+                    case AccountType.Apple:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             };
             
             _sendCode?.Invoke();
+            return;
+
+            void OnVerified(VerifiedCredential verifiedCredential)
+            {
+                CloseView();
+                onSuccess?.Invoke(verifiedCredential);
+            }
         }
         
         private void Initialize(string guardianId, AccountType accountType, string verifierServerName)
@@ -98,17 +109,15 @@ namespace Portkey.UI
                 case AccountType.Email:
                     _sendCode = () =>
                     {
-                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardian.id,
-                            session => { }, guardian.chainId, guardian.verifier.id,
-                            OperationTypeEnum.communityRecovery));
+                        StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardian,
+                            session => { }));
                     };
                     break;
                 case AccountType.Phone:
                     _sendCode = () =>
                     {
-                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardian.id,
-                            session => { }, guardian.chainId, guardian.verifier.id,
-                            OperationTypeEnum.communityRecovery));
+                        StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardian,
+                            session => { }));
                     };
                     break;
                 case AccountType.Google:

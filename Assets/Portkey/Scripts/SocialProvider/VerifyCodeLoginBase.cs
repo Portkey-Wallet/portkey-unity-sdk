@@ -11,8 +11,8 @@ namespace Portkey.SocialProvider
         private string _verifierSessionId = null;
         
         public abstract AccountType AccountType { get; }
-        public string VerifierId { get; private set; } = null;
-        public string ChainId { get; private set; } = null;
+        
+        private ProcessingInfo _processingInfo = new();
 
         protected VerifyCodeLoginBase(IPortkeySocialService portkeySocialService)
         {
@@ -20,6 +20,14 @@ namespace Portkey.SocialProvider
         }
         
         protected abstract bool IsCorrectGuardianIdFormat(string id, out string errormessage);
+
+        public bool IsProcessingAccount(string guardianId, out ProcessingInfo processingInfo)
+        {
+            var ret = _processingInfo.guardianId.Equals(guardianId);
+            processingInfo = (ret)? _processingInfo: null;
+
+            return ret;
+        }
 
         public IEnumerator SendCode(SendCodeParams param, SuccessCallback<string> successCallback, ErrorCallback errorCallback)
         {
@@ -48,8 +56,9 @@ namespace Portkey.SocialProvider
             yield return _portkeySocialService.GetVerificationCode(sendCodeParams, (response) =>
             {
                 _verifierSessionId = response.verifierSessionId;
-                VerifierId = sendCodeParams.body.verifierId;
-                ChainId = sendCodeParams.body.chainId;
+                _processingInfo.guardianId = sendCodeParams.body.guardianIdentifier;
+                _processingInfo.verifierId = sendCodeParams.body.verifierId;
+                _processingInfo.chainId = sendCodeParams.body.chainId;
                 
                 successCallback?.Invoke(param.guardianId);
             }, errorCallback);
@@ -74,6 +83,8 @@ namespace Portkey.SocialProvider
                     verificationDoc = verificationDoc,
                     signature = response.signature
                 };
+
+                _processingInfo.guardianId = null;
                 
                 successCallback?.Invoke(verifyCodeResult);
             }, errorCallback);

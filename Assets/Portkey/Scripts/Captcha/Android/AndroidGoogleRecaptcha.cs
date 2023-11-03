@@ -54,6 +54,12 @@ namespace Portkey.Captcha
         private ConcurrentQueue<CaptchaOutput> _captchaResults = new ConcurrentQueue<CaptchaOutput>();
         private SuccessCallback<string> _onSuccess = null;
         private ErrorCallback _onError = null;
+        private readonly PortkeyConfig _config;
+        
+        public AndroidGoogleRecaptcha(PortkeyConfig config)
+        {
+            _config = config;
+        }
         
         public void ExecuteCaptcha(SuccessCallback<string> successCallback, ErrorCallback errorCallback)
         {
@@ -74,7 +80,7 @@ namespace Portkey.Captcha
             using var context = currentActivity.Call<AndroidJavaObject>("getApplicationContext");
             using var recaptchaPlugin = new AndroidJavaClass("com.portkey.nativerecaptcha.NativeRecaptcha");
             recaptchaPlugin.CallStatic("SetCallback", callback);
-            recaptchaPlugin.CallStatic("VerifyGoogleReCAPTCHA", context);
+            recaptchaPlugin.CallStatic("VerifyGoogleReCAPTCHA", context, _config.RecaptchaAndroidSitekey);
         }
         
         private IEnumerator HandleCaptchaOutput()

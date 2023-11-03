@@ -37,6 +37,12 @@ namespace Portkey.Core
         private string googleWebGLLoginUrl = "https://openlogin.portkey.finance/";
         [SerializeField]
         private string googleWebGLRedirectUri = "https://openlogin.portkey.finance/auth-callback";
+        
+        [Header("Google Recaptcha Sitekeys")]
+        [SerializeField]
+        private string recaptchaWebSitekey = "6LfR_bElAAAAAJSOBuxle4dCFaciuu9zfxRQfQC0";
+        [SerializeField]
+        private string recaptchaAndroidSitekey = "6LcENaYnAAAAAGenYUvyat1R-TAzQaMZdOYBNSHC";
 
         [Header("Approval Settings")]
         [SerializeField] private int minApprovals = 3;
@@ -62,6 +68,8 @@ namespace Portkey.Core
         public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
         public string ApplePCLoginUrl => applePCLoginUrl;
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
+        public string RecaptchaWebSitekey => recaptchaWebSitekey;
+        public string RecaptchaAndroidSitekey => recaptchaAndroidSitekey;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;
         public TransportConfig PortkeyTransportConfig => portkeyTransportConfig;

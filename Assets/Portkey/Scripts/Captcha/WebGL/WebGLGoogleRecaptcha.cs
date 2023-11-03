@@ -8,16 +8,22 @@ namespace Portkey.Captcha
     public class WebGLGoogleRecaptcha : ICaptcha
     {
         private ICaptchaCallback _callbackObject;
+        private readonly PortkeyConfig _config;
 #if UNITY_WEBGL
         [DllImport("__Internal")]
-        private static extern void ExecuteRecaptcha();
+        private static extern void ExecuteRecaptcha(string siteKey);
 #endif
+        
+        public WebGLGoogleRecaptcha(PortkeyConfig config)
+        {
+            _config = config;
+        }
         
         public void ExecuteCaptcha(SuccessCallback<string> successCallback, ErrorCallback errorCallback)
         {
             Listen(successCallback, errorCallback);
 #if UNITY_WEBGL
-            ExecuteRecaptcha();
+            ExecuteRecaptcha(_config.RecaptchaWebSitekey);
 #endif
         }
         

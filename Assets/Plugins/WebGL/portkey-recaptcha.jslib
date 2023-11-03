@@ -1,11 +1,11 @@
 
 mergeInto(LibraryManager.library, {
 
-  ExecuteRecaptcha: function (url) {
+  ExecuteRecaptcha: function (sitekey) {
     // adding google recaptcha api script onto html header
     var script = document.createElement('script');
     script.type = 'text/javascript';
-    script.text = "var verifyCallback = function(response) { document.getElementById('recaptchaDiv').remove(); window.unityInstance.SendMessage('PortkeyGoogleRecaptchaCallback', 'OnCaptchaSuccess', response); }; var onloadCallback = function() { grecaptcha.render(document.getElementById('recaptchaDiv'), {'sitekey' : '6LfR_bElAAAAAJSOBuxle4dCFaciuu9zfxRQfQC0', 'callback' : verifyCallback}); };";
+    script.text = "var verifyCallback = function(response) { document.getElementById('recaptchaDiv').remove(); window.unityInstance.SendMessage('PortkeyGoogleRecaptchaCallback', 'OnCaptchaSuccess', response); }; var onloadCallback = function() { grecaptcha.render(document.getElementById('recaptchaDiv'), {'sitekey' : '" + UTF8ToString(sitekey) + "', 'callback' : verifyCallback}); };";
     document.head.appendChild(script);
 
     var apiScript = document.createElement('script');

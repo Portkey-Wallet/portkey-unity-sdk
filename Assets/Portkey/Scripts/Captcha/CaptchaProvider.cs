@@ -6,6 +6,12 @@ namespace Portkey.Captcha
     public class CaptchaProvider : ICaptchaProvider
     {
         private ICaptcha _captcha;
+        private readonly PortkeyConfig _config;
+        
+        public CaptchaProvider(PortkeyConfig config)
+        {
+            _config = config;
+        }
         
         public ICaptcha GetCaptcha()
         {
@@ -13,7 +19,7 @@ namespace Portkey.Captcha
             return _captcha;
         }
         
-        private static ICaptcha GetCaptchaByPlatform()
+        private ICaptcha GetCaptchaByPlatform()
         {
 #if UNITY_EDITOR || UNITY_STANDALONE
             throw new NotImplementedException("Platform not supported");
@@ -22,7 +28,7 @@ namespace Portkey.Captcha
 #elif UNITY_ANDROID
             throw new NotImplementedException("Platform not supported");
 #elif UNITY_WEBGL
-            return new WebGLGoogleRecaptcha();
+            return new WebGLGoogleRecaptcha(_config);
 #else
             throw new NotImplementedException("Platform not supported");
 #endif

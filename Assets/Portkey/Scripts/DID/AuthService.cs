@@ -39,7 +39,7 @@ namespace Portkey.DID
             
             _verifierService = verifierService;
             Message = this;
-            _captchaProvider = new CaptchaProvider();
+            _captchaProvider = new CaptchaProvider(_config);
             Email = new EmailLogin(_portkeySocialService);
             Phone = new PhoneLogin(_portkeySocialService);
             AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);

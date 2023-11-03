@@ -44,6 +44,25 @@ To start using the Portkey Unity SDK, follow these steps:
 6. In the Unity editor, navigate to **Assets > Import Package > Custom Package**.
 7. Select the SDK package file (e.g., `portkey-unity-sdk-v1.0.0-alpha.unitypackage`) and click **Open**.
 8. Unity will import the SDK assets and libraries into your project.
+9. Restart your Unity editor.
+
+#### iOS Setup
+
+We are using External Dependency Manager for Unity (EDM4U) to manage iOS dependencies. Therefore we will need to install some dependencies in order to build the project on iOS.
+
+1. Install rvm
+    ```
+    curl -sSL https://get.rvm.io | bash -s stable
+    ```
+2. Install ruby 3.2.2
+    ```
+    rvm install 3.2.2
+    ```
+3. Restart Unity
+4. Open Unity with super user permission through the command below:
+    ```
+    sudo /Applications/Unity/Hub/Editor/<Your Unity Version>/Unity.app/Contents/MacOS/unity
+    ```
 
 ### Tools
 - GraphQL C# Code Generator (For generating data structs of GraphQL's query responses)
@@ -86,18 +105,18 @@ using Portkey.DID;
 
 public class GoogleLoginExample : MonoBehaviour
 {
-    [SerializeField] private DID _did;
+    [SerializeField] private PortkeySDK _portkeySDK;
 
     public void SignInWithGoogle()
     {
-        _did.AuthService.GoogleCredentialProvider.Get(credential => 
+        _portkeySDK.AuthService.GoogleCredentialProvider.Get(credential => 
         {
-            StartCoroutine(_did.AuthService.GetGuardians(credential, guardians =>
+            StartCoroutine(_portkeySDK.AuthService.GetGuardians(credential, guardians =>
             {
                 if(guardians.Count == 0)
                 {
                     // No guardians, proceed to sign up
-                    StartCoroutine(_did.AuthService.SignUp(credential, didWalletInfo => 
+                    StartCoroutine(_portkeySDK.AuthService.SignUp(credential, didWalletInfo => 
                     {
                         // user has successfully signed up and his info can be found in didWalletInfo
                     }));
@@ -106,21 +125,21 @@ public class GoogleLoginExample : MonoBehaviour
                 {
                     List<ApprovedGuardian> approvedGuardians = new List<ApprovedGuardian>();
                     // Guardians exist, proceed to sign in
-                    for (int i = 0; i < _did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count); ++i)
+                    for (int i = 0; i < _portkeySDK.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count); ++i)
                     {
-                        StartCoroutine(_did.AuthService.Verify(guardians[i], approvedGuardian =>
+                        StartCoroutine(_portkeySDK.AuthService.Verify(guardians[i], approvedGuardian =>
                         {
                             approvedGuardians.Add(approvedGuardian);
                         }));
                     }
                     
-                    while(approvedGuardians.Count < _did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count))
+                    while(approvedGuardians.Count < _portkeySDK.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count))
                     {
                         // wait for guardians to be approved
                     }
 
                     // first element of the guardians array is the login guardian
-                    StartCoroutine(_did.AuthService.Login(guardians[0], approvedGuardians, didWalletInfo =>
+                    StartCoroutine(_portkeySDK.AuthService.Login(guardians[0], approvedGuardians, didWalletInfo =>
                     {
                         // user is logged in and his info can be found in didWalletInfo
                     }));
@@ -140,18 +159,18 @@ using Portkey.DID;
 
 public class AppleLoginExample : MonoBehaviour
 {
-    [SerializeField] private DID _did;
+    [SerializeField] private PortkeySDK _portkeySDK;
 
     public void SignInWithApple()
     {
-        _did.AuthService.AppleCredentialProvider.Get(credential => 
+        _portkeySDK.AuthService.AppleCredentialProvider.Get(credential => 
         {
-            StartCoroutine(_did.AuthService.GetGuardians(credential, guardians =>
+            StartCoroutine(_portkeySDK.AuthService.GetGuardians(credential, guardians =>
             {
                 if(guardians.Count == 0)
                 {
                     // No guardians, proceed to sign up
-                    StartCoroutine(_did.AuthService.SignUp(credential, didWalletInfo => 
+                    StartCoroutine(_portkeySDK.AuthService.SignUp(credential, didWalletInfo => 
                     {
                         // user has successfully signed up and his info can be found in didWalletInfo
                     }));
@@ -160,21 +179,21 @@ public class AppleLoginExample : MonoBehaviour
                 {
                     List<ApprovedGuardian> approvedGuardians = new List<ApprovedGuardian>();
                     // Guardians exist, proceed to sign in
-                    for (int i = 0; i < _did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count); ++i)
+                    for (int i = 0; i < _portkeySDK.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count); ++i)
                     {
-                        StartCoroutine(_did.AuthService.Verify(guardians[i], approvedGuardian =>
+                        StartCoroutine(_portkeySDK.AuthService.Verify(guardians[i], approvedGuardian =>
                         {
                             approvedGuardians.Add(approvedGuardian);
                         }));
                     }
                     
-                    while(approvedGuardians.Count < _did.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count))
+                    while(approvedGuardians.Count < _portkeySDK.AuthService.GetRequiredApprovedGuardiansCount(guardians.Count))
                     {
                         // wait for guardians to be approved
                     }
 
                     // first element of the guardians array is the login guardian
-                    StartCoroutine(_did.AuthService.Login(guardians[0], approvedGuardians, didWalletInfo =>
+                    StartCoroutine(_portkeySDK.AuthService.Login(guardians[0], approvedGuardians, didWalletInfo =>
                     {
                         // user is logged in and his info can be found in didWalletInfo
                     }));

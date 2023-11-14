@@ -1,6 +1,7 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Portkey.Core;
-using Portkey.Transport;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.iOS.Xcode;
@@ -13,7 +14,70 @@ namespace Portkey.Editor
 #if UNITY_IOS
         private static readonly string PORTKEYCONFIG_NAME = "PortkeyConfig";
         private static readonly string FACEID_USAGE_DESCRIPTION = "$(PRODUCT_NAME) wants to use TouchId or FaceID for authentication.";
+        private static readonly string[] ResourceExts = { ".html" };
+        
+        private static readonly string UNITY_ASSET_PATH = "Assets/";
+        private static readonly string XCODE_LIBRARIES_PATH = "Libraries/";
+ 
+        internal static void CopyAndReplaceDirectory(string srcPath, string dstPath, string[] enableExts)
+        {
+            var isExist = false;
+            
+            if (Directory.Exists(dstPath))
+            {
+                isExist = true;
+            }
 
+            if (File.Exists(dstPath))
+            {
+                isExist = true;
+            }
+
+            if (!isExist)
+            {
+                Directory.CreateDirectory(dstPath);
+            }
+
+            foreach (var file in Directory.GetFiles(srcPath))
+            {
+                if (enableExts.Contains(Path.GetExtension(file)))
+                {
+                    File.Copy(file, Path.Combine(dstPath, Path.GetFileName(file)));
+                }
+            }
+ 
+            foreach (var dir in Directory.GetDirectories(srcPath))
+            {
+                CopyAndReplaceDirectory(dir, Path.Combine(dstPath, Path.GetFileName(dir)), enableExts);
+            }
+        }
+        
+        public static void GetDirFileList(string dirPath, ref List<string> dirs, string[] enableExts, string subPathFrom="")
+        {
+            foreach (var path in Directory.GetFiles(dirPath))
+            {
+                if (enableExts.Contains(System.IO.Path.GetExtension(path)))
+                {
+                    if(subPathFrom != "")
+                    {
+                        dirs.Add(path.Substring(path.IndexOf(subPathFrom)));
+                    }
+                    else
+                    {
+                        dirs.Add(path);
+                    }
+                }
+            }
+ 
+            if (Directory.GetDirectories(dirPath).Length > 0)
+            {
+                foreach (var path in Directory.GetDirectories(dirPath))
+                {
+                    GetDirFileList(path, ref dirs, enableExts, subPathFrom);
+                }
+            }
+        }
+        
         [PostProcessBuild]
         public static void PostProcessing(BuildTarget buildTarget, string path)
         {
@@ -23,20 +87,42 @@ namespace Portkey.Editor
             }
             
             UpdateXcodePlist(path);
-            UpdateXcodeBuildSettings(path);
+            
+            var projPath = PBXProject.GetPBXProjectPath(path);
+            var proj = new PBXProject();
+            
+            UpdateXcodeBuildSettings(proj, projPath);
+            UpdateXcodeBuildPhase(proj, path);
+            
+            proj.WriteToFile (projPath);
         }
 
-        private static void UpdateXcodeBuildSettings(string path)
+        private static void UpdateXcodeBuildSettings(PBXProject proj, string projPath)
         {
-            var projPath = PBXProject.GetPBXProjectPath(path);
-            
-            var proj = new PBXProject();
             proj.ReadFromString(File.ReadAllText(projPath));
             var mainTargetGuid = proj.GetUnityMainTargetGuid();
             
             UpdateRunpathSearchPaths(proj, mainTargetGuid);
+        }
+        
+        private static void UpdateXcodeBuildPhase(PBXProject proj, string path)
+        {
+            var projPath = PBXProject.GetPBXProjectPath(path);
             
-            proj.WriteToFile (projPath);
+            const string RECAPTCHA_FOLDER = "Plugins/iOS/IOSRecaptchaPlugin";
+            var targetGuid = proj.GetUnityMainTargetGuid();
+            var destPath = Path.Combine(path, XCODE_LIBRARIES_PATH + RECAPTCHA_FOLDER);
+            
+            var resources = new List<string>();
+            CopyAndReplaceDirectory(UNITY_ASSET_PATH + RECAPTCHA_FOLDER, destPath, ResourceExts);
+            GetDirFileList(destPath, ref resources, ResourceExts, XCODE_LIBRARIES_PATH + RECAPTCHA_FOLDER);
+            
+            foreach (var resource in resources)
+            {
+                var resourcesBuildPhase = proj.GetResourcesBuildPhaseByTarget(targetGuid);
+                var resourcesFilesGuid = proj.AddFile(resource, resource, PBXSourceTree.Source);
+                proj.AddFileToBuildSection(targetGuid, resourcesBuildPhase, resourcesFilesGuid);
+            }
         }
 
         private static void UpdateRunpathSearchPaths(PBXProject proj, string targetGuid)

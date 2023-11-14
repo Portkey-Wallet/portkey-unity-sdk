@@ -24,7 +24,7 @@ namespace Portkey.Captcha
 #if UNITY_EDITOR || UNITY_STANDALONE
             throw new NotImplementedException("Platform not supported");
 #elif UNITY_IOS
-            throw new NotImplementedException("Platform not supported");
+            return new IOSGoogleRecaptcha(_config);
 #elif UNITY_ANDROID
             throw new NotImplementedException("Platform not supported");
 #elif UNITY_WEBGL

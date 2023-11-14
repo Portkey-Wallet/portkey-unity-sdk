@@ -24,8 +24,8 @@ namespace Portkey.Captcha
 
         public void OnCaptchaError(string error)
         {
-            OnError?.Invoke(error);
-            
+            OnError?.Invoke(string.IsNullOrEmpty(error) ? "Closed captcha verification!" : error);
+
             Destroy(gameObject);
         }
     }

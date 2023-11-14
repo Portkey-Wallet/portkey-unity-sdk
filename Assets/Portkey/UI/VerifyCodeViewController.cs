@@ -103,6 +103,10 @@ namespace Portkey.UI
         private void OnError(string error)
         {
             //TODO: re-establish verification of code
+            if (error == "Closed captcha verification!")
+            {
+                CloseView();
+            }
         }
         
         public void Initialize(Guardian guardian, SuccessCallback<ApprovedGuardian> onSuccess)

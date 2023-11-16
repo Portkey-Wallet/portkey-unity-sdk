@@ -43,12 +43,14 @@ namespace Portkey.UI
                         StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(EmailAddress.Parse(guardianId), session =>
                         {
                             portkeySDK.AuthService.Message.Loading(false);
+                            resendButton.Deactivate();
                         }));
                         break;
                     case AccountType.Phone:
                         StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(PhoneNumber.Parse(guardianId), session =>
                         {
                             portkeySDK.AuthService.Message.Loading(false);
+                            resendButton.Deactivate();
                         }));
                         break;
                     case AccountType.Google:
@@ -93,7 +95,6 @@ namespace Portkey.UI
             digitSequenceInput.Clear();
             guardianDisplay.Initialize(guardianId, accountType, verifierServerName);
             detailsText.text = $"A 6-digit verification code has been sent to {guardianId}. Please enter the code within 10 minutes.";
-            resendButton.Deactivate();
 
             portkeySDK.AuthService.Message.OnErrorEvent += OnError;
             
@@ -109,6 +110,11 @@ namespace Portkey.UI
             }
         }
         
+        public void DeactivateTimedButton()
+        {
+            resendButton.Deactivate();
+        }
+        
         public void Initialize(Guardian guardian, SuccessCallback<ApprovedGuardian> onSuccess)
         {
             Initialize(guardian.id, guardian.accountType, guardian.verifier.name);
@@ -121,6 +127,7 @@ namespace Portkey.UI
                         StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardian, session =>
                         {
                             portkeySDK.AuthService.Message.Loading(false);
+                            resendButton.Deactivate();
                         }));
                     };
                     break;
@@ -130,6 +137,7 @@ namespace Portkey.UI
                         StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardian, session =>
                         {
                             portkeySDK.AuthService.Message.Loading(false);
+                            resendButton.Deactivate();
                         }));
                     };
                     break;

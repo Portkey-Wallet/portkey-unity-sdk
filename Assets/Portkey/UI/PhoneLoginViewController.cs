@@ -57,6 +57,7 @@ namespace Portkey.UI
                         StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.SendCode(phoneNumber, result =>
                         {
                             ShowLoading(false);
+                            verifyCodeViewController.DeactivateTimedButton();
                         }));
                     });
                     break;

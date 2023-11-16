@@ -101,6 +101,7 @@ namespace Portkey.UI
                         StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.SendCode(emailAddress, result =>
                         {
                             ShowLoading(false);
+                            verifyCodeViewController.DeactivateTimedButton();
                         }));
                     });
                     break;

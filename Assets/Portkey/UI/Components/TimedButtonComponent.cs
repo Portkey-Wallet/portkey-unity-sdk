@@ -25,8 +25,6 @@ namespace Portkey.UI
         private void OnClickButton()
         {
             OnClick?.Invoke();
-            _timer = maxInterval;
-            button.interactable = false;
         }
         
         public void Activate()

@@ -27,9 +27,7 @@ namespace Portkey.UI
         
         public override void OnClickLogin()
         {
-            var value = inputField.text;
-            
-            if (!LoginHelper.IsValidPhoneNumber(value))
+            if (!LoginHelper.IsValidPhoneNumber(InputPhoneNumber))
             {
                 errorText.text = string.IsNullOrEmpty(InputPhoneNumber) ? "" : "Invalid phone number.";
                 return;

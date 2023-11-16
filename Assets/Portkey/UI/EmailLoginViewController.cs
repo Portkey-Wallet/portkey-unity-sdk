@@ -97,7 +97,7 @@ namespace Portkey.UI
                 case 0:
                     SignUpPrompt(() =>
                     {
-                        ShowLoading(true, "Loading...");
+                        ShowLoading(true, "Assigning a verifier on-chain...");
                         StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.SendCode(emailAddress, result =>
                         {
 

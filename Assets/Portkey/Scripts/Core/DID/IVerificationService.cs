@@ -12,6 +12,7 @@ namespace Portkey.Core
         public string verifierId;
         public string chainId;
         public int operationType;
+        public int platformType;
     }
 
     [Serializable]

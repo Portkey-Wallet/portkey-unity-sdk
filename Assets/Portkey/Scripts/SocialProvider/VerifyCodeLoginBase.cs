@@ -2,9 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using Portkey.Core;
 using Portkey.Utilities;
+using UnityEngine;
 
 namespace Portkey.SocialProvider
 {
+    internal enum PlatformType
+    {
+        WEB,
+        ANDROID,
+        IOS
+    }
+    
     public abstract class VerifyCodeLoginBase : IVerifyCodeLogin
     {
         private IPortkeySocialService _portkeySocialService;
@@ -45,7 +53,8 @@ namespace Portkey.SocialProvider
                     verifierId = param.verifierId,
                     chainId = param.chainId,
                     type = AccountType.ToString(),
-                    operationType = (int)param.operationType
+                    operationType = (int)param.operationType,
+                    platformType = (int)GetPlatformType()
                 },
                 headers = new Dictionary<string, string>
                 {
@@ -88,6 +97,20 @@ namespace Portkey.SocialProvider
                 
                 successCallback?.Invoke(verifyCodeResult);
             }, errorCallback);
+        }
+        
+        internal static PlatformType GetPlatformType()
+        {
+            var platform = Application.platform;
+
+            var type = platform switch
+            {
+                RuntimePlatform.Android => PlatformType.ANDROID,
+                RuntimePlatform.IPhonePlayer => PlatformType.IOS,
+                _ => PlatformType.WEB
+            };
+
+            return type;
         }
     }
 }

@@ -48,7 +48,6 @@ namespace Portkey.UI
         {
             inputField.text = "";
             errorText.text = "";
-            loginButton.interactable = false;
         }
 
         public void OnClickBack()
@@ -60,6 +59,16 @@ namespace Portkey.UI
 
         public virtual void OnClickLogin()
         {
+            var value = inputField.text;
+            
+            if (!LoginHelper.IsValidEmail(value))
+            {
+                errorText.text = string.IsNullOrEmpty(value) ? "" : "Invalid email.";
+                return;
+            }
+
+            errorText.text = "";
+            
             StartLoading();
 
             var emailAddress = EmailAddress.Parse(inputField.text);
@@ -127,20 +136,6 @@ namespace Portkey.UI
                 
                 verifyCodeViewController.Initialize(guardianId, accountType, verifier, OpenSetPINView);
             }); 
-        }
-
-        public void OnValueChanged()
-        {
-            var value = inputField.text;
-            if (LoginHelper.IsValidEmail(value))
-            {
-                loginButton.interactable = true;
-                errorText.text = "";
-                return;
-            }
-            
-            errorText.text = string.IsNullOrEmpty(value) ? "" : "Invalid email.";
-            loginButton.interactable = false;
         }
         
         public void OnClickClose()

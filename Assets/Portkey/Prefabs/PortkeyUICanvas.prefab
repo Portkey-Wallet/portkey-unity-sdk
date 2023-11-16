@@ -24901,6 +24901,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1515300935598512977, guid: ceea9c2a0845140138f22ec04be929c8, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1617038378470504711, guid: ceea9c2a0845140138f22ec04be929c8, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -27080,6 +27084,10 @@ PrefabInstance:
       propertyPath: guardianApprovalViewController
       value: 
       objectReference: {fileID: 4753605759836814766}
+    - target: {fileID: 7903639877316537988, guid: d3ac5f2f4ddfd4274bca21b95ef30f9b, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d3ac5f2f4ddfd4274bca21b95ef30f9b, type: 3}
 --- !u!224 &2543574696082574901 stripped

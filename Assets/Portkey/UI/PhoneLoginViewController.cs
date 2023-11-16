@@ -25,21 +25,18 @@ namespace Portkey.UI
             }, PortkeySDK.AuthService.Message.Error));
         }
         
-        public new void OnValueChanged()
-        {
-            if (LoginHelper.IsValidPhoneNumber(InputPhoneNumber))
-            {
-                loginButton.interactable = true;
-                errorText.text = "";
-                return;
-            }
-            
-            errorText.text = string.IsNullOrEmpty(InputPhoneNumber) ? "" : "Invalid phone number.";
-            loginButton.interactable = false;
-        }
-        
         public override void OnClickLogin()
         {
+            var value = inputField.text;
+            
+            if (!LoginHelper.IsValidPhoneNumber(value))
+            {
+                errorText.text = string.IsNullOrEmpty(InputPhoneNumber) ? "" : "Invalid phone number.";
+                return;
+            }
+
+            errorText.text = "";
+            
             StartLoading();
 
             var phoneNumber = PhoneNumber.Parse(InputPhoneNumber);

@@ -56,7 +56,7 @@ namespace Portkey.UI
                         ShowLoading(true, "Assigning a verifier on-chain...");
                         StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.SendCode(phoneNumber, result =>
                         {
-
+                            ShowLoading(false);
                         }));
                     });
                     break;

@@ -100,7 +100,7 @@ namespace Portkey.UI
                         ShowLoading(true, "Assigning a verifier on-chain...");
                         StartCoroutine(PortkeySDK.AuthService.EmailCredentialProvider.SendCode(emailAddress, result =>
                         {
-
+                            ShowLoading(false);
                         }));
                     });
                     break;
@@ -132,6 +132,8 @@ namespace Portkey.UI
             var description = $"{verifier.name} will send a verification code to {guardianId} to verify your {type}.";
             unregisteredView.Initialize("", description, () =>
             {
+                ShowLoading(true, "Loading...");
+                
                 PortkeySDK.AuthService.Message.ConfirmSendCode();
                 
                 verifyCodeViewController.Initialize(guardianId, accountType, verifier, OpenSetPINView);

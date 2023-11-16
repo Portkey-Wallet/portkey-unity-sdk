@@ -44,7 +44,7 @@ mergeInto(LibraryManager.library, {
     var overlayScript = document.createElement('script');
     overlayScript.type = 'text/javascript';
     overlayScript.text = "function overlayClickCallback() {" +
-        "  alert(\"Overlay clicked! You can replace this with your own callback logic.\");" +
+        "  window.unityInstance.SendMessage('PortkeyGoogleRecaptchaCallback', 'OnCaptchaError', 'Closed captcha verification!');" +
         "}" +
         "var overlay = document.getElementById('overlay');" +
         "overlay.addEventListener(\"click\", function() {" +

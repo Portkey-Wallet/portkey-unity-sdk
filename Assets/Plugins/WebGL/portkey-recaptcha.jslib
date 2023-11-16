@@ -39,7 +39,7 @@ mergeInto(LibraryManager.library, {
 
     div.appendChild(recaptchaDiv);
     
-    document.getElementById("unity-canvas").appendChild(div);
+    document.body.appendChild(div);
 
     var overlayScript = document.createElement('script');
     overlayScript.type = 'text/javascript';

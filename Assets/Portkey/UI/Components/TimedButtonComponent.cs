@@ -14,7 +14,14 @@ namespace Portkey.UI
         
         public delegate void OnClickHandler();
         public event OnClickHandler OnClick;
-        public string Text { get; set; }
+
+        public bool Interactable
+        {
+            get => button.interactable;
+            set => button.interactable = value;
+        }
+        
+        private string Text { get; set; }
 
         private void Start()
         {
@@ -26,24 +33,24 @@ namespace Portkey.UI
         {
             OnClick?.Invoke();
         }
-        
-        public void Activate()
+
+        private void BecomesClickable()
         {
             description.text = $"{Text}";
-            button.interactable = true;
+            Interactable = true;
         }
         
-        public void Deactivate()
+        public void ActivateTimeOut()
         {
             _timer = maxInterval;
-            button.interactable = false;
+            Interactable = false;
         }
         
         private void Update()
         {
             if (_timer <= 0.0f)
             {
-                Activate();
+                BecomesClickable();
                 return;
             }
             

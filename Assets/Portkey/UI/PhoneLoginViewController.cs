@@ -54,10 +54,11 @@ namespace Portkey.UI
                     SignUpPrompt(() =>
                     {
                         ShowLoading(true, "Assigning a verifier on-chain...");
+                        verifyCodeViewController.DeactivateTimedButton();
                         StartCoroutine(PortkeySDK.AuthService.PhoneCredentialProvider.SendCode(phoneNumber, result =>
                         {
                             ShowLoading(false);
-                            verifyCodeViewController.DeactivateTimedButton();
+                            verifyCodeViewController.ActivateTimeOut();
                         }));
                     });
                     break;

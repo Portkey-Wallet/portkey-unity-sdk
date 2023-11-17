@@ -40,17 +40,19 @@ namespace Portkey.UI
                 switch(accountType)
                 {
                     case AccountType.Email:
+                        resendButton.Interactable = false;
                         StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(EmailAddress.Parse(guardianId), session =>
                         {
                             portkeySDK.AuthService.Message.Loading(false);
-                            resendButton.Deactivate();
+                            resendButton.ActivateTimeOut();
                         }));
                         break;
                     case AccountType.Phone:
+                        resendButton.Interactable = false;
                         StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(PhoneNumber.Parse(guardianId), session =>
                         {
                             portkeySDK.AuthService.Message.Loading(false);
-                            resendButton.Deactivate();
+                            resendButton.ActivateTimeOut();
                         }));
                         break;
                     case AccountType.Google:
@@ -112,7 +114,12 @@ namespace Portkey.UI
         
         public void DeactivateTimedButton()
         {
-            resendButton.Deactivate();
+            resendButton.Interactable = false;
+        }
+        
+        public void ActivateTimeOut()
+        {
+            resendButton.ActivateTimeOut();
         }
         
         public void Initialize(Guardian guardian, SuccessCallback<ApprovedGuardian> onSuccess)
@@ -124,20 +131,22 @@ namespace Portkey.UI
                 case AccountType.Email:
                     _sendCode = () =>
                     {
+                        resendButton.Interactable = false;
                         StartCoroutine(portkeySDK.AuthService.EmailCredentialProvider.SendCode(guardian, session =>
                         {
                             portkeySDK.AuthService.Message.Loading(false);
-                            resendButton.Deactivate();
+                            resendButton.ActivateTimeOut();
                         }));
                     };
                     break;
                 case AccountType.Phone:
                     _sendCode = () =>
                     {
+                        resendButton.Interactable = false;
                         StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.SendCode(guardian, session =>
                         {
                             portkeySDK.AuthService.Message.Loading(false);
-                            resendButton.Deactivate();
+                            resendButton.ActivateTimeOut();
                         }));
                     };
                     break;

@@ -72,7 +72,7 @@ namespace Portkey.Network
 
             foreach (var field in formFields.Where(field => !string.IsNullOrEmpty(field.Value)))
             {
-                url.Append($"{field.Key}={field.Value}&");
+                url.Append($"{field.Key}={UnityWebRequest.EscapeURL(field.Value)}&");
             }
             
             var ret = url.ToString().TrimEnd('&');

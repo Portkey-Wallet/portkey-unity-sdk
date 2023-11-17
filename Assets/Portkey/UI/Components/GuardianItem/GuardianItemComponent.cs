@@ -149,6 +149,7 @@ namespace Portkey.UI
             }
             else
             {
+                _portkeySDK.AuthService.Message.Loading(true, "Loading...");
                 _verifyCodeViewController.Initialize(_guardian, OnApproved);
             }
         }

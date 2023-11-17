@@ -110,6 +110,8 @@ namespace Portkey.UI
             {
                 CloseView();
             }
+            
+            resendButton.Interactable = true;
         }
         
         public void DeactivateTimedButton()

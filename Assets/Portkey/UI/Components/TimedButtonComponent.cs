@@ -18,7 +18,7 @@ namespace Portkey.UI
         public bool Interactable
         {
             get => button.interactable;
-            set => button.interactable = value;
+            set => button.interactable = (!(_timer > 0.0f)) && value;
         }
         
         private string Text { get; set; }

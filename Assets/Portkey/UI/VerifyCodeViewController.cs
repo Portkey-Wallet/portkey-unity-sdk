@@ -162,8 +162,10 @@ namespace Portkey.UI
             
             _verifyCode = (credential) =>
             {
+                portkeySDK.AuthService.Message.Loading(true, "Loading...");
                 StartCoroutine(portkeySDK.AuthService.Verify(guardian, approvedGuardian =>
                 {
+                    portkeySDK.AuthService.Message.Loading(false);
                     CloseView();
                     onSuccess?.Invoke(approvedGuardian);
                 }, credential));

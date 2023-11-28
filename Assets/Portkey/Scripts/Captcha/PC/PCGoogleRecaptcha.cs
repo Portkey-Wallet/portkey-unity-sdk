@@ -31,7 +31,9 @@ namespace Portkey.Captcha
         private void Execute()
         {
             var port = SocialProvider.Utilities.GetRandomUnusedPort();
-            var url = $"{_url}unity-recaptcha?siteKey={_webSiteKey}&port={port}/";
+            var param = $"siteKey={_webSiteKey}&port={port}";
+            var escapedParam = Uri.EscapeUriString(param);
+            var url = $"{_url}unity-recaptcha?{escapedParam}";
       
             Listen(port);
             

@@ -21,7 +21,9 @@ namespace Portkey.Captcha
         
         private ICaptcha GetCaptchaByPlatform()
         {
+            Debugger.LogError($"GetCaptcha");
 #if UNITY_EDITOR || UNITY_STANDALONE
+            Debugger.LogError($"GetCaptcha: PCGoogleRecaptcha");
             return new PCGoogleRecaptcha(_config);
 #elif UNITY_IOS
             return new IOSGoogleRecaptcha(_config);

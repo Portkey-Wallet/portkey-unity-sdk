@@ -38,6 +38,7 @@ namespace Portkey.Captcha
             Listen(port);
             
 #if UNITY_STANDALONE || UNITY_EDITOR
+            Debugger.LogError($"Calling recaptcha url: {url}");
             Application.OpenURL(url);
 #endif
         }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Portkey.UI
 {
-    public class UnregisteredViewController : MonoBehaviour
+    public class PromptViewController : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI headerTextComponent;
         [SerializeField] private TextMeshProUGUI descriptionTextComponent;
@@ -25,7 +25,7 @@ namespace Portkey.UI
             gameObject.SetActive(false);
         }
 
-        public void OnClickSignUp()
+        public void OnClickConfirm()
         {
             _onConfirm?.Invoke();
             gameObject.SetActive(false);

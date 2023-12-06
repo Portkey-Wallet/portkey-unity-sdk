@@ -36,6 +36,7 @@ namespace Portkey.UI
         [SerializeField] private SetPINViewController setPinViewController;
         [SerializeField] private GuardiansApprovalViewController guardiansApprovalViewController;
         [SerializeField] private LockViewController lockViewController;
+        [SerializeField] private AccountCancellationView accountCancellationView;
         
         private DIDAccountInfo _accountInfo = null;
         private bool _isSignOut = false;
@@ -212,6 +213,14 @@ namespace Portkey.UI
             {
                 OnError("You are disconnected from the wallet.");
             }
+        }
+        
+        public void OnClickDeleteAccount()
+        {
+            accountCancellationView.Initialize(() =>
+            {
+                
+            });
         }
 
         private void ResetViews()

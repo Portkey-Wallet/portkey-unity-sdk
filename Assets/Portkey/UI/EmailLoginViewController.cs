@@ -4,6 +4,7 @@ using Portkey.Core;
 using Portkey.SocialProvider;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Portkey.UI
@@ -12,7 +13,7 @@ namespace Portkey.UI
     {
         [Header("Views")]
         [SerializeField] protected GuardiansApprovalViewController guardianApprovalViewController;
-        [SerializeField] protected UnregisteredViewController unregisteredView;
+        [FormerlySerializedAs("unregisteredView")] [SerializeField] protected PromptViewController promptView;
         [SerializeField] protected VerifyCodeViewController verifyCodeViewController;
         [SerializeField] protected SetPINViewController setPinViewController;
         
@@ -123,7 +124,7 @@ namespace Portkey.UI
 
         protected void SignUpPrompt(Action onConfirm, Action onClose = null)
         {
-            unregisteredView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
+            promptView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
         }
 
         protected void OnVerifierServerSelected(string guardianId, AccountType accountType, Verifier verifier)
@@ -132,7 +133,7 @@ namespace Portkey.UI
             
             var type = accountType == AccountType.Email? "email address" : "phone number";
             var description = $"{verifier.name} will send a verification code to {guardianId} to verify your {type}.";
-            unregisteredView.Initialize("", description, () =>
+            promptView.Initialize("", description, () =>
             {
                 ShowLoading(true, "Loading...");
                 

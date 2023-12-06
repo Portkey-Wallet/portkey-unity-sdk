@@ -9,7 +9,7 @@ namespace Portkey.UI
     public class SignInViewController : MonoBehaviour
     {
         [FormerlySerializedAs("did")] [SerializeField] private DID.PortkeySDK portkeySDK;
-        [SerializeField] private UnregisteredViewController unregisteredView;
+        [FormerlySerializedAs("unregisteredView")] [SerializeField] private PromptViewController promptView;
         [FormerlySerializedAs("guardianApprovalView")] [SerializeField] private GuardiansApprovalViewController guardianApprovalViewController;
         [SerializeField] private ErrorViewController errorView;
         [SerializeField] private LoadingViewController loadingView;
@@ -138,7 +138,7 @@ namespace Portkey.UI
         
         private void SignUpPrompt(Action onConfirm, Action onClose = null)
         {
-            unregisteredView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
+            promptView.Initialize("Continue with this account?", "This account has not been registered yet. Click \"Confirm\" to complete the registration.", onConfirm, onClose);
         }
 
         public void OnClickClose()

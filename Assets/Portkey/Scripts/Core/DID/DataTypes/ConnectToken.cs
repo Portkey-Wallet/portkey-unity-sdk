@@ -6,7 +6,6 @@ namespace Portkey.Core
     public class ConnectToken
     {
         public string access_token;
-        public string token_type;
-        public string expires_in;
+        public long expires_in;
     }
 }

@@ -36,13 +36,18 @@ namespace Portkey.DID
             return _config.ApiBaseUrl + url;
         }
         
-        private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, IHttp.ErrorCallback errorCallback)
+        private IEnumerator Post<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, IHttp.ErrorCallback errorCallback, Dictionary<string, string> headers = null)
         {
             var jsonRequestData = new JsonRequestData
             {
                 Url = GetFullApiUrl(url),
                 JsonData = JsonConvert.SerializeObject(requestParams),
             };
+            
+            if(headers != null)
+            {
+                jsonRequestData.Headers = headers;
+            }
 
             return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback), errorCallback);
         }
@@ -52,7 +57,7 @@ namespace Portkey.DID
             return _http.Get(requestData, JsonToObject<T2>(successCallback, errorCallback), errorCallback);
         }
         
-        private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, IHttp.ErrorCallback errorCallback)
+        private IEnumerator Get<T1, T2>(string url, T1 requestParams, SuccessCallback<T2> successCallback, IHttp.ErrorCallback errorCallback, Dictionary<string, string> headers = null)
         {
             var requestData = new FieldFormRequestData<T1>()
             {
@@ -60,16 +65,26 @@ namespace Portkey.DID
                 FieldFormsObject = requestParams,
             };
             
+            if(headers != null)
+            {
+                requestData.Headers = headers;
+            }
+            
             return HttpGet(requestData, successCallback, errorCallback);
         }
         
-        private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, IHttp.ErrorCallback errorCallback)
+        private IEnumerator Get<T>(string url, SuccessCallback<T> successCallback, IHttp.ErrorCallback errorCallback, Dictionary<string, string> headers = null)
         {
             var requestData = new FieldFormRequestData<Empty>
             {
                 Url = GetFullApiUrl(url),
                 FieldFormsObject = new Empty()
             };
+            
+            if(headers != null)
+            {
+                requestData.Headers = headers;
+            }
             
             return HttpGet(requestData, successCallback, errorCallback);
         }
@@ -322,6 +337,34 @@ namespace Portkey.DID
         public IEnumerator GetPhoneCountryCodeWithLocal(SuccessCallback<IPhoneCountryCodeResult> successCallback, ErrorCallback errorCallback)
         {
             return Get("/api/app/phone/info", successCallback, OnError(errorCallback));
+        }
+
+        public IEnumerator IsAccountDeletionPossible(ConnectToken connectToken, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
+        {
+            return Get("/api/app/account/revoke/entrance", successCallback, OnError(errorCallback), GetAuthorizationHeader(connectToken));
+        }
+
+        public IEnumerator ValidateAccountDeletion(ConnectToken connectToken, SuccessCallback<AccountDeletionValidationResult> successCallback, ErrorCallback errorCallback)
+        {
+            return Get("/api/app/account/revoke/check", successCallback, OnError(errorCallback), GetAuthorizationHeader(connectToken));
+        }
+
+        public IEnumerator DeleteAccount(ConnectToken connectToken, string appleToken, SuccessCallback<bool> successCallback,
+            ErrorCallback errorCallback)
+        {
+            var param = new AccountDeletionParams
+            {
+                appleToken = appleToken
+            };
+            return Post("/api/app/account/revoke/request", param, successCallback, OnError(errorCallback), GetAuthorizationHeader(connectToken));
+        }
+        
+        private static Dictionary<string, string> GetAuthorizationHeader(ConnectToken connectToken)
+        {
+            return new Dictionary<string, string>
+            {
+                { "Authorization", $"Bearer {connectToken.access_token}" }
+            };
         }
     }
 }

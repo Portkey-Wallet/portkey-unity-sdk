@@ -158,6 +158,33 @@ namespace Portkey.Core
         public ICountryItem locateData = null;
     }
     
+    [Serializable]
+    public class GetTransferLimitParams
+    {
+        public string caHash;
+        public int skipCount;
+        public int maxResultCount;
+    }
+
+    [Serializable]
+    public class TransferLimitData
+    {
+        public string chainId;
+        public string symbol;
+        public string singleLimit;
+        public string defaultSingleLimit;
+        public string dailyLimit;
+        public string defaultDailyLimit;
+        public bool restricted;
+    }
+
+    [Serializable]
+    public class GetTransferLimitResult
+    {
+        public int totalRecordCount;
+        public TransferLimitData data;
+    }
+    
     /// <summary>
     /// Social service interface for all social services to implement.
     /// </summary>
@@ -195,5 +222,11 @@ namespace Portkey.Core
         /// Get phone country code with local.
         /// </summary>
         IEnumerator GetPhoneCountryCodeWithLocal(SuccessCallback<IPhoneCountryCodeResult> successCallback, ErrorCallback errorCallback);
+
+        /// <summary>
+        /// Get transfer limit of the user.
+        /// </summary>
+        IEnumerator GetTransferLimit(GetTransferLimitParams requestParams,
+            SuccessCallback<GetTransferLimitResult> successCallback, ErrorCallback errorCallback);
     }
 }

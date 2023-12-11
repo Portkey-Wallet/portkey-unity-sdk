@@ -143,6 +143,21 @@ namespace Portkey.DID
         {
             yield return _portkeySocialService.GetPhoneCountryCodeWithLocal(successCallback, errorCallback);
         }
+        
+        /// <summary> The GetTransferLimit function get user transfer limit.      
+        /// &lt;para&gt;If the user is logged in, it returns true.&lt;/para&gt;
+        /// &lt;para&gt;If the user is not logged in, it returns false.&lt;/para&gt;</summary>
+        ///
+        ///
+        /// <returns> A boolean value indication if the user is logged in.</returns>
+        public IEnumerator GetTransferLimit(GetTransferLimitParams param,SuccessCallback<GetTransferLimitResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            yield return _portkeySocialService.GetTransferLimit(param, result =>
+            {
+                successCallback(result);
+            }, errorCallback);
+        }
 
         /// <summary> The IsLoggedIn function checks to see if the user is logged in.        
         /// &lt;para&gt;If the user is logged in, it returns true.&lt;/para&gt;

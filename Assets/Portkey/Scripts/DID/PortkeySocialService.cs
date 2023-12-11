@@ -323,5 +323,12 @@ namespace Portkey.DID
         {
             return Get("/api/app/phone/info", successCallback, OnError(errorCallback));
         }
+        
+        public IEnumerator GetTransferLimit(GetTransferLimitParams requestParams, SuccessCallback<GetTransferLimitResult> successCallback, ErrorCallback errorCallback)
+        {
+            return Post("/api/app/user/security/transferLimit", requestParams, successCallback, OnError(errorCallback));
+            
+            //return Post("/api/app/user/security/transferLimit", requestParams, successCallback, OnError(errorCallback));
+        }
     }
 }

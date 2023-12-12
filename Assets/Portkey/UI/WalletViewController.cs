@@ -27,6 +27,7 @@ namespace Portkey.UI
         [Header("UI")]
         [SerializeField] private GameObject confirmSignOutDialog;
         [SerializeField] private TextMeshProUGUI chainInfoText;
+        [SerializeField] private AccountDeletionButton accountDeletionButton;
 
         [Header("Token UI")]
         [SerializeField] private TokenUIInfo[] tokenInfos;
@@ -57,6 +58,8 @@ namespace Portkey.UI
             chainInfoText.text = LOADING_MESSAGE;
             _chainIdToCaAddress.Clear();
             ResetTokenUIInfos();
+            
+            accountDeletionButton.Initialize(_accountInfo, OnError);
             
             chainInfoText.text = _accountInfo.chainId;
             

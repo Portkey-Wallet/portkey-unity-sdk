@@ -12,6 +12,10 @@ namespace Portkey.Core
         [SerializeField]
         private string apiBaseUrl;
         
+        [Header("Portkey Token Endpoint")]
+        [SerializeField]
+        private string tokenApiUrl;
+        
         [Header("Google PC Login")]
         [SerializeField]
         private string googlePCClientId = "931335042992-4cvdlgo4etblfe4t7dk9i1q7oouj2od0.apps.googleusercontent.com";

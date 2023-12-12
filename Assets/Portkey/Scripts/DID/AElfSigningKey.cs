@@ -50,7 +50,8 @@ namespace Portkey.DID
 
         public IEnumerator Sign(string data, SuccessCallback<byte[]> successCallback, ErrorCallback errorCallback)
         {
-            var signature = Sign(Encoding.UTF8.GetBytes(data));
+            var hash = Encoding.UTF8.GetBytes(data).ComputeHash();
+            var signature = Sign(hash);
 
             successCallback?.Invoke(signature);
             yield break;

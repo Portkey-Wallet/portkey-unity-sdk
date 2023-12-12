@@ -4055,7 +4055,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2643963775989522190
 RectTransform:
   m_ObjectHideFlags: 0
@@ -18699,6 +18699,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AccountCancellationView
       objectReference: {fileID: 0}
+    - target: {fileID: 6230082840958050073, guid: 97a5f893f67454a88813de97c196ebe5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 97a5f893f67454a88813de97c196ebe5, type: 3}
 --- !u!224 &1195882994798690595 stripped
@@ -19867,6 +19871,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1476405698324185870, guid: b5e6ed3b128834d7d9c576a0c42261d4, type: 3}
+      propertyPath: portkeySDK
+      value: 
+      objectReference: {fileID: 1058882298470602853}
     - target: {fileID: 2137760570908183300, guid: b5e6ed3b128834d7d9c576a0c42261d4, type: 3}
       propertyPath: m_Name
       value: DeleteAccountButton

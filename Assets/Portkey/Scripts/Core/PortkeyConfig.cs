@@ -62,6 +62,7 @@ namespace Portkey.Core
         /// A getter for the chain infos.
         /// </summary>
         public string ApiBaseUrl => apiBaseUrl;
+        public string TokenApiUrl => tokenApiUrl;
         public string GooglePCClientId => googlePCClientId;
         public string GooglePCClientSecret => googlePCClientSecret;
         public string GoogleAndroidClientId => googleAndroidClientId;

@@ -55,7 +55,7 @@ namespace Portkey.DID
             _socialVerifierProvider = new SocialVerifierProvider(_socialProvider, _portkeySocialService);
             _storageSuite = new NonPersistentStorage<string>();
             _signingKeyGenerator = new SigningKeyGenerator(_encryption);
-            _connectService = new ConnectionService<IHttp>(_config.ApiBaseUrl, _request);
+            _connectService = new ConnectionService<IHttp>(_config.TokenApiUrl, _request);
             ChainProvider = new AElfChainProvider(_request, _portkeySocialService);
             _accountGenerator = new AccountGenerator();
             _accountRepository = new AccountRepository(_storageSuite, _encryption, _signingKeyGenerator, _accountGenerator);

@@ -341,7 +341,10 @@ namespace Portkey.DID
 
         public IEnumerator IsAccountDeletionPossible(ConnectToken connectToken, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {
-            return Get("/api/app/account/revoke/entrance", successCallback, OnError(errorCallback), GetAuthorizationHeader(connectToken));
+            return Get("/api/app/account/revoke/entrance", (IsAccountDeletionPossibleResult result) =>
+            {
+                successCallback(result.entranceDisplay);
+            }, OnError(errorCallback), GetAuthorizationHeader(connectToken));
         }
 
         public IEnumerator ValidateAccountDeletion(ConnectToken connectToken, SuccessCallback<AccountDeletionValidationResult> successCallback, ErrorCallback errorCallback)
@@ -356,7 +359,10 @@ namespace Portkey.DID
             {
                 appleToken = appleToken
             };
-            return Post("/api/app/account/revoke/request", param, successCallback, OnError(errorCallback), GetAuthorizationHeader(connectToken));
+            return Post("/api/app/account/revoke/request", param, (DeleteAccountResult result) =>
+            {
+                successCallback(result.success);
+            }, OnError(errorCallback), GetAuthorizationHeader(connectToken));
         }
         
         private static Dictionary<string, string> GetAuthorizationHeader(ConnectToken connectToken)

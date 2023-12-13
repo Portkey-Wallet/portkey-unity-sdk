@@ -158,22 +158,10 @@ namespace Portkey.Core
         public ICountryItem locateData = null;
     }
     
-    public class AccountDeletionValidationResult
-    {
-        public bool validatedAssets;
-        public bool validatedGuardian;
-        public bool validatedDevice;
-    }
-    
-    internal class AccountDeletionParams
-    {
-        public string appleToken;
-    }
-    
     /// <summary>
     /// Social service interface for all social services to implement.
     /// </summary>
-    public interface IPortkeySocialService : IVerificationService, ISearchService
+    public interface IPortkeySocialService : IVerificationService, ISearchService, IAccountService
     {
         public static readonly string UNREGISTERED_CODE = "3002";
         
@@ -207,17 +195,5 @@ namespace Portkey.Core
         /// Get phone country code with local.
         /// </summary>
         IEnumerator GetPhoneCountryCodeWithLocal(SuccessCallback<IPhoneCountryCodeResult> successCallback, ErrorCallback errorCallback);
-        /// <summary>
-        /// An API check to see if account can be deleted. This is possible if account has only 1 login guardian that is using apple account.
-        /// </summary>
-        IEnumerator IsAccountDeletionPossible(ConnectToken connectToken, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
-        /// <summary>
-        /// Validate account deletion. User must have lesser than stipulated amount of assets, must have only 1 login guardian that is using apple account and that device is an iOS device.
-        /// </summary>
-        IEnumerator ValidateAccountDeletion(ConnectToken connectToken, SuccessCallback<AccountDeletionValidationResult> successCallback, ErrorCallback errorCallback);
-        /// <summary>
-        /// Delete account from database.
-        /// </summary>
-        IEnumerator DeleteAccount(ConnectToken connectToken, string appleToken, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
     }
 }

@@ -68,6 +68,7 @@ namespace Portkey.UI
             {
                 if (result)
                 {
+                    CloseView();
                     _onDeleteAccount?.Invoke();
                 }
                 else

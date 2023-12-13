@@ -1,4 +1,5 @@
 using Portkey.Core;
+using Portkey.Utilities;
 using UnityEngine;
 
 namespace Portkey.UI
@@ -10,7 +11,7 @@ namespace Portkey.UI
         public void Initialize(DIDAccountInfo accountInfo, ErrorCallback errorCallback)
         {
             gameObject.SetActive(false);
-            StartCoroutine(portkeySDK.IsAccountDeletionPossible(accountInfo, display =>
+            StaticCoroutine.StartCoroutine(portkeySDK.IsAccountDeletionPossible(accountInfo, display =>
             {
                 gameObject.SetActive(display);
             }, errorCallback));

@@ -4099,7 +4099,7 @@ MonoBehaviour:
   portkeySDK: {fileID: 1058882298470602853}
   confirmSignOutDialog: {fileID: 1606297849121987431}
   chainInfoText: {fileID: 5608933622871011710}
-  accountDeletionButton: {fileID: 0}
+  accountDeletionButton: {fileID: 12222627339865267}
   tokenInfos:
   - chainLabelText: {fileID: 5041281333827015206}
     addressText: {fileID: 5976212666146240357}
@@ -19898,6 +19898,17 @@ PrefabInstance:
       objectReference: {fileID: 3453700473384200439}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b5e6ed3b128834d7d9c576a0c42261d4, type: 3}
+--- !u!114 &12222627339865267 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1476405698324185870, guid: b5e6ed3b128834d7d9c576a0c42261d4, type: 3}
+  m_PrefabInstance: {fileID: 1465450276925820861}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 438f3ebb3d6fc4bd681ac342824c4751, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &1490482176144259037 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 70108053974317152, guid: b5e6ed3b128834d7d9c576a0c42261d4, type: 3}

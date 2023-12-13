@@ -207,23 +207,25 @@ namespace Portkey.UI
         {
             portkeySDK.AuthService.Message.Loading(false);
 
-            _isSignOut = true;
-            
-            ResetViews();
-            OpenSignInView();
+            SignOut();
 
             if (logoutMessage == LogoutMessage.PortkeyExtensionLogout)
             {
                 OnError("You are disconnected from the wallet.");
             }
         }
-        
+
+        private void SignOut()
+        {
+            _isSignOut = true;
+
+            ResetViews();
+            OpenSignInView();
+        }
+
         public void OnClickDeleteAccount()
         {
-            accountCancellationView.Initialize(() =>
-            {
-                
-            });
+            accountCancellationView.Initialize(_accountInfo, SignOut);
         }
 
         private void ResetViews()

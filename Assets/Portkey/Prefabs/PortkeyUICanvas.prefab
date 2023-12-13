@@ -18695,6 +18695,10 @@ PrefabInstance:
       propertyPath: promptView
       value: 
       objectReference: {fileID: 2935962257760947544}
+    - target: {fileID: 3846409384900841189, guid: 97a5f893f67454a88813de97c196ebe5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6230082840958050073, guid: 97a5f893f67454a88813de97c196ebe5, type: 3}
       propertyPath: m_Name
       value: AccountCancellationView
@@ -18702,6 +18706,15 @@ PrefabInstance:
     - target: {fileID: 6230082840958050073, guid: 97a5f893f67454a88813de97c196ebe5, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6403684721003845357, guid: 97a5f893f67454a88813de97c196ebe5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9111044755616525424, guid: 97a5f893f67454a88813de97c196ebe5, type: 3}
+      propertyPath: m_text
+      value: Are you sure you want to delete your account? Please note that you won't
+        be able to recover your account once it's deleted.
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 97a5f893f67454a88813de97c196ebe5, type: 3}

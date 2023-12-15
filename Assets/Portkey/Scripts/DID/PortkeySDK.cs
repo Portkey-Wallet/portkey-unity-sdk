@@ -1,8 +1,12 @@
+using System;
 using System.Collections;
+using System.Text;
+using AElf;
 using Portkey.Biometric;
 using Portkey.BrowserWalletExtension;
 using Portkey.Chain;
 using Portkey.Contract;
+using Portkey.Contracts.CA;
 using Portkey.Core;
 using Portkey.Encryption;
 using Portkey.GraphQL;
@@ -52,7 +56,7 @@ namespace Portkey.DID
             _socialVerifierProvider = new SocialVerifierProvider(_socialProvider, _portkeySocialService);
             _storageSuite = new NonPersistentStorage<string>();
             _signingKeyGenerator = new SigningKeyGenerator(_encryption);
-            _connectService = new ConnectionService<IHttp>(_config.ApiBaseUrl, _request);
+            _connectService = new ConnectionService<IHttp>("http://192.168.66.240:8080", _request);
             ChainProvider = new AElfChainProvider(_request, _portkeySocialService);
             _accountGenerator = new AccountGenerator();
             _accountRepository = new AccountRepository(_storageSuite, _encryption, _signingKeyGenerator, _accountGenerator);
@@ -67,8 +71,10 @@ namespace Portkey.DID
             
             _didWallet = new DIDAccount(_portkeySocialService, _signingKeyGenerator, _connectService, _caContractProvider, _accountRepository, _accountGenerator, _appLogin, _qrLogin, _browserWalletExtension);
             AuthService = new AuthService(_portkeySocialService, _didWallet, _socialProvider, _socialVerifierProvider, _config, _verifierService);
+            
+            AuthService.Message.OnLogoutEvent += OnLogout;
         }
-        
+
         /// <summary>
         /// AuthService provides functions to login and logout.
         /// </summary>
@@ -144,20 +150,45 @@ namespace Portkey.DID
             yield return _portkeySocialService.GetPhoneCountryCodeWithLocal(successCallback, errorCallback);
         }
         
-        /// <summary> The GetTransferLimit function get user transfer limit.      
-        /// &lt;para&gt;If the user is logged in, it returns true.&lt;/para&gt;
-        /// &lt;para&gt;If the user is not logged in, it returns false.&lt;/para&gt;</summary>
-        ///
-        ///
-        /// <returns> A boolean value indication if the user is logged in.</returns>
-        public IEnumerator GetTransferLimit(GetTransferLimitParams param,SuccessCallback<GetTransferLimitResult> successCallback,
+        public IEnumerator GetCaContractAddress(string chainId, SuccessCallback<IContract> successCallback,
             ErrorCallback errorCallback)
         {
-            yield return _portkeySocialService.GetTransferLimit(param, result =>
+            yield return _caContractProvider.GetContract(chainId ,successCallback, errorCallback);
+        }
+        
+        /// <summary> The GetTransferLimit function get user transfer limit. </summary>     
+        /// <param name="GetTransferLimitParams param"> Parameters for getting transferlimit through caHash and chain ID.</param>
+        /// <param name="SuccessCallback successCallback"> The success callback returning the transferLimit information.</param>
+        /// <param name="ErrorCallback errorCallback"> The error callback.</param>
+        ///
+        ///
+        /// <returns> Transfer limit info will be returned if users set before.</returns>
+        public IEnumerator GetTransferLimit(DIDAccountInfo accountInfo, GetTransferLimitParams param,SuccessCallback<GetTransferLimitResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            yield return ExecuteWithConnectToken(accountInfo, (token) =>
             {
-                successCallback(result);
+                StartCoroutine(_portkeySocialService.GetTransferLimit(token, param, successCallback, errorCallback));
             }, errorCallback);
         }
+        
+        /// <summary> The SetTransferLimit function set user transfer limit. </summary>     
+        /// <param name="GetTransferLimitParams param"> Parameters for setting transferlimit through caHash and guardian info.</param>
+        /// <param name="SuccessCallback successCallback"> The success callback returning the setting transferLimit information.</param>
+        /// <param name="ErrorCallback errorCallback"> The error callback.</param>
+        ///
+        ///
+        /// <returns> Transaction result will be returned </returns>
+        public IEnumerator SetTransferLimit(DIDAccountInfo accountInfo, SetTransferLimitInput param,SuccessCallback<IContract.TransactionInfoDto> successCallback,
+            ErrorCallback errorCallback)
+        {
+            yield return StartCoroutine(GetCaContractAddress("AELF", result =>
+            {
+                StaticCoroutine.StartCoroutine(result.SendAsync(accountInfo.signingKey, "SetTransferLimit", param,
+                    successCallback, errorCallback));
+            },errorCallback));
+        }
+        
 
         /// <summary> The IsLoggedIn function checks to see if the user is logged in.        
         /// &lt;para&gt;If the user is logged in, it returns true.&lt;/para&gt;
@@ -169,5 +200,90 @@ namespace Portkey.DID
         {
             return _didWallet.IsLoggedIn();
         }
+        
+        private IEnumerator ExecuteWithConnectToken(DIDAccountInfo accountInfo, Action<ConnectToken> execution, ErrorCallback errorCallback)
+        {
+            if (accountInfo == null)
+            {
+                errorCallback("User is not logged in!");
+                yield break;
+            }
+            
+            var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
+            var message = $"{accountInfo.signingKey.Address}-{timestamp}";
+
+            yield return accountInfo.signingKey.Sign(message, signature =>
+            {
+                StartCoroutine(_connectService.GetConnectToken(new RequestTokenConfig
+                {
+                    ca_hash = accountInfo.caInfo.caHash,
+                    chain_id = AuthService.Message.ChainId, //current chain id
+                    grant_type = "signature",
+                    client_id = "CAServer_App",
+                    scope = "CAServer",
+                    pubkey = accountInfo.signingKey.PublicKey,
+                    timestamp = timestamp,
+                    signature = signature.ToHex()
+                }, (token) =>  execution(token), error =>
+                {
+                    int i = 0;
+                    var tmp = new RequestTokenConfig
+                    {
+                        ca_hash = accountInfo.caInfo.caHash,
+                        chain_id = AuthService.Message.ChainId, //current chain id
+                        grant_type = "signature",
+                        client_id = "CAServer_App",
+                        scope = "CAServer",
+                        pubkey = accountInfo.signingKey.PublicKey,
+                        timestamp = timestamp,
+                        signature = signature.ToHex()
+                    };
+                    ++i;
+                }));
+            }, error =>
+            {
+                int i = 0;
+                ++i;
+            });
+        }
+        
+        private void OnLogout(LogoutMessage message)
+        {
+            if (message is LogoutMessage.Logout or LogoutMessage.PortkeyExtensionLogout)
+            {
+                _connectService.Reset();
+            }
+        }
+        
+#if UNITY_IOS
+        public IEnumerator IsAccountDeletionPossible(DIDAccountInfo accountInfo, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
+        {
+            yield return ExecuteWithConnectToken(accountInfo, (token) =>
+            {
+                StartCoroutine(_portkeySocialService.IsAccountDeletionPossible(token, successCallback, errorCallback));
+            }, errorCallback);
+        }
+        
+        public IEnumerator ValidateAccountDeletion(DIDAccountInfo accountInfo, SuccessCallback<AccountDeletionValidationResult> successCallback, ErrorCallback errorCallback)
+        {
+            yield return ExecuteWithConnectToken(accountInfo, (token) =>
+            {
+                StartCoroutine(_portkeySocialService.ValidateAccountDeletion(token, successCallback, errorCallback));
+            }, errorCallback);
+        }
+        
+        public IEnumerator DeleteAccount(DIDAccountInfo accountInfo, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
+        {
+            AuthService.AppleCredentialProvider.Get((appleCredential) =>
+            {
+                StartCoroutine(ExecuteWithConnectToken(accountInfo, (token) =>
+                {
+                    StartCoroutine(_portkeySocialService.DeleteAccount(token, appleCredential.SignInToken, successCallback, errorCallback));
+                }, errorCallback));
+            });
+            
+            yield break;
+        }
+#endif
     }
 }

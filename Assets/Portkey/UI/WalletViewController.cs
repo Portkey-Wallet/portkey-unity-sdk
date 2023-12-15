@@ -203,7 +203,8 @@ namespace Portkey.UI
 
         public void OnClickTransferSettings()
         {
-            transferSettingsViewController.Initialize(portkeySDK, gameObject, _accountInfo.caInfo.caHash);
+            transferSettingsViewController.AccountInfo = _accountInfo;
+            transferSettingsViewController.Initialize(portkeySDK, gameObject);
             CloseView();
         }
 

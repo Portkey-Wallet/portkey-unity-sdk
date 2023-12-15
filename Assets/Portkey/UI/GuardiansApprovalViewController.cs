@@ -13,6 +13,7 @@ namespace Portkey.UI
         [SerializeField] private SetPINViewController setPINViewController;
         [SerializeField] private SignInViewController signInViewController;
         [SerializeField] private VerifyCodeViewController verifyCodeViewController;
+        [SerializeField] private TransferSettingsViewController transferSettingsViewController;
         [SerializeField] private GameObject infoDialog;
 
         [Header("Guardian Item List")] [SerializeField]
@@ -45,6 +46,7 @@ namespace Portkey.UI
         private bool _startTimer = false;
         private bool _isUpdatedGuardianUIInfo = false;
         private ICredential _credential = null;
+        private bool _isCalledBySetLimit = false;
         private List<Guardian> _guardians = new List<Guardian>();
         private List<ApprovedGuardian> _approvedGuardians = new List<ApprovedGuardian>();
 
@@ -53,10 +55,11 @@ namespace Portkey.UI
             _startTimer = true;
         }
 
-        public void Initialize(List<Guardian> guardians, ICredential credential = null)
+        public void Initialize(List<Guardian> guardians, ICredential credential = null, bool isCalledBySetLimit = false)
         {
             _guardians = guardians;
             _credential = credential;
+            _isCalledBySetLimit = isCalledBySetLimit;
             
             portkeySDK.AuthService.EmailCredentialProvider.EnableCodeSendConfirmationFlow = false;
             portkeySDK.AuthService.PhoneCredentialProvider.EnableCodeSendConfirmationFlow = false;
@@ -214,7 +217,10 @@ namespace Portkey.UI
         public void OnClickSend()
         {
             CloseView();
-            OpenSetPINView();
+            transferSettingsViewController.ApprovedGuardians = _approvedGuardians;
+            if (_isCalledBySetLimit) transferSettingsViewController.OpenView();
+            else OpenSetPINView();
+
         }
 
         private void OpenSetPINView()

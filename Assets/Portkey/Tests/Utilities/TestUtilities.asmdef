@@ -1,18 +1,18 @@
 {
-    "name": "TestUtilities",
-    "rootNamespace": "",
-    "references": [
-        "GUID:55e3c1c7e872645afad4b1c1986b1c71"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "TestUtilities",
+  "rootNamespace": "",
+  "references": [
+    "GUID:55e3c1c7e872645afad4b1c1986b1c71"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

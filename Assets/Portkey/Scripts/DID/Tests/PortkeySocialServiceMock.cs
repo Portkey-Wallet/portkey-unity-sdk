@@ -117,7 +117,25 @@ namespace Portkey.Test
             throw new System.NotImplementedException();
         }
 
-        public IEnumerator GetTransferLimit(GetTransferLimitParams requestParams,
+        public IEnumerator IsAccountDeletionPossible(ConnectToken connectToken, SuccessCallback<bool> successCallback,
+            ErrorCallback errorCallback)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IEnumerator ValidateAccountDeletion(ConnectToken connectToken, SuccessCallback<AccountDeletionValidationResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IEnumerator DeleteAccount(ConnectToken connectToken, string appleToken, SuccessCallback<bool> successCallback,
+            ErrorCallback errorCallback)
+        {
+            throw new System.NotImplementedException();
+        }
+        
+        public IEnumerator GetTransferLimit(ConnectToken connectToken, GetTransferLimitParams requestParams,
             SuccessCallback<GetTransferLimitResult> successCallback, ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();

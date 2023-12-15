@@ -182,7 +182,19 @@ namespace Portkey.Core
     public class GetTransferLimitResult
     {
         public int totalRecordCount;
-        public TransferLimitData data;
+        public TransferLimitData[] data;
+    }
+    
+    public class AccountDeletionValidationResult
+    {
+        public bool validatedAssets;
+        public bool validatedGuardian;
+        public bool validatedDevice;
+    }
+    
+    internal class AccountDeletionParams
+    {
+        public string appleToken;
     }
     
     /// <summary>
@@ -226,7 +238,19 @@ namespace Portkey.Core
         /// <summary>
         /// Get transfer limit of the user.
         /// </summary>
-        IEnumerator GetTransferLimit(GetTransferLimitParams requestParams,
+        IEnumerator GetTransferLimit(ConnectToken connectToken, GetTransferLimitParams requestParams,
             SuccessCallback<GetTransferLimitResult> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// An API check to see if account can be deleted. This is possible if account has only 1 login guardian that is using apple account.
+        /// </summary>
+        IEnumerator IsAccountDeletionPossible(ConnectToken connectToken, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Validate account deletion. User must have lesser than stipulated amount of assets, must have only 1 login guardian that is using apple account and that device is an iOS device.
+        /// </summary>
+        IEnumerator ValidateAccountDeletion(ConnectToken connectToken, SuccessCallback<AccountDeletionValidationResult> successCallback, ErrorCallback errorCallback);
+        /// <summary>
+        /// Delete account from database.
+        /// </summary>
+        IEnumerator DeleteAccount(ConnectToken connectToken, string appleToken, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);
     }
 }

@@ -224,27 +224,8 @@ namespace Portkey.DID
                     pubkey = accountInfo.signingKey.PublicKey,
                     timestamp = timestamp,
                     signature = signature.ToHex()
-                }, (token) =>  execution(token), error =>
-                {
-                    int i = 0;
-                    var tmp = new RequestTokenConfig
-                    {
-                        ca_hash = accountInfo.caInfo.caHash,
-                        chain_id = AuthService.Message.ChainId, //current chain id
-                        grant_type = "signature",
-                        client_id = "CAServer_App",
-                        scope = "CAServer",
-                        pubkey = accountInfo.signingKey.PublicKey,
-                        timestamp = timestamp,
-                        signature = signature.ToHex()
-                    };
-                    ++i;
-                }));
-            }, error =>
-            {
-                int i = 0;
-                ++i;
-            });
+                }, (token) =>  execution(token), errorCallback));
+            }, errorCallback);
         }
         
         private void OnLogout(LogoutMessage message)

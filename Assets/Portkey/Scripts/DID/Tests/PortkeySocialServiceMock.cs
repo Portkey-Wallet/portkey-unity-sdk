@@ -134,5 +134,11 @@ namespace Portkey.Test
         {
             throw new System.NotImplementedException();
         }
+        
+        public IEnumerator GetTransferLimit(ConnectToken connectToken, GetTransferLimitParams requestParams,
+            SuccessCallback<GetTransferLimitResult> successCallback, ErrorCallback errorCallback)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

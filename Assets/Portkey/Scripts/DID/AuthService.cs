@@ -178,6 +178,11 @@ namespace Portkey.DID
         {
             yield return GetGuardians(credential.SocialInfo.sub, successCallback, OnError);
         }
+        
+        public IEnumerator GetGuardians(DIDAccountInfo accountInfo, SuccessCallback<List<Guardian>> successCallback)
+        {
+            yield return GetGuardians(accountInfo.managerInfo.guardianIdentifier, successCallback, OnError);
+        }
 
         public IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<Guardian>> successCallback)
         {

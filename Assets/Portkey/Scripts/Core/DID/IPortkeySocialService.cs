@@ -158,6 +158,33 @@ namespace Portkey.Core
         public ICountryItem locateData = null;
     }
     
+    [Serializable]
+    public class GetTransferLimitParams
+    {
+        public string caHash;
+        public int skipCount;
+        public int maxResultCount;
+    }
+
+    [Serializable]
+    public class TransferLimitData
+    {
+        public string chainId;
+        public string symbol;
+        public string singleLimit;
+        public string defaultSingleLimit;
+        public string dailyLimit;
+        public string defaultDailyLimit;
+        public bool restricted;
+    }
+
+    [Serializable]
+    public class GetTransferLimitResult
+    {
+        public int totalRecordCount;
+        public TransferLimitData[] data;
+    }
+    
     public class AccountDeletionValidationResult
     {
         public bool validatedAssets;
@@ -207,6 +234,12 @@ namespace Portkey.Core
         /// Get phone country code with local.
         /// </summary>
         IEnumerator GetPhoneCountryCodeWithLocal(SuccessCallback<IPhoneCountryCodeResult> successCallback, ErrorCallback errorCallback);
+
+        /// <summary>
+        /// Get transfer limit of the user.
+        /// </summary>
+        IEnumerator GetTransferLimit(ConnectToken connectToken, GetTransferLimitParams requestParams,
+            SuccessCallback<GetTransferLimitResult> successCallback, ErrorCallback errorCallback);
         /// <summary>
         /// An API check to see if account can be deleted. This is possible if account has only 1 login guardian that is using apple account.
         /// </summary>

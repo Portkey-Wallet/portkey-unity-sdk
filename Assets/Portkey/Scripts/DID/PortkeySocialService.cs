@@ -338,6 +338,11 @@ namespace Portkey.DID
         {
             return Get("/api/app/phone/info", successCallback, OnError(errorCallback));
         }
+        
+        public IEnumerator GetTransferLimit(ConnectToken connectToken, GetTransferLimitParams requestParams, SuccessCallback<GetTransferLimitResult> successCallback, ErrorCallback errorCallback)
+        {
+            return Get("/api/app/user/security/transferLimit", requestParams, successCallback, OnError(errorCallback), GetAuthorizationHeader(connectToken));
+        }
 
         public IEnumerator IsAccountDeletionPossible(ConnectToken connectToken, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {

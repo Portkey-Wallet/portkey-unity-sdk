@@ -1020,9 +1020,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   guardianApprovalViewController: {fileID: 0}
-  unregisteredView: {fileID: 0}
-  errorView: {fileID: 0}
-  loadingView: {fileID: 0}
+  promptView: {fileID: 0}
+  verifyCodeViewController: {fileID: 0}
+  setPinViewController: {fileID: 0}
   inputField: {fileID: 1515300935598512977}
   loginButton: {fileID: 1617038378470504711}
   errorText: {fileID: 6112651990369990124}

@@ -1,6 +1,6 @@
 name: GitHub Actions
 run-name: ${{ github.actor }} is running Unity Unit Tests
-on: [push]
+on: [ push ]
 jobs:
   Unity-Unit-Test-Run:
     runs-on: ubuntu-latest
@@ -25,8 +25,8 @@ jobs:
       - name: Cache Library
         uses: actions/cache@v2
         with:
-            path: Library
-            key: Library
+          path: Library
+          key: Library
       - name: Unity - Test runner
         uses: game-ci/unity-test-runner@v2.1.1
         env:

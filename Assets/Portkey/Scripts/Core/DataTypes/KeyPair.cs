@@ -14,7 +14,7 @@ namespace Portkey.Core
         public KeyPair(PrivateKey privateKey)
         {
             PrivateKey = privateKey;
-            PublicKey = privateKey.PublicKey.ToString();
+            PublicKey = privateKey.PublicKey.Decompress().ToString();
             Address = privateKey.PublicKey.Decompress().ToAddress();
         }
     }

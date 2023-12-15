@@ -16,6 +16,7 @@ namespace Portkey.Core
         IEnumerator GetGuardians(ICredential credential, SuccessCallback<List<Guardian>> successCallback);
         IEnumerator GetGuardians(PhoneNumber phoneNumber, SuccessCallback<List<Guardian>> successCallback);
         IEnumerator GetGuardians(EmailAddress emailAddress, SuccessCallback<List<Guardian>> successCallback);
+        IEnumerator GetGuardians(DIDAccountInfo accountInfo, SuccessCallback<List<Guardian>> successCallback);
         IEnumerator Verify(Guardian guardian, SuccessCallback<ApprovedGuardian> successCallback, ICredential credential = null);
         IEnumerator SignUp(PhoneNumber phoneNumber, SuccessCallback<DIDAccountInfo> successCallback);
         IEnumerator SignUp(EmailAddress emailAddress, SuccessCallback<DIDAccountInfo> successCallback);

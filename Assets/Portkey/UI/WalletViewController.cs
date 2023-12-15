@@ -37,6 +37,7 @@ namespace Portkey.UI
         [SerializeField] private GuardiansApprovalViewController guardiansApprovalViewController;
         [SerializeField] private LockViewController lockViewController;
         [SerializeField] private AccountCancellationView accountCancellationView;
+        [SerializeField] private TransferSettingsViewController transferSettingsViewController;
         
         private DIDAccountInfo _accountInfo = null;
         private bool _isSignOut = false;
@@ -199,7 +200,14 @@ namespace Portkey.UI
 
             StartCoroutine(portkeySDK.AuthService.Logout());
         }
-        
+
+        public void OnClickTransferSettings()
+        {
+            transferSettingsViewController.AccountInfo = _accountInfo;
+            transferSettingsViewController.Initialize(portkeySDK, gameObject);
+            CloseView();
+        }
+
         private void OnSuccessLogout(LogoutMessage logoutMessage)
         {
             portkeySDK.AuthService.Message.Loading(false);

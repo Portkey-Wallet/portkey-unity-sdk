@@ -169,7 +169,7 @@ namespace Portkey.DID
             }
             
             var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
-            var messageHash = Encoding.UTF8.GetBytes($"{accountInfo.signingKey.Address}-{timestamp}").ComputeHash().ToHex();
+            var messageHash = $"{accountInfo.signingKey.Address}-{timestamp}";
 
             yield return accountInfo.signingKey.Sign(messageHash, signature =>
             {

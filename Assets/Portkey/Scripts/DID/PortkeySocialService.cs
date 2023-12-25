@@ -341,10 +341,41 @@ namespace Portkey.DID
 
         public IEnumerator IsAccountDeletionPossible(ConnectToken connectToken, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
         {
-            return Get("/api/app/account/revoke/entrance", (IsAccountDeletionPossibleResult result) =>
+            var pollCount = 0;
+            return Poll();
+            
+            IEnumerator Poll()
             {
-                successCallback(result.entranceDisplay);
-            }, OnError(errorCallback), GetAuthorizationHeader(connectToken));
+                yield return Get("/api/app/account/revoke/entrance", (IsAccountDeletionPossibleResult result) =>
+                {
+                    successCallback(result.entranceDisplay);
+                }, error =>
+                {
+                    if (error.code == 500)
+                    {
+                        //retry for 3 minutes
+                        if(pollCount > 6)
+                        {
+                            errorCallback("Network Error!");
+                        }
+                        else
+                        {
+                            ++pollCount;
+                            StaticCoroutine.StartCoroutine(Repoll());
+                        }
+                    }
+                    else
+                    {
+                        errorCallback(error.message);
+                    }
+                }, GetAuthorizationHeader(connectToken));
+            }
+
+            IEnumerator Repoll()
+            {
+                yield return new WaitForSeconds(30.0f);
+                yield return Poll();
+            }
         }
 
         public IEnumerator ValidateAccountDeletion(ConnectToken connectToken, SuccessCallback<AccountDeletionValidationResult> successCallback, ErrorCallback errorCallback)

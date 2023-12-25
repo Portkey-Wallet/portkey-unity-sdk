@@ -11,10 +11,12 @@ namespace Portkey.UI
         public void Initialize(DIDAccountInfo accountInfo, ErrorCallback errorCallback)
         {
             gameObject.SetActive(false);
+#if UNITY_IOS
             StaticCoroutine.StartCoroutine(portkeySDK.IsAccountDeletionPossible(accountInfo, display =>
             {
                 gameObject.SetActive(display);
             }, errorCallback));
+#endif
         }
     }
 }

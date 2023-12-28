@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Portkey.Core;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -43,19 +44,24 @@ namespace Portkey.UI
         
         private void OnValidateAccountDeletion(AccountDeletionValidationResult result)
         {
+            var errorMessage = new StringBuilder();
+            
             if (!result.validatedAssets)
             {
-                OnError("Please transfer all of your assets out of your account, including Tokens and NFTs.");
-                return;
+                errorMessage.AppendLine("Please transfer all of your assets out of your account, including Tokens and NFTs.\n");
             }
             if (!result.validatedGuardian)
             {
-                OnError("Please ensure that other users have already disassociated the Guardian from your current Apple ID.");
-                return;
+                errorMessage.AppendLine("Please ensure that other users have already disassociated the Guardian from your current Apple ID.\n");
             }
             if (!result.validatedDevice)
             {
-                OnError("Please remove other login devices.");
+                errorMessage.AppendLine("Please remove other login devices.\n");
+            }
+            
+            if (errorMessage.Length > 0)
+            {
+                OnError(errorMessage.ToString());
                 return;
             }
             

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Portkey.Core;
+using Portkey.DID;
 using TMPro;
 using UnityEngine;
 
@@ -77,7 +78,8 @@ namespace Portkey.UI
             _verifyCodeViewController = verifyCodeViewController;
             _onApproved = onApproved;
             _approved = false;
-            _credential = credential;
+
+            _credential = AuthService.IsCredentialMatchGuardian(credential, guardian) ? credential : null;
             
             DisplayGuardianIcon(guardian.accountType); ;
             DisplayVerifierIcon(guardian.verifier.name);

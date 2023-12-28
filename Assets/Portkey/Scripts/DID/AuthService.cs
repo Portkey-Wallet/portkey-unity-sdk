@@ -321,7 +321,7 @@ namespace Portkey.DID
             return cred.ChainId == guard.chainId && cred.VerifierId == guard.verifier.id;
         }
 
-        private static bool IsCredentialMatchGuardian(ICredential cred, Guardian guard)
+        public static bool IsCredentialMatchGuardian(ICredential cred, Guardian guard)
         {
             return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
         }

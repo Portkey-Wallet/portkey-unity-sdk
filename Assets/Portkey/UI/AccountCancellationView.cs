@@ -39,11 +39,14 @@ namespace Portkey.UI
         
         public void OnClickConfirm()
         {
+            portkeySDK.AuthService.Message.Loading(true, "Loading...");
             StartCoroutine(portkeySDK.ValidateAccountDeletion(_accountInfo, OnValidateAccountDeletion, OnError));
         }
         
         private void OnValidateAccountDeletion(AccountDeletionValidationResult result)
         {
+            portkeySDK.AuthService.Message.Loading(false);
+            
             var errorMessage = new StringBuilder();
             
             if (!result.validatedAssets)
@@ -70,8 +73,11 @@ namespace Portkey.UI
 
         private void OnConfirmDeleteAccount()
         {
+            portkeySDK.AuthService.Message.Loading(true, "Loading...");
+            
             StartCoroutine(portkeySDK.DeleteAccount(_accountInfo, result =>
             {
+                portkeySDK.AuthService.Message.Loading(false);
                 if (result)
                 {
                     CloseView();

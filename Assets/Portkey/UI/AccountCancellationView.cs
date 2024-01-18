@@ -40,7 +40,9 @@ namespace Portkey.UI
         public void OnClickConfirm()
         {
             portkeySDK.AuthService.Message.Loading(true, "Loading...");
+#if UNITY_IOS
             StartCoroutine(portkeySDK.ValidateAccountDeletion(_accountInfo, OnValidateAccountDeletion, OnError));
+#endif
         }
         
         private void OnValidateAccountDeletion(AccountDeletionValidationResult result)
@@ -73,6 +75,7 @@ namespace Portkey.UI
 
         private void OnConfirmDeleteAccount()
         {
+#if UNITY_IOS
             portkeySDK.AuthService.Message.Loading(true, "Loading...");
             
             StartCoroutine(portkeySDK.DeleteAccount(_accountInfo, result =>
@@ -88,6 +91,7 @@ namespace Portkey.UI
                     OnError("Failed to delete account!");
                 }
             }, OnError));
+#endif
         }
         
         private void OnError(string error)

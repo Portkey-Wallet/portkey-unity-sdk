@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff6e57f4326f74baf85a3434bd0e2b4f, type: 3}
+  m_Name: PortkeyConfigTest
+  m_EditorClassIdentifier: 
+  apiBaseUrl: https://localtest-applesign.portkey.finance
+  tokenApiUrl: http://192.168.66.240:8080
+  googlePCClientId: 931335042992-4cvdlgo4etblfe4t7dk9i1q7oouj2od0.apps.googleusercontent.com
+  googlePCClientSecret: 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
+  googleAndroidClientId: 931335042992-ousd4tdbui5n2msmqj94ppp632a27ofv.apps.googleusercontent.com
+  googleAndroidClientSecret: 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
+  googleIosClientId: 931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com
+  googleIosDotReverseClientId: com.googleusercontent.apps.931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker
+  googleWebGLClientId: 931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com
+  googleWebGLLoginUrl: https://openlogin.portkey.finance/
+  googleWebGLRedirectUri: https://openlogin.portkey.finance/auth-callback
+  recaptchaWebSitekey: 6LfR_bElAAAAAJSOBuxle4dCFaciuu9zfxRQfQC0
+  recaptchaAndroidSitekey: 6LcENaYnAAAAAGenYUvyat1R-TAzQaMZdOYBNSHC
+  minApprovals: 3
+  denominator: 5
+  applePCLoginUrl: https://openlogin.portkey.finance/
+  portkeyTransportConfig: {fileID: 11400000, guid: 4ab5930a0b1b04e9ea7c8eaeaf50823d, type: 2}

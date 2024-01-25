@@ -34,6 +34,12 @@ namespace Portkey.Test
         {
             throw new System.NotImplementedException();
         }
+        
+        public IEnumerator VerifyTelegramToken(VerifyTelegramTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback,
+            ErrorCallback errorCallback)
+        {
+            throw new System.NotImplementedException();
+        }
 
         public IEnumerator GetVerifierServer(string chainId, SuccessCallback<VerifierServerResult> successCallback, ErrorCallback errorCallback)
         {

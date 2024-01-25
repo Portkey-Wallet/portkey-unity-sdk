@@ -86,7 +86,7 @@ namespace Portkey.SocialProvider
             };
             yield return _portkeySocialService.VerifyVerificationCode(verifyCodeParams, (response) =>
             {
-                var verificationDoc = LoginHelper.ProcessVerificationDoc(response.verificationDoc, verifyCodeParams.verifierId);
+                var verificationDoc = LoginHelper.ProcessVerificationDoc(response.verificationDoc, verifyCodeParams. verifierId);
                 var verifyCodeResult = new VerifyCodeResult
                 {
                     verificationDoc = verificationDoc,

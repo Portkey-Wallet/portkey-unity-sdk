@@ -43,10 +43,10 @@ namespace Portkey.DID
                 Url = GetFullApiUrl(url),
                 JsonData = JsonConvert.SerializeObject(requestParams),
             };
-            
             if(headers != null)
             {
                 jsonRequestData.Headers = headers;
+                Debugger.Log($"headers in body {headers.Count}");
             }
 
             return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback), errorCallback);
@@ -184,6 +184,31 @@ namespace Portkey.DID
         {
             return Post("/api/app/account/verifyAppleToken", requestParams, successCallback, OnError(errorCallback));
         }
+        
+        public IEnumerator VerifyTelegramToken(VerifyTelegramTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        {
+            Debugger.Log($"calling API type:{requestParams.operationType} chainid: {requestParams.chainId} access {requestParams.accessToken} verify{requestParams.verifierId}");
+            var corsHeaders = new Dictionary<string, string>
+            {
+                { "Access-Control-Allow-Credentials", "true" },
+                { "Access-Control-Allow-Headers", "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time" },
+                { "Access-Control-Allow-Methods", "GET, POST, OPTIONS" },
+                { "Access-Control-Allow-Origin", "http://localhost:52352" },
+            };
+            return Post("/api/app/account/verifyTelegramToken", requestParams, successCallback, OnError(errorCallback),
+                corsHeaders);
+            // var jsonRequestData = new JsonRequestData
+            // {
+            //     Url = "http://192.168.64.201:5001/api/app/account/verifyTelegramToken",
+            //     JsonData = JsonConvert.SerializeObject(requestParams),
+            // };
+            // Debugger.Log("jsonRequestData done, start to call");
+            // var callback = JsonToObject<VerifyVerificationCodeResult>(successCallback, OnError(errorCallback));
+            // Debugger.Log("callback init done");
+            // jsonRequestData.Headers = null;
+            //
+            // return _http.Post(jsonRequestData, callback, OnError(errorCallback));
+        }
 
         internal class GetVerifierServerParams
         {
@@ -212,11 +237,16 @@ namespace Portkey.DID
                     errorCallback("Network Error!");
                     yield break;
                 }
+
+                var skipWarningHeader = new Dictionary<string, string>()
+                {
+                    { "ngrok-skip-browser-warning", "true" }
+                };
             
-                yield return Get("/api/app/search/accountregisterindex", new Filter { filter = $"_id:{sessionId}" }, (ArrayWrapper<RegisterStatusResult> ret) =>
+                yield return Get("/api/app/search/accountregisterindex", new Filter { filter = $"_id:{sessionId}"}, (ArrayWrapper<RegisterStatusResult> ret) =>
                 {
                     StaticCoroutine.StartCoroutine(RepollIfNeeded(ret));
-                }, OnError(errorCallback));
+                }, OnError(errorCallback), skipWarningHeader);
             }
             
             IEnumerator RepollIfNeeded(ArrayWrapper<RegisterStatusResult> result)
@@ -301,7 +331,11 @@ namespace Portkey.DID
 
         public IEnumerator GetHolderInfo(GetHolderInfoParams requestParams, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
         {
-            return Get("/api/app/account/guardianIdentifiers", requestParams, successCallback, OnError(errorCallback));
+            var skipWarningHeader = new Dictionary<string, string>()
+            {
+                { "ngrok-skip-browser-warning", "true" }
+            };
+            return Get("/api/app/account/guardianIdentifiers", requestParams, successCallback, OnError(errorCallback), skipWarningHeader);
         }
 
         public IEnumerator GetHolderInfoByManager(GetCAHolderByManagerParams requestParams, SuccessCallback<GetCAHolderByManagerResult> successCallback, ErrorCallback errorCallback)
@@ -318,6 +352,11 @@ namespace Portkey.DID
 
         public IEnumerator GetRegisterInfo(GetRegisterInfoParams requestParams, SuccessCallback<RegisterInfo> successCallback, ErrorCallback errorCallback)
         {
+            var skipWarningHeader = new Dictionary<string, string>()
+            {
+                { "ngrok-skip-browser-warning", "true" }
+            };
+            
             return Get("/api/app/account/registerInfo", requestParams, successCallback, (error) =>
             {
                 if (error.details.Contains(IPortkeySocialService.UNREGISTERED_CODE))
@@ -326,7 +365,7 @@ namespace Portkey.DID
                     return;
                 }
                 errorCallback(error.message);
-            });
+            }, skipWarningHeader);
         }
 
         public IEnumerator CheckGoogleRecaptcha(CheckGoogleRecaptchaParams requestParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)

@@ -98,6 +98,7 @@ namespace Portkey.UI
         {
             AccountType.Apple  => new AppleGuardianText(guardian),
             AccountType.Google => new GoogleGuardianText(guardian),
+            AccountType.Telegram => new TelegramGuardianText(guardian),
             AccountType.Phone  => new PhoneGuardianText(guardian),
             AccountType.Email  => new EmailGuardianText(guardian),
             _ => throw new ArgumentOutOfRangeException(nameof(guardian.accountType), $"Not expected AccountType value: {guardian.accountType}"),
@@ -111,7 +112,9 @@ namespace Portkey.UI
 
         private void DisplayGuardianIcon(AccountType guardianType)
         {
+            Debugger.Log($"display icon");
             _guardianIconMap.ToList().ForEach(icon => icon.Value.SetActive(false));
+            Debugger.Log($"icon list {_guardianIconMap.ToList()}");
             _guardianIconMap[guardianType]?.SetActive(true);
         }
         
@@ -144,7 +147,7 @@ namespace Portkey.UI
                 return;
             }
 
-            if (_guardian.accountType is AccountType.Apple or AccountType.Google)
+            if (_guardian.accountType is AccountType.Apple or AccountType.Google or AccountType.Telegram)
             {
                 _portkeySDK.AuthService.Message.Loading(true, "Loading...");
                 StartCoroutine(_portkeySDK.AuthService.Verify(_guardian, OnApproved, _credential));

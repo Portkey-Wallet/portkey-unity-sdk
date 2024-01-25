@@ -9,6 +9,7 @@ namespace Portkey.Core
     {
         AppleCredentialProvider AppleCredentialProvider { get; }
         GoogleCredentialProvider GoogleCredentialProvider { get; }
+        TelegramCredentialProvider TelegramCredentialProvider { get; }
         PhoneCredentialProvider PhoneCredentialProvider { get; }
         EmailCredentialProvider EmailCredentialProvider { get; }
         IAuthMessage Message { get; }

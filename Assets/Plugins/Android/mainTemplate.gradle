@@ -23,7 +23,7 @@ android {
         versionCode **VERSIONCODE**
         versionName '**VERSIONNAME**'
         consumerProguardFiles 'proguard-unity.txt'**USER_PROGUARD**
-    }
+    }x`
 
     lintOptions {
         abortOnError false

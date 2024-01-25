@@ -57,6 +57,7 @@ namespace Portkey.UI
                         break;
                     case AccountType.Google:
                     case AccountType.Apple:
+                    case AccountType.Telegram:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -75,6 +76,7 @@ namespace Portkey.UI
                         break;
                     case AccountType.Google:
                     case AccountType.Apple:
+                    case AccountType.Telegram:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -154,6 +156,7 @@ namespace Portkey.UI
                     break;
                 case AccountType.Google:
                 case AccountType.Apple:
+                case AccountType.Telegram:
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -198,6 +201,7 @@ namespace Portkey.UI
                     break;
                 case AccountType.Google:
                 case AccountType.Apple:
+                case AccountType.Telegram:
                 default:
                     throw new ArgumentOutOfRangeException();
             }

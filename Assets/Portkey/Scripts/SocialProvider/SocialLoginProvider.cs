@@ -31,6 +31,7 @@ namespace Portkey.SocialProvider
         private ISocialLogin CreateSocialLogin(AccountType type) => type switch
         {
             AccountType.Google => GetGoogleLoginByPlatform(),
+            AccountType.Telegram => GetTelegramLoginByPlatform(),
             AccountType.Email => null,
             AccountType.Phone => null,
             AccountType.Apple => GetAppleLoginByPlatform(),
@@ -47,6 +48,20 @@ namespace Portkey.SocialProvider
             return new AndroidGoogleLogin(_config, _request);
 #elif UNITY_WEBGL
             return new WebGLGoogleLogin(_config, _request);
+#else
+            throw new NotImplementedException("Platform not supported");
+#endif
+        }
+        private ISocialLogin GetTelegramLoginByPlatform()
+        {
+#if UNITY_EDITOR || UNITY_STANDALONE
+            return new PCTelegramLogin(_config, _request);
+#elif UNITY_IOS
+            return new IOSTelegramLogin(_config, _request);
+#elif UNITY_ANDROID
+            return new AndroidTelegramLogin(_config, _request);
+#elif UNITY_WEBGL
+            return new WebGLTelegramLogin(_config, _request);
 #else
             throw new NotImplementedException("Platform not supported");
 #endif

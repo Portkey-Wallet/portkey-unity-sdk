@@ -31,6 +31,9 @@ namespace Portkey.Core
         [Header("Google iOS Login")]
         [SerializeField]
         private string googleIosClientId = "931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com";
+        [Header("Telegram iOS Login")]
+        [SerializeField]
+        private string telegramIosClientId = "";
         [SerializeField]
         private string googleIosDotReverseClientId = "com.googleusercontent.apps.931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker";
 
@@ -39,6 +42,9 @@ namespace Portkey.Core
         private string googleWebGLClientId = "931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com";
         [SerializeField]
         private string googleWebGLLoginUrl = "https://openlogin.portkey.finance/";
+        [SerializeField]
+        private string telegramWebGLLoginUrl= "https://openlogin-test.portkey.finance/";
+        
         [SerializeField]
         private string googleWebGLRedirectUri = "https://openlogin.portkey.finance/auth-callback";
         
@@ -71,6 +77,8 @@ namespace Portkey.Core
         public string GoogleIOSDotReverseClientId => googleIosDotReverseClientId;
         public string GoogleWebGLClientId => googleWebGLClientId;
         public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
+        public string TelegramIOSClientId => telegramIosClientId;
+        public string TelegramWebGLLoginUrl => telegramWebGLLoginUrl;
         public string ApplePCLoginUrl => applePCLoginUrl;
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public string RecaptchaWebSitekey => recaptchaWebSitekey;

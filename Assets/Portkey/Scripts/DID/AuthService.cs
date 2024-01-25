@@ -24,6 +24,7 @@ namespace Portkey.DID
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }
+        public TelegramCredentialProvider TelegramCredentialProvider { get; private set; }
         public PhoneCredentialProvider PhoneCredentialProvider { get; private set; }
         public EmailCredentialProvider EmailCredentialProvider { get; private set; }
         public IAuthMessage Message { get; private set; }
@@ -44,6 +45,8 @@ namespace Portkey.DID
             Phone = new PhoneLogin(_portkeySocialService);
             AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
             GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
+            TelegramCredentialProvider = new TelegramCredentialProvider(socialLoginProvider, Message, _verifierService,
+                _socialVerifierProvider);
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, this, _verifierService, _captchaProvider.GetCaptcha());
             EmailCredentialProvider = new EmailCredentialProvider(Email, this, _verifierService, _captchaProvider.GetCaptcha());
 
@@ -231,6 +234,12 @@ namespace Portkey.DID
                         VerifyGuardian(guardian, googleCredential, successCallback);
                     });
                     break;
+                case AccountType.Telegram:
+                    GoogleCredentialProvider.Get(telegramCredential =>
+                    {
+                        VerifyGuardian(guardian, telegramCredential, successCallback);
+                    });
+                    break;
                 case AccountType.Email:
                     yield return EmailCredentialProvider.Get(EmailAddress.Parse(guardian.id), emailCredential =>
                     {
@@ -259,7 +268,7 @@ namespace Portkey.DID
 
             switch (guardian.accountType)
             {
-                case AccountType.Apple or AccountType.Google:
+                case AccountType.Apple or AccountType.Google or AccountType.Telegram:
                     SocialVerifyAndApproveGuardian(credential, guardian);
                     break;
                 case AccountType.Email:
@@ -422,12 +431,13 @@ namespace Portkey.DID
                 verificationDoc = verifiedCredential.VerificationDoc.toString,
                 signature = verifiedCredential.Signature
             };
+            Debugger.Log($"start registering {param}");
             yield return _did.Register(param, registerResult =>
             {
                 if (IsCAValid(registerResult.Status))
                 {
                     OnError("Register failed! Missing caAddress or caHash.");
-                    return;
+                    // return;
                 }
 
                 var walletInfo = new DIDAccountInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,
@@ -463,7 +473,7 @@ namespace Portkey.DID
                         StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                     });
                     break;
-                case AccountType.Apple or AccountType.Google:
+                case AccountType.Apple or AccountType.Google or AccountType.Telegram:
                     var chainId = Message.ChainId;
                     Message.Loading(true, "Assigning a verifier on-chain...");
                     yield return _verifierService.GetVerifierServer(chainId, verifierServer =>

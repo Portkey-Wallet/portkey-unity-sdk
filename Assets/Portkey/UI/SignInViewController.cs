@@ -33,6 +33,10 @@ namespace Portkey.UI
                     StartLoginLoading();
                     portkeySDK.AuthService.GoogleCredentialProvider.Get(AuthCallback);
                     break;
+                case AccountType.Telegram:
+                    StartLoginLoading();
+                    portkeySDK.AuthService.TelegramCredentialProvider.Get(AuthCallback);
+                    break;
                 case AccountType.Email:
                     emailLoginViewController.Initialize(portkeySDK, gameObject);
                     break;
@@ -117,6 +121,9 @@ namespace Portkey.UI
                                 break;
                             case AccountType.Google:
                                 StartCoroutine(portkeySDK.AuthService.GoogleCredentialProvider.Verify(credential, OpenSetPinView));
+                                break;
+                            case AccountType.Telegram:
+                                StartCoroutine(portkeySDK.AuthService.TelegramCredentialProvider.Verify(credential, OpenSetPinView));
                                 break;
                             default: throw new ArgumentException("Not expected account type!");
                         };

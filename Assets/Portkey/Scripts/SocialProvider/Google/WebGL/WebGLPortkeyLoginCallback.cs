@@ -10,7 +10,7 @@ namespace Portkey.SocialProvider
         private class WebGLPortkeySocialLoginData
         {
             public string token;
-            //Google or Apple
+            //Google or Apple or Telegram
             public string provider;
         }
         
@@ -18,6 +18,7 @@ namespace Portkey.SocialProvider
         {
             "Google" => AccountType.Google,
             "Apple" => AccountType.Apple,
+            "Telegram" => AccountType.Telegram,
             _ => throw new Exception("Not supported provider")
         };
 

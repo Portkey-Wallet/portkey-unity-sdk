@@ -8,6 +8,7 @@ namespace Portkey.Core
         Email,
         Phone,
         Google,
-        Apple
+        Apple,
+        Telegram
     }
 }

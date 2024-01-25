@@ -75,6 +75,15 @@ namespace Portkey.Core
         public string chainId;
         public int operationType;
     }
+    
+    [Serializable]
+    public class VerifyTelegramTokenParams
+    {
+        public string accessToken;
+        public string verifierId;
+        public string chainId;
+        public int operationType;
+    }
 
     [Serializable]
     public class VerifyAppleTokenParams
@@ -107,6 +116,7 @@ namespace Portkey.Core
         public IEnumerator VerifyVerificationCode(VerifyVerificationCodeParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator SendAppleUserExtraInfo(SendAppleUserExtraInfoParams requestParams, SuccessCallback<SendAppleUserExtraInfoResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator VerifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator VerifyTelegramToken(VerifyTelegramTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator VerifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetVerifierServer(string chainId, SuccessCallback<VerifierServerResult> successCallback, ErrorCallback errorCallback);
         // TODO: to confirm with Sally if captcha will be needed

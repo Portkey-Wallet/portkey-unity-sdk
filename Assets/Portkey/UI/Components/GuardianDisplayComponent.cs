@@ -40,7 +40,9 @@ namespace Portkey.UI
 
         private void DisplayGuardianIcon(AccountType guardianType)
         {
+            Debugger.Log("display guardian icon");
             _guardianIconMap.ToList().ForEach(icon => icon.Value.SetActive(false));
+            Debugger.Log($"guardian icon list {_guardianIconMap.ToList()}");
             _guardianIconMap[guardianType]?.SetActive(true);
         }
         

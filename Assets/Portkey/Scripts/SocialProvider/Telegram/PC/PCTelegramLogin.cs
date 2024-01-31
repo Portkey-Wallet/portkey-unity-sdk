@@ -8,26 +8,17 @@ namespace Portkey.SocialProvider
     
     public class PCTelegramLogin : TelegramLoginBase
     {
-        private readonly string _clientSecret;
-        private string _redirectUri;
-        private int _randomPort;
-        private string _state;
-        private string _codeVerifier;
+        private int _port;
         private string _url;
 
         public PCTelegramLogin(PortkeyConfig config, IHttp request) : base(request)
         {
-            _url = config.TelegramWebGLLoginUrl;
+            _url = config.TelegramLoginUrl;
+            _port = config.TelegramLoginPort;
         }
 
         protected override void OnAuthenticate()
         {
-            _state = Guid.NewGuid().ToString();
-            _codeVerifier = Guid.NewGuid().ToString();
-
-            _randomPort = 8070;
-            _redirectUri = $"https://3773-202-156-61-238.ngrok-free.app/";
-            
             Authenticate();
             Listen();
         }
@@ -35,7 +26,7 @@ namespace Portkey.SocialProvider
         private void Listen()
         {
             var httpListener = new System.Net.HttpListener();
-            httpListener.Prefixes.Add($"http://localhost:{_randomPort}/");
+            httpListener.Prefixes.Add($"http://127.0.0.1:{_port}/");
             httpListener.Start();
 
             var context = System.Threading.SynchronizationContext.Current;
@@ -91,9 +82,11 @@ namespace Portkey.SocialProvider
 
         private void Authenticate()
         {
-            var codeChallenge = Utilities.GetCodeChallenge(_codeVerifier);
-            // var authorizationRequest = $"{AUTHORIZATION_ENDPOINT}?response_type=code&client_id={ClientId}&state={_state}&scope={Uri.EscapeDataString(ACCESS_SCOPE)}&redirect_uri={Uri.EscapeDataString(_redirectUri)}&code_challenge={codeChallenge}&code_challenge_method=S256";
-            var authorizationRequest = $"{_url}/social-login/Telegram";
+            const string loginUri = "social-login/";
+            const string loginType = "Telegram";
+            const string loginFrom = "unitysdk";
+            const string serviceUri = "https://test3-applesign-v2.portkey.finance";
+            var authorizationRequest = $"{_url}{loginUri}{loginType}?from={loginFrom}&serviceURI={serviceUri}";
             Application.OpenURL(authorizationRequest);
         }
         

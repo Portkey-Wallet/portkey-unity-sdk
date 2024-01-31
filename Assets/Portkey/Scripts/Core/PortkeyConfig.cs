@@ -43,7 +43,9 @@ namespace Portkey.Core
         [SerializeField]
         private string googleWebGLLoginUrl = "https://openlogin.portkey.finance/";
         [SerializeField]
-        private string telegramWebGLLoginUrl= "https://openlogin-test.portkey.finance/";
+        private string telegramLoginUrl= "https://openlogin-test.portkey.finance/";
+        [SerializeField]
+        private int telegramLoginPort= 53285;
         
         [SerializeField]
         private string googleWebGLRedirectUri = "https://openlogin.portkey.finance/auth-callback";
@@ -78,7 +80,8 @@ namespace Portkey.Core
         public string GoogleWebGLClientId => googleWebGLClientId;
         public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
         public string TelegramIOSClientId => telegramIosClientId;
-        public string TelegramWebGLLoginUrl => telegramWebGLLoginUrl;
+        public string TelegramLoginUrl => telegramLoginUrl;
+        public int TelegramLoginPort => telegramLoginPort;
         public string ApplePCLoginUrl => applePCLoginUrl;
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public string RecaptchaWebSitekey => recaptchaWebSitekey;

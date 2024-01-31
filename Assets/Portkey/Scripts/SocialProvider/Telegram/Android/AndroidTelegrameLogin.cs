@@ -9,14 +9,14 @@ using Portkey.Contracts.CA;
 
 namespace Portkey.SocialProvider
 {
-    public class IOSTelegramLogin : TelegramLoginBase
+    public class AndroidTelegramLogin : TelegramLoginBase
     {
         private System.Net.HttpListener _httpListener;
         private string _url;
         private int _port;
         private IEnumerator _listenCoroutine;
         
-        public IOSTelegramLogin(PortkeyConfig config, IHttp request) : base(request)
+        public AndroidTelegramLogin(PortkeyConfig config, IHttp request) : base(request)
         {
             _url = config.TelegramLoginUrl;
             _port = config.TelegramLoginPort;

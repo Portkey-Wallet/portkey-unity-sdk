@@ -8,10 +8,12 @@ namespace Portkey.SocialProvider
     public class WebGLTelegramLogin : TelegramLoginBase
     {
         private string _url;
+        private int _port;
         
         public WebGLTelegramLogin(PortkeyConfig config, IHttp request) : base(request)
         {
-            _url = config.TelegramWebGLLoginUrl;
+            _url = config.TelegramLoginUrl;
+            _port = config.TelegramLoginPort;
         }
         
 #if UNITY_WEBGL
@@ -23,12 +25,10 @@ namespace Portkey.SocialProvider
         {
             const string loginUri = "social-login/";
             const string loginType = "Telegram";
-
+            const string loginFrom = "unitysdk";
+            const string serviceUri = "https://test3-applesign-v2.portkey.finance";
             SetupAuthenticationCallback();
-
-            Debugger.Log("Authenticating for WebGL");
-            Debugger.Log(_url);
-            var url = $"{_url}{loginUri}{loginType}?network=TESTNET";
+            var url = $"{_url}{loginUri}{loginType}?from={loginFrom}&serviceURI={serviceUri}";
 #if UNITY_WEBGL
             OpenURL(url);
 #endif
@@ -36,7 +36,6 @@ namespace Portkey.SocialProvider
 
         private void SetupAuthenticationCallback()
         {
-            Debugger.Log("setting up callback");
             var gameObject = new GameObject("WebGLPortkeyLoginCallback");
             var callbackComponent = gameObject.AddComponent<WebGLPortkeyLoginCallback>();
             callbackComponent.OnSuccessCallback = OnSuccess;

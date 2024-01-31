@@ -46,7 +46,6 @@ namespace Portkey.DID
             if(headers != null)
             {
                 jsonRequestData.Headers = headers;
-                Debugger.Log($"headers in body {headers.Count}");
             }
 
             return _http.Post(jsonRequestData, JsonToObject<T2>(successCallback, errorCallback), errorCallback);
@@ -197,17 +196,6 @@ namespace Portkey.DID
             };
             return Post("/api/app/account/verifyTelegramToken", requestParams, successCallback, OnError(errorCallback),
                 corsHeaders);
-            // var jsonRequestData = new JsonRequestData
-            // {
-            //     Url = "http://192.168.64.201:5001/api/app/account/verifyTelegramToken",
-            //     JsonData = JsonConvert.SerializeObject(requestParams),
-            // };
-            // Debugger.Log("jsonRequestData done, start to call");
-            // var callback = JsonToObject<VerifyVerificationCodeResult>(successCallback, OnError(errorCallback));
-            // Debugger.Log("callback init done");
-            // jsonRequestData.Headers = null;
-            //
-            // return _http.Post(jsonRequestData, callback, OnError(errorCallback));
         }
 
         internal class GetVerifierServerParams

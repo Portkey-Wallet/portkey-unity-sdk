@@ -20,7 +20,6 @@ namespace Portkey.SocialProvider
                 accessToken = param.accessToken,
                 chainId = param.chainId,
                 verifierId = param.verifierId,
-                //todo: confirm this verifierID
                 operationType = param.operationType
             };
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyTelegramToken(verifyTelegramParam, (verificationResult) =>

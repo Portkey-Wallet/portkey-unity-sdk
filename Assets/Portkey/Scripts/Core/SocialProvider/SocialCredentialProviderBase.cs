@@ -20,12 +20,10 @@ namespace Portkey.Core
         
         public IEnumerator Verify(ICredential credential, SuccessCallback<VerifiedCredential> successCallback, OperationTypeEnum operationType = OperationTypeEnum.register)
         {
-            Debugger.Log($"verifying {credential}");
             if (credential is not T cred)
             {
                 throw new Exception("Invalid credential type!");
             }
-            Debugger.Log($"aurthmsg is {authMessage}");
             var chainId = authMessage.ChainId;
             
             authMessage.Loading(true, "Assigning a verifier on-chain...");

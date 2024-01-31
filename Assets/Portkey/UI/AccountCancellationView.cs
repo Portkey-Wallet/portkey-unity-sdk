@@ -40,7 +40,7 @@ namespace Portkey.UI
         public void OnClickConfirm()
         {
             portkeySDK.AuthService.Message.Loading(true, "Loading...");
-            //StartCoroutine(portkeySDK.ValidateAccountDeletion(_accountInfo, OnValidateAccountDeletion, OnError));
+            StartCoroutine(portkeySDK.ValidateAccountDeletion(_accountInfo, OnValidateAccountDeletion, OnError));
         }
         
         private void OnValidateAccountDeletion(AccountDeletionValidationResult result)
@@ -75,19 +75,19 @@ namespace Portkey.UI
         {
             portkeySDK.AuthService.Message.Loading(true, "Loading...");
             
-            //StartCoroutine(portkeySDK.DeleteAccount(_accountInfo, result =>
-            //{
-                //portkeySDK.AuthService.Message.Loading(false);
-                //if (result)
-                //{
-                    //CloseView();
-                    //_onDeleteAccount?.Invoke();
-                //}
-                //else
-                //{
-                    //OnError("Failed to delete account!");
-                //}
-            //}, OnError));
+            StartCoroutine(portkeySDK.DeleteAccount(_accountInfo, result =>
+            {
+                portkeySDK.AuthService.Message.Loading(false);
+                if (result)
+                {
+                    CloseView();
+                    _onDeleteAccount?.Invoke();
+                }
+                else
+                {
+                    OnError("Failed to delete account!");
+                }
+            }, OnError));
         }
         
         private void OnError(string error)

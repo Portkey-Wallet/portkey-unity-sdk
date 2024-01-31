@@ -72,6 +72,7 @@ namespace Portkey.SocialProvider
             output.Close();
 
             HandleAuthenticationResponse(context.Request.QueryString);
+            StopListening();
         }
 
         private void HandleAuthenticationResponse(NameValueCollection parameters)

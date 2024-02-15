@@ -67,26 +67,9 @@ namespace Portkey.Core
         public UserInfo userInfo;
     }
     
-    [Serializable]
-    public class VerifyGoogleTokenParams
-    {
-        public string accessToken;
-        public string verifierId;
-        public string chainId;
-        public int operationType;
-    }
     
     [Serializable]
-    public class VerifyTelegramTokenParams
-    {
-        public string accessToken;
-        public string verifierId;
-        public string chainId;
-        public int operationType;
-    }
-
-    [Serializable]
-    public class VerifyAppleTokenParams
+    public class VerifyTokenParams
     {
         public string accessToken;
         public string verifierId;
@@ -115,9 +98,9 @@ namespace Portkey.Core
         public IEnumerator GetVerificationCode(SendVerificationCodeRequestParams requestParams, SuccessCallback<SendVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator VerifyVerificationCode(VerifyVerificationCodeParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator SendAppleUserExtraInfo(SendAppleUserExtraInfoParams requestParams, SuccessCallback<SendAppleUserExtraInfoResult> successCallback, ErrorCallback errorCallback);
-        public IEnumerator VerifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
-        public IEnumerator VerifyTelegramToken(VerifyTelegramTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
-        public IEnumerator VerifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator VerifyGoogleToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator VerifyTelegramToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
+        public IEnumerator VerifyAppleToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback);
         public IEnumerator GetVerifierServer(string chainId, SuccessCallback<VerifierServerResult> successCallback, ErrorCallback errorCallback);
         // TODO: to confirm with Sally if captcha will be needed
         // public IEnumerator CheckGoogleRecaptcha(CheckGoogleRecaptchaParams requestParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback);

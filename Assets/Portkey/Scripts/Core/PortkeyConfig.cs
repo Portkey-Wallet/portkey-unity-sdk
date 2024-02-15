@@ -33,8 +33,6 @@ namespace Portkey.Core
         private string googleIosClientId = "931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com";
         [Header("Telegram iOS Login")]
         [SerializeField]
-        private string telegramIosClientId = "";
-        [SerializeField]
         private string googleIosDotReverseClientId = "com.googleusercontent.apps.931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker";
 
         [Header("Google WebGL Login")]
@@ -55,6 +53,9 @@ namespace Portkey.Core
         private string recaptchaWebSitekey = "6LfR_bElAAAAAJSOBuxle4dCFaciuu9zfxRQfQC0";
         [SerializeField]
         private string recaptchaAndroidSitekey = "6LcENaYnAAAAAGenYUvyat1R-TAzQaMZdOYBNSHC";
+        [SerializeField]
+        private string recaptchaBaseURL = "https://openlogin.portkey.finance/";
+
 
         [Header("Approval Settings")]
         [SerializeField] private int minApprovals = 3;
@@ -79,12 +80,12 @@ namespace Portkey.Core
         public string GoogleIOSDotReverseClientId => googleIosDotReverseClientId;
         public string GoogleWebGLClientId => googleWebGLClientId;
         public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
-        public string TelegramIOSClientId => telegramIosClientId;
         public string TelegramLoginUrl => telegramLoginUrl;
         public int TelegramLoginPort => telegramLoginPort;
         public string ApplePCLoginUrl => applePCLoginUrl;
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public string RecaptchaWebSitekey => recaptchaWebSitekey;
+        public string RecaptchaBaseURL => recaptchaBaseURL;
         public string RecaptchaAndroidSitekey => recaptchaAndroidSitekey;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;

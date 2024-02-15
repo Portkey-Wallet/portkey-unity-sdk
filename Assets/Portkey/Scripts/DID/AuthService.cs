@@ -235,7 +235,7 @@ namespace Portkey.DID
                     });
                     break;
                 case AccountType.Telegram:
-                    GoogleCredentialProvider.Get(telegramCredential =>
+                    TelegramCredentialProvider.Get(telegramCredential =>
                     {
                         VerifyGuardian(guardian, telegramCredential, successCallback);
                     });
@@ -431,13 +431,12 @@ namespace Portkey.DID
                 verificationDoc = verifiedCredential.VerificationDoc.toString,
                 signature = verifiedCredential.Signature
             };
-            Debugger.Log($"start registering {param}");
             yield return _did.Register(param, registerResult =>
             {
                 if (IsCAValid(registerResult.Status))
                 {
                     OnError("Register failed! Missing caAddress or caHash.");
-                    // return;
+                    return;
                 }
 
                 var walletInfo = new DIDAccountInfo(verifiedCredential.ChainId, param.loginGuardianIdentifier, param.type, registerResult.Status,

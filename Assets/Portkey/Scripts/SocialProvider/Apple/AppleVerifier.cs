@@ -14,7 +14,7 @@ namespace Portkey.SocialProvider
 
         protected override void VerifyToken(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
         {
-            var verifyAppleParam = new VerifyAppleTokenParams
+            var verifyAppleParam = new VerifyTokenParams
             {
                 accessToken = param.accessToken,
                 chainId = param.chainId,

@@ -15,7 +15,7 @@ namespace Portkey.SocialProvider
         protected override void VerifyToken(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
         {
             Debugger.Log($"verify token here {param.accessToken}{param.operationType}{param.verifierId}");
-            var verifyTelegramParam = new VerifyTelegramTokenParams
+            var verifyTelegramParam = new VerifyTokenParams
             {
                 accessToken = param.accessToken,
                 chainId = param.chainId,

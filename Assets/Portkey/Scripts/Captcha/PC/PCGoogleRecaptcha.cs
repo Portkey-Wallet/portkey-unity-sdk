@@ -17,7 +17,7 @@ namespace Portkey.Captcha
             _webSiteKey = config.RecaptchaWebSitekey;
             //_url = config.ApplePCLoginUrl;
             //_url = "http://localhost:3000/";
-            _url = "https://openlogin.portkey.finance/";
+            _url = config.RecaptchaBaseURL;
         }
         
         public void ExecuteCaptcha(SuccessCallback<string> successCallback, ErrorCallback errorCallback)

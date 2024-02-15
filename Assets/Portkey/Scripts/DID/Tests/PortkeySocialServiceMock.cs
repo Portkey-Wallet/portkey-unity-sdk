@@ -23,19 +23,19 @@ namespace Portkey.Test
             throw new System.NotImplementedException();
         }
 
-        public IEnumerator VerifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback,
+        public IEnumerator VerifyGoogleToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback,
             ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();
         }
 
-        public IEnumerator VerifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback,
+        public IEnumerator VerifyAppleToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback,
             ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();
         }
         
-        public IEnumerator VerifyTelegramToken(VerifyTelegramTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback,
+        public IEnumerator VerifyTelegramToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback,
             ErrorCallback errorCallback)
         {
             throw new System.NotImplementedException();

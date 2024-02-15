@@ -174,17 +174,17 @@ namespace Portkey.DID
             return Post("/api/app/userExtraInfo/appleUserExtraInfo", requestParams, successCallback, OnError(errorCallback));
         }
 
-        public IEnumerator VerifyGoogleToken(VerifyGoogleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyGoogleToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/account/verifyGoogleToken", requestParams, successCallback, OnError(errorCallback));
         }
 
-        public IEnumerator VerifyAppleToken(VerifyAppleTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyAppleToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
             return Post("/api/app/account/verifyAppleToken", requestParams, successCallback, OnError(errorCallback));
         }
         
-        public IEnumerator VerifyTelegramToken(VerifyTelegramTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator VerifyTelegramToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
             Debugger.Log($"calling API type:{requestParams.operationType} chainid: {requestParams.chainId} access {requestParams.accessToken} verify{requestParams.verifierId}");
             var corsHeaders = new Dictionary<string, string>
@@ -225,16 +225,11 @@ namespace Portkey.DID
                     errorCallback("Network Error!");
                     yield break;
                 }
-
-                var skipWarningHeader = new Dictionary<string, string>()
-                {
-                    { "ngrok-skip-browser-warning", "true" }
-                };
             
                 yield return Get("/api/app/search/accountregisterindex", new Filter { filter = $"_id:{sessionId}"}, (ArrayWrapper<RegisterStatusResult> ret) =>
                 {
                     StaticCoroutine.StartCoroutine(RepollIfNeeded(ret));
-                }, OnError(errorCallback), skipWarningHeader);
+                }, OnError(errorCallback));
             }
             
             IEnumerator RepollIfNeeded(ArrayWrapper<RegisterStatusResult> result)
@@ -319,11 +314,7 @@ namespace Portkey.DID
 
         public IEnumerator GetHolderInfo(GetHolderInfoParams requestParams, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
         {
-            var skipWarningHeader = new Dictionary<string, string>()
-            {
-                { "ngrok-skip-browser-warning", "true" }
-            };
-            return Get("/api/app/account/guardianIdentifiers", requestParams, successCallback, OnError(errorCallback), skipWarningHeader);
+            return Get("/api/app/account/guardianIdentifiers", requestParams, successCallback, OnError(errorCallback));
         }
 
         public IEnumerator GetHolderInfoByManager(GetCAHolderByManagerParams requestParams, SuccessCallback<GetCAHolderByManagerResult> successCallback, ErrorCallback errorCallback)
@@ -340,11 +331,6 @@ namespace Portkey.DID
 
         public IEnumerator GetRegisterInfo(GetRegisterInfoParams requestParams, SuccessCallback<RegisterInfo> successCallback, ErrorCallback errorCallback)
         {
-            var skipWarningHeader = new Dictionary<string, string>()
-            {
-                { "ngrok-skip-browser-warning", "true" }
-            };
-            
             return Get("/api/app/account/registerInfo", requestParams, successCallback, (error) =>
             {
                 if (error.details.Contains(IPortkeySocialService.UNREGISTERED_CODE))
@@ -353,7 +339,7 @@ namespace Portkey.DID
                     return;
                 }
                 errorCallback(error.message);
-            }, skipWarningHeader);
+            });
         }
 
         public IEnumerator CheckGoogleRecaptcha(CheckGoogleRecaptchaParams requestParams, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)

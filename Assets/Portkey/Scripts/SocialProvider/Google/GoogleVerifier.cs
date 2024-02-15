@@ -14,7 +14,7 @@ namespace Portkey.SocialProvider
 
         protected override void VerifyToken(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
         {
-            var verifyGoogleParam = new VerifyGoogleTokenParams
+            var verifyGoogleParam = new VerifyTokenParams
             {
                 accessToken = param.accessToken,
                 chainId = param.chainId,

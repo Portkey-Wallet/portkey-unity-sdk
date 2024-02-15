@@ -173,7 +173,6 @@ namespace Portkey.DID
                 clientId = signingKey.Address,
                 requestId = Guid.NewGuid().ToString()
             };
-            Debugger.Log($"_socialService.Register: {param}");
             yield return _socialService.Register(param, (result) =>
             {
                 StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId, signingKey, (status) =>

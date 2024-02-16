@@ -11,4 +11,19 @@ namespace Portkey.Core
         Apple,
         Telegram
     }
+    
+    public static class AccountTypeExtensions
+    {
+        public static bool IsSocialAccountType(this AccountType accountType)
+        {
+            switch(accountType){
+                case AccountType.Apple:
+                case AccountType.Google:
+                case AccountType.Telegram:
+                    return true;
+                default: 
+                    return false;
+            }
+        }
+    }
 }

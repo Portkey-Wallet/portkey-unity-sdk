@@ -45,7 +45,7 @@ namespace Portkey.SocialProvider
 
         private static SocialLoginInfo CreateSocialLoginInfo(string accessToken)
         {
-            var jObject = DecodePayload(accessToken);
+            var jObject = new Jwt(accessToken);
 
             var exp = jObject.GetValue<long>("exp");
             var expiryDate = DateTime.UnixEpoch.AddSeconds(exp);
@@ -64,13 +64,6 @@ namespace Portkey.SocialProvider
                 }
             };
             return socialLoginInfo;
-        }
-
-        private static JObject DecodePayload(string accessToken)
-        {
-            var payload = JwtDecoder.DecodePayload(accessToken);
-            var jObject = JObject.Parse(payload);
-            return jObject;
         }
 
         public void HandleError(string error)

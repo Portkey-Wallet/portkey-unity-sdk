@@ -14,22 +14,11 @@ namespace Portkey.SocialProvider
 
         protected override void VerifyToken(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
         {
-            var verifyAppleParam = new VerifyTokenParams
-            {
-                accessToken = param.accessToken,
-                chainId = param.chainId,
-                verifierId = param.verifierId,
-                operationType = param.operationType
-            };
+            var verifyAppleParam = ConvertToken(param);
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyAppleToken(verifyAppleParam,
                 (verificationResult) =>
                 {
-                    var verificationDoc = LoginHelper.ProcessVerificationDoc(verificationResult.verificationDoc, param.verifierId);
-                    var verifyCodeResult = new VerifyCodeResult
-                    {
-                        verificationDoc = verificationDoc,
-                        signature = verificationResult.signature
-                    };
+                    var verifyCodeResult = VerifyDoc(verifyAppleParam, verificationResult);
                     //TODO: set guardian list
                     successCallback(verifyCodeResult, param.accessToken);
                 }, errorCallback));

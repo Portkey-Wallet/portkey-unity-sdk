@@ -145,7 +145,7 @@ namespace Portkey.UI
                 return;
             }
 
-            if (_guardian.accountType is AccountType.Apple or AccountType.Google or AccountType.Telegram)
+            if (_guardian.accountType.IsSocialAccountType())
             {
                 _portkeySDK.AuthService.Message.Loading(true, "Loading...");
                 StartCoroutine(_portkeySDK.AuthService.Verify(_guardian, OnApproved, _credential));

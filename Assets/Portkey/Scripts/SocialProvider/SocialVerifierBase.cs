@@ -10,7 +10,30 @@ namespace Portkey.SocialProvider
         {
             _socialLogin = socialLogin;
         }
-        
+
+        public VerifyTokenParams ConvertToken(VerifyAccessTokenParam param)
+        {
+            var verifyTelegramParam = new VerifyTokenParams
+            {
+                accessToken = param.accessToken,
+                chainId = param.chainId,
+                verifierId = param.verifierId,
+                operationType = param.operationType
+            };
+            return verifyTelegramParam;
+        }
+
+        public VerifyCodeResult VerifyDoc(VerifyTokenParams verifyTokenParams, VerifyVerificationCodeResult verificationResult)
+        {
+            var verifiedDoc = LoginHelper.ProcessVerificationDoc(verificationResult.verificationDoc, verifyTokenParams.verifierId);
+            var verifyCodeResult = new VerifyCodeResult
+            {
+                verificationDoc = verifiedDoc,
+                signature = verificationResult.signature
+            };
+            return verifyCodeResult;
+        }
+
         public void AuthenticateIfAccessTokenExpired(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
         {
             if(param.accessToken == null)

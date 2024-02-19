@@ -11,7 +11,7 @@ namespace Portkey.SocialProvider
             _socialLogin = socialLogin;
         }
 
-        public VerifyTokenParams ConvertToken(VerifyAccessTokenParam param)
+        public VerifyTokenParams Convert(VerifyAccessTokenParam param)
         {
             var verifyTelegramParam = new VerifyTokenParams
             {
@@ -23,7 +23,7 @@ namespace Portkey.SocialProvider
             return verifyTelegramParam;
         }
 
-        public VerifyCodeResult VerifyDoc(VerifyTokenParams verifyTokenParams, VerifyVerificationCodeResult verificationResult)
+        public VerifyCodeResult CreateVerifyCodeResult(VerifyTokenParams verifyTokenParams, VerifyVerificationCodeResult verificationResult)
         {
             var verifiedDoc = LoginHelper.ProcessVerificationDoc(verificationResult.verificationDoc, verifyTokenParams.verifierId);
             var verifyCodeResult = new VerifyCodeResult

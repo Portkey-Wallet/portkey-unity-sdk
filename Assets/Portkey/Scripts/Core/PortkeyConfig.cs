@@ -18,7 +18,7 @@ namespace Portkey.Core
         
         [Header("OpenLogin Endpoint")]
         [SerializeField]
-        private string openLoginUrl = "https://openlogin.portkey.finance/";
+        private string openLoginUrl = "https://openlogin-test.portkey.finance/";
         
         [Header("Google PC Login")]
         [SerializeField]

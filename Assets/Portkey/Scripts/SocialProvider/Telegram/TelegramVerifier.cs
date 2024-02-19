@@ -14,11 +14,11 @@ namespace Portkey.SocialProvider
 
         protected override void VerifyToken(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
         {
-            var verifyTelegramParam = ConvertToken(param);
+            var verifyTelegramParam = Convert(param);
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyTelegramToken(verifyTelegramParam, (verificationResult) =>
             {
                 Debugger.Log($"receive call back {verificationResult}");
-                var verifyCodeResult = VerifyDoc(verifyTelegramParam, verificationResult);
+                var verifyCodeResult = CreateVerifyCodeResult(verifyTelegramParam, verificationResult);
                 //TODO: set guardian list
                 successCallback(verifyCodeResult, param.accessToken);
             }, errorCallback));

@@ -495,40 +495,6 @@ namespace Portkey.DID
                 default:
                     throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
             }
-
-            // switch (credential.AccountType)
-            // {
-            //     case AccountType.Email:
-            //         var emailCredential = (EmailCredential)credential;
-            //         VerifyEmailCredential(emailCredential, OperationTypeEnum.register, verifiedCredential =>
-            //         {
-            //             StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
-            //         });
-            //         break;
-            //     case AccountType.Phone:
-            //         var phoneCredential = (PhoneCredential)credential;
-            //         VerifyPhoneCredential(phoneCredential, OperationTypeEnum.register, verifiedCredential =>
-            //         {
-            //             StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
-            //         });
-            //         break;
-            //     case AccountType.Apple:
-            //     case AccountType.Google:
-            //     case AccountType.Telegram:
-            //         var chainId = Message.ChainId;
-            //         Message.Loading(true, "Assigning a verifier on-chain...");
-            //         yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
-            //         {
-            //             VerifySocialCredential(credential, chainId, verifierServer.id, OperationTypeEnum.register, verifiedCredential =>
-            //             {
-            //                 Message.Loading(true, "Creating address on the chain...");
-            //                 StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
-            //             });
-            //         }, OnError);
-            //         break;
-            //     default:
-            //         throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
-            // }
         }
 
         /// <summary> The Login function is used to log in a user with a list of approved guardians.        

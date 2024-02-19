@@ -10,11 +10,11 @@ namespace Portkey.Core
     {
         [Header("Portkey Endpoint")]
         [SerializeField]
-        private string apiBaseUrl;
+        private string apiBaseUrl = "https://test3-applesign-v2.portkey.finance";
         
         [Header("Portkey Token Endpoint")]
         [SerializeField]
-        private string tokenApiUrl;
+        private string tokenApiUrl = "http://192.168.66.240:8080";
         
         [Header("Google PC Login")]
         [SerializeField]
@@ -31,7 +31,6 @@ namespace Portkey.Core
         [Header("Google iOS Login")]
         [SerializeField]
         private string googleIosClientId = "931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com";
-        [Header("Telegram iOS Login")]
         [SerializeField]
         private string googleIosDotReverseClientId = "com.googleusercontent.apps.931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker";
 
@@ -40,15 +39,17 @@ namespace Portkey.Core
         private string googleWebGLClientId = "931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com";
         [SerializeField]
         private string googleWebGLLoginUrl = "https://openlogin.portkey.finance/";
+        
+        [SerializeField]
+        private string googleWebGLRedirectUri = "https://openlogin.portkey.finance/auth-callback";
+        
+        [Header("Telegram Login")]
         [SerializeField]
         private string telegramLoginUrl= "https://openlogin-test.portkey.finance/";
         [SerializeField]
         private string telegramServiceUrl= "https://test3-applesign-v2.portkey.finance";
         [SerializeField]
         private int telegramLoginPort= 53285;
-        
-        [SerializeField]
-        private string googleWebGLRedirectUri = "https://openlogin.portkey.finance/auth-callback";
         
         [Header("Google Recaptcha Sitekeys")]
         [SerializeField]

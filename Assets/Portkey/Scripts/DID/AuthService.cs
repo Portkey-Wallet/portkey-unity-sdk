@@ -266,20 +266,22 @@ namespace Portkey.DID
                 return;
             }
 
-            switch (guardian.accountType)
+            var accountType = guardian.accountType;
+            if (accountType.IsSocialAccountType())
             {
-                case AccountType.Apple or AccountType.Google or AccountType.Telegram:
-                    SocialVerifyAndApproveGuardian(credential, guardian);
-                    break;
-                case AccountType.Email:
-                    EmailVerifyAndApproveGuardian((EmailCredential)credential, guardian);
-                    break;
-                case AccountType.Phone:
-                    PhoneVerifyAndApproveGuardian((PhoneCredential)credential, guardian);
-                    break;
-                default:
-                    OnError($"Unsupported account type: {guardian.accountType}.");
-                    break;
+                SocialVerifyAndApproveGuardian(credential, guardian);
+            }
+            else if (accountType == AccountType.Email)
+            {
+                EmailVerifyAndApproveGuardian((EmailCredential)credential, guardian);
+            }
+            else if (accountType == AccountType.Phone)
+            {
+                PhoneVerifyAndApproveGuardian((PhoneCredential)credential, guardian);
+            }
+            else
+            {
+                OnError($"Unsupported account type: {guardian.accountType}.");
             }
 
             return;
@@ -470,25 +472,28 @@ namespace Portkey.DID
                     });
                 }, OnError);
             }
-            else if (accountType == AccountType.Email)
+            else switch (accountType)
             {
-                var emailCredential = (EmailCredential)credential;
-                VerifyEmailCredential(emailCredential, OperationTypeEnum.register, verifiedCredential =>
+                case AccountType.Email:
                 {
-                    StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
-                });
-            }
-            else if (accountType == AccountType.Phone)
-            {
-                var phoneCredential = (PhoneCredential)credential;
-                VerifyPhoneCredential(phoneCredential, OperationTypeEnum.register, verifiedCredential =>
+                    var emailCredential = (EmailCredential)credential;
+                    VerifyEmailCredential(emailCredential, OperationTypeEnum.register, verifiedCredential =>
+                    {
+                        StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
+                    });
+                    break;
+                }
+                case AccountType.Phone:
                 {
-                    StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
-                });
-            }
-            else
-            {
-                throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
+                    var phoneCredential = (PhoneCredential)credential;
+                    VerifyPhoneCredential(phoneCredential, OperationTypeEnum.register, verifiedCredential =>
+                    {
+                        StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
+                    });
+                    break;
+                }
+                default:
+                    throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
             }
 
             // switch (credential.AccountType)

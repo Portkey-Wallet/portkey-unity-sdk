@@ -19,7 +19,7 @@ namespace Portkey.SocialProvider
         
         public IOSTelegramLogin(PortkeyConfig config, IHttp request) : base(request)
         {
-            _url = config.TelegramLoginUrl;
+            _url = config.OpenLoginUrl;
             _port = config.TelegramLoginPort;
             _serviceUrl = config.TelegramServiceUrl;
         }

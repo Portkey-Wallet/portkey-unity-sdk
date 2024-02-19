@@ -11,7 +11,7 @@ namespace Portkey.SocialProvider
 
         public PCAppleLogin(PortkeyConfig config, IHttp request) : base(request)
         {
-            _url = config.ApplePCLoginUrl;
+            _url = config.OpenLoginUrl;
         }
 
         // ReSharper disable Unity.PerformanceAnalysis

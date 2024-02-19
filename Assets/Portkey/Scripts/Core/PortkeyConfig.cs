@@ -16,6 +16,10 @@ namespace Portkey.Core
         [SerializeField]
         private string tokenApiUrl = "http://192.168.66.240:8080";
         
+        [Header("OpenLogin Endpoint")]
+        [SerializeField]
+        private string openLoginUrl = "https://openlogin.portkey.finance/";
+        
         [Header("Google PC Login")]
         [SerializeField]
         private string googlePCClientId = "931335042992-4cvdlgo4etblfe4t7dk9i1q7oouj2od0.apps.googleusercontent.com";
@@ -37,15 +41,11 @@ namespace Portkey.Core
         [Header("Google WebGL Login")]
         [SerializeField]
         private string googleWebGLClientId = "931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com";
-        [SerializeField]
-        private string googleWebGLLoginUrl = "https://openlogin.portkey.finance/";
         
         [SerializeField]
         private string googleWebGLRedirectUri = "https://openlogin.portkey.finance/auth-callback";
         
         [Header("Telegram Login")]
-        [SerializeField]
-        private string telegramLoginUrl= "https://openlogin-test.portkey.finance/";
         [SerializeField]
         private string telegramServiceUrl= "https://test3-applesign-v2.portkey.finance";
         [SerializeField]
@@ -56,16 +56,11 @@ namespace Portkey.Core
         private string recaptchaWebSitekey = "6LfR_bElAAAAAJSOBuxle4dCFaciuu9zfxRQfQC0";
         [SerializeField]
         private string recaptchaAndroidSitekey = "6LcENaYnAAAAAGenYUvyat1R-TAzQaMZdOYBNSHC";
-        [SerializeField]
-        private string recaptchaBaseURL = "https://openlogin.portkey.finance/";
 
 
         [Header("Approval Settings")]
         [SerializeField] private int minApprovals = 3;
         [SerializeField] private int denominator = 5;
-        
-        [Header("Apple PC Login")]
-        [SerializeField] private string applePCLoginUrl = "https://openlogin.portkey.finance/";
         
         [Header("Login App Settings")]
         [SerializeField] private TransportConfig portkeyTransportConfig;
@@ -75,6 +70,7 @@ namespace Portkey.Core
         /// </summary>
         public string ApiBaseUrl => apiBaseUrl;
         public string TokenApiUrl => tokenApiUrl;
+        public string OpenLoginUrl => openLoginUrl;
         public string GooglePCClientId => googlePCClientId;
         public string GooglePCClientSecret => googlePCClientSecret;
         public string GoogleAndroidClientId => googleAndroidClientId;
@@ -82,14 +78,10 @@ namespace Portkey.Core
         public string GoogleIOSClientId => googleIosClientId;
         public string GoogleIOSDotReverseClientId => googleIosDotReverseClientId;
         public string GoogleWebGLClientId => googleWebGLClientId;
-        public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
-        public string TelegramLoginUrl => telegramLoginUrl;
         public int TelegramLoginPort => telegramLoginPort;
         public string TelegramServiceUrl => telegramServiceUrl;
-        public string ApplePCLoginUrl => applePCLoginUrl;
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public string RecaptchaWebSitekey => recaptchaWebSitekey;
-        public string RecaptchaBaseURL => recaptchaBaseURL;
         public string RecaptchaAndroidSitekey => recaptchaAndroidSitekey;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;

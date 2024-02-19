@@ -13,7 +13,7 @@ namespace Portkey.SocialProvider
         public WebGLGoogleLogin(PortkeyConfig config, IHttp request) : base(request)
         {
             ClientId = config.GoogleWebGLClientId;
-            _url = config.GoogleWebGLLoginUrl;
+            _url = config.OpenLoginUrl;
             _redirectUri = config.GoogleWebGLRedirectUri;
         }
         

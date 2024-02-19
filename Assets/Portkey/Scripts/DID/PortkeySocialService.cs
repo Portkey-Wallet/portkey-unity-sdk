@@ -192,7 +192,7 @@ namespace Portkey.DID
                 { "Access-Control-Allow-Credentials", "true" },
                 { "Access-Control-Allow-Headers", "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time" },
                 { "Access-Control-Allow-Methods", "GET, POST, OPTIONS" },
-                { "Access-Control-Allow-Origin", "http://localhost:52352" },
+                { "Access-Control-Allow-Origin", "http://localhost:53285" },
             };
             return Post("/api/app/account/verifyTelegramToken", requestParams, successCallback, OnError(errorCallback),
                 corsHeaders);

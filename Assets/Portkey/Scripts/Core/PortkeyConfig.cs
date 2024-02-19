@@ -43,6 +43,8 @@ namespace Portkey.Core
         [SerializeField]
         private string telegramLoginUrl= "https://openlogin-test.portkey.finance/";
         [SerializeField]
+        private string telegramServiceUrl= "https://test3-applesign-v2.portkey.finance";
+        [SerializeField]
         private int telegramLoginPort= 53285;
         
         [SerializeField]
@@ -82,6 +84,7 @@ namespace Portkey.Core
         public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
         public string TelegramLoginUrl => telegramLoginUrl;
         public int TelegramLoginPort => telegramLoginPort;
+        public string TelegramServiceUrl => telegramServiceUrl;
         public string ApplePCLoginUrl => applePCLoginUrl;
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public string RecaptchaWebSitekey => recaptchaWebSitekey;

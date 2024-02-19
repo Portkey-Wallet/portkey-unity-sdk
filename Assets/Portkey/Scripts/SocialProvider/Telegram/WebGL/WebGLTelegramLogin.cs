@@ -9,11 +9,13 @@ namespace Portkey.SocialProvider
     {
         private string _url;
         private int _port;
+        private string _serviceUrl;
         
         public WebGLTelegramLogin(PortkeyConfig config, IHttp request) : base(request)
         {
             _url = config.TelegramLoginUrl;
             _port = config.TelegramLoginPort;
+            _serviceUrl = config.TelegramServiceUrl;
         }
         
 #if UNITY_WEBGL
@@ -26,7 +28,7 @@ namespace Portkey.SocialProvider
             const string loginUri = "social-login/";
             const string loginType = "Telegram";
             const string loginFrom = "unitysdk";
-            const string serviceUri = "https://test3-applesign-v2.portkey.finance";
+            var serviceUri = _serviceUrl;
             SetupAuthenticationCallback();
             var url = $"{_url}{loginUri}{loginType}?from={loginFrom}&serviceURI={serviceUri}";
 #if UNITY_WEBGL

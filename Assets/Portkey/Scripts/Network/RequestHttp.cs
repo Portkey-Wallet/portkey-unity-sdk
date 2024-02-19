@@ -83,6 +83,7 @@ namespace Portkey.Network
         public override IEnumerator Post(JsonRequestData data, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             data.JsonData??=string.Empty;
+            
             var postData = Encoding.UTF8.GetBytes(data.JsonData);
             using var request = new UnityWebRequest(data.Url, 
                 UnityWebRequest.kHttpVerbPOST,
@@ -97,14 +98,12 @@ namespace Portkey.Network
             request.SetRequestHeader("Content-Type", data.ContentType);
             foreach (var header in data.Headers)
             {
-                
                 request.SetRequestHeader(header.Key, header.Value);
             }
             
             Debugger.Log($"[POST] url: {data.Url}");
 
             yield return request.SendWebRequest();
-            
 
             if (request.error != null || request.result != UnityWebRequest.Result.Success)
             {

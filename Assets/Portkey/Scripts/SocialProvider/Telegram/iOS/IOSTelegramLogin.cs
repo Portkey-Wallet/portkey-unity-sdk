@@ -13,6 +13,7 @@ namespace Portkey.SocialProvider
     {
         private System.Net.HttpListener _httpListener;
         private string _url;
+        private string _serviceUrl;
         private int _port;
         private IEnumerator _listenCoroutine;
         
@@ -20,6 +21,7 @@ namespace Portkey.SocialProvider
         {
             _url = config.TelegramLoginUrl;
             _port = config.TelegramLoginPort;
+            _serviceUrl = config.TelegramServiceUrl;
         }
 
         // ReSharper disable Unity.PerformanceAnalysis
@@ -28,7 +30,7 @@ namespace Portkey.SocialProvider
             const string loginUri = "social-login/";
             const string loginType = "Telegram";
             const string loginFrom = "unitysdk";
-            const string serviceUri = "https://test3-applesign-v2.portkey.finance";
+            var serviceUri = _serviceUrl;
             var url = $"{_url}{loginUri}{loginType}?from={loginFrom}&serviceURI={serviceUri}";
             Application.OpenURL(url);
 

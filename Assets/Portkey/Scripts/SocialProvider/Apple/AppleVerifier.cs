@@ -18,7 +18,7 @@ namespace Portkey.SocialProvider
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyAppleToken(verifyAppleParam,
                 (verificationResult) =>
                 {
-                    var verifyCodeResult = CreateVerifyCodeResult(verifyAppleParam, verificationResult);
+                    var verifyCodeResult = new VerifyCodeResult(verificationResult, verifyAppleParam.verifierId);
                     //TODO: set guardian list
                     successCallback(verifyCodeResult, param.accessToken);
                 }, errorCallback));

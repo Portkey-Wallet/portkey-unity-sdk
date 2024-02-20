@@ -26,11 +26,7 @@ namespace Portkey.SocialProvider
         public VerifyCodeResult CreateVerifyCodeResult(VerifyTokenParams verifyTokenParams, VerifyVerificationCodeResult verificationResult)
         {
             var verifiedDoc = LoginHelper.ProcessVerificationDoc(verificationResult.verificationDoc, verifyTokenParams.verifierId);
-            var verifyCodeResult = new VerifyCodeResult
-            {
-                verificationDoc = verifiedDoc,
-                signature = verificationResult.signature
-            };
+            var verifyCodeResult = new VerifyCodeResult(verificationResult, verifyTokenParams.verifierId);
             return verifyCodeResult;
         }
 

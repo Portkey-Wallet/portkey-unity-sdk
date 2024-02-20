@@ -23,12 +23,14 @@ namespace Portkey.DID
         private PortkeyConfig _config;
         private IHttp _http;
         private GraphQL.PortkeyDIDGraphQL _portkeyDidGraphQl;
+        private Dictionary<string, string> _corsHeaders;
 
         public PortkeySocialService(PortkeyConfig config, IHttp http, GraphQL.PortkeyDIDGraphQL portkeyDidGraphQl)
         {
             _config = config;
             _http = http;
             _portkeyDidGraphQl = portkeyDidGraphQl;
+            _corsHeaders = config.CorsHeaders;
         }
 
         private string GetFullApiUrl(string url)
@@ -187,15 +189,8 @@ namespace Portkey.DID
         public IEnumerator VerifyTelegramToken(VerifyTokenParams requestParams, SuccessCallback<VerifyVerificationCodeResult> successCallback, ErrorCallback errorCallback)
         {
             Debugger.Log($"calling API type:{requestParams.operationType} chainid: {requestParams.chainId} access {requestParams.accessToken} verify{requestParams.verifierId}");
-            var corsHeaders = new Dictionary<string, string>
-            {
-                { "Access-Control-Allow-Credentials", "true" },
-                { "Access-Control-Allow-Headers", "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time" },
-                { "Access-Control-Allow-Methods", "GET, POST, OPTIONS" },
-                { "Access-Control-Allow-Origin", "http://localhost:53285" },
-            };
             return Post("/api/app/account/verifyTelegramToken", requestParams, successCallback, OnError(errorCallback),
-                corsHeaders);
+                _corsHeaders);
         }
 
         internal class GetVerifierServerParams

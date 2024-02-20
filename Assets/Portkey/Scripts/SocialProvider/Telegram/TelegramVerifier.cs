@@ -17,8 +17,7 @@ namespace Portkey.SocialProvider
             var verifyTelegramParam = Convert(param);
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyTelegramToken(verifyTelegramParam, (verificationResult) =>
             {
-                Debugger.Log($"receive call back {verificationResult}");
-                var verifyCodeResult = CreateVerifyCodeResult(verifyTelegramParam, verificationResult);
+                var verifyCodeResult = new VerifyCodeResult(verificationResult, verifyTelegramParam.verifierId);
                 //TODO: set guardian list
                 successCallback(verifyCodeResult, param.accessToken);
             }, errorCallback));

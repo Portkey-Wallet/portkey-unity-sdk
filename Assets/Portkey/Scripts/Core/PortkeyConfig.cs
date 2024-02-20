@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Portkey.Core
 {
@@ -50,6 +51,14 @@ namespace Portkey.Core
         private string telegramServiceUrl= "https://test3-applesign-v2.portkey.finance";
         [SerializeField]
         private int telegramLoginPort= 53285;
+        [SerializeField]
+        private Dictionary<string, string> corsHeaders = new Dictionary<string, string>
+        {
+            { "Access-Control-Allow-Credentials", "true" },
+            { "Access-Control-Allow-Headers", "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time" },
+            { "Access-Control-Allow-Methods", "GET, POST, OPTIONS" },
+            { "Access-Control-Allow-Origin", "http://localhost:53285" },
+        };
         
         [Header("Google Recaptcha Sitekeys")]
         [SerializeField]
@@ -86,5 +95,6 @@ namespace Portkey.Core
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;
         public TransportConfig PortkeyTransportConfig => portkeyTransportConfig;
+        public Dictionary<string, string> CorsHeaders => corsHeaders;
     }
 }

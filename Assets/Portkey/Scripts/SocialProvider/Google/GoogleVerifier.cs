@@ -17,7 +17,7 @@ namespace Portkey.SocialProvider
             var verifyGoogleParam = Convert(param);
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyGoogleToken(verifyGoogleParam, (verificationResult) =>
             {
-                var verifyCodeResult = CreateVerifyCodeResult(verifyGoogleParam, verificationResult);
+                var verifyCodeResult = new VerifyCodeResult(verificationResult, verifyGoogleParam.verifierId);
                 //TODO: set guardian list
                 successCallback(verifyCodeResult, param.accessToken);
             }, errorCallback));

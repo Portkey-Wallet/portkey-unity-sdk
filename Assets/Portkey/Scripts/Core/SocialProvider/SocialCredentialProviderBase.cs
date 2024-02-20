@@ -40,7 +40,7 @@ namespace Portkey.Core
                 };
                 socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
                 {
-                    successCallback?.Invoke(new VerifiedCredential(credential, chainId, result.verificationDoc, result.signature));
+                    successCallback?.Invoke(new VerifiedCredential(credential, chainId, result.VerificationDoc, result.Signature));
                 }, authMessage.Error);
             }, authMessage.Error);
         }

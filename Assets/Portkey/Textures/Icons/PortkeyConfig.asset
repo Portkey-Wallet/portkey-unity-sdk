@@ -23,7 +23,7 @@ MonoBehaviour:
   googleWebGLClientId: 931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com
   googleWebGLLoginUrl: https://openlogin.portkey.finance/
   telegramLoginUrl: https://openlogin.portkey.finance/
-  telegramServiceUrl: https://test3-applesign-v2.portkey.finance
+  telegramServiceUrl: https://aa-portkey.portkey.finance
   telegramLoginPort: 53285
   googleWebGLRedirectUri: https://openlogin.portkey.finance/auth-callback
   recaptchaWebSitekey: 6LfR_bElAAAAAJSOBuxle4dCFaciuu9zfxRQfQC0

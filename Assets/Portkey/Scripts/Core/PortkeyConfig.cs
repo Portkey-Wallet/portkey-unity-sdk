@@ -11,7 +11,7 @@ namespace Portkey.Core
     {
         [Header("Portkey Endpoint")]
         [SerializeField]
-        private string apiBaseUrl = "https://test3-applesign-v2.portkey.finance";
+        private string apiBaseUrl = "https://aa-portkey.portkey.finance";
         
         [Header("Portkey Token Endpoint")]
         [SerializeField]
@@ -19,7 +19,7 @@ namespace Portkey.Core
         
         [Header("OpenLogin Endpoint")]
         [SerializeField]
-        private string openLoginUrl = "https://openlogin-test.portkey.finance/";
+        private string openLoginUrl = "https://openlogin.portkey.finance/";
         
         [Header("Google PC Login")]
         [SerializeField]
@@ -48,7 +48,7 @@ namespace Portkey.Core
         
         [Header("Telegram Login")]
         [SerializeField]
-        private string telegramServiceUrl= "https://test3-applesign-v2.portkey.finance";
+        private string telegramServiceUrl= "https://aa-portkey.portkey.finance";
         [SerializeField]
         private int telegramLoginPort= 53285;
         [SerializeField]

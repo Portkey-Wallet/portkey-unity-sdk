@@ -4,7 +4,9 @@ using System.Linq;
 using Portkey.Core;
 using UnityEditor;
 using UnityEditor.Callbacks;
+#if UNITY_IOS
 using UnityEditor.iOS.Xcode;
+#endif
 using UnityEngine;
 
 namespace Portkey.Editor

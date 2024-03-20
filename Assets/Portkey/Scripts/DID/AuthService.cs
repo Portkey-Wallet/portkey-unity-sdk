@@ -334,7 +334,7 @@ namespace Portkey.DID
 
         public static bool IsCredentialMatchGuardian(ICredential cred, Guardian guard)
         {
-            return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
+            return cred != null && cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
         }
 
         private void VerifyPhoneCredential(PhoneCredential credential, OperationTypeEnum operationType, SuccessCallback<VerifiedCredential> successCallback)

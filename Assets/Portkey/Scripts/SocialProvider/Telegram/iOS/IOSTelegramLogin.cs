@@ -31,7 +31,7 @@ namespace Portkey.SocialProvider
             const string loginType = "Telegram";
             const string loginFrom = "unitysdk";
             var serviceUri = _serviceUrl;
-            var url = $"{_url}{loginUri}{loginType}?from={loginFrom}&serviceURI={serviceUri}";
+            var url = $"{_url}{loginUri}{loginType}?from={loginFrom}&serviceURI={serviceUri}&device=ios";
             Application.OpenURL(url);
 
             if (Application.runInBackground)
@@ -44,7 +44,7 @@ namespace Portkey.SocialProvider
         private IEnumerator Listen()
         {
             _httpListener = new System.Net.HttpListener();
-            _httpListener.Prefixes.Add($"http://127.0.0.1:{_port}/");
+            _httpListener.Prefixes.Add($"http://bs-local.com:{_port}/");
             _httpListener.Start();
             
             while (Application.runInBackground && !_httpListener.IsListening)

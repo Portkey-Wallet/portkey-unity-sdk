@@ -15,7 +15,7 @@ namespace Portkey.Core
         
         [Header("Portkey Token Endpoint")]
         [SerializeField]
-        private string tokenApiUrl = "http://192.168.66.240:8080";
+        private string tokenApiUrl = "https://auth-aa-portkey.portkey.finance";
         
         [Header("OpenLogin Endpoint")]
         [SerializeField]

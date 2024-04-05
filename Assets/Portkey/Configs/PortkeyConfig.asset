@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PortkeyConfig
   m_EditorClassIdentifier: 
   apiBaseUrl: https://aa-portkey.portkey.finance
-  tokenApiUrl: http://192.168.66.240:8080
+  tokenApiUrl: https://auth-aa-portkey.portkey.finance
   googlePCClientId: 931335042992-4cvdlgo4etblfe4t7dk9i1q7oouj2od0.apps.googleusercontent.com
   googlePCClientSecret: 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
   googleAndroidClientId: 931335042992-ousd4tdbui5n2msmqj94ppp632a27ofv.apps.googleusercontent.com

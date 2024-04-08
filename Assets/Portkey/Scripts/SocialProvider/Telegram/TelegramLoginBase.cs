@@ -62,7 +62,7 @@ namespace Portkey.SocialProvider
                 {
                     email = "*****",
                     sub = jObject.GetValue<string>("userId"),
-                    picture = jObject.GetValue<string>("protoUrl"),
+                    // picture = jObject.GetValue<string>("protoUrl"),
                     // email_verified = jObject.GetValue<bool>("email_verified")
                 }
             };

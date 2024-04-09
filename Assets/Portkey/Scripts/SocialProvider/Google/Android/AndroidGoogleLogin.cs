@@ -97,9 +97,7 @@ namespace Portkey.SocialProvider
             using var currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
             using var context = currentActivity.Call<AndroidJavaObject>("getApplicationContext");
             using var unityGoogleLoginPlugin = new AndroidJavaClass("com.portkey.nativegoogleloginactivity.NativeGoogleLoginActivity");
-            unityGoogleLoginPlugin.SetStatic("clientId", ClientId);
-            unityGoogleLoginPlugin.CallStatic("SetCallback", callback);
-            unityGoogleLoginPlugin.CallStatic("Call", currentActivity);
+            unityGoogleLoginPlugin.CallStatic("Call", currentActivity, ClientId, callback);
         }
 
         protected override AndroidGetAccessTokenParam CreateGetAccessTokenParam(string authCode)

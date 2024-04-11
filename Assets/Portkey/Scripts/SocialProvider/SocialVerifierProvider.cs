@@ -34,6 +34,7 @@ namespace Portkey.SocialProvider
             ISocialVerifier socialVerifier = type switch
             {
                 AccountType.Google => new GoogleVerifier(_socialProvider.GetSocialLogin(AccountType.Google), _portkeySocialService),
+                AccountType.Telegram => new TelegramVerifier(_socialProvider.GetSocialLogin(AccountType.Telegram), _portkeySocialService),
                 AccountType.Email => throw new NotImplementedException("Email not implemented yet"),
                 AccountType.Phone => throw new NotImplementedException("Phone not implemented yet"),
                 AccountType.Apple => new AppleVerifier(_socialProvider.GetSocialLogin(AccountType.Apple), _portkeySocialService),

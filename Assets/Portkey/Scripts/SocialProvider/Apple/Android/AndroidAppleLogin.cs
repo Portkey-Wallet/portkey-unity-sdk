@@ -51,7 +51,7 @@ namespace Portkey.SocialProvider
         
         public AndroidAppleLogin(PortkeyConfig config, IHttp request) : base(request)
         {
-            _url = config.GoogleWebGLLoginUrl;
+            _url = config.OpenLoginUrl;
         }
 
         protected override void OnAuthenticate()

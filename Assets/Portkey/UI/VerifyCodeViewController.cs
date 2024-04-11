@@ -57,6 +57,7 @@ namespace Portkey.UI
                         break;
                     case AccountType.Google:
                     case AccountType.Apple:
+                    case AccountType.Telegram:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -73,8 +74,6 @@ namespace Portkey.UI
                     case AccountType.Phone:
                         StartCoroutine(portkeySDK.AuthService.PhoneCredentialProvider.Verify(credential, OnVerified));
                         break;
-                    case AccountType.Google:
-                    case AccountType.Apple:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -154,6 +153,7 @@ namespace Portkey.UI
                     break;
                 case AccountType.Google:
                 case AccountType.Apple:
+                case AccountType.Telegram:
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -198,6 +198,7 @@ namespace Portkey.UI
                     break;
                 case AccountType.Google:
                 case AccountType.Apple:
+                case AccountType.Telegram:
                 default:
                     throw new ArgumentOutOfRangeException();
             }

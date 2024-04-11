@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Portkey.Core
 {
@@ -10,11 +11,15 @@ namespace Portkey.Core
     {
         [Header("Portkey Endpoint")]
         [SerializeField]
-        private string apiBaseUrl;
+        private string apiBaseUrl = "https://aa-portkey.portkey.finance";
         
         [Header("Portkey Token Endpoint")]
         [SerializeField]
-        private string tokenApiUrl;
+        private string tokenApiUrl = "https://auth-aa-portkey.portkey.finance";
+        
+        [Header("OpenLogin Endpoint")]
+        [SerializeField]
+        private string openLoginUrl = "https://openlogin.portkey.finance/";
         
         [Header("Google PC Login")]
         [SerializeField]
@@ -37,10 +42,23 @@ namespace Portkey.Core
         [Header("Google WebGL Login")]
         [SerializeField]
         private string googleWebGLClientId = "931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com";
-        [SerializeField]
-        private string googleWebGLLoginUrl = "https://openlogin.portkey.finance/";
+        
         [SerializeField]
         private string googleWebGLRedirectUri = "https://openlogin.portkey.finance/auth-callback";
+        
+        [Header("Telegram Login")]
+        [SerializeField]
+        private string telegramServiceUrl= "https://aa-portkey.portkey.finance";
+        [SerializeField]
+        private int telegramLoginPort= 53285;
+        [SerializeField]
+        private Dictionary<string, string> corsHeaders = new Dictionary<string, string>
+        {
+            { "Access-Control-Allow-Credentials", "true" },
+            { "Access-Control-Allow-Headers", "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time" },
+            { "Access-Control-Allow-Methods", "GET, POST, OPTIONS" },
+            { "Access-Control-Allow-Origin", "http://localhost:53285" },
+        };
         
         [Header("Google Recaptcha Sitekeys")]
         [SerializeField]
@@ -48,12 +66,10 @@ namespace Portkey.Core
         [SerializeField]
         private string recaptchaAndroidSitekey = "6LcENaYnAAAAAGenYUvyat1R-TAzQaMZdOYBNSHC";
 
+
         [Header("Approval Settings")]
         [SerializeField] private int minApprovals = 3;
         [SerializeField] private int denominator = 5;
-        
-        [Header("Apple PC Login")]
-        [SerializeField] private string applePCLoginUrl = "https://openlogin.portkey.finance/";
         
         [Header("Login App Settings")]
         [SerializeField] private TransportConfig portkeyTransportConfig;
@@ -63,6 +79,7 @@ namespace Portkey.Core
         /// </summary>
         public string ApiBaseUrl => apiBaseUrl;
         public string TokenApiUrl => tokenApiUrl;
+        public string OpenLoginUrl => openLoginUrl;
         public string GooglePCClientId => googlePCClientId;
         public string GooglePCClientSecret => googlePCClientSecret;
         public string GoogleAndroidClientId => googleAndroidClientId;
@@ -70,13 +87,14 @@ namespace Portkey.Core
         public string GoogleIOSClientId => googleIosClientId;
         public string GoogleIOSDotReverseClientId => googleIosDotReverseClientId;
         public string GoogleWebGLClientId => googleWebGLClientId;
-        public string GoogleWebGLLoginUrl => googleWebGLLoginUrl;
-        public string ApplePCLoginUrl => applePCLoginUrl;
+        public int TelegramLoginPort => telegramLoginPort;
+        public string TelegramServiceUrl => telegramServiceUrl;
         public string GoogleWebGLRedirectUri => googleWebGLRedirectUri;
         public string RecaptchaWebSitekey => recaptchaWebSitekey;
         public string RecaptchaAndroidSitekey => recaptchaAndroidSitekey;
         public int MinApprovals => minApprovals;
         public int Denominator => denominator;
         public TransportConfig PortkeyTransportConfig => portkeyTransportConfig;
+        public Dictionary<string, string> CorsHeaders => corsHeaders;
     }
 }

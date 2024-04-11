@@ -98,6 +98,7 @@ namespace Portkey.UI
         {
             AccountType.Apple  => new AppleGuardianText(guardian),
             AccountType.Google => new GoogleGuardianText(guardian),
+            AccountType.Telegram => new TelegramGuardianText(guardian),
             AccountType.Phone  => new PhoneGuardianText(guardian),
             AccountType.Email  => new EmailGuardianText(guardian),
             _ => throw new ArgumentOutOfRangeException(nameof(guardian.accountType), $"Not expected AccountType value: {guardian.accountType}"),
@@ -144,7 +145,7 @@ namespace Portkey.UI
                 return;
             }
 
-            if (_guardian.accountType is AccountType.Apple or AccountType.Google)
+            if (_guardian.accountType.IsSocialAccountType())
             {
                 _portkeySDK.AuthService.Message.Loading(true, "Loading...");
                 StartCoroutine(_portkeySDK.AuthService.Verify(_guardian, OnApproved, _credential));

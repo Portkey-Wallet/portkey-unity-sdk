@@ -129,14 +129,14 @@ namespace Portkey.Network
             }
             request.timeout = HTTP_TIMEOUT;
 
-            Debugger.Log($"[POST] url: {data.Url}");
+            Debugger.Log($"[POST] error url: {data.Url}");
+            Debugger.Log($"[POST] error data: {data.ContentType} {data.Headers} {data.ToString()}");
             
             yield return request.SendWebRequest();
 
             if (request.error != null || request.result != UnityWebRequest.Result.Success)
             {
                 var errorMessage = GetErrorMessage(request);
-                errorCallback(errorMessage);
                 yield break;
             }
             

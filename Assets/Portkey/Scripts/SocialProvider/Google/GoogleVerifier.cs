@@ -14,21 +14,10 @@ namespace Portkey.SocialProvider
 
         protected override void VerifyToken(VerifyAccessTokenParam param, AuthCallback successCallback, ErrorCallback errorCallback)
         {
-            var verifyGoogleParam = new VerifyGoogleTokenParams
-            {
-                accessToken = param.accessToken,
-                chainId = param.chainId,
-                verifierId = param.verifierId,
-                operationType = param.operationType
-            };
+            var verifyGoogleParam = Convert(param);
             StaticCoroutine.StartCoroutine(_portkeySocialService.VerifyGoogleToken(verifyGoogleParam, (verificationResult) =>
             {
-                var verificationDoc = LoginHelper.ProcessVerificationDoc(verificationResult.verificationDoc, param.verifierId);
-                var verifyCodeResult = new VerifyCodeResult
-                {
-                    verificationDoc = verificationDoc,
-                    signature = verificationResult.signature
-                };
+                var verifyCodeResult = new VerifyCodeResult(verificationResult, verifyGoogleParam.verifierId);
                 //TODO: set guardian list
                 successCallback(verifyCodeResult, param.accessToken);
             }, errorCallback));

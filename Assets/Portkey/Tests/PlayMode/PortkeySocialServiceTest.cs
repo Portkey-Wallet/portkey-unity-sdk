@@ -291,7 +291,7 @@ namespace Portkey.Test
         {
             var done = false;
 
-            var requestParams = new VerifyAppleTokenParams()
+            var requestParams = new VerifyTokenParams()
             {
                 chainId = "AELF"
             };
@@ -310,7 +310,7 @@ namespace Portkey.Test
         {
             var done = false;
 
-            var requestParams = new VerifyGoogleTokenParams()
+            var requestParams = new VerifyTokenParams()
             {
                 chainId = "AELF"
             };

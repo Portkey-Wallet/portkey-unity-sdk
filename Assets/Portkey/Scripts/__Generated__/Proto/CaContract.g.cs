@@ -367,6 +367,7 @@ namespace Portkey.Contracts.CA {
     [pbr::OriginalName("GUARDIAN_TYPE_OF_PHONE")] OfPhone = 1,
     [pbr::OriginalName("GUARDIAN_TYPE_OF_GOOGLE")] OfGoogle = 2,
     [pbr::OriginalName("GUARDIAN_TYPE_OF_APPLE")] OfApple = 3,
+    [pbr::OriginalName("GUARDIAN_TYPE_OF_Telegram")] OfTelegram = 4,
   }
 
   public enum StrategyValueType {

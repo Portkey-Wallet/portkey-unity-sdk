@@ -173,7 +173,6 @@ namespace Portkey.DID
                 clientId = signingKey.Address,
                 requestId = Guid.NewGuid().ToString()
             };
-            
             yield return _socialService.Register(param, (result) =>
             {
                 StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId, signingKey, (status) =>
@@ -297,6 +296,7 @@ namespace Portkey.DID
             GuardianType.OfPhone => AccountType.Phone,
             GuardianType.OfGoogle => AccountType.Google,
             GuardianType.OfApple => AccountType.Apple,
+            GuardianType.OfTelegram => AccountType.Telegram,
             _ => throw new ArgumentOutOfRangeException(nameof(type), $"Not expected account type: {type}")
         }; 
 

@@ -24,6 +24,7 @@ namespace Portkey.DID
 
         public AppleCredentialProvider AppleCredentialProvider { get; private set; }
         public GoogleCredentialProvider GoogleCredentialProvider { get; private set; }
+        public TelegramCredentialProvider TelegramCredentialProvider { get; private set; }
         public PhoneCredentialProvider PhoneCredentialProvider { get; private set; }
         public EmailCredentialProvider EmailCredentialProvider { get; private set; }
         public IAuthMessage Message { get; private set; }
@@ -44,6 +45,8 @@ namespace Portkey.DID
             Phone = new PhoneLogin(_portkeySocialService);
             AppleCredentialProvider = new AppleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
             GoogleCredentialProvider = new GoogleCredentialProvider(socialLoginProvider, Message, _verifierService, _socialVerifierProvider);
+            TelegramCredentialProvider = new TelegramCredentialProvider(socialLoginProvider, Message, _verifierService,
+                _socialVerifierProvider);
             PhoneCredentialProvider = new PhoneCredentialProvider(Phone, this, _verifierService, _captchaProvider.GetCaptcha());
             EmailCredentialProvider = new EmailCredentialProvider(Email, this, _verifierService, _captchaProvider.GetCaptcha());
 
@@ -231,6 +234,12 @@ namespace Portkey.DID
                         VerifyGuardian(guardian, googleCredential, successCallback);
                     });
                     break;
+                case AccountType.Telegram:
+                    TelegramCredentialProvider.Get(telegramCredential =>
+                    {
+                        VerifyGuardian(guardian, telegramCredential, successCallback);
+                    });
+                    break;
                 case AccountType.Email:
                     yield return EmailCredentialProvider.Get(EmailAddress.Parse(guardian.id), emailCredential =>
                     {
@@ -257,20 +266,22 @@ namespace Portkey.DID
                 return;
             }
 
-            switch (guardian.accountType)
+            var accountType = guardian.accountType;
+            if (accountType.IsSocialAccountType())
             {
-                case AccountType.Apple or AccountType.Google:
-                    SocialVerifyAndApproveGuardian(credential, guardian);
-                    break;
-                case AccountType.Email:
-                    EmailVerifyAndApproveGuardian((EmailCredential)credential, guardian);
-                    break;
-                case AccountType.Phone:
-                    PhoneVerifyAndApproveGuardian((PhoneCredential)credential, guardian);
-                    break;
-                default:
-                    OnError($"Unsupported account type: {guardian.accountType}.");
-                    break;
+                SocialVerifyAndApproveGuardian(credential, guardian);
+            }
+            else if (accountType == AccountType.Email)
+            {
+                EmailVerifyAndApproveGuardian((EmailCredential)credential, guardian);
+            }
+            else if (accountType == AccountType.Phone)
+            {
+                PhoneVerifyAndApproveGuardian((PhoneCredential)credential, guardian);
+            }
+            else
+            {
+                OnError($"Unsupported account type: {guardian.accountType}.");
             }
 
             return;
@@ -323,7 +334,7 @@ namespace Portkey.DID
 
         public static bool IsCredentialMatchGuardian(ICredential cred, Guardian guard)
         {
-            return cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
+            return cred != null && cred.SocialInfo.sub == guard.id && cred.AccountType == guard.accountType;
         }
 
         private void VerifyPhoneCredential(PhoneCredential credential, OperationTypeEnum operationType, SuccessCallback<VerifiedCredential> successCallback)
@@ -348,7 +359,7 @@ namespace Portkey.DID
             };
             socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
             {
-                successCallback?.Invoke(new VerifiedCredential(credential, chainId, result.verificationDoc, result.signature));
+                successCallback?.Invoke(new VerifiedCredential(credential, chainId, result.VerificationDoc, result.Signature));
             }, OnError);
         }
 
@@ -447,34 +458,40 @@ namespace Portkey.DID
         /// <returns> A DIDAccountInfo object.</returns>
         public IEnumerator SignUp(ICredential credential, SuccessCallback<DIDAccountInfo> successCallback)
         {
-            switch (credential.AccountType)
+            var accountType = credential.AccountType;
+            if (accountType.IsSocialAccountType())
+            {
+                var chainId = Message.ChainId;
+                Message.Loading(true, "Assigning a verifier on-chain...");
+                yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
+                {
+                    VerifySocialCredential(credential, chainId, verifierServer.id, OperationTypeEnum.register, verifiedCredential =>
+                    {
+                        Message.Loading(true, "Creating address on the chain...");
+                        StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
+                    });
+                }, OnError);
+            }
+            else switch (accountType)
             {
                 case AccountType.Email:
+                {
                     var emailCredential = (EmailCredential)credential;
                     VerifyEmailCredential(emailCredential, OperationTypeEnum.register, verifiedCredential =>
                     {
                         StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                     });
                     break;
+                }
                 case AccountType.Phone:
+                {
                     var phoneCredential = (PhoneCredential)credential;
                     VerifyPhoneCredential(phoneCredential, OperationTypeEnum.register, verifiedCredential =>
                     {
                         StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
                     });
                     break;
-                case AccountType.Apple or AccountType.Google:
-                    var chainId = Message.ChainId;
-                    Message.Loading(true, "Assigning a verifier on-chain...");
-                    yield return _verifierService.GetVerifierServer(chainId, verifierServer =>
-                    {
-                        VerifySocialCredential(credential, chainId, verifierServer.id, OperationTypeEnum.register, verifiedCredential =>
-                        {
-                            Message.Loading(true, "Creating address on the chain...");
-                            StaticCoroutine.StartCoroutine(SignUp(verifiedCredential, successCallback));
-                        });
-                    }, OnError);
-                    break;
+                }
                 default:
                     throw new ArgumentException($"Credential holds invalid account type {credential.AccountType}!");
             }

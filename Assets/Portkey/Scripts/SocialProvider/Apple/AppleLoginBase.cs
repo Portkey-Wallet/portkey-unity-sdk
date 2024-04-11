@@ -45,9 +45,9 @@ namespace Portkey.SocialProvider
 
         private static SocialLoginInfo CreateSocialLoginInfo(string accessToken)
         {
-            var jObject = DecodePayload(accessToken);
+            var jwt = new Jwt(accessToken);
 
-            var exp = jObject.GetValue<long>("exp");
+            var exp = jwt.GetValue<long>("exp");
             var expiryDate = DateTime.UnixEpoch.AddSeconds(exp);
             var isExpired = DateTime.Now > expiryDate;
 
@@ -58,19 +58,12 @@ namespace Portkey.SocialProvider
                 accountType = AccountType.Apple,
                 socialInfo = new SocialInfo
                 {
-                    email = jObject.GetValue<string>("email"),
-                    sub = jObject.GetValue<string>("sub"),
-                    email_verified = jObject.GetValue<bool>("email_verified")
+                    email = jwt.GetValue<string>("email"),
+                    sub = jwt.GetValue<string>("sub"),
+                    email_verified = jwt.GetValue<bool>("email_verified")
                 }
             };
             return socialLoginInfo;
-        }
-
-        private static JObject DecodePayload(string accessToken)
-        {
-            var payload = JwtDecoder.DecodePayload(accessToken);
-            var jObject = JObject.Parse(payload);
-            return jObject;
         }
 
         public void HandleError(string error)

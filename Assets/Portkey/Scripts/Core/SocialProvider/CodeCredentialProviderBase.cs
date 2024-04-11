@@ -139,7 +139,7 @@ namespace Portkey.Core
             
             yield return _codeLogin.VerifyCode(codeCredential, operationType, result =>
             {
-                successCallback?.Invoke(new VerifiedCredential(codeCredential, result.verificationDoc, result.signature));
+                successCallback?.Invoke(new VerifiedCredential(codeCredential, result.VerificationDoc, result.Signature));
             }, _message.Error);
         }
         

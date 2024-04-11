@@ -24,7 +24,6 @@ namespace Portkey.Core
             {
                 throw new Exception("Invalid credential type!");
             }
-
             var chainId = authMessage.ChainId;
             
             authMessage.Loading(true, "Assigning a verifier on-chain...");
@@ -41,7 +40,7 @@ namespace Portkey.Core
                 };
                 socialVerifier.AuthenticateIfAccessTokenExpired(param, (result, token) =>
                 {
-                    successCallback?.Invoke(new VerifiedCredential(credential, chainId, result.verificationDoc, result.signature));
+                    successCallback?.Invoke(new VerifiedCredential(credential, chainId, result.VerificationDoc, result.Signature));
                 }, authMessage.Error);
             }, authMessage.Error);
         }

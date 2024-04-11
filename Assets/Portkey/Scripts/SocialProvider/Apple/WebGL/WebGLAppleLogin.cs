@@ -11,7 +11,7 @@ namespace Portkey.SocialProvider
         
         public WebGLAppleLogin(PortkeyConfig config, IHttp request) : base(request)
         {
-            _url = config.GoogleWebGLLoginUrl;
+            _url = config.OpenLoginUrl;
         }
         
 #if UNITY_WEBGL

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: PortkeyConfig
   m_EditorClassIdentifier: 
   apiBaseUrl: https://aa-portkey.portkey.finance
-  tokenApiUrl: http://192.168.66.240:8080
+  tokenApiUrl: https://auth-portkey.portkey.finance
+  openLoginUrl: https://openlogin.portkey.finance/
   googlePCClientId: 931335042992-4cvdlgo4etblfe4t7dk9i1q7oouj2od0.apps.googleusercontent.com
   googlePCClientSecret: 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
   googleAndroidClientId: 931335042992-ousd4tdbui5n2msmqj94ppp632a27ofv.apps.googleusercontent.com
@@ -21,11 +22,11 @@ MonoBehaviour:
   googleIosClientId: 931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker.apps.googleusercontent.com
   googleIosDotReverseClientId: com.googleusercontent.apps.931335042992-n0aj79qor1t4qekpgbs5ahru9c891ker
   googleWebGLClientId: 931335042992-d8jgdbleopnpgjcmbqnf7dqhri93lj2m.apps.googleusercontent.com
-  googleWebGLLoginUrl: https://openlogin.portkey.finance/
   googleWebGLRedirectUri: https://openlogin.portkey.finance/auth-callback
+  telegramServiceUrl: https://aa-portkey.portkey.finance
+  telegramLoginPort: 53285
   recaptchaWebSitekey: 6LfR_bElAAAAAJSOBuxle4dCFaciuu9zfxRQfQC0
   recaptchaAndroidSitekey: 6LcENaYnAAAAAGenYUvyat1R-TAzQaMZdOYBNSHC
   minApprovals: 3
   denominator: 5
-  applePCLoginUrl: https://openlogin.portkey.finance/
   portkeyTransportConfig: {fileID: 11400000, guid: 4ab5930a0b1b04e9ea7c8eaeaf50823d, type: 2}

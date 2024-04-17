@@ -70,7 +70,7 @@ namespace Portkey.SocialProvider
                     if (output.isError)
                     {
                         Debugger.LogError(output.message);
-                        _errorCallback?.Invoke("Network Error!");
+                        _errorCallback?.Invoke("User cancelled Apple Login!");
                     }
                     else
                     {

@@ -217,7 +217,7 @@ namespace Portkey.DID
             {
                 if(pollCount > queryOptions.maxCount)
                 {
-                    errorCallback("Network Error!");
+                    errorCallback("Fail to get register status. Network Error!");
                     yield break;
                 }
             
@@ -252,7 +252,7 @@ namespace Portkey.DID
             {
                 if(pollCount > queryOptions.maxCount)
                 {
-                    errorCallback("Network Error!");
+                    errorCallback("Fail to get recover status. Network Error!");
                     yield break;
                 }
             
@@ -364,7 +364,7 @@ namespace Portkey.DID
                         //retry for 3 minutes
                         if(pollCount > 6)
                         {
-                            errorCallback("Network Error!");
+                            errorCallback("Account Deletion Network Error!");
                         }
                         else
                         {

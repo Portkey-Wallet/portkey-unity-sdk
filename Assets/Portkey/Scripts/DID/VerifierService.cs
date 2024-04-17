@@ -29,7 +29,7 @@ namespace Portkey.DID
                 chainId = chainInfos.FirstOrDefault(chainInfo => chainInfo == chainId);
                 if (chainId == null)
                 {
-                    errorCallback("Network Error!");
+                    errorCallback("Failed to get chain info. Network Error!");
                     return;
                 }
                 
@@ -131,7 +131,7 @@ namespace Portkey.DID
             {
                 if (result == null)
                 {
-                    errorCallback("Network Error!");
+                    errorCallback("Failed to get Verifier Server. Network Error!");
                     return;
                 }
                 

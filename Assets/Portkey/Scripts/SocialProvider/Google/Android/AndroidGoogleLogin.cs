@@ -76,7 +76,7 @@ namespace Portkey.SocialProvider
                     if (output.isError)
                     {
                         Debugger.LogError(output.message);
-                        _errorCallback?.Invoke("User cancelled Google Login!");
+                        _errorCallback?.Invoke("Google Login interrupted: " + output.message);
                     }
                     else
                     {

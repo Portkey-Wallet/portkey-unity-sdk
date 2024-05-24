@@ -50,7 +50,9 @@ namespace Portkey.UI
         
         private void StartLoginLoading()
         {
+#if !UNITY_ANDROID
             portkeySDK.AuthService.Message.Loading(true, "Loading...");
+#endif
 #if UNITY_EDITOR || UNITY_STANDALONE
             cancelLoadingViewController.Initialize(portkeySDK, gameObject);
 #endif
@@ -96,6 +98,7 @@ namespace Portkey.UI
 
         private void AuthCallback(ICredential credential)
         {
+            portkeySDK.AuthService.Message.Loading(true, "Loading...");
             StartCoroutine(portkeySDK.AuthService.GetGuardians(credential, guardians =>
             {
                 CheckSignUpOrLogin(credential, guardians);

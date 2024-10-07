@@ -17,6 +17,12 @@ namespace Portkey.Core
         public string clientId = null;
         public string requestId = null;
     }
+    
+    public class ReferralInfo
+    {
+        public string referralCode = null;
+        public string projectCode = null;
+    }
 
     [Serializable]
     public class ApprovedGuardian
@@ -40,6 +46,7 @@ namespace Portkey.Core
         public string verificationDoc = null;
         public string signature = null;
         public Context context = null;
+        public ReferralInfo referralInfo = null;
     }
 
     [Serializable]
@@ -57,6 +64,7 @@ namespace Portkey.Core
         public string extraData = null;
         public string chainId = null;
         public Context context = null;
+        public ReferralInfo referralInfo = null;
     }
 
     [Serializable]

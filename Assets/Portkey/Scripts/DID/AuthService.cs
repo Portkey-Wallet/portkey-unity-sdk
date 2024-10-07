@@ -431,7 +431,12 @@ namespace Portkey.DID
                 verifierId = verifiedCredential.VerificationDoc.verifierId,
                 extraData = extraData,
                 verificationDoc = verifiedCredential.VerificationDoc.toString,
-                signature = verifiedCredential.Signature
+                signature = verifiedCredential.Signature,
+                referralInfo = new ReferralInfo
+                {
+                    referralCode = string.Empty,
+                    projectCode = _config.ProjectCode
+                }
             };
             yield return _did.Register(param, registerResult =>
             {
@@ -532,7 +537,12 @@ namespace Portkey.DID
                 loginGuardianIdentifier = loginGuardian.id.RemoveAllWhiteSpaces(),
                 guardiansApprovedList = approvedGuardians.ToArray(),
                 chainId = loginGuardian.chainId,
-                extraData = extraData
+                extraData = extraData,
+                referralInfo = new ReferralInfo
+                {
+                    referralCode = string.Empty,
+                    projectCode = _config.ProjectCode
+                }
             };
             StaticCoroutine.StartCoroutine(_did.Login(param, result =>
             {

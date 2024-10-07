@@ -6,5 +6,6 @@ namespace Portkey.Core
         public ApprovedGuardian[] guardiansApprovedList;
         public string extraData;
         public string chainId;
+        public ReferralInfo referralInfo;
     }
 }

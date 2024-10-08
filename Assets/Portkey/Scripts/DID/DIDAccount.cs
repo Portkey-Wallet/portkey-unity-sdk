@@ -27,7 +27,10 @@ namespace Portkey.DID
 
         protected Account Account = null;
 
-        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator, IConnectionService connectionService, IContractProvider contractProvider, IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin, IQRLogin qrLogin, IBrowserWalletExtension browserWalletExtension)
+        public DIDAccount(IPortkeySocialService socialService, ISigningKeyGenerator signingKeyGenerator,
+            IConnectionService connectionService, IContractProvider contractProvider,
+            IAccountRepository accountRepository, IAccountGenerator accountGenerator, IAppLogin appLogin,
+            IQRLogin qrLogin, IBrowserWalletExtension browserWalletExtension)
         {
             _socialService = socialService;
             _signingKeyGenerator = signingKeyGenerator;
@@ -50,12 +53,13 @@ namespace Portkey.DID
             return _accountRepository.Load(keyName, password, out Account);
         }
 
-        public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator Login(AccountLoginParams param, SuccessCallback<LoginResult> successCallback,
+            ErrorCallback errorCallback)
         {
             Reset();
 
             var signingKey = _signingKeyGenerator.Create();
-            
+
             var context = new Context
             {
                 clientId = signingKey.Address,
@@ -69,152 +73,164 @@ namespace Portkey.DID
                 manager = signingKey.Address,
                 guardiansApproved = param.guardiansApprovedList,
                 extraData = param.extraData,
-                context = context
+                context = context,
+                referralInfo = param.referralInfo
             };
-            yield return _socialService.Recovery(recoveryParam, (result) =>
-            {
-                StaticCoroutine.StartCoroutine(GetLoginStatus(param.chainId, result.sessionId, signingKey, (status) =>
+            yield return _socialService.Recovery(recoveryParam,
+                (result) =>
                 {
-                    successCallback(new LoginResult(status, result.sessionId));
-                }, errorCallback));
-            }, errorCallback);
+                    StaticCoroutine.StartCoroutine(GetLoginStatus(param.chainId, result.sessionId, signingKey,
+                        (status) => { successCallback(new LoginResult(status, result.sessionId)); }, errorCallback));
+                }, errorCallback);
         }
 
-        protected IEnumerator GetLoginStatus(string chainId, string sessionId, ISigningKey signingKey, SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
+        protected IEnumerator GetLoginStatus(string chainId, string sessionId, ISigningKey signingKey,
+            SuccessCallback<RecoverStatusResult> successCallback, ErrorCallback errorCallback)
         {
             return _socialService.GetRecoverStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
-            {
-                if(status == null)
                 {
-                    errorCallback("Failed to get register status.");
-                    return;
-                }
-                if(IsFirstTimeRecoverPassed(chainId, status))
-                {
-                    var holderInfoParams = new GetHolderInfoParams
+                    if (status == null)
                     {
-                        chainId = chainId,
-                        caHash = status.caHash
-                    };
-                    StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
-                    {
-                        var isCurrentAccountManager = info.managerInfos.Any(manager => manager.address == signingKey.Address);
-                        if (isCurrentAccountManager)
-                        {
-                            Account = _accountGenerator.Create(chainId, info.guardianList.guardians[0].guardianIdentifier, status.caHash, status.caAddress, signingKey);
-                        }
+                        errorCallback("Failed to get register status.");
+                        return;
+                    }
 
+                    if (IsFirstTimeRecoverPassed(chainId, status))
+                    {
+                        var holderInfoParams = new GetHolderInfoParams
+                        {
+                            chainId = chainId,
+                            caHash = status.caHash
+                        };
+                        StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
+                        {
+                            var isCurrentAccountManager =
+                                info.managerInfos.Any(manager => manager.address == signingKey.Address);
+                            if (isCurrentAccountManager)
+                            {
+                                Account = _accountGenerator.Create(chainId,
+                                    info.guardianList.guardians[0].guardianIdentifier, status.caHash, status.caAddress,
+                                    signingKey);
+                            }
+
+                            successCallback(status);
+                        }, errorCallback));
+                    }
+                    else
+                    {
                         successCallback(status);
-                    }, errorCallback));
-                }
-                else
-                {
-                    successCallback(status);
-                }
-            },
-            errorCallback);
+                    }
+                },
+                errorCallback);
         }
-        
+
         private bool IsFirstTimeRecoverPassed(string chainId, RecoverStatusResult response)
         {
-            return response!= null && response.IsStatusPass() && IsCAInfoEmpty(chainId);
+            return response != null && response.IsStatusPass() && IsCAInfoEmpty(chainId);
         }
-        
+
         private bool IsCAInfoEmpty(string chainId)
         {
             return Account == null || !Account.accountDetails.caInfoMap.ContainsKey(chainId);
         }
-        
-        public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback, ErrorCallback errorCallback)
+
+        public IEnumerator Logout(EditManagerParams param, SuccessCallback<bool> successCallback,
+            ErrorCallback errorCallback)
         {
-            if(Account == null)
+            if (Account == null)
             {
                 errorCallback("Account is not logged in!");
                 yield break;
             }
+
             param.chainId ??= Account.accountDetails.chainId;
-            if(param.caHash == null && Account.accountDetails.caInfoMap.TryGetValue(param.chainId, out var caInfo))
+            if (param.caHash == null && Account.accountDetails.caInfoMap.TryGetValue(param.chainId, out var caInfo))
             {
                 param.caHash = caInfo.caHash;
                 Debugger.Log($"CAHash: {param.caHash}");
             }
-            if(param.caHash == null)
+
+            if (param.caHash == null)
             {
                 errorCallback("CAHash does not exist!");
                 yield break;
             }
+
             if (Account.managementSigningKey is PortkeyExtensionSigningKey)
             {
                 Reset();
                 successCallback?.Invoke(true);
                 yield break;
             }
+
             param.managerInfo ??= new ManagerInfo
             {
                 Address = Account.managementSigningKey.Address.ToAddress(),
                 ExtraData = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds().ToString()
             };
             Debugger.Log("Removing Manager...");
-            yield return RemoveManager(param, result =>
-            {
-                successCallback(result);
-            }, errorCallback);
+            yield return RemoveManager(param, result => { successCallback(result); }, errorCallback);
         }
 
-        public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator Register(RegisterParams param, SuccessCallback<RegisterResult> successCallback,
+            ErrorCallback errorCallback)
         {
             Reset();
-            
+
             var signingKey = _signingKeyGenerator.Create();
-            
+
             param.manager = signingKey.Address;
             param.context = new Context
             {
                 clientId = signingKey.Address,
                 requestId = Guid.NewGuid().ToString()
             };
-            yield return _socialService.Register(param, (result) =>
-            {
-                StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId, signingKey, (status) =>
+            yield return _socialService.Register(param,
+                (result) =>
                 {
-                    successCallback(new RegisterResult(status, result.sessionId));
-                }, errorCallback));
-            }, errorCallback);
+                    StaticCoroutine.StartCoroutine(GetRegisterStatus(param.chainId, result.sessionId, signingKey,
+                        (status) => { successCallback(new RegisterResult(status, result.sessionId)); }, errorCallback));
+                }, errorCallback);
         }
 
-        protected IEnumerator GetRegisterStatus(string chainId, string sessionId, ISigningKey signingKey, SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
+        protected IEnumerator GetRegisterStatus(string chainId, string sessionId, ISigningKey signingKey,
+            SuccessCallback<RegisterStatusResult> successCallback, ErrorCallback errorCallback)
         {
             return _socialService.GetRegisterStatus(sessionId, QueryOptions.DefaultQueryOptions, (status) =>
-            {
-                if(status == null)
                 {
-                    errorCallback("Failed to get register status.");
-                    return;
-                }
-                if(IsFirstTimeRegisterPassed(chainId, status))
-                {
-                    var holderInfoParams = new GetHolderInfoParams
+                    if (status == null)
                     {
-                        chainId = chainId,
-                        caHash = status.caHash
-                    };
-                    StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
-                    {
-                        var isCurrentAccountManager = info.managerInfos.Any(manager => manager.address == signingKey.Address);
-                        if (isCurrentAccountManager)
-                        {
-                            Account = _accountGenerator.Create(chainId, info.guardianList.guardians[0].guardianIdentifier, status.caHash, status.caAddress, signingKey);
-                        }
+                        errorCallback("Failed to get register status.");
+                        return;
+                    }
 
+                    if (IsFirstTimeRegisterPassed(chainId, status))
+                    {
+                        var holderInfoParams = new GetHolderInfoParams
+                        {
+                            chainId = chainId,
+                            caHash = status.caHash
+                        };
+                        StaticCoroutine.StartCoroutine(GetHolderInfo(holderInfoParams, (info) =>
+                        {
+                            var isCurrentAccountManager =
+                                info.managerInfos.Any(manager => manager.address == signingKey.Address);
+                            if (isCurrentAccountManager)
+                            {
+                                Account = _accountGenerator.Create(chainId,
+                                    info.guardianList.guardians[0].guardianIdentifier, status.caHash, status.caAddress,
+                                    signingKey);
+                            }
+
+                            successCallback(status);
+                        }, errorCallback));
+                    }
+                    else
+                    {
                         successCallback(status);
-                    }, errorCallback));
-                }
-                else
-                {
-                    successCallback(status);
-                }
-            },
-            errorCallback);
+                    }
+                },
+                errorCallback);
         }
 
         private void UpdateAccountInfo(string guardianIdentifier)
@@ -224,7 +240,7 @@ namespace Portkey.DID
                 LoginAccount = guardianIdentifier
             };
         }
-        
+
         private void UpdateCAInfo(string chainId, string caHash, string caAddress)
         {
             Account.accountDetails.caInfoMap[chainId] = new CAInfo
@@ -236,10 +252,11 @@ namespace Portkey.DID
 
         private bool IsFirstTimeRegisterPassed(string chainId, RegisterStatusResult response)
         {
-            return response!= null && response.IsStatusPass() && IsCAInfoEmpty(chainId);
+            return response != null && response.IsStatusPass() && IsCAInfoEmpty(chainId);
         }
 
-        public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GetHolderInfo(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback,
+            ErrorCallback errorCallback)
         {
             return _socialService.GetHolderInfo(param, (holderInfo) =>
             {
@@ -252,15 +269,17 @@ namespace Portkey.DID
             }, errorCallback);
         }
 
-        public IEnumerator GetHolderInfo(GetHolderInfoByManagerParams param, SuccessCallback<CaHolderWithGuardian> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GetHolderInfo(GetHolderInfoByManagerParams param,
+            SuccessCallback<CaHolderWithGuardian> successCallback, ErrorCallback errorCallback)
         {
             var manager = param.manager;
-            
+
             // If manager is not specified, use the management wallet.
-            if(manager == null && Account != null)
+            if (manager == null && Account != null)
             {
                 manager = Account.managementSigningKey.Address;
             }
+
             if (manager == null)
             {
                 errorCallback("No manager account!");
@@ -289,7 +308,7 @@ namespace Portkey.DID
                 successCallback(info);
             }, errorCallback);
         }
-        
+
         private static AccountType GetAccountType(GuardianType type) => type switch
         {
             GuardianType.OfEmail => AccountType.Email,
@@ -298,23 +317,25 @@ namespace Portkey.DID
             GuardianType.OfApple => AccountType.Apple,
             GuardianType.OfTelegram => AccountType.Telegram,
             _ => throw new ArgumentOutOfRangeException(nameof(type), $"Not expected account type: {type}")
-        }; 
+        };
 
-        public IEnumerator GetHolderInfoByContract(GetHolderInfoParams param, SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GetHolderInfoByContract(GetHolderInfoParams param,
+            SuccessCallback<IHolderInfo> successCallback, ErrorCallback errorCallback)
         {
-            yield return _contractProvider.GetContract(param.chainId,  (contract) =>
+            yield return _contractProvider.GetContract(param.chainId, (contract) =>
             {
                 var holderInfoInput = new GetHolderInfoInput
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                StaticCoroutine.StartCoroutine(contract.CallAsync<GetHolderInfoOutput>("GetHolderInfo", holderInfoInput, result =>
-                {
-                    var holderInfo = ConvertToHolderInfo(result);
-                    UpdateCAInfo(param.chainId, holderInfo.caHash, holderInfo.caAddress);
+                StaticCoroutine.StartCoroutine(contract.CallAsync<GetHolderInfoOutput>("GetHolderInfo", holderInfoInput,
+                    result =>
+                    {
+                        var holderInfo = ConvertToHolderInfo(result);
+                        UpdateCAInfo(param.chainId, holderInfo.caHash, holderInfo.caAddress);
 
-                    successCallback(holderInfo);
-                }, errorCallback));
+                        successCallback(holderInfo);
+                    }, errorCallback));
             }, errorCallback);
         }
 
@@ -336,19 +357,20 @@ namespace Portkey.DID
                         jArray.ToList().ForEach(PropagateValueToParent);
                         break;
                     case JObject jObject:
-                        if(jObject.Count == 1 && jObject.TryGetValue("value", out var value))
+                        if (jObject.Count == 1 && jObject.TryGetValue("value", out var value))
                         {
-                            if(jObject.Parent is JProperty parent)
+                            if (jObject.Parent is JProperty parent)
                             {
                                 parent.First?.Replace(value);
                             }
+
                             break;
                         }
-                        
+
                         //TODO: see how we can implement this through our customized JsonFormatter
                         foreach (var (key, token) in jObject)
                         {
-                            if(key == "type" && token?.Type == JTokenType.String)
+                            if (key == "type" && token?.Type == JTokenType.String)
                             {
                                 switch (token.Value<string>())
                                 {
@@ -368,8 +390,10 @@ namespace Portkey.DID
                                         throw new ArgumentOutOfRangeException();
                                 }
                             }
+
                             PropagateValueToParent(token);
                         }
+
                         break;
                 }
             }
@@ -385,12 +409,12 @@ namespace Portkey.DID
             /*var jsonResult = JsonFormatter.Default.Format(result);
             var convertedOutput = JsonPropagateValueToParent(jsonResult);
             var holderInfo = JsonConvert.DeserializeObject<IHolderInfo>(convertedOutput);*/
-            
+
             var holderInfo = ComplexConvertToHolderInfo(result);
-            
+
             return holderInfo;
         }
-        
+
         private static IHolderInfo ComplexConvertToHolderInfo(GetHolderInfoOutput result)
         {
             var newGuardianList = new Core.GuardianList
@@ -435,100 +459,115 @@ namespace Portkey.DID
 
         private bool IsLoginAccountTheRequestedGuardian(GetHolderInfoParams param, IHolderInfo holderInfo)
         {
-            return holderInfo != null && Account != null && param.guardianIdentifier == Account.accountDetails.socialInfo?.LoginAccount;
+            return holderInfo != null && Account != null &&
+                   param.guardianIdentifier == Account.accountDetails.socialInfo?.LoginAccount;
         }
 
-        public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback, ErrorCallback errorCallback)
+        public IEnumerator GetCAHolderInfo(string chainId, SuccessCallback<CAHolderInfo> successCallback,
+            ErrorCallback errorCallback)
         {
-            if(_connectionService == null)
+            if (_connectionService == null)
             {
                 throw new Exception("ConnectService is not initialized.");
             }
-            if(Account.managementSigningKey == null)
+
+            if (Account.managementSigningKey == null)
             {
                 throw new Exception("Management Account is not initialized.");
             }
+
             var caHash = Account.accountDetails.caInfoMap[chainId]?.caHash;
-            if(caHash == null)
+            if (caHash == null)
             {
                 throw new Exception($"CA Hash on Chain ID: ({chainId}) does not exists.");
             }
 
             var timestamp = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
-            yield return Account.managementSigningKey.Sign($"{Account.managementSigningKey.Address}-{timestamp}", signatureBytes =>
-            {
-                var signature = BitConverter.ToString(signatureBytes);
-                var publicKey = Account.managementSigningKey.PublicKey;
-                var requestTokenConfig = new RequestTokenConfig
+            yield return Account.managementSigningKey.Sign($"{Account.managementSigningKey.Address}-{timestamp}",
+                signatureBytes =>
                 {
-                    grant_type = "signature",
-                    client_id = "CAServer_App",
-                    scope = "CAServer",
-                    signature = signature,
-                    pubkey = publicKey,
-                    timestamp = timestamp,
-                    ca_hash = caHash,
-                    chain_id = chainId
-                };
-                StaticCoroutine.StartCoroutine(_connectionService.GetConnectToken(requestTokenConfig, (token) =>
-                {
-                    if(token == null)
+                    var signature = BitConverter.ToString(signatureBytes);
+                    var publicKey = Account.managementSigningKey.PublicKey;
+                    var requestTokenConfig = new RequestTokenConfig
                     {
-                        errorCallback("Failed to get token.");
-                        return;
-                    }
-                
-                    StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}", caHash, (caHolderInfo) =>
+                        grant_type = "signature",
+                        client_id = "CAServer_App",
+                        scope = "CAServer",
+                        signature = signature,
+                        pubkey = publicKey,
+                        timestamp = timestamp,
+                        ca_hash = caHash,
+                        chain_id = chainId
+                    };
+                    StaticCoroutine.StartCoroutine(_connectionService.GetConnectToken(requestTokenConfig, (token) =>
                     {
-                        if(caHolderInfo == null)
+                        if (token == null)
                         {
-                            errorCallback("Failed to get CA Holder Info.");
+                            errorCallback("Failed to get token.");
                             return;
                         }
 
-                        if (caHolderInfo.nickName != null)
-                        {
-                            Account.accountDetails.socialInfo.Nickname = caHolderInfo.nickName;
-                        }
-                        successCallback(caHolderInfo);
+                        StaticCoroutine.StartCoroutine(_socialService.GetCAHolderInfo($"Bearer {token.access_token}",
+                            caHash, (caHolderInfo) =>
+                            {
+                                if (caHolderInfo == null)
+                                {
+                                    errorCallback("Failed to get CA Holder Info.");
+                                    return;
+                                }
+
+                                if (caHolderInfo.nickName != null)
+                                {
+                                    Account.accountDetails.socialInfo.Nickname = caHolderInfo.nickName;
+                                }
+
+                                successCallback(caHolderInfo);
+                            }, errorCallback));
                     }, errorCallback));
-                }, errorCallback));
-            }, errorCallback);
+                }, errorCallback);
         }
-        
+
         public ISigningKey GetManagementSigningKey()
         {
             return Account?.managementSigningKey;
         }
 
-        public IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator LoginWithPortkeyApp(SuccessCallback<PortkeyAppLoginResult> successCallback,
+            ErrorCallback errorCallback)
         {
             yield return _appLogin.Login(result =>
             {
-                Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
+                Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId,
+                    result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash,
+                    result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
                 successCallback(result);
             }, errorCallback);
         }
 
-        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDAccountInfo> successCallback, Action OnDisconnected, ErrorCallback errorCallback)
+        public IEnumerator LoginWithPortkeyExtension(SuccessCallback<DIDAccountInfo> successCallback,
+            Action OnDisconnected, ErrorCallback errorCallback)
         {
             _browserWalletExtension.Connect(walletInfo =>
             {
-                Account = _accountGenerator.Create(walletInfo.chainId, walletInfo.managerInfo.guardianIdentifier, walletInfo.caInfo.caHash, walletInfo.caInfo.caAddress, walletInfo.signingKey);
+                Account = _accountGenerator.Create(walletInfo.chainId, walletInfo.managerInfo.guardianIdentifier,
+                    walletInfo.caInfo.caHash, walletInfo.caInfo.caAddress, walletInfo.signingKey);
                 successCallback(walletInfo);
             }, OnDisconnected, errorCallback);
             yield break;
         }
 
-        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback, SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
+        public IEnumerator LoginWithQRCode(SuccessCallback<Texture2D> qrCodeCallback,
+            SuccessCallback<PortkeyAppLoginResult> successCallback, ErrorCallback errorCallback)
         {
             yield return _qrLogin.Login(qrCodeCallback, result =>
             {
-                Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId, result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash, result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
+                Account = _accountGenerator.Create(result.caHolder.holderManagerInfo.originChainId,
+                    result.caHolder.loginGuardianInfo[0].id, result.caHolder.holderManagerInfo.caHash,
+                    result.caHolder.holderManagerInfo.caAddress, result.managementAccount);
                 successCallback(result);
             }, errorCallback);
         }
-        
+
         public void CancelLoginWithQRCode()
         {
             _qrLogin.Cancel();
@@ -552,12 +591,12 @@ namespace Portkey.DID
         private IEnumerator AddManager(EditManagerParams editManagerParams, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
-            if(Account == null)
+            if (Account == null)
             {
                 errorCallback("User is not logged in.");
                 yield break;
             }
-            
+
             yield return _contractProvider.GetContract(editManagerParams.chainId, (contract) =>
             {
                 var addManagerInfoInput = new AddManagerInfoInput
@@ -565,44 +604,48 @@ namespace Portkey.DID
                     ManagerInfo = editManagerParams.managerInfo,
                     CaHash = Hash.LoadFromHex(editManagerParams.caHash)
                 };
-                
-                StaticCoroutine.StartCoroutine(contract.SendAsync(Account.managementSigningKey, "AddManagerInfo", addManagerInfoInput, result =>
-                {
-                    successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
-                }, errorCallback));
+
+                StaticCoroutine.StartCoroutine(contract.SendAsync(Account.managementSigningKey, "AddManagerInfo",
+                    addManagerInfoInput,
+                    result =>
+                    {
+                        successCallback(result.transactionResult.Status == TransactionResultStatus.Mined.ToString());
+                    }, errorCallback));
             }, errorCallback);
         }
 
         private IEnumerator RemoveManager(EditManagerParams param, SuccessCallback<bool> successCallback,
             ErrorCallback errorCallback)
         {
-            if(Account == null)
+            if (Account == null)
             {
                 errorCallback("User is not logged in.");
                 yield break;
             }
-            
+
             yield return _contractProvider.GetContract(param.chainId, (contract) =>
             {
                 var removeManagerInfoInput = new RemoveManagerInfoInput
                 {
                     CaHash = Hash.LoadFromHex(param.caHash)
                 };
-                StaticCoroutine.StartCoroutine(contract.SendAsync(Account.managementSigningKey, "RemoveManagerInfo", removeManagerInfoInput, result =>
-                {
-                    if (IsCurrentAccount(param))
+                StaticCoroutine.StartCoroutine(contract.SendAsync(Account.managementSigningKey, "RemoveManagerInfo",
+                    removeManagerInfoInput, result =>
                     {
-                        Reset();
-                    }
-                
-                    successCallback(result.transactionResult.Status == "MINED");
-                }, errorCallback));
+                        if (IsCurrentAccount(param))
+                        {
+                            Reset();
+                        }
+
+                        successCallback(result.transactionResult.Status == "MINED");
+                    }, errorCallback));
             }, errorCallback);
         }
 
         private bool IsCurrentAccount(EditManagerParams param)
         {
-            return param.managerInfo?.Address.ToString() == Account?.managementSigningKey.Address && Account?.accountDetails.caInfoMap[param.chainId].caHash == param.caHash;
+            return param.managerInfo?.Address.ToString() == Account?.managementSigningKey.Address &&
+                   Account?.accountDetails.caInfoMap[param.chainId].caHash == param.caHash;
         }
     }
 }

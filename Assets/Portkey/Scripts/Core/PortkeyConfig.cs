@@ -74,6 +74,10 @@ namespace Portkey.Core
         [Header("Login App Settings")]
         [SerializeField] private TransportConfig portkeyTransportConfig;
 
+        [Header("ProjectCode")]
+        [SerializeField]
+        private string projectCode = "15001";
+
         /// <summary>
         /// A getter for the chain infos.
         /// </summary>
@@ -96,5 +100,6 @@ namespace Portkey.Core
         public int Denominator => denominator;
         public TransportConfig PortkeyTransportConfig => portkeyTransportConfig;
         public Dictionary<string, string> CorsHeaders => corsHeaders;
+        public string ProjectCode => projectCode;
     }
 }
